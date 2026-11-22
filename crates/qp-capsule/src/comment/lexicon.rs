@@ -48,6 +48,7 @@ pub const ADVICE_EN: &[&str] = &[
     r"take profit",
     r"go (long|short)",
 ];
+#[allow(clippy::expect_used)]
 fn advice_list(lang: Lang) -> &'static [Regex] {
     static TR: OnceLock<Vec<Regex>> = OnceLock::new();
     static EN: OnceLock<Vec<Regex>> = OnceLock::new();
@@ -122,6 +123,7 @@ pub const DIR_DOWN_EN: &[&str] = &[
     r"los(e|es|ing|t|s)",
 ];
 
+#[allow(clippy::expect_used)]
 fn dir_lists(lang: Lang) -> &'static (Vec<Regex>, Vec<Regex>) {
     static TR: OnceLock<(Vec<Regex>, Vec<Regex>)> = OnceLock::new();
     static EN: OnceLock<(Vec<Regex>, Vec<Regex>)> = OnceLock::new();

@@ -1,5 +1,13 @@
 //! A study can read another study's output and several bar fields; all modes agree.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

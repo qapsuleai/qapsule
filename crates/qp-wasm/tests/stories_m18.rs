@@ -2,6 +2,14 @@
 //! instrument's story list only when the chart opens, keeps it while the chart is open
 //! (pinch, drag, replay steps, style) and drops it when the chart closes. Nothing is
 //! asked on the feed screen or at capsule depth.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_wasm::drive::{parity_host, with_viewer_core};

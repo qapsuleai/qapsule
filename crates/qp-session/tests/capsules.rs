@@ -3,6 +3,14 @@
 //! trace (GOAL 2, VERIFY 9), K26 in both languages, sensitivity is never changed by the
 //! system, and a person's preferences reach nobody else.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 

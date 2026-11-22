@@ -7,6 +7,14 @@
 //! - hand-built series with the exact bar each detector must fire on;
 //! - a candidate that disappears when the bar is revised.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::{BTreeMap, BTreeSet};

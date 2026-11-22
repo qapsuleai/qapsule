@@ -113,6 +113,7 @@ impl Draw<'_> {
         }
     }
 
+    #[allow(clippy::cognitive_complexity)]
     /// One story's lane in a layer `story:<capsule>` (data: its finding; one item, its
     /// lane box).
     #[allow(clippy::too_many_lines)]

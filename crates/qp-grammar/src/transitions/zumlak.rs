@@ -262,6 +262,7 @@ fn both(s: &SharedElement) -> Option<(&PixelRect, &PixelRect)> {
     Some((s.before.as_ref()?, s.after.as_ref()?))
 }
 
+#[allow(clippy::too_many_lines)]
 /// `zumlak` frame (module docs). Paint order: old scene (in place), old price panel
 /// (camera), new scene (camera), the marked bar's column
 /// of the new scene, the glyph.

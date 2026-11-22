@@ -316,6 +316,7 @@ impl Session {
         parts.into_iter().flatten().map(|(_, l)| l).collect()
     }
 
+    #[allow(clippy::too_many_lines)]
     /// [`Session::entry_events`] of the world the fields hold, for the connections of
     /// that world (`public`; without a public world, every connection), in three groups
     /// (changes, finding states, proposals), each line with its connection index.

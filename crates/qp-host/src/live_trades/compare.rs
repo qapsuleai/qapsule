@@ -147,6 +147,7 @@ pub(super) fn print_row(label: &str, d: &BarDiff, x: &VolExtra) {
     );
 }
 
+#[allow(clippy::cognitive_complexity)]
 /// `qp live compare-trades`.
 #[allow(clippy::too_many_lines)]
 pub fn compare_trades(a: &CompareTradesArgs) -> Result<(), String> {
@@ -452,6 +453,7 @@ fn add_stats(acc: &mut LiveStats, s: &LiveStats) {
     acc.bars_opened += s.bars_opened;
 }
 
+#[allow(clippy::too_many_lines)]
 /// M27 source table: price card (R6), trades, mixed (trade bar where trades built one,
 /// else the card bar), on the bars the card recording covers (final, outside every
 /// connection gap, not a feed's first intraday bar).

@@ -3,6 +3,14 @@
 //! measures the cost on a 10,000-bar document (`cargo test --release -p qp-session
 //! --test selector_copies -- --ignored --nocapture`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::time::Instant;

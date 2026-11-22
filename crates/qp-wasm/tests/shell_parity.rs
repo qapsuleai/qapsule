@@ -1,5 +1,13 @@
 //! R4/T5 (GOAL criterion 4): the shell core driven with raw pointer events gives the same
 //! document and scene digests as the same session driven with protocol messages only.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_wasm::drive::{parity_host, shell_less, with_core};

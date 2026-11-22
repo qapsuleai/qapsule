@@ -1,6 +1,14 @@
 //! Nested study addresses (K63): a chain built from an address is bit-identical to the
 //! same chain built by hand, in batch, streaming and "revise the last bar" modes.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_compute::address::{is_interval, Source, MAX_DEPTH};

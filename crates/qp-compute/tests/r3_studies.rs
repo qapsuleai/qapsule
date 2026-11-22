@@ -4,6 +4,14 @@
 //!   in the same order, so also bit for bit);
 //! - warmup, `discard_last`, `extend`, the separate digest is stable.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use proptest::prelude::*;
 use proptest::test_runner::RngSeed;
 use qp_compute::sweep::{bench_closes, cross_target_digest, r3_studies_digest};

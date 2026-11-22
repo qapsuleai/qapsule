@@ -142,6 +142,7 @@ fn panel(id: u32, name: &str, weight: f64) -> Panel {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// The `zemre` face of `finding`.
 ///
 /// # Errors

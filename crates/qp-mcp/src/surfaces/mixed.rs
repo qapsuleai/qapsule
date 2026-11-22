@@ -96,6 +96,7 @@ pub fn new() -> Box<dyn ToolSurface> {
 // ---------------------------------------------------------------------------
 
 impl Mixed {
+    #[allow(clippy::too_many_lines)]
     fn overview(ctx: &mut Ctx<'_>, a: &OverviewArgs) -> Value {
         let format = a.format.unwrap_or_default();
         let limit = limit_of(a.limit);
@@ -307,6 +308,7 @@ impl Mixed {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn watch(&mut self, ctx: &mut Ctx<'_>, a: WatchArgs) -> Value {
         match a.action {
             WatchAction::Add => {

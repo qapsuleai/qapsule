@@ -94,6 +94,7 @@ fn take<T>(items: &mut Vec<T>, id: &str, f: impl Fn(&T) -> &str) -> Option<(T, O
         .map(|i| (items.remove(i), u32::try_from(i).ok()))
 }
 
+#[allow(clippy::cognitive_complexity)]
 /// Applies one change and returns the change that undoes it.
 ///
 /// # Errors

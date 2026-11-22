@@ -90,6 +90,7 @@ fn daily_weekend_and_holiday() {
     );
 }
 
+#[allow(clippy::too_many_lines)]
 /// VERIFY 12 / FIX-E1 B1: real Borsa Istanbul closures outside the R1 sample (feasts,
 /// 15 July, 29 October, 2023 earthquake closure, half days), answers written from the
 /// official calendar (`qp_calendar::XIST_HOLIDAYS`).

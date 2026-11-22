@@ -3,6 +3,7 @@
 use super::*;
 
 impl Session {
+    #[allow(clippy::too_many_lines)]
     pub(super) fn build_with_keys(
         init: SessionInit,
         repo_root: &Path,

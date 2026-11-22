@@ -3,6 +3,7 @@
 
 use super::*;
 
+#[allow(clippy::cognitive_complexity)]
 /// Compiles `view` with data from `provider` into a scene description.
 ///
 /// # Errors

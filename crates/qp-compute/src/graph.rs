@@ -63,6 +63,7 @@ struct Suffix {
     values: Vec<f64>,
 }
 
+#[allow(clippy::expect_used)]
 /// Runs one stage alone over `input` and returns the output `which` after its warmup.
 fn run_stage(s: &Stage, input: &Suffix) -> Result<Suffix, ComputeError> {
     let mut out = None;
@@ -206,6 +207,7 @@ impl ResultCache {
         self.map.is_empty()
     }
 
+    #[allow(clippy::expect_used)]
     /// Outputs of `study(params)` over `x`, computed once per distinct key. `input` is
     /// `content_hash(x)` (pass it to avoid rehashing the same input).
     ///

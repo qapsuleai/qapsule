@@ -238,6 +238,7 @@ fn pace_follows_the_speed_factor_on_a_fake_clock() {
     assert_eq!(engine_field("rp4").as_deref(), Some("rp4"));
 }
 
+#[allow(clippy::too_many_lines)]
 /// VERIFY 8: the same trades through the loopback mock broker's trade endpoint (a real
 /// `LiveConnection`, the live hub sink, the live runtime on the wall clock) and through
 /// the simulation give byte-equal data events in the live host.

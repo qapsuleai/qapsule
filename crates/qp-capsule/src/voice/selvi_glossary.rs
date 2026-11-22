@@ -86,6 +86,7 @@ fn unit_adj(period: Period) -> (&'static str, &'static str) {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// One entry: `(term, explanation)` in `lang`.
 #[must_use]
 pub fn entry(term: Term, cx: &GlossCtx, lang: Lang) -> (String, String) {

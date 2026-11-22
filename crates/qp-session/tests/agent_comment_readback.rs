@@ -3,6 +3,14 @@
 //! its person through `list`, `get`, `capsule` and `document` — also when it names an
 //! instrument (`SYN02`: the symbol's digits are no number).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::PathBuf;
 
 use qp_schema::protocol::SessionInit;

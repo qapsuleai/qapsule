@@ -147,6 +147,7 @@ fn layer_id(l: &Layer) -> String {
     l.id.clone().unwrap_or_default()
 }
 
+#[allow(clippy::cognitive_complexity)]
 /// Expands one grammar op.
 #[allow(clippy::too_many_lines)]
 pub(crate) fn expand_grammar(

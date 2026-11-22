@@ -33,6 +33,7 @@ impl<'a> Cx<'a> {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     /// A clause about fact `f` (no time, no full stop). `also`: it adds to the story.
     pub(super) fn clause(&self, f: &Fact, also: bool) -> Option<Bi> {
         let m = f.meaning.as_ref()?;

@@ -12,6 +12,14 @@
 //! - Wake only the affected: two views on two feeds; a tick on one feed sends nothing to
 //!   subscribers of the other view or to conditions on the other feed.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

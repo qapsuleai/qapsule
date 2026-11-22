@@ -200,6 +200,7 @@ fn ema_cache(
     Ok(cache)
 }
 
+#[allow(clippy::expect_used)]
 /// Steps `L` EMAs over `x` into `cols` (`NaN` in warmup): `peek1`/`commit1` until every
 /// lane is past its seed bar, then the steady expression with the states in registers.
 fn ema_lanes<const L: usize>(emas: &mut [Ema], x: &[f64], cols: &mut [Vec<f64>]) {
@@ -278,6 +279,7 @@ fn macd_run(
     Ok(())
 }
 
+#[allow(clippy::expect_used)]
 /// The macd line of `x` into `line`: the operations of `Macd::peek1`/`commit1` on the
 /// fast and slow EMAs; once both are past their seed bar, the steady expressions run with
 /// the states in registers.
@@ -304,6 +306,7 @@ fn macd_line(mut ef: Ema, mut es: Ema, x: &[f64], line: &mut [f64]) {
     }
 }
 
+#[allow(clippy::expect_used)]
 /// Steps `L` signal EMAs over `m[w..]` (the macd values), writing signal and histogram
 /// into columns 1 and 2 of `bufs[l]` exactly as `Macd::peek1`/`commit1` do. Until every
 /// lane is past its seed bar the regular `peek1`/`commit1` run; after that the steady
@@ -479,6 +482,7 @@ pub(super) fn rsi(
     Ok(())
 }
 
+#[allow(clippy::expect_used)]
 /// Steps `L` RSIs over the precomputed split into column 0 of `bufs[l]`.
 fn rsi_lanes<const L: usize>(
     rs: &mut [Rsi],

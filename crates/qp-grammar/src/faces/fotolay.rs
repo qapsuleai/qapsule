@@ -403,6 +403,7 @@ mod tests {
         assert!(!headline(&cases[5]).chars().any(|c| c.is_ascii_digit()));
     }
 
+    #[allow(clippy::too_many_lines)]
     /// The face compiles with both alphabets of the human test: one glyph over the
     /// event's bar, the headline from the template, no legend or last-value tag.
     #[test]

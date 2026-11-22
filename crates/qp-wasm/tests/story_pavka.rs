@@ -10,6 +10,14 @@
 //! - Without `story` nothing changes (the default chart).
 //!
 //! `QP_STORY_PNG=<dir>` writes the scenes as PNG files there (a visual check).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_schema::scene::{DataSource, SceneDesc};

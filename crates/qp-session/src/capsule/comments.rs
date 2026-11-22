@@ -471,6 +471,7 @@ impl Session {
             .collect()
     }
 
+    #[allow(clippy::too_many_lines)]
     /// (R5B, §25.4) `comment` events for the comments stored by the entries after
     /// `full_len` (the authority's log) and `pub_len` (the public world's), to the
     /// `comments` subscribers that may receive them, in connection and subscription

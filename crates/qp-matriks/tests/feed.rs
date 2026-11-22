@@ -2,6 +2,14 @@
 //! re-subscription, sequence numbers, determinism, and the seam with history (series and
 //! indicators continuous). All messages are hand-built with made-up symbols and prices.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 
 use prost::Message as _;

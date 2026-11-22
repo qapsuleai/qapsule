@@ -5,6 +5,14 @@
 //! the bars built from the full trade list; `@lvl2` never subscribed. Every address is
 //! 127.0.0.1; no real data.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::{Arc, Mutex};

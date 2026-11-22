@@ -1,6 +1,14 @@
 //! R5/S: the integration's presentation defaults (M16 look + companion face, M17 voice,
 //! M18 story chart, M20 open capsule design), the look → face rule, and the viewer's feed
 //! text following a voice change (the gallery agent's question).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

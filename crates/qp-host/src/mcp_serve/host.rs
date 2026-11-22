@@ -115,6 +115,7 @@ impl McpHost {
         }
     }
 
+    #[allow(clippy::expect_used, clippy::too_many_lines)]
     fn post(
         &mut self,
         hub: &SharedHub,

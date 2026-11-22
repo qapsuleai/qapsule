@@ -4,6 +4,14 @@
 //! Legacy outputs are trimmed (no warmup values) and aligned to the last bar; ours have
 //! one value per bar with leading `None` (K13). Tolerance: 1e-9 relative (absolute below 1).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

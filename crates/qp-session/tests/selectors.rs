@@ -4,6 +4,14 @@
 //! single id of the document (only ids the agent itself chooses for new items) and
 //! checks each task's success criterion on the resulting document.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use serde_json::{json, Value};

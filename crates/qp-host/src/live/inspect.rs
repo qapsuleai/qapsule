@@ -115,6 +115,7 @@ impl TradeInspect {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// (RP4) [`TradeInspect`] of raw records.
 #[must_use]
 pub(crate) fn inspect_trades(recs: &[RawRecord]) -> TradeInspect {
@@ -267,6 +268,7 @@ fn print_trade_inspect(t: &mut TradeInspect) {
     );
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn inspect(path: &Path) -> Result<(), String> {
     use qp_matriks::{parse_topic, SymbolBook, Topic, UpdateKind};
     let (recs, tail) = read_all(path)?;

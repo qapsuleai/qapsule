@@ -249,6 +249,7 @@ fn position_slot<'a>(l: &'a mut Layer, pointer: &str) -> Option<&'a mut Option<P
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// Resolves the origins of a layer's constants (`docs/GRAMMAR.md` §10): explicit
 /// origins must resolve and match their constant bit for bit; a missing constant is
 /// written from its origin; a constant without an origin is bound to the one named

@@ -3,6 +3,14 @@
 //! yorumu" and its origin (agent, "… adına" the person), and the pending proposals with
 //! their author; the reader's accept goes out as `accept_proposal` on the shell's own
 //! (human, unmarked) connection and the authority applies it.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use std::path::{Path, PathBuf};

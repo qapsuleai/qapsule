@@ -1,5 +1,13 @@
 //! Schema generation and export are deterministic.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::PathBuf;
 
 fn render(schemas: &[(&'static str, serde_json::Value)]) -> Vec<(&'static str, String)> {

@@ -3,6 +3,7 @@
 use super::*;
 
 impl Session {
+    #[allow(clippy::too_many_lines)]
     /// Answer to the `capsules` query (run on the asker's projected document).
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn capsules_query(
@@ -171,6 +172,7 @@ impl Session {
         self.capsule_query_with(ci, id, path, true)
     }
 
+    #[allow(clippy::too_many_lines)]
     /// [`Session::capsule_query`]; with `with_comments`, the comments the reader may
     /// receive (R5B, §25.4).
     pub(crate) fn capsule_query_with(

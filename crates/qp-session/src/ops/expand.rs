@@ -267,6 +267,7 @@ pub(crate) fn proposal_state_name(s: ProposalState) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// Validates a bound series of `put_series` (§18.2, §18.7).
 fn check_bind(doc: &Document, series: &Series, sp: &str, max_bind_bars: u32) -> PResult<()> {
     let SeriesSource::Bind {

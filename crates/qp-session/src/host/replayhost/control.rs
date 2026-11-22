@@ -156,6 +156,7 @@ impl ReplayHost {
         out
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Applies a control on the host's own authority (no connection, no permission
     /// check): the state after it and the notifications its steps caused. State-changing
     /// controls are recorded ([`ReplayHost::controls`]).

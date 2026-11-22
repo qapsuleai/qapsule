@@ -270,6 +270,7 @@ impl Retained {
             + self.spare.as_ref().map_or(0, |p| p.data().len())
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Paints the frame `w` × `h` on `bg` with `prims` (device pixels, paint order) over
     /// the last one. Returns the region that changed (`[x, y, w, h]`), `None` when no
     /// pixel changed. The pixels are then [`Retained::pixmap`], byte-identical to

@@ -53,6 +53,7 @@ impl VolumeSurge {
 }
 
 impl Default for VolumeSurge {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self::new(Self::WINDOW, Self::MULT).expect("valid defaults")
     }

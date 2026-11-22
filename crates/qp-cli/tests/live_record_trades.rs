@@ -3,6 +3,14 @@
 //! anything connects), a `-trade.qpraw` raw log without buyer / seller bytes, and `qp live
 //! inspect` printing only aggregate trade statistics.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::process::{Command, Stdio};
 use std::time::Duration;
 

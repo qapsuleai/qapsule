@@ -288,6 +288,7 @@ impl LiveConfig {
         Self::from_lookup(|k| std::env::var(k).ok(), &system_host_name())
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Same as [`from_env`](Self::from_env) with an explicit variable lookup and host name
     /// (tests; no process-wide environment mutation).
     pub fn from_lookup(

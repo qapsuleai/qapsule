@@ -81,6 +81,7 @@ impl BandSqueeze {
 }
 
 impl Default for BandSqueeze {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self::new(Self::PERIOD, Self::K, Self::LOOKBACK, Self::EXIT_MULT).expect("valid defaults")
     }
@@ -102,6 +103,7 @@ impl Engine for BandSqueeze {
         self.period - 1 + self.bw_lo.period() - 1
     }
 
+    #[allow(clippy::too_many_lines)]
     fn eval(&self, bar: &Bar, _flow: Option<&FlowPoint>) -> (BandSqueezeStep, Vec<Detection>) {
         let Some(v) = self.bb.peek1(bar.c) else {
             return (

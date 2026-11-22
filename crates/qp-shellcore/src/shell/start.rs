@@ -151,6 +151,7 @@ impl Default for DemoOptions {
     }
 }
 
+#[allow(clippy::expect_used)]
 /// The demo's session init: `qp_session::demo_init` (owner `arkin`, host, agent `scout`,
 /// viewer `guest`) plus the owner [`VISITOR`] without data entitlement; every feed bound,
 /// the capsule engine on all of them; daily bars moved by hourly bars.

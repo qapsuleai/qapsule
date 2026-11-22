@@ -4,6 +4,7 @@
 use super::*;
 
 impl Session {
+    #[allow(clippy::too_many_lines)]
     /// The view drawn for a capsule at open depth `d` (`sentence`: its face, the card),
     /// if the reader gets one.
     fn depth_view(&mut self, ci: usize, finding: &str, d: OpenDepth) -> PResult<Option<View>> {
@@ -317,6 +318,7 @@ impl Session {
         Ok(Some((scene, price, fact_bar)))
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Moves capsule `cap` from depth `from` to `to` on connection `ci`: the view state,
     /// what to show at `to`, the shared elements and (at evidence) the evidence access.
     pub(super) fn transition(

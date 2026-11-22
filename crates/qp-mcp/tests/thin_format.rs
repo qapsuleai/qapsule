@@ -2,6 +2,14 @@
 //! format (`qp mcp serve --capsule-format`): `card` text or `layered` JSON for
 //! `query_capsule` / `query_capsules`; `json` (or none) leaves the protocol reply as is.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_mcp::{surfaces, Config, Hub, McpServer, NotifyMode, Options, SharedHub};

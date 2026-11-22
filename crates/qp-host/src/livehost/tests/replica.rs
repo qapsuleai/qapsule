@@ -31,6 +31,7 @@ fn deliver(core: &mut qp_shellcore::shell::ShellCore, conn: &str, lines: Vec<Out
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// RP4/T5 (R6 observation, REPORT §10): a full replica that joins a live host late
 /// holds the same series as one connected from the start — the history and every
 /// live bar since, also over a drop and its repair.
@@ -159,6 +160,7 @@ fn late_full_replica_has_the_same_series_as_an_early_one() {
     assert_eq!(dl, de, "late replica shows what the early one shows");
 }
 
+#[allow(clippy::too_many_lines)]
 /// The same check on the real feed engine (`MatriksFeed`, made-up protobuf ticks of
 /// `live::tests::fake_records`: a snapshot, trades, ask-only updates, a drop and a
 /// reconnect), 5-minute bars, and the bars closed by the exchange clock.
@@ -264,6 +266,7 @@ fn late_full_replica_matches_on_the_matriks_feed() {
     assert_eq!(enc(&l), enc(&e), "late replica byte-equal to the early one");
 }
 
+#[allow(clippy::too_many_lines)]
 /// (RP4/T6) Incremental = from scratch on the live path: two identical live hosts take
 /// the same data events (a fixed, uneven order: symbol `k` moves every `k + 1`-th
 /// round, patches inside a bar and new bars), clocks, market statuses and messages;

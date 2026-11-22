@@ -2,6 +2,14 @@
 //! transcript per view. `cargo run -p qp-cli --example make_views` from anywhere;
 //! `tests/views.rs` checks that the committed files match.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "../tests/support/views_gen.rs"]
 mod views_gen;
 

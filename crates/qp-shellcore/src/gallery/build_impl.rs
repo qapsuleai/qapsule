@@ -35,6 +35,7 @@ struct Ctx {
 }
 
 impl Ctx {
+    #[allow(clippy::expect_used)]
     /// A new core on its own connection, at the host's moment, in the gallery's
     /// language and theme, painting at [`IMAGE_SCALE`].
     fn core(&mut self) -> (ShellCore, String) {

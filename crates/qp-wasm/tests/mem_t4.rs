@@ -1,6 +1,14 @@
 //! RP3/T4: the shell core's own records stay bounded on a long session, and the large
 //! frames (start, data) parsed typed give the same page as the JSON-tree path
 //! (`rounds/RP3/experiments/T4.md`).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

@@ -100,6 +100,7 @@ pub fn ema_tail(x: &[f64], period: usize, from: usize, out: &mut [f64]) -> Certi
     ema_tail_with(x, period, &Bounds::new(x, from), out)
 }
 
+#[allow(clippy::expect_used)]
 /// [`ema_tail`] with precomputed bounds (`bounds.from` is the first output bar).
 ///
 /// # Panics
@@ -179,6 +180,7 @@ pub fn rsi_tail(x: &[f64], period: usize, from: usize, out: &mut [f64]) -> Certi
     rsi_tail_with(x, period, &Bounds::new(x, from), out)
 }
 
+#[allow(clippy::expect_used)]
 /// [`rsi_tail`] with precomputed bounds.
 ///
 /// # Panics

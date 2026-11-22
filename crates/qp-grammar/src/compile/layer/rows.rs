@@ -47,6 +47,7 @@ pub(super) enum RowAgg {
     MaxAbs,
 }
 
+#[allow(clippy::too_many_lines)]
 /// Rows of a single-valued channel (lines). Returns rows, skipped count, LOD-line flag.
 pub(super) fn series_rows(
     cx: &Ctx<'_, '_>,
@@ -140,6 +141,7 @@ pub(super) fn series_rows(
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// Rows of a two-valued mark (area, band, bar): `v = [y, y2]`.
 pub(super) fn pair_rows(
     cx: &Ctx<'_, '_>,

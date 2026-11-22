@@ -2,6 +2,14 @@
 //! scale, gaps, points beyond the last bar, emphasis, multi-panel layout, themes and
 //! determinism.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_grammar::scale::{slot_x, value_at, value_y};

@@ -1,5 +1,13 @@
 //! R4/T2 (§21): the replay host — determinism, controls, permissions, backward seek.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::protocol::{OutboundLine, ReplayInit};

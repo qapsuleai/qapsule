@@ -3,6 +3,14 @@
 //! outcome, clusters when the lanes run out, closed stories hideable — at 5, 50 and 200
 //! stories; the scene's story elements and the point query name the same stories.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use qp_grammar::look::{Look, R4};

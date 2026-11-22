@@ -8,6 +8,14 @@
 //!   instrument's feed.
 //! - The device's work and traffic per step do not depend on the size of the universe
 //!   (30 vs 300 instruments, natively; 3,000 in the browser measurement).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_wasm::drive::{parity_host, parity_host_n, shell_less, viewer_less, with_viewer_core};

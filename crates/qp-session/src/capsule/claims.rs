@@ -310,6 +310,7 @@ impl Claims {
         self.reg.get(key).map(|r| &r.ev)
     }
 
+    #[allow(clippy::too_many_lines)]
     /// After the bars of bar series changed (`changed`, `rd` and the cache already
     /// updated): gap marks follow the plane; registered claims on a changed series whose
     /// bar closed, was corrected, or whose data was rebuilt are re-checked at their bar

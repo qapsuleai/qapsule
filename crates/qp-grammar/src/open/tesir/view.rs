@@ -39,6 +39,7 @@ fn trust_role(c: Option<DeviceCheck>) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// The capsule depth's view (see the module docs). A finding without a story (R2) or
 /// without a meaning keeps today's view.
 ///

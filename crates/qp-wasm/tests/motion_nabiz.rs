@@ -2,6 +2,14 @@
 //! without reduce motion (no fact is lost), the default design changes nothing, a state
 //! change the device sees gives one beat (and a change label until the next look), the
 //! overlay is empty under reduce motion and every frame is a pure function of its time.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use std::collections::BTreeSet;

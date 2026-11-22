@@ -27,6 +27,7 @@ fn trimmed<const L: usize>(xs: &[&[f64]; L], outs: &mut [&mut [f64]]) -> usize {
     n
 }
 
+#[allow(clippy::expect_used)]
 /// RSI over `L` lanes; writes `outs[l][..n]` (`NaN` in warmup).
 pub(crate) fn rsi<const L: usize>(xs: &[&[f64]; L], periods: &[usize; L], outs: &mut [&mut [f64]]) {
     let n = trimmed(xs, outs);
@@ -77,6 +78,7 @@ pub(crate) fn rsi<const L: usize>(xs: &[&[f64]; L], periods: &[usize; L], outs: 
     }
 }
 
+#[allow(clippy::expect_used)]
 /// EMA over `L` lanes.
 pub(crate) fn ema<const L: usize>(xs: &[&[f64]; L], periods: &[usize; L], outs: &mut [&mut [f64]]) {
     let n = trimmed(xs, outs);
@@ -108,6 +110,7 @@ pub(crate) fn ema<const L: usize>(xs: &[&[f64]; L], periods: &[usize; L], outs: 
     }
 }
 
+#[allow(clippy::expect_used)]
 /// SMA over `L` lanes.
 pub(crate) fn sma<const L: usize>(xs: &[&[f64]; L], periods: &[usize; L], outs: &mut [&mut [f64]]) {
     let n = trimmed(xs, outs);
@@ -143,6 +146,7 @@ pub(crate) fn sma<const L: usize>(xs: &[&[f64]; L], periods: &[usize; L], outs: 
     }
 }
 
+#[allow(clippy::expect_used)]
 /// MACD over `L` lanes, `(fast, slow, signal)` per lane; outputs `outs[l * 3 + j]`
 /// (macd, signal, histogram).
 pub(crate) fn macd<const L: usize>(
@@ -201,6 +205,7 @@ pub(crate) fn macd<const L: usize>(
     }
 }
 
+#[allow(clippy::expect_used)]
 /// Bollinger over `L` lanes, `(period, k)` per lane; outputs `outs[l * 4 + j]` (middle,
 /// upper, lower, bandwidth). The flat-window branch of [`crate::Bollinger`] becomes a
 /// per-lane select between its two formulas (both computed, one kept).

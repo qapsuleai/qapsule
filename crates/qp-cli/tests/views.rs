@@ -4,6 +4,14 @@
 //! (`fixtures/golden/sample.png`, criterion 3). The `qp explain` dumps are stable and
 //! match `fixtures/views/*.explain.txt`. The fixtures are what the generator produces.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "support/views_gen.rs"]
 mod views_gen;
 

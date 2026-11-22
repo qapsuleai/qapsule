@@ -344,6 +344,7 @@ fn only_in(a: &Document, b: &Document) -> BTreeSet<String> {
     out
 }
 
+#[allow(clippy::too_many_lines)]
 /// One change of an entry of the authority's world as the public world takes it
 /// (`inverse`: the entry's inverse, for what the person changed; `p.hidden`: the engine
 /// items only the authority's world has).

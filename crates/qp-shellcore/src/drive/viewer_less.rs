@@ -122,6 +122,7 @@ impl ViewerAgent {
         self.deliver(host, lines, before);
     }
 
+    #[allow(clippy::expect_used)]
     /// The data plane first (as `qp demo` orders it), then the messages.
     fn deliver(&mut self, host: &mut ReplayHost, lines: Vec<OutboundLine>, before: usize) {
         for f in viewer_frames(host, CONN, &mut self.served, before) {
@@ -304,6 +305,7 @@ impl ViewerAgent {
     }
 }
 
+#[allow(clippy::panic, clippy::too_many_lines)]
 /// (RP3/M15, §22) [`shell_less`] for a viewer: the same script driven with protocol
 /// messages only over a `viewer` subscription (no replica of the document, no data of the
 /// universe; the open instrument's data as `qp demo` serves it). Every feed capsule is
@@ -465,6 +467,7 @@ pub fn pump_viewer(
     }
 }
 
+#[allow(clippy::expect_used, clippy::panic)]
 /// (RP3/M15) [`with_core`] for the viewer core: frames as `qp demo` writes them to a
 /// viewer connection (data plane filtered, `bind` frames); every feed capsule is made
 /// visible before a digest.

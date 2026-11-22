@@ -372,6 +372,7 @@ impl Session {
         self.scan_conditions(series, lo);
     }
 
+    #[allow(clippy::too_many_lines)]
     /// A `dispute` from connection `ci` (§19.9).
     pub(crate) fn dispute(
         &mut self,

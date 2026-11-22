@@ -4,6 +4,14 @@
 //! device's scene telling the same as the authority's point query: every tap below is
 //! aimed with the device's own `hit` reading of the scene it painted and the authority's
 //! answer is checked against it.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_schema::protocol::OpenDepth;

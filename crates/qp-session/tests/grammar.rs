@@ -1,6 +1,14 @@
 //! Grammar v0 in the authority (R2/T5): canonical form, the ten grammar ops with exact
 //! inverses, validation errors, origins, conflict keys, summary and presenter.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use serde_json::{json, Value};

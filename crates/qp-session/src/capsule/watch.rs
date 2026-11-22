@@ -65,6 +65,7 @@ fn matches(doc: &Document, person: &str, m: &WatchMatch, e: &StoryEvent) -> bool
         && (!m.negative || negative(stage))
 }
 
+#[allow(clippy::too_many_lines)]
 /// `add_watch` and `remove_watch` (§25.5).
 pub(crate) fn expand_watch(
     doc: &Document,
@@ -230,6 +231,7 @@ impl Session {
                 .is_some_and(|p| p.role == qp_schema::protocol::Role::Owner)
     }
 
+    #[allow(clippy::expect_used)]
     /// The watches' changes and matches for one engine look's `events` (in the world the
     /// fields hold).
     pub(crate) fn match_watches(&self, events: &[StoryEvent]) -> (Vec<ChangeOp>, Vec<Matched>) {

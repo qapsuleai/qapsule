@@ -224,6 +224,7 @@ impl fmt::Debug for MockBroker {
 }
 
 impl MockBroker {
+    #[allow(clippy::unwrap_used, clippy::expect_used)]
     pub fn start(script: BrokerScript) -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").expect("bind loopback");
         let addr = listener.local_addr().expect("local addr");
@@ -282,10 +283,12 @@ impl MockBroker {
         self.addr
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn stats(&self) -> MockStats {
         self.shared.stats.lock().unwrap().clone()
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn script(&self, f: impl FnOnce(&mut BrokerScript)) {
         f(&mut self.shared.script.lock().unwrap());
     }
@@ -313,6 +316,7 @@ impl MockBroker {
         self.broadcast(MULTICONNECT_TOPIC, MULTICONNECT_PAYLOAD);
     }
 
+    #[allow(clippy::unwrap_used)]
     /// Closes every open connection from the server side (TCP shutdown, no MQTT goodbye).
     pub fn drop_connections(&self) {
         for (_, tx) in self.shared.conns.lock().unwrap().iter() {
@@ -320,6 +324,7 @@ impl MockBroker {
         }
     }
 
+    #[allow(clippy::unwrap_used)]
     /// (RP4) Closes, from the server side, only the connections on request path `path`
     /// (`market`, `trade`); the others stay open.
     pub fn drop_path(&self, path: &str) {
@@ -334,6 +339,7 @@ impl MockBroker {
         wait_poll(timeout, || pred(&self.stats()))
     }
 
+    #[allow(clippy::unwrap_used)]
     fn send_all(&self, cmd: BrokerCmd) {
         for (_, tx) in self.shared.conns.lock().unwrap().iter() {
             let c = match &cmd {
@@ -374,6 +380,7 @@ struct Gauge {
 }
 
 impl Gauge {
+    #[allow(clippy::unwrap_used)]
     fn open(shared: Arc<BrokerShared>) -> Self {
         {
             let mut st = shared.stats.lock().unwrap();
@@ -388,6 +395,7 @@ impl Gauge {
         }
     }
 
+    #[allow(clippy::unwrap_used)]
     /// Counts this connection under `path` too (called once, after the handshake).
     fn set_path(&mut self, path: &str) {
         if !self.open || self.path.is_some() {
@@ -404,6 +412,7 @@ impl Gauge {
         self.path = Some(p);
     }
 
+    #[allow(clippy::unwrap_used)]
     fn close(&mut self) {
         if self.open {
             self.open = false;
@@ -448,10 +457,12 @@ impl RecordingSink {
         Arc::new(Self::default())
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn messages(&self) -> Vec<RecordedMessage> {
         self.messages.lock().unwrap().clone()
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn events(&self) -> Vec<LiveEvent> {
         self.events
             .lock()
@@ -461,6 +472,7 @@ impl RecordingSink {
             .collect()
     }
 
+    #[allow(clippy::unwrap_used)]
     /// `Display` and `Debug` of every event (what a logger would write).
     pub fn event_texts(&self) -> Vec<String> {
         self.events
@@ -471,6 +483,7 @@ impl RecordingSink {
             .collect()
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn count(&self, pred: impl Fn(&LiveEvent) -> bool) -> usize {
         self.events
             .lock()
@@ -484,12 +497,14 @@ impl RecordingSink {
         wait_poll(timeout, || self.count(&pred) > 0)
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn wait_messages(&self, timeout: Duration, n: usize) -> bool {
         wait_poll(timeout, || self.messages.lock().unwrap().len() >= n)
     }
 }
 
 impl LiveSink for RecordingSink {
+    #[allow(clippy::unwrap_used)]
     fn on_message(&self, msg: &LiveMessage<'_>) {
         self.messages.lock().unwrap().push(RecordedMessage {
             seq: msg.seq,
@@ -500,6 +515,7 @@ impl LiveSink for RecordingSink {
         });
     }
 
+    #[allow(clippy::unwrap_used)]
     fn on_event(&self, endpoint: &EndpointKey, event: &LiveEvent) {
         self.events
             .lock()

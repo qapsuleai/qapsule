@@ -208,6 +208,7 @@ fn paren(parts: &[(&str, Option<String>)]) -> String {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn event_clause(p: &Plan<'_>) -> String {
     let i = p.inst;
     let w = cap(&when(p.lead_ago));
@@ -478,6 +479,7 @@ fn family_name(f: EvidenceFamily) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn remark(p: &Plan<'_>) -> Option<String> {
     let s = when(p.stage_ago);
     let no_longer = p.class != Class::Ended;

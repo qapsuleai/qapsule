@@ -2,6 +2,7 @@
 
 use super::*;
 
+#[allow(clippy::cognitive_complexity)]
 /// The story part of the scene; see the module documentation.
 #[must_use]
 #[allow(clippy::too_many_lines)]

@@ -9,6 +9,14 @@
 //! a golden that does not exist yet. On mismatch the actual image is written to
 //! `target/golden-actual/` and the pixel-diff statistics are printed.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod r0;
 
 use std::path::PathBuf;

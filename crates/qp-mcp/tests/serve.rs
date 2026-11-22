@@ -1,6 +1,14 @@
 //! (R5B/T2) The served endpoint: surface registry, common tools (`render`,
 //! `notifications`), notification delivery by MCP revision, the measurement log.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::cell::RefCell;
 use std::io::Write;
 use std::path::{Path, PathBuf};

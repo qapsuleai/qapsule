@@ -15,6 +15,11 @@ unsafe_code = "forbid"
 [workspace.lints.clippy]
 dbg_macro = "warn"
 todo = "warn"
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+too_many_lines = "warn"
+cognitive_complexity = "warn"
 
 [profile.release]
 lto = "thin"

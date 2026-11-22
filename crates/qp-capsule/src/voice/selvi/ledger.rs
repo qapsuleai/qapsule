@@ -7,6 +7,7 @@ impl<'a> Cx<'a> {
     // Ledger
     // -----------------------------------------------------------------------
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn ledger(&self) -> Bi {
         let l = self.story.ledger_at_birth;
         let (tr_past, en_past, tr_neg, tr_if, en_if) = match self.dir {

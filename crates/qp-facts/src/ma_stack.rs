@@ -127,6 +127,7 @@ impl MaStack {
 }
 
 impl Default for MaStack {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self::new(Self::FAST, Self::SLOW, Self::ATR, Self::RISE).expect("valid defaults")
     }

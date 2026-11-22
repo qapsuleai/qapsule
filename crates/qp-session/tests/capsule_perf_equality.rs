@@ -7,6 +7,14 @@
 //! (R3/K1 changed the lines of the readers without every licensed flow on purpose: they
 //! read the public world; see `bound_with_flow_and_readers_unchanged`.)
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 

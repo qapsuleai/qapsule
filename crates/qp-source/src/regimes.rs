@@ -155,6 +155,7 @@ pub const SYNTHETIC_HOLIDAYS: &[&str] = &[
 /// Half day of the synthetic market's calendar (R1 sample: 2026-03-19, closes 12:30).
 pub const SYNTHETIC_HALF_DAYS: &[(&str, &str)] = &[("2026-03-19", "12:30")];
 
+#[allow(clippy::expect_used)]
 /// The synthetic market's own, frozen calendar: `XIST` sessions, weekend and time zone
 /// with the R1 sample holidays ([`SYNTHETIC_HOLIDAYS`], [`SYNTHETIC_HALF_DAYS`]).
 ///
@@ -175,6 +176,7 @@ pub fn synthetic_calendar() -> Calendar {
     cal
 }
 
+#[allow(clippy::expect_used)]
 fn xist() -> ExchangeCalendar {
     // The synthetic calendar is valid by construction.
     ExchangeCalendar::new(&synthetic_calendar()).expect("synthetic calendar is valid")

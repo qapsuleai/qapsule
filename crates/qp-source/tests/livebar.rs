@@ -2,6 +2,14 @@
 //! methods, the seam with history, late ticks, determinism and §18.4 conformity. All
 //! ticks are hand-built (no real data).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use qp_calendar::{builtin, parse_date, ExchangeCalendar, Interval};
 use qp_schema::data::{DataChange, DataEvent, FeedKey};
 use qp_schema::Bar;

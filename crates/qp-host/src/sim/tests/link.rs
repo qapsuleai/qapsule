@@ -50,6 +50,7 @@ fn pump_until(
     until(rt)
 }
 
+#[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
 /// The trade link drops and comes back while the market link drops and comes back: the
 /// market's loss stales nothing (bars go on from trades), the trade's loss stales the
 /// feeds, its reconnect fills the gap from the REST trade history (a fake REST: the cached
@@ -246,6 +247,7 @@ fn trade_link_drops_repair_from_rest_bit_equal() {
     );
 }
 
+#[allow(clippy::too_many_lines)]
 /// T4's known limit: after a REST bar repair the feed is replaced; with trades the new
 /// one keeps the watched symbols (a gap from the new seam) and the trade connection's
 /// state, and the trades after the seam come back from history: bit-equal bars.
@@ -379,6 +381,7 @@ fn reseeded_trade_feed_keeps_watched_symbols_and_trade_link() {
     assert!(feed.inner().trade_stale_symbols().is_empty());
 }
 
+#[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
 /// Both endpoints at once on the loopback mock broker, through the demo's own wiring
 /// (`spawn_connection`, `HubSink`, the live runtime): one connection per endpoint
 /// (`max_concurrent == 1` on each path), no `@lvl2` trade topic ever reaches the broker

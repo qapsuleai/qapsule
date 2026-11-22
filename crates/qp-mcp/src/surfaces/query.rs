@@ -265,6 +265,7 @@ fn did_you_mean<'a>(word: &str, candidates: impl IntoIterator<Item = &'a str>) -
         .collect()
 }
 
+#[allow(clippy::too_many_lines)]
 fn shape(find: &str, format: Format, select: &[String], out: Out, seq: Option<u64>) -> Value {
     let count = out.items.len();
     let mut ids: Vec<String> = Vec::new();

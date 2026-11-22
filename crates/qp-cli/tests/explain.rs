@@ -1,5 +1,13 @@
 //! `qp explain` and `qp scene`: headless semantic summary and scene description.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use assert_cmd::Command;

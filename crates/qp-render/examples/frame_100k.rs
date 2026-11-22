@@ -10,6 +10,14 @@
 //! and total (compile + rasterize in one timed span), and the number of pixels that
 //! differ between the LOD and the full frame (decoded RGBA compare).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "../tests/r0/mod.rs"]
 mod r0;
 

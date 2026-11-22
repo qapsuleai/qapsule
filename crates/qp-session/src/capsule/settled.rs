@@ -355,6 +355,7 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     /// After a settled answer on `series` (`lo..=hi`; `corrected`: bars changed): the
     /// detectors re-run on the authority's (corrected) final bars; every story with a fact
     /// the corrected data no longer gives (or gives with other evidence values) is

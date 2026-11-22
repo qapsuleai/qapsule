@@ -4,6 +4,7 @@
 use super::*;
 
 impl LiveBars {
+    #[allow(clippy::too_many_lines)]
     /// Applies one price-card update; returns the data events it causes (possibly none).
     pub fn push(&mut self, tick: &CardTick) -> Vec<DataEvent> {
         let mut out = Vec::new();
@@ -165,6 +166,7 @@ impl LiveBars {
         out
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Applies one trade (rule 8); returns the data events it causes (possibly none).
     pub fn push_trade(&mut self, tr: &TradeTick) -> Vec<DataEvent> {
         let mut out = Vec::new();

@@ -1,5 +1,13 @@
 //! R4/D: the metrics page's additions (GOAL 9): p99 and long-frame shares, the zoom
 //! mode, device facts, memory samples, the look in the summary and the reset.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_wasm::drive::parity_host;

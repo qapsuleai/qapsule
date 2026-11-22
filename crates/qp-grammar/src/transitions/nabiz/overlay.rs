@@ -76,6 +76,7 @@ fn ring_box(g: &PixelRect) -> [f64; 4] {
     [cx - side / 2.0, cy - side / 2.0, side, side]
 }
 
+#[allow(clippy::too_many_lines)]
 /// The overlay boxes of one face at its frame (empty: nothing to paint). Pure.
 #[must_use]
 pub fn overlay(f: &FaceMotion, look: &Look, theme: &Theme) -> Vec<OverlayBox> {

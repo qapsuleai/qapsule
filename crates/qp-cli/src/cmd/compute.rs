@@ -54,6 +54,7 @@ fn load_bars(input: &Path, series: Option<&str>) -> Result<Vec<qp_schema::Bar>, 
     qp_source::collect_bars(source.as_mut()).map_err(|e| e.to_string())
 }
 
+#[allow(clippy::expect_used)]
 pub(crate) fn compute(args: &ComputeArgs) -> Result<Outcome, String> {
     if args.list {
         let list: Vec<serde_json::Value> = qp_compute::STUDY_NAMES

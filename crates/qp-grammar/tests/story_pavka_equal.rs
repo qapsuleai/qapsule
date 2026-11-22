@@ -7,6 +7,14 @@
 //! gives a scene equal, and byte-equal as JSON, to the one the code before the change
 //! gave (kept verbatim in `tests/pavka_ref/`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod pavka_ref;
 
 use qp_grammar::look::{self, Look, R4};

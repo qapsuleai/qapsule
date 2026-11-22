@@ -3,6 +3,7 @@
 
 use super::*;
 
+#[allow(clippy::unwrap_used, clippy::too_many_lines)]
 pub(super) fn serve_connection(
     s: &BrokerShared,
     stream: TcpStream,

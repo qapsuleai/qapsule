@@ -142,6 +142,7 @@ fn wrong(path: &str, expected: impl Into<String>, v: &Value) -> Option<Violation
     })
 }
 
+#[allow(clippy::too_many_lines)]
 fn walk(v: &Value, schema: &Value, root: &Value, path: &str, depth: u32) -> Option<Violation> {
     if depth > 200 {
         return None;
@@ -301,6 +302,7 @@ fn walk_object(
     None
 }
 
+#[allow(clippy::too_many_lines)]
 fn walk_branches(
     v: &Value,
     branches: &[Value],

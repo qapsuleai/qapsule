@@ -144,6 +144,7 @@ impl RsiDivergence {
 }
 
 impl Default for RsiDivergence {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self::new(Self::RSI, Self::MIN_GAP, Self::MAX_GAP).expect("valid defaults")
     }

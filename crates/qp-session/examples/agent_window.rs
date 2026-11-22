@@ -22,6 +22,14 @@
 //! `watches.json`: `[{"text", "match", "for"?, "expires_t"?, "max_matches"?}, …]` — the
 //! `add_watch` operation's fields.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::io::Write;
 use std::path::PathBuf;
 

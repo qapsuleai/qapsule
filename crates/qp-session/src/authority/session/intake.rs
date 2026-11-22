@@ -87,6 +87,7 @@ impl Session {
         self.host_data_event(&ev).map_err(|e| e.to_string())
     }
 
+    #[allow(clippy::too_many_lines)]
     /// THE boundary: one raw inbound message on connection `conn`. Checks the size,
     /// parses (errors `parse`, `schema` with a JSON pointer, `limit`), then handles it.
     pub fn handle_raw(&mut self, conn: &str, line: &str) -> Vec<OutboundLine> {
@@ -211,6 +212,7 @@ impl Session {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Finds the selectors of a raw message, resolves them against the document (for a
     /// command: op by op, each against the document as the earlier ops of the same
     /// command leave it) and writes the ids in their place. Returns `{pointer -> id}`.

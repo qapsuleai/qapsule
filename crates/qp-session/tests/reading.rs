@@ -2,6 +2,14 @@
 //! the point query `hit`, a property test over six views (values equal the data, empty
 //! areas have no item) and the data → pixel → data round trip through the protocol.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

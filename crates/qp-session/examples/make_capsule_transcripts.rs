@@ -12,6 +12,14 @@
 //! cargo run -p qp-session --example make_capsule_transcripts -- --write
 //! ```
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::data::DataEvent;

@@ -301,6 +301,7 @@ impl<R: Read> RawReader<R> {
         r
     }
 
+    #[allow(clippy::expect_used)]
     fn read_one(&mut self) -> Result<Option<RawRecord>, RawError> {
         let at = self.offset;
         let corrupt = |reason| RawError::Corrupt { offset: at, reason };

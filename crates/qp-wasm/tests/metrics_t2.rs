@@ -1,6 +1,14 @@
 //! RP3/T2: the metrics page's own bugs (GOAL 9) — long frames against the detected
 //! refresh rate, the opening timeline across a new core, the zoom warning — plus the paint
 //! list handed to non-pixel paint paths and the automatic comparison's driver (GOAL 8).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

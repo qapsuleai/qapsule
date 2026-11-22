@@ -6,6 +6,14 @@
 //! connection the host marked as an agent's. The proposal stays pending and out of the
 //! document until a person decides it on a connection of their own.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_mcp::surfaces::{self, thin::HUMAN_DECISION_TOOLS};

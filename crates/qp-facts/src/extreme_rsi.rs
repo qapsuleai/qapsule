@@ -110,6 +110,7 @@ impl RsiExtreme {
 }
 
 impl Default for RsiExtreme {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self::new(Self::RSI, Self::UPPER, Self::LOWER).expect("valid defaults")
     }

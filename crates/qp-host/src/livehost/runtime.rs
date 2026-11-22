@@ -89,6 +89,7 @@ impl LiveRuntime {
         host.live_mark_stale()
     }
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn apply(
         &mut self,
         host: &mut ReplayHost,

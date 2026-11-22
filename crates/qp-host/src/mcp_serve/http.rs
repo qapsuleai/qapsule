@@ -158,6 +158,7 @@ pub(super) fn rpc_error_body(code: i64, message: &str) -> String {
     json!({"jsonrpc": "2.0", "id": null, "error": {"code": code, "message": message}}).to_string()
 }
 
+#[allow(clippy::too_many_lines)]
 /// Serves one `/mcp` request (the request line and headers are read; `body` is the
 /// body): checks `Host`, `Origin` and the token, hands the request to the hub's thread
 /// and writes its answer.

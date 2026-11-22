@@ -9,6 +9,7 @@ impl Session {
         self.handle_resolved(conn, msg, BTreeMap::new())
     }
 
+    #[allow(clippy::too_many_lines)]
     /// Handles a parsed message whose selectors resolved to `resolved` (§17).
     pub(super) fn handle_resolved(
         &mut self,

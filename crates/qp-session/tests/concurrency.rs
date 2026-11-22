@@ -12,6 +12,14 @@
 //! satisfies the oracle), **refused** (the second write was refused and the document
 //! equals the first write alone: safe, needs a retry), **WRONG** (anything else).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_schema::protocol::SessionInit;

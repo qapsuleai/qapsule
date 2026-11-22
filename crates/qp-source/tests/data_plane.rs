@@ -2,6 +2,14 @@
 //! resolution, binding validation, the memory provider and the field-level synthetic
 //! stream (same final bits as the whole-bar path; streaming studies equal batch).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 

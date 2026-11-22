@@ -60,6 +60,7 @@ impl<'a> Resolver<'a> {
 
     // -- rows per kind ----------------------------------------------------
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn series_rows(&self, sel: &SeriesSel, path: &str) -> PResult<Outcome> {
         let doc = self.doc;
         let on = match &sel.on {
@@ -211,6 +212,7 @@ impl<'a> Resolver<'a> {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn layer_rows(
         &self,
         view: Option<&View>,

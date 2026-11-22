@@ -3,6 +3,14 @@
 //!
 //! `cargo run --release -p qp-grammar --example bench_compile [-- N]`
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::time::Instant;
 

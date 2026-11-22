@@ -4,6 +4,7 @@
 use super::*;
 
 impl Worker {
+    #[allow(clippy::too_many_lines)]
     pub(super) fn session(&mut self, token: &AccessToken) -> SessionEnd {
         let mut ws = match open_websocket(
             &self.url,

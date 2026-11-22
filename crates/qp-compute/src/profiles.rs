@@ -31,6 +31,7 @@ pub fn a_series() -> Vec<f64> {
     bench_closes(A_BARS, A_SEED)
 }
 
+#[allow(clippy::expect_used)]
 /// Profile A, study `name`: the R1 sweep over [`bench_grid`].
 ///
 /// # Panics
@@ -56,6 +57,7 @@ pub fn b_series() -> Vec<Vec<f64>> {
     v
 }
 
+#[allow(clippy::expect_used)]
 /// Profile B, study `name` with default parameters over every series;
 /// `visit(series_index, outputs)`.
 ///
@@ -67,6 +69,7 @@ pub fn b_run(name: &str, series: &[Vec<f64>], visit: impl FnMut(usize, &SweepCol
     crate::sweep::sweep_series_each(name, &p, &xs, visit).expect("defaults are valid");
 }
 
+#[allow(clippy::expect_used)]
 /// Profile B as in RP1/T1: one [`sweep_each`] call per series (no series lanes).
 ///
 /// # Panics
@@ -92,6 +95,7 @@ fn period(p: usize) -> BTreeMap<String, f64> {
     BTreeMap::from([("period".to_owned(), p as f64)])
 }
 
+#[allow(clippy::panic)]
 /// Profile C grid of a family (1,000 variants each).
 ///
 /// - `ema>rsi`: ema period ∈ {2,3,5,8,13,21,34,55,89,144} × rsi period 2..=101
@@ -152,6 +156,7 @@ pub fn c_grid(family: &str) -> Vec<ChainSpec> {
     v
 }
 
+#[allow(clippy::expect_used)]
 /// Builds a chain variant as one [`Study`] (nested [`Chain`]s reading output 0).
 ///
 /// # Panics
@@ -168,6 +173,7 @@ pub fn c_build(spec: &ChainSpec) -> Box<dyn Study> {
     s
 }
 
+#[allow(clippy::expect_used)]
 /// Profile C, one family, with the computation graph ([`crate::graph::sweep_chains`]):
 /// every distinct prefix once, the last stage as a lane sweep.
 ///
@@ -262,6 +268,7 @@ pub struct Bank {
 }
 
 impl Bank {
+    #[allow(clippy::expect_used)]
     /// Builds the bank from specs.
     ///
     /// # Panics

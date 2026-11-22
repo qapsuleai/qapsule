@@ -1,6 +1,14 @@
 //! Sweep = individual runs, bit for bit, for every study and every lane count; and the
 //! accuracy of the rolling Bollinger variance on a long series.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

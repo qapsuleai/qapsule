@@ -140,6 +140,7 @@ impl Hub {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn handle(&mut self, cmd: Cmd) {
         match cmd {
             Cmd::Connect {

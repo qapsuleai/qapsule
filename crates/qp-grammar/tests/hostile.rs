@@ -1,6 +1,14 @@
 //! Security review: extreme or non-finite domains and values must terminate quickly with an
 //! error or a sane scene (no infinite grid loops).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::time::{Duration, Instant};

@@ -6,6 +6,7 @@ use super::*;
 // explain
 // ---------------------------------------------------------------------------
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn explain(ctx: &mut Ctx<'_>, a: &ExplainArgs) -> Value {
     let r = ctx.query(json!({"kind": "capsule", "capsule": a.capsule}));
     if !is_result(&r) {

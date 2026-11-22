@@ -197,6 +197,7 @@ impl Session {
         update
     }
 
+    #[allow(clippy::too_many_lines)]
     /// [`Session::viewer_update`] inside the reader's world.
     fn viewer_compute(
         &mut self,

@@ -3,6 +3,14 @@
 //! lanes that never overlap, the selected story first, closed stories hidden on request,
 //! the point query naming every element it is drawn for, determinism and contrast.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_grammar::stories::korda::{self, StoryHit, CLUSTER_LAYER, STORY_LAYER, TOGGLE_LAYER};

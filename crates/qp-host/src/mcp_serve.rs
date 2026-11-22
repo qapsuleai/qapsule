@@ -164,6 +164,7 @@ impl Dump {
     }
 }
 
+#[allow(clippy::expect_used)]
 /// Adds the agent principals [`AGENTS`] (agent author, role `proposer`) when missing;
 /// with explicit replay entitlements, each gets those of the person it works for.
 pub(crate) fn add_agent_principals(init: &mut SessionInit) {
@@ -309,6 +310,7 @@ fn device(kind: &str) -> Result<qp_schema::protocol::Surface, String> {
     serde_json::from_value(json!({ "kind": kind })).map_err(|e| format!("--device `{kind}`: {e}"))
 }
 
+#[allow(clippy::too_many_lines)]
 /// `qp mcp serve`.
 ///
 /// # Errors

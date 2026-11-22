@@ -22,6 +22,7 @@ pub(super) fn ser(v: &impl serde::Serialize) -> Value {
     serde_json::to_value(v).unwrap_or(Value::Null)
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn find_capsules(
     io: &mut Io<'_, '_>,
     w: &Where,
@@ -125,6 +126,7 @@ pub(super) fn find_capsules(
     Ok(out)
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn find_stories(
     io: &mut Io<'_, '_>,
     w: &Where,
@@ -371,6 +373,7 @@ pub(super) fn find_facts(io: &mut Io<'_, '_>, w: &Where, limit: usize) -> Result
     Ok(out)
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn find_instrument(io: &mut Io<'_, '_>, w: &Where) -> Result<Out, Fail> {
     let syms = match &w.instrument {
         Some(i) => vec![io.instrument(i, "/where/instrument")?],

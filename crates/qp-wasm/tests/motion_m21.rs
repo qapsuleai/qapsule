@@ -1,6 +1,14 @@
 //! R5/M21 `surek`: the faces' own changes in the shell core — the same facts with motion
 //! and under reduced motion (information loss 0), the label on the face under reduced
 //! motion, a frame for every animated change, and today's motion (`r4`) unchanged.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_schema::scene::{Prim, SceneDesc};

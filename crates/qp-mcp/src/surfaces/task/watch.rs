@@ -31,6 +31,7 @@ impl Task {
         lines
     }
 
+    #[allow(clippy::too_many_lines)]
     pub(super) fn watch(&mut self, ctx: &mut Ctx<'_>, a: WatchArgs) -> Result<Value, RpcError> {
         match a.action {
             WatchAction::List => {

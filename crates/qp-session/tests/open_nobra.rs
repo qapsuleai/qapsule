@@ -12,6 +12,14 @@
 //!   digit in any question text (K33/K34, A32).
 //! - Under `r4` the capsule depth is today's card, byte for byte.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

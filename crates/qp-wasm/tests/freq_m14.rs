@@ -2,6 +2,14 @@
 //! display frame; a frame without data events raises nothing to paint; the paint pass
 //! paints only the faces on screen and none behind the open layer; the page's mode
 //! (secure context, WebGPU, JIT probe) is in the summary with its warnings.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

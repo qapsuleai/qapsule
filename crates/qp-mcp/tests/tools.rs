@@ -1,6 +1,14 @@
 //! Generated tools: coverage of the protocol schema, validity of the input schemas
 //! against the protocol's valid examples, JSON-RPC handling, conformance over MCP.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_mcp::conform::{run_file, to_tool};

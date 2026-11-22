@@ -3,6 +3,7 @@
 use super::*;
 
 impl Session {
+    #[allow(clippy::too_many_lines)]
     /// (R4/T5) The `style` gesture: the connection's face design, glyph alphabet and
     /// theme; (R4/H-M8910) feed layout, depth transition, outcome mark style and last look
     /// (view state; nothing is written). Validated before anything changes.

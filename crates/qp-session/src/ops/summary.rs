@@ -353,6 +353,7 @@ pub(crate) struct FastHints<'a> {
     findings_of_fact: RefCell<Option<RowsOf<'a>>>,
 }
 
+#[allow(clippy::too_many_lines)]
 /// The summary of a document.
 #[must_use]
 pub(crate) fn summarize_doc(doc: &Document) -> DocSummary {

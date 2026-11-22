@@ -2,6 +2,7 @@
 
 use super::*;
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn expand_remove(doc: &Document, id: &str, p: &str) -> PResult<Vec<ChangeOp>> {
     use qp_schema::protocol::Collection as C;
     let ip = ptr(p, "id");
@@ -145,6 +146,7 @@ fn anchor_stamps(e: &LogEntry) -> Option<Vec<&str>> {
     Some(ids)
 }
 
+#[allow(clippy::too_many_lines)]
 pub(super) fn expand_undo(
     doc: &Document,
     seq: Option<Seq>,

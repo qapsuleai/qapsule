@@ -4,6 +4,14 @@
 //! `rounds/RP4/experiments/M26/mevsim/tests/mevsim.rs` (the bit-identity with that crate
 //! itself is checked in `rounds/RP4/experiments/harness/tests/rp4_product.rs`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use qp_calendar::{builtin, parse_date, ExchangeCalendar, Interval, XIST_HALF_DAYS};
 use qp_facts::season::{Season, CLOSE};
 use qp_facts::{

@@ -337,6 +337,7 @@ fn threshold_name(s: &Src, f: &Fact) -> String {
     }
 }
 
+#[allow(clippy::expect_used)]
 /// The basis row: the threshold by name and value, or (locked) what is locked and which
 /// entitlement opens it.
 fn basis(s: &Src) -> String {
@@ -373,6 +374,7 @@ fn basis(s: &Src) -> String {
     }
 }
 
+#[allow(clippy::expect_used)]
 /// The basis row's note: the evidence family and its licence (locked: that the values
 /// open with that entitlement).
 fn basis2(s: &Src) -> String {

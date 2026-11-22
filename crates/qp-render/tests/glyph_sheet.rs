@@ -10,6 +10,14 @@
 //! `valid`, final `no_longer`, realized `closed`, failed `closed`. Only `no_longer` draws
 //! differently; the g1 sheets are unchanged (validity absent).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "support/golden_check.rs"]
 mod golden_check;
 

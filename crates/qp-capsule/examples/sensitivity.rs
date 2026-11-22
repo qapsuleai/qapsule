@@ -35,6 +35,14 @@
 //! `rounds/R3/experiments/S/` are the pre-K42 record and are not rewritten. Deterministic:
 //! two runs give the same bytes.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "support/mod.rs"]
 mod support;
 

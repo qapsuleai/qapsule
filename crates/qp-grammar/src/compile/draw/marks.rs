@@ -115,6 +115,7 @@ pub(super) fn points(pl: &Prepared, g: &Geo<'_>, out: &mut SceneLayer) {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 /// A `text` layer with a panel-relative position (R3, `docs/GRAMMAR.md` §18): left-aligned
 /// at a panel-relative `x` (else centred on the row's bar), its top at a panel-relative
 /// `y` (else on the value); with a panel-relative `x` the text wraps at the panel's right

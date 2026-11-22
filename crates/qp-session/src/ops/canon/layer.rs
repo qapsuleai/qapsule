@@ -194,6 +194,7 @@ fn check_channels(
     Ok(consts)
 }
 
+#[allow(clippy::too_many_lines)]
 /// Validates one layer in its view and brings it to canonical form (origins of
 /// constants; constants written from origins). The layer's id must be assigned and its
 /// panel must be in `site.view.panels`; `site.view.layers` are the other layers (the

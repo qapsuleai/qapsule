@@ -1,6 +1,14 @@
 //! Every row of the `docs/CAPSULE.md` §9.3 transition table, the step order, ids, the
 //! ledger (§9.4), retraction (K37), candidates (K28) and the glyph spec.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_capsule::engine::{capsule_id, finding_id, Engine, EngineConfig};

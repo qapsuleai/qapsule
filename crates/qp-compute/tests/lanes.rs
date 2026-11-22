@@ -2,6 +2,14 @@
 //! parameter list (shuffled, duplicated, odd counts), any lane count, series shorter than
 //! the warmup, flat stretches and zero prices; `sweep_series_each` = one run per series.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

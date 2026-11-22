@@ -2,6 +2,14 @@
 //! top to bottom; the trust row opens its explanation; a reader without the entitlement
 //! gets the templated basis row and no number; every look gives the same blocks.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_grammar::open::{self, DeviceCheck, TextInput};

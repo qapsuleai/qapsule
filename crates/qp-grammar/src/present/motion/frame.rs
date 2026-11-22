@@ -44,6 +44,7 @@ fn halves(r: &PixelRect) -> (PixelRect, PixelRect) {
     )
 }
 
+#[allow(clippy::too_many_lines)]
 /// A frame of face change `ch` at progress `p`, the face at page (`left`, `top`). The
 /// element list (count, order, source, `src`) is the same for every `p`.
 ///

@@ -167,6 +167,7 @@ impl AlphabetTrait for Siluet {
         "siluet"
     }
 
+    #[allow(clippy::cognitive_complexity)]
     #[allow(clippy::too_many_lines)]
     fn draw(&self, spec: &GlyphSpec, bx: GlyphBox, theme: &Theme) -> Vec<Prim> {
         let s = bx.size;

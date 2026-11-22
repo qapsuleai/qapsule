@@ -3,6 +3,14 @@
 //! the last, volume Σ price·quantity (TL) with lots apart, special trades in the day bar only (default) or as set,
 //! card ticks ignored, late trades, the seam, determinism. Hand-built trades only.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use qp_calendar::{builtin, parse_date, ExchangeCalendar};
 use qp_schema::data::{DataChange, DataEvent, FeedKey};
 use qp_schema::Bar;

@@ -213,6 +213,7 @@ fn de00_grey(l1: f64, l2: f64) -> f64 {
     (l1 - l2).abs() / s
 }
 
+#[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
 /// (R5/M16) `oltan` meets the hard thresholds from its record: type and touch sizes,
 /// the closed glyph's floor, the evidence note, every chrome text pair; the meaning
 /// colours (ink = `tg5` realized plate, up, down, the grey of no direction / no longer

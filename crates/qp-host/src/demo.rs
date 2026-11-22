@@ -311,6 +311,7 @@ struct Hub {
     quit: bool,
 }
 
+#[allow(clippy::expect_used)]
 /// The replay host inside the hub.
 fn host_of(h: &qp_mcp::SharedHub) -> std::cell::RefMut<'_, ReplayHost> {
     std::cell::RefMut::map(h.borrow_mut(), |h| {
@@ -325,6 +326,7 @@ fn host_of(h: &qp_mcp::SharedHub) -> std::cell::RefMut<'_, ReplayHost> {
 /// (R6/M24) Least interval between two viewer recomputations in a live host.
 const VIEWER_FLUSH_MS: u64 = 250;
 
+#[allow(clippy::too_many_lines, clippy::cognitive_complexity)]
 pub fn demo(a: &DemoArgs) -> Result<(), String> {
     if a.https_host.as_deref().is_some_and(|n| n.trim().is_empty()) {
         return Err("--https-host: empty name".to_owned());

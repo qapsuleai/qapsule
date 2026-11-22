@@ -269,6 +269,7 @@ fn day_states(
 }
 
 impl Replay {
+    #[allow(clippy::too_many_lines)]
     /// Builds the replay of `feeds` (any order; kept sorted by key).
     ///
     /// # Errors

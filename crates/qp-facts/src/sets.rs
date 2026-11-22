@@ -29,6 +29,7 @@ pub const SEASON_MIN_DAYS: usize = 5;
 /// least one hour; shorter bars (and daily bars) get exactly the `r3` detections.
 pub const SEASON_MIN_LEN_MS: i64 = 3_600_000;
 
+#[allow(clippy::expect_used)]
 /// (RP4/M26, `docs/CAPSULE.md` §9.9) The `rp4` detector set: the `r3` set
 /// ([`default_detectors`]) in the same order and with the same ids, with
 /// `breakout.range` and `flow.volume_surge` replaced by their seasonal version 2

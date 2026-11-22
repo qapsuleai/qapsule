@@ -14,6 +14,14 @@
 //! cargo run -p qp-session --example make_feed_rule_transcript -- --write
 //! ```
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::data::DataEvent;

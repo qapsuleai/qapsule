@@ -14,17 +14,29 @@ def load(path):
 
 
 def split_exceptions(findings, cfg):
-    """(kept, excepted): findings named in cfg["exceptions"] (rule + item) are excepted."""
+    """(kept, excepted, unused): findings named in cfg["exceptions"] (rule + item) are
+    excepted. An exception with a `max` is a latch (K89): a finding whose value exceeds it is
+    kept, marked with `ceiling`, and `judge` turns it into an error."""
     ex = {(e["rule"], e["item"]): e for e in cfg.get("exceptions", [])}
     kept, excepted = [], []
     for f in findings:
         e = ex.get((f["rule"], f["item"]))
-        if e is not None:
+        if e is not None and "max" in e and f["value"] > e["max"]:
+            kept.append(dict(f, ceiling=e))
+        elif e is not None:
             excepted.append(dict(f, exception=e))
         else:
             kept.append(f)
     unused = [e for k, e in ex.items() if not any((f["rule"], f["item"]) == k for f in findings)]
     return kept, excepted, unused
+
+
+def missing_ceilings(cfg):
+    """A crate.lines exception without a `max` latch is a configuration error (K89)."""
+    return [{"rule": "exception.max", "item": e["item"], "value": 0, "limit": 0,
+             "message": f"exception {e.get('id', '')} crate.lines {e['item']} has no `max`",
+             "why": "a crate.lines exception must carry a ceiling (K89)"}
+            for e in cfg.get("exceptions", []) if e["rule"] == "crate.lines" and "max" not in e]
 
 
 def judge(findings, base, hard_rules):
@@ -39,6 +51,10 @@ def judge(findings, base, hard_rules):
         entry = rules.get(rule, {})
         items = entry.get("items", {})
         for f in fs:
+            if "ceiling" in f:
+                c = f["ceiling"]
+                errors.append(dict(f, why=f"above the exception ceiling {c['max']} ({c.get('id', '')})"))
+                continue
             if rule in hard_rules:
                 errors.append(dict(f, why="hard rule (no baseline)"))
                 continue
@@ -50,9 +66,10 @@ def judge(findings, base, hard_rules):
             else:
                 tolerated.append(f)
         limit = entry.get("count")
-        if limit is not None and rule not in hard_rules and len(fs) > limit:
-            errors.append({"rule": rule, "item": "*", "value": len(fs), "limit": limit,
-                           "message": f"{rule}: {len(fs)} findings > baseline count {limit}",
+        n = sum(1 for f in fs if "ceiling" not in f)
+        if limit is not None and rule not in hard_rules and n > limit:
+            errors.append({"rule": rule, "item": "*", "value": n, "limit": limit,
+                           "message": f"{rule}: {n} findings > baseline count {limit}",
                            "why": "rule count above the baseline"})
     stale = []
     present = {(f["rule"], f["item"]): f["value"] for f in findings}

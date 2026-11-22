@@ -29,7 +29,8 @@ def render(base, cfg):
         for c, o in sorted(ov.items()):
             out.append(f"| {o.get('id', '')} | katman | `{c}` → `{o['layer']}` | {o.get('reason', '')} | {o.get('status', '')} |")
         for e in exc:
-            out.append(f"| {e.get('id', '')} | `{e['rule']}` | `{e['item']}` | {e.get('reason', '')} | {e.get('status', '')} |")
+            cap = f"; tavan {e['max']}" if "max" in e else ""
+            out.append(f"| {e.get('id', '')} | `{e['rule']}` | `{e['item']}` | {e.get('reason', '')} | {e.get('status', '')}{cap} |")
         out.append("")
     rules = base.get("rules", {})
     out += ["## Özet", "", "| Kural | Ne | Hedef | Kalem |", "|---|---|---|---|"]

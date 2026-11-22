@@ -140,6 +140,8 @@
       "id": "İ3",
       "rule": "crate.lines",
       "item": "qp-session",
+      "max": 31999,
+      "max_note": "RG1 sonu değeri (K89: net satır eklenmez)",
       "status": "onaylandı (K85, 2026-11-22)",
       "reason": "23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4)."
     },
@@ -147,6 +149,8 @@
       "id": "İ4",
       "rule": "crate.lines",
       "item": "qp-grammar",
+      "max": 21000,
+      "max_note": "RD2 tavanı (K89)",
       "status": "onaylandı (K85, 2026-11-22)",
       "reason": "Çekirdek ↔ tasarım klasörleri (faces, open, stories, glyph) adla kayıt üstünden döngüsel; döngüsüz kesimlerle bile ≈14,7 bin kalır. Gerçek bölme kaydın enjeksiyona çevrilmesini ister (M4a ölçümü)."
     },
@@ -154,6 +158,8 @@
       "id": "İ5",
       "rule": "crate.lines",
       "item": "qp-capsule",
+      "max": 13230,
+      "max_note": "RG1 sonu değeri",
       "status": "onaylandı (K85, 2026-11-22)",
       "reason": "13,2 bin. voice/ (4,75 bin) saf taşımayla qp-voice crate'ine ayrılabilir, ama alanda iki yeni yan bağımlılık açar (qp-voice → qp-capsule, qp-facts); İ2 kararına bağlı bırakıldı (M4b ölçümü)."
     },
@@ -172,5 +178,5 @@
       "reason": "Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var."
     }
   ],
-  "_exceptions_doc": "Named exceptions approved by Arkin (DECISIONS K85; reasons in rounds/RG1/REPORT.md §4). A finding matching rule+item is printed as an exception on every run instead of failing. Adding or removing one needs a decision row."
+  "_exceptions_doc": "Named exceptions approved by Arkin (DECISIONS K85; reasons in rounds/RG1/REPORT.md §4). A finding matching rule+item is printed as an exception on every run instead of failing. `max` is a latch (K89): a value above it fails; a crate.lines exception must carry one; it may only go down except by a decision row. Adding or removing one needs a decision row."
 }

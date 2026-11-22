@@ -84,7 +84,9 @@ def main(argv):
         print(f"EXCEPTION layer: {o} placed in `{v['layer']}` ({v.get('status', '')}): {v.get('reason', '')}")
     for f in excepted:
         e = f["exception"]
-        print(f"EXCEPTION [{f['rule']}] {f['message']} — {e.get('id', '')} {e.get('status', '')}: {e.get('reason', '')}")
+        cap = f" (ceiling {e['max']})" if "max" in e else ""
+        print(f"EXCEPTION [{f['rule']}] {f['message']}{cap} — {e.get('id', '')} {e.get('status', '')}: {e.get('reason', '')}")
+    errors += bl.missing_ceilings(cfg)
     for e in unused:
         print(f"unused exception (remove it): {e['rule']} {e['item']}")
     by_rule = {}

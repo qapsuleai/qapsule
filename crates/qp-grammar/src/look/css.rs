@@ -91,5 +91,60 @@ pub fn css_vars(look: &Look, scheme: Option<&str>) -> Vec<(String, String)> {
         ("--qp-face-pad".into(), pad(ch.face_pad)),
         ("--qp-face-min-h".into(), px(ch.face_min_h)),
     ]);
+    rd2_vars(look, &t, &mut v);
     v
+}
+
+/// (RD2/S1) The token contract's variables (`docs/design/CONTRACT.md`), appended after
+/// the existing ones: the scene's colour roles, the origin roles and the agent's dash,
+/// the type scale, the figure font, the card's radius and shadow, the profile.
+fn rd2_vars(look: &Look, t: &Theme, v: &mut Vec<(String, String)>) {
+    let px = |x: f64| format!("{x}px");
+    for (name, c) in [
+        ("scene-bg", t.bg),
+        ("scene-text", t.text),
+        ("scene-muted", t.muted),
+        ("surface", t.surface),
+        ("grid", t.grid),
+        ("axis", t.axis),
+        ("up", t.up),
+        ("down", t.down),
+        ("warn", t.warn),
+        ("focus", t.focus),
+        ("neutral", t.neutral),
+        ("valid", t.valid),
+        ("invalid", t.invalid),
+        ("closed", t.closed),
+    ] {
+        v.push((format!("--qp-{name}"), hex(c)));
+    }
+    for (i, c) in t.series.iter().enumerate() {
+        v.push((format!("--qp-s{}", i + 1), hex(*c)));
+    }
+    let o = look.origin_roles(t);
+    v.extend([
+        ("--qp-origin-human".into(), hex(o.human)),
+        ("--qp-origin-agent".into(), hex(o.agent)),
+        ("--qp-origin-engine".into(), hex(o.engine)),
+        (
+            "--qp-agent-dash".into(),
+            look.agent_dash()
+                .map_or_else(|| "none".to_owned(), |[d, g]| format!("{d} {g}")),
+        ),
+    ]);
+    for r in ROLES {
+        if let Some(role) = look.types.role(r) {
+            v.push((format!("--qp-fs-{r}"), px(role.px)));
+        }
+    }
+    let figure = look.role_font("figure");
+    v.extend([
+        (
+            "--qp-font-figure".into(),
+            format!("\"{}\", ui-monospace, monospace", figure.css_family),
+        ),
+        ("--qp-radius-card".into(), px(look.surface.card_radius)),
+        ("--qp-shadow".into(), look.surface.shadow_css.to_owned()),
+        ("--qp-profile".into(), look.profile.name().to_owned()),
+    ]);
 }

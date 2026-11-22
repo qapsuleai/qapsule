@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Value tables of docs/design/CONTRACT.md, generated from the look record (RD2/S1).
+
+  scripts/design-contract            rewrite every generated block in CONTRACT.md
+  scripts/design-contract --check    exit 1 if a committed block differs from the record
+
+A block is the text between `<!-- generated:look=<name> -->` and `<!-- /generated -->`;
+its values come from `qp look show <name>` (crates/qp-grammar/src/look*), never by hand.
+"""
+
+import difflib
+import json
+import os
+import re
+import subprocess
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONTRACT = os.path.join(ROOT, "docs", "design", "CONTRACT.md")
+BLOCK = re.compile(r"(<!-- generated:look=([a-z][a-z0-9_-]*) -->\n)(.*?)(<!-- /generated -->)", re.S)
+
+CHROME = ["bg", "card", "fg", "muted", "line", "control", "page"]
+DATA = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "grid", "axis"]
+ROLES = ["headline", "title", "body", "label", "figure", "note"]
+MEANING = ["up", "down", "warn", "valid", "invalid", "neutral", "closed", "focus"]
+
+
+def show(name):
+    out = subprocess.run(
+        ["cargo", "run", "-q", "--release", "-p", "qp-cli", "--", "look", "show", name],
+        cwd=ROOT, check=True, capture_output=True, text=True).stdout
+    return json.loads(out)
+
+
+def fmt(v):
+    if isinstance(v, bool) or v is None:
+        return json.dumps(v)
+    if isinstance(v, list):
+        return ", ".join(fmt(x) for x in v)
+    return str(v)
+
+
+def table(head, rows):
+    lines = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+    lines += ["| " + " | ".join(fmt(c) for c in r) + " |" for r in rows]
+    return "\n".join(lines)
+
+
+def block(name):
+    lk = show(name)
+    d, l = lk["colors"]["dark"], lk["colors"]["light"]
+    o = lk["origin"]
+    colours = (
+        [(f"`chrome.{k}`", "krom nötr", d["chrome"][k], l["chrome"][k]) for k in CHROME]
+        + [(f"`{k}`", "veri", d[k], l[k]) for k in DATA]
+        + [(f"`{k}`", "anlam", d[k], l[k]) for k in MEANING]
+        + [(f"`origin.{k}`", "köken", o["dark"][k], o["light"][k])
+           for k in ("human", "agent", "engine")]
+    )
+    dash = o["agent_dash"]
+    t, s, sp, ch, mo, ca = (lk["type"], lk["surface"], lk["space"], lk["chrome"],
+                            lk["motion"], lk["chart"])
+    parts = [
+        f"Görünüş `{name}`: profil `{lk['profile']}`, varsayılan düzen `{lk['scheme']}`"
+        + (", köken rolleri türetilmiş." if o["derived"] else "."),
+        "",
+        "#### Renk rolleri",
+        table(["rol", "grup", "koyu", "açık"], colours),
+        "",
+        f"Ajan çizgisinin kesiği: `{' '.join(str(x) for x in dash) if dash else 'none'}`.",
+        "",
+        "#### Tip ölçeği",
+        table(["rol", "px", "satır", "yazı tipi"],
+              [(f"`{r}`", t[r]["px"], t[r]["line"], f"`{t[r]['font']}`") for r in ROLES]),
+        "",
+        "#### Boşluk, yarıçap, kenar",
+        table(["değer", "kayıt"], [
+            ("boşluk ölçeği", sp["scale"]),
+            ("çizim alanı kenarı (sol, sağ, üst, alt)",
+             [sp["plot"][k] for k in ("left", "right", "top", "bottom")]),
+            ("panel arası", sp["panel_gap"]),
+            ("denetim yarıçapı", s["radius"]),
+            ("kart yarıçapı", s["card_radius"]),
+            ("rozet yarıçapı", s["pill_radius"]),
+            ("çizgi kalınlığı", s["line"]),
+            ("gölge", f"`{s['shadow_css']}`"),
+        ]),
+        "",
+        "#### Yoğunluk",
+        table(["değer", "kayıt"], [
+            ("gövde (`--qp-fs`)", ch["text_px"]),
+            ("küçük / tablo / en küçük", [ch["small_px"], ch["table_px"], ch["tiny_px"]]),
+            ("denetim / sekme yüksekliği (0 = içerik)", [ch["control_h"], ch["tab_h"]]),
+        ]),
+        "",
+        "#### Hareket",
+        table(["değer", "kayıt"], [
+            ("süre çarpanı", mo["duration_scale"]),
+            ("eğri", f"`{mo['ease']}`"),
+            ("kabuk geçişi (ms)", mo["chrome_ms"]),
+        ]),
+        "",
+        "#### Grafik",
+        table(["değer", "kayıt"], [(f"`{k}`", ca[k]) for k in ca]),
+        "",
+    ]
+    return "\n".join(parts)
+
+
+def main(argv):
+    check = "--check" in argv
+    with open(CONTRACT, encoding="utf-8") as f:
+        text = f.read()
+    new = BLOCK.sub(lambda m: m.group(1) + block(m.group(2)) + m.group(4), text)
+    if not BLOCK.search(text):
+        print("design-contract: no generated block in docs/design/CONTRACT.md", file=sys.stderr)
+        return 1
+    if check:
+        if new != text:
+            sys.stdout.writelines(difflib.unified_diff(
+                text.splitlines(True), new.splitlines(True), "CONTRACT.md", "generated"))
+            print("design-contract: CONTRACT.md differs from the look record "
+                  "(run scripts/design-contract)", file=sys.stderr)
+            return 1
+        print("design-contract: generated tables equal the look record (difference 0)")
+        return 0
+    with open(CONTRACT, "w", encoding="utf-8") as f:
+        f.write(new)
+    print("design-contract: CONTRACT.md written")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

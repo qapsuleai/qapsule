@@ -103,6 +103,7 @@ pub const ORNEK: Look = Look {
     },
     surface: Surface {
         radius: 12.0,
+        card_radius: 12.0,
         ..R4.surface
     },
     motion: Motion {

@@ -60,6 +60,10 @@
 #  19 arch       RG1 (docs/ENGINEERING.md): scripts/arch-check --self-test (known violations
 #                are caught, the ratchet works) and scripts/arch-check (layers, size budgets,
 #                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json)
+#  20 design     RD2/S1: scripts/design-check: P1–P13 (../refs/reports/VISUAL.md §5) and R5's
+#                hard thresholds for every registered non-legacy look in both schemes (legacy
+#                looks are printed, never failing), and the value tables of
+#                docs/design/CONTRACT.md equal the look record (scripts/design-contract --check)
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -567,6 +571,12 @@ step_arch() {
   note "self-test passes; no error outside the debt baseline"
 }
 
+step_design() {
+  command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/design-contract needs it)"
+  scripts/design-check || fail "design check failed (scripts/design-check)"
+  note "non-legacy looks pass P1-P13 and H1-H3; contract tables equal the look record"
+}
+
 # --- run -------------------------------------------------------------------
 
 total_start=$SECONDS
@@ -589,6 +599,7 @@ run_step replay step_replay
 run_step shell step_shell
 run_step demo step_demo
 run_step arch step_arch
+run_step design step_design
 total=$((SECONDS - total_start))
 
 failed=0

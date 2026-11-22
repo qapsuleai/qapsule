@@ -185,6 +185,8 @@ pub const OLTAN: Look = Look {
         pill_radius: 10.0,
         line: 1.0,
         shadow: false,
+        shadow_css: "none",
+        card_radius: 14.0,
         strip_alpha: 48,
         veil_alpha: 170,
     },
@@ -246,4 +248,7 @@ pub const OLTAN: Look = Look {
         ..R4.story
     },
     open: R4.open,
+    profile: Profile::Legacy,
+    origin: None,
+    chart: ChartLook::legacy(72.0, 32.0),
 };

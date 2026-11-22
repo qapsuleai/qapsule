@@ -7,12 +7,12 @@
 //! ```
 //! Prints one JSON line per configuration; writes PNGs to `target/spikes/`.
 
-#[path = "common/mod.rs"]
-mod common;
+#[path = "measure/mod.rs"]
+mod measure;
 
 use std::time::Instant;
 
-use common::{diff, fnv1a, golden_rgba, median, ms, write_png};
+use measure::{diff, fnv1a, golden_rgba, median, ms, write_png};
 #[path = "../tests/r0/mod.rs"]
 mod r0;
 
@@ -21,7 +21,7 @@ use qp_render::spikes::vello_cpu::{rasterize, Config};
 
 fn main() {
     let t_first = Instant::now();
-    let json = std::fs::read_to_string(common::root().join("fixtures/bars/sample.json")).unwrap();
+    let json = std::fs::read_to_string(measure::root().join("fixtures/bars/sample.json")).unwrap();
     let bars = qp_render::parse_bars(&json).unwrap();
     let (w, h) = (qp_render::DEFAULT_WIDTH, qp_render::DEFAULT_HEIGHT);
     let sample = r0::scene(&bars, w, h);
@@ -33,7 +33,7 @@ fn main() {
     let stress_golden = golden_rgba("stress.png");
     let stress = stress_scene(600, 300);
     // 100k bars without LOD, like the R0 measurement.
-    let big = r0::scene_full(&qp_render::synthetic_bars(100_000, 7), w, h);
+    let big = r0::scene_full(&qp_source::synthetic_series(100_000, 7), w, h);
     let mt = if cfg!(feature = "spike-vello-cpu-mt") {
         std::thread::available_parallelism().map_or(1, |n| n.get().min(8) as u16)
     } else {

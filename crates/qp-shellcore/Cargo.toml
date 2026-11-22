@@ -1,0 +1,30 @@
+[package]
+name = "qp-shellcore"
+description = "Qapsule shell core (ShellCore): the pure-Rust core of the presentation shell over the qp-session replica (scene, paint lists, gallery, viewer, native drive)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+# RP3/M12c: the GPU paint path's glyph atlas (the same fontdue as qp-render, already in
+# the build through it; named here for its `Font` type).
+fontdue = { version = "0.9.5", default-features = false }
+qp-calendar = { path = "../qp-calendar" }
+qp-capsule = { path = "../qp-capsule" }
+qp-grammar = { path = "../qp-grammar" }
+qp-render = { path = "../qp-render" }
+qp-schema = { path = "../qp-schema" }
+qp-session = { path = "../qp-session" }
+qp-source = { path = "../qp-source" }
+# RP3/T4: typed parsing of the large frames (start, data) without a JSON tree.
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# The shell clock (`performance.now()` in `shell.rs`); the same pinned version as qp-wasm.
+wasm-bindgen = "=0.2.130"
+
+[lints]
+workspace = true

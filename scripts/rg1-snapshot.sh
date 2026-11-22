@@ -195,7 +195,7 @@ cargo test -q --workspace -- --list 2>/dev/null | grep ': test$' >"$priv/tests.l
 sed -E 's/: test$//; s/.*:://' "$priv/tests.list" | LC_ALL=C sort >"$priv/tests.all"
 allow="rounds/RG1/experiments/new-tests.txt"
 if [ -f "$allow" ]; then
-  grep -v '^#' "$allow" | sed '/^$/d' | LC_ALL=C sort >"$priv/allow"
+  { grep -v '^#' "$allow" || true; } | sed '/^$/d' | LC_ALL=C sort >"$priv/allow"
   missing="$(LC_ALL=C comm -23 "$priv/allow" <(LC_ALL=C sort -u "$priv/tests.all"))"
   [ -z "$missing" ] || { echo "new-tests.txt names missing tests: $missing" >&2; echo "MISSING: $missing" >"$out/tests.allow-missing"; }
   python3 - "$priv/tests.all" "$priv/allow" >"$out/tests.names" <<'PY'

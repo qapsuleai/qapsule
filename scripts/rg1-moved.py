@@ -30,8 +30,9 @@ sys.path.insert(0, HERE)
 from archcheck import rustscan as rs  # noqa: E402
 
 VIS = re.compile(r"^pub(\((crate|super|self|in [^)]*)\))?\s+")
+VIS_INLINE = re.compile(r"(?<![A-Za-z0-9_])pub(\((crate|super|self|in [^)]*)\))?\s*(?=[A-Za-z_])")
 ITEM = re.compile(
-    r"\b(fn|struct|enum|union|trait|type|const|static|macro_rules!)(?:\s+|(?<=!)\s*)([A-Za-z_][A-Za-z0-9_]*)?")
+    r"(?<!')\b(fn|struct|enum|union|trait|type|const|static|macro_rules!)(?:\s+|(?<=!)\s*)([A-Za-z_][A-Za-z0-9_]*)?")
 PATH = re.compile(r"\b((?:crate|super|self|[a-z_][a-z0-9_]*)::)+(?=[A-Za-z_{*])")
 ALLOW = re.compile(r"^#\[allow\(clippy::[a-z_]+(,\s*clippy::[a-z_]+)*\)\]$")
 
@@ -52,12 +53,18 @@ def show(rev, path):
 
 
 def norm(text):
+    """Trimmed lines without leading visibility; then rustfmt's re-wrapping is undone:
+    whitespace collapsed, no space next to brackets, no trailing comma before a closer."""
     out = []
     for line in text.split("\n"):
         s = VIS.sub("", line.strip())
         if s:
             out.append(s)
-    return "\n".join(out)
+    t = " ".join(out)
+    t = re.sub(r"\s+", " ", t)
+    t = re.sub(r"\s*([()\[\]{}<>,;])\s*", r"\1", t)
+    t = re.sub(r",([)\]}>])", r"\1", t)
+    return VIS_INLINE.sub("", t)
 
 
 def items(src):

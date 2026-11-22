@@ -19,7 +19,7 @@ dosyayı değiştirme, commit etme, birleştirme. Yalnız ölç ve hüküm ver.
    (`rounds/RG1/experiments/baseline/text/tests.count`, 1164; ad listesi
    `text/tests.names` — `cargo test --workspace -q -- --list 2>/dev/null | grep ': test$' | sed -E 's/: test$//; s/.*:://' | sort | diff - rounds/RG1/experiments/baseline/text/tests.names`).
 4. `scripts/rg1-compare.sh` → "225 items byte-identical".
-5. `python3 scripts/rg1-moved.py $(git merge-base main HEAD) HEAD --list` → CHANGED 0; PATH,
+5. `python3 /Users/arkns/Works/Mchart/qapsule/scripts/rg1-moved.py $(git merge-base main HEAD) HEAD --list` (ana ağaçtaki **güncel** sürüm; cwd denetlenen worktree) → CHANGED 0; PATH,
    ALLOW ve izinli CHANGED kalemlerinin (planın §13'ünde ve görev metninde adıyla izin verilenler)
    her birine tek tek bak: gerçekten yalnız yol mu, izinli mi?
 6. `scripts/arch-check --json` → görevin crate(ler)inde `file.hard` (istisna isteği olarak

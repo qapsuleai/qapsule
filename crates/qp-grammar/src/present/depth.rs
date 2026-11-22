@@ -39,7 +39,7 @@ pub use opening::{
 };
 
 /// Bars shown before the fact bar in the chart view.
-pub const CHART_LOOKBACK: u64 = 30;
+pub const CHART_LOOKBACK: u64 = qp_schema::params::system::DEPTH_CHART_LOOKBACK_BARS.default_u64();
 
 /// What the presenter shows for a finding at one depth.
 #[derive(Debug, Clone, PartialEq)]
@@ -412,4 +412,13 @@ pub fn face_view_in(
 #[must_use]
 pub fn story_design(name: Option<&str>) -> Option<&'static crate::stories::StoryDesign> {
     crate::stories::by_name(name)
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn chart_lookback_binds_registry() {
+        assert_eq!(super::CHART_LOOKBACK, 30);
+    }
 }

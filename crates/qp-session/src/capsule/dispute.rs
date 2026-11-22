@@ -43,13 +43,13 @@ use crate::session::{out, Session};
 use crate::values::{bar_series, condition_series, Delta};
 
 /// At most this many open disputes per connection (further ones: `limited`).
-pub const MAX_OPEN: usize = 16;
+pub const MAX_OPEN: usize = qp_schema::params::system::DISPUTE_MAX_OPEN_PER_CONN.default_usize();
 /// At most this many disputes accepted per connection over its life (further ones:
 /// `limited`); bounds the idempotence record.
-pub const MAX_PER_CONN: usize = 256;
+pub const MAX_PER_CONN: usize = qp_schema::params::system::DISPUTE_MAX_PER_CONN.default_usize();
 /// At most this many different digests per (connection, claim, `t`) (further ones:
 /// `limited`).
-pub const MAX_DIGESTS: usize = 4;
+pub const MAX_DIGESTS: usize = qp_schema::params::system::DISPUTE_MAX_DIGESTS.default_usize();
 
 /// A digest is exactly 16 lowercase hex digits (`data_digest`).
 fn valid_digest(d: &str) -> bool {
@@ -742,5 +742,16 @@ impl Session {
             }
         }
         out
+    }
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn dispute_limits_bind_registry() {
+        assert_eq!(super::MAX_OPEN, 16);
+        assert_eq!(super::MAX_PER_CONN, 256);
+        assert_eq!(super::MAX_DIGESTS, 4);
     }
 }

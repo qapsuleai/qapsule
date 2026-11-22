@@ -30,7 +30,7 @@ use crate::session::Session;
 const GP: &str = "/gesture";
 
 /// (R5/M18) Fewest bars a story cluster's tap shows.
-const STORY_ZOOM_MIN: u64 = 20;
+const STORY_ZOOM_MIN: u64 = qp_schema::params::system::GESTURE_STORY_ZOOM_MIN_BARS.default_u64();
 
 /// Default height of a capsule face in the feed when the surface reports none.
 pub const FACE_HEIGHT: u32 = 140;
@@ -691,4 +691,13 @@ struct Out {
     at: Option<qp_schema::protocol::AtBar>,
     viewport: Option<Viewport>,
     opening: Option<Box<Opening>>,
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn story_zoom_min_binds_registry() {
+        assert_eq!(super::STORY_ZOOM_MIN, 20);
+    }
 }

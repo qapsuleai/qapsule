@@ -14,12 +14,12 @@ use crate::frame::{Column, Frame, Row};
 use crate::provider::SeriesKind;
 use crate::theme::with_opacity;
 
-mod constants;
 mod prepare;
+mod resolve;
 mod rows;
 
-use constants::resolve_constants;
 pub(crate) use prepare::prepare;
+use resolve::resolve_constants;
 use rows::{pair_rows, series_rows, text_field_of, RowAgg};
 
 /// What a layer draws.

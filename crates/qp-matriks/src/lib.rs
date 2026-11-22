@@ -29,11 +29,10 @@
 /// (`TimeMessage`, `DepthStatsMessage`, `QStatus`, `ViopAgentListMessage`)
 /// carry no presence: absent and default look the same.
 #[allow(missing_docs, clippy::all, clippy::pedantic, rustdoc::all)]
-pub mod messages {
-    include!(concat!(env!("OUT_DIR"), "/messages.rs"));
-}
+pub mod messages;
 
 pub mod clock;
+mod error;
 pub mod feed;
 pub mod fields;
 pub mod notice;
@@ -45,6 +44,7 @@ pub mod trade;
 pub mod wire;
 
 pub use clock::{decode_time, ClockEvent, MarketClock, TimeTick};
+pub use error::DecodeError;
 pub use feed::{
     parse_update_date, ConnChange, FeedOut, FeedSource, FeedStats, LiveFeed, LiveFeedConfig,
     TimeSource, TradeFeedConfig, TradeFeedStats, TradeGap, VolumeField,
@@ -63,35 +63,3 @@ pub use trade::{
     TradeDecodeConfig, TradeError, TradeHistory, TradeKey, TradeRawView, TradeTimeUnit,
     TRADE_FIELDS,
 };
-
-/// Decoding error for a Matriks payload.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum DecodeError {
-    /// The payload is not valid protobuf wire format.
-    Wire(wire::WireError),
-    /// prost could not decode the payload into the expected message.
-    Proto(String),
-}
-
-impl std::fmt::Display for DecodeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            DecodeError::Wire(e) => write!(f, "wire format: {e}"),
-            DecodeError::Proto(e) => write!(f, "protobuf decode: {e}"),
-        }
-    }
-}
-
-impl std::error::Error for DecodeError {}
-
-impl From<wire::WireError> for DecodeError {
-    fn from(e: wire::WireError) -> Self {
-        DecodeError::Wire(e)
-    }
-}
-
-impl From<prost::DecodeError> for DecodeError {
-    fn from(e: prost::DecodeError) -> Self {
-        DecodeError::Proto(e.to_string())
-    }
-}

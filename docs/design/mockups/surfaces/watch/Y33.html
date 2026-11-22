@@ -1,0 +1,161 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y33 — Tutma yüzdesi ve sicil. Kademe 1: on bir durum; iki profil.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y33 Tutma yüzdesi ve sicil</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y33</span>Tutma yüzdesi, taban oran, düşük güven; canlı ↔ yeniden oynatma</h1>
+  <p>Bir iddianın sicili: tutma yüzdesi, taban oran, örnek sayısı, aralık. <b>n &lt; 20: yüzde gizli, sayı görünür.</b> Canlı ve yeniden oynatma hiçbir toplamda karışmaz; yeniden oynatma “simüle” etiketli. Yüzde büyük başlık olmaz, yön rengi almaz.</p>
+  <div class="facts"><span class="chip">Kademe 1</span><span class="chip">K75</span><span class="chip">K77</span><span class="chip">K86</span><span class="chip">11 / 11 durum</span><span class="chip">ledger.md · Y33</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Kapsül yüzünde satır</span><span class="k">Tutma %64 (n = 42)</span></li><li><span>Dokun</span><span class="k">sicil bölümü: canlı, simüle</span></li><li><span>Son 10 kayıt</span><span class="k">tarih · ● / ○</span></li><li><span>Kayda dokun</span><span class="k">zaman gezintisi (Y34)</span></li></ol>
+<section class="profile desk" aria-label="Masaüstü"><h2>Masaüstü <span class="note">tavek · kapsül yüzü 360 px · açık sicil bölümü 560 px</span></h2>
+<h3 class="block-h">Ana durum: açılmış kapsülün sicil bölümü</h3><div class="desk-frame" style="width: calc(560px + 2 * var(--m-rule))"><div class="detail">
+<section><div class="d-title"><div class="top"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div><h2>120,00 kırılımı tutunur (3 bar, günlük)</h2><div class="meta"><span>Kanıt penceresi grafikte işaretli · 11–15 Eyl</span></div></div></section>
+<section><h3>Sicil <span class="grow"></span><span class="note">eşik n ≥ 20 · <u>varsayılan</u></span></h3>
+<div class="ledger" style="padding: 0"><div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div class="lrow simrow"><span class="lbl">Simüle</span><span>Yeniden oynatma · simüle: tutma</span><span class="plain">%58</span><span class="plain">(n = 310)</span></div></div>
+<p class="note" style="margin-top: var(--qp-space-1)">Canlı ve simüle hiçbir toplamda karışmaz.</p></section>
+<section><h3>Son kayıtlar <span class="grow"></span><span class="dots"><span class="h">●</span><span class="m">○</span><span class="h">●●</span><span class="m">○</span><span class="h">●</span></span><span class="note">Tümü · 42</span></h3><div class="rec"><span class="plain muted">15 Eyl</span><span>3/3 bar · 120,00</span><span><span class="ws r-valid"><i>●</i>Tuttu</span></span></div><div class="rec"><span class="plain muted">18 Eyl</span><span>3. barda geri döndü</span><span><span class="ws r-invalid"><i>○</i>Tutmadı</span></span></div><div class="rec"><span class="plain muted">02 Eyl</span><span>3/3 bar</span><span><span class="ws r-valid"><i>●</i>Tuttu</span></span></div><div class="rec"><span class="plain muted">21 Ağu</span><span>3/3 bar</span><span><span class="ws r-valid"><i>●</i>Tuttu</span></span></div><div class="rec"><span class="plain muted">06 Ağu</span><span>2. barda</span><span><span class="ws r-invalid"><i>○</i>Tutmadı</span></span></div><div class="rec"><span class="plain muted">24 Tem</span><span>3/3 bar</span><span><span class="ws r-valid"><i>●</i>Tuttu</span></span></div></section>
+<section><h3>Ajanın cümlesi</h3><p class="edge-agent" style="padding-left: var(--qp-space-2); font-size: var(--m-fs-label)">Bu kalıp canlı sicilde <span class="fig">42</span> kez görüldü; tutma <span class="fig">%64</span>, taban oran <span class="fig">%51</span>. <span class="note">sayılar motor cümlesinden (A61)</span></p></section>
+<section><p class="disclaimer">Sinyal, tavsiye değil</p></section></div></div><h3 class="block-h">Durumlar (kapsül yüzündeki tek satır)</h3><div class="states">
+<figure class="state "><figcaption><span class="n">1</span><b>Canlı, yeterli örnek (n ≥ 20)</b><code>--fg · tablo rakamı</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">2</span><b>Az örnek (n < 20)</b><code>yüzde gizli · K75</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>DNZ30 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>Hacim patlaması sonrası devam</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span class="r-warn">Düşük güven</span><span class="muted">· az örnek:</span><span class="plain">12</span><span>kayıttan</span><span class="plain">8'i</span><span>tuttu</span></div><p class="note">Yüzde 20 kayıttan sonra görünür · eşik <u>varsayılan</u> (Y37)</p>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">3</span><b>Taban orandan ayrışmıyor</b><code>A54 · A57</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>KRM12 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>Destek altında zayıflama</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span class="r-warn">Düşük güven</span><span class="muted">· taban orandan ayrışmıyor</span><span class="fig">(%52 / %51)</span></div><p class="note">Elinde tuttuğun hissede olumsuz: bildirildi (Y12)</p>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">4</span><b>Örnek yok</b><code>--muted</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>Üçlü tepe sonrası kırılım</h3>
+  <p class="muted">Bu kalıp için henüz sicil yok</p>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">5</span><b>Sonuç kuralı yok</b><code>--muted</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin human">İzleme</span><span>SYN20 · Sen</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>Not: “bunun altı zayıflık”</h3>
+  <p class="muted">Puanlanmıyor: sonuç kuralı yok</p>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">6</span><b>Açık kayıt</b><code>--muted</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div><div class="rec"><span class="plain muted">15 Eyl</span><span>120,00 · 2/3 bar</span><span><span class="ws r-muted"><i>◐</i>Açık · sonuç 3 bar içinde</span></span></div></div>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">7</span><b>Kapandı: tuttu / tutmadı</b><code>dolu ● / boş ○</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div><div class="rec"><span class="plain muted">15 Eyl</span><span>3/3 bar</span><span><span class="ws r-valid"><i>●</i>Tuttu</span></span></div><div class="rec"><span class="plain muted">18 Eyl</span><span>125,00 · 3. barda geri döndü</span><span><span class="ws r-invalid"><i>○</i>Tutmadı</span></span></div></div>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">8</span><b>Yeniden oynatma (simüle)</b><code>--note-bg · ayrı satır</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div class="lrow simrow"><span class="lbl">Simüle</span><span>Yeniden oynatma · simüle: tutma</span><span class="plain">%58</span><span class="plain">(n = 310)</span></div><p class="note">Canlı ve simüle toplanmaz; sıralama yalnız canlı kayıtla.</p>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">9</span><b>Yalnız simüle var</b><code>--muted + --note-fg</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span class="muted">Canlı kayıt yok</span></div><div class="lrow simrow"><span class="lbl">Simüle</span><span>Yeniden oynatma · simüle: tutma</span><span class="plain">%58</span><span class="plain">(n = 310)</span></div>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">10</span><b>Kurumsal işlem sonrası</b><code>K88</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div><div class="rec"><span class="plain muted">23 Kas</span><span>56,20 · 1/3 bar</span><span><span class="ws r-muted"><i>◐</i>Açık · sonuç 3 bar içinde</span></span></div></div><p class="note">Düzeyler 1:2 bölünmeyle taşındı</p>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">11</span><b>Yetki yok</b><code>D-yetkiyok</code></figcaption>
+<div class="surface w-panel edge-engine-top"><div class="capface">
+  <div class="head"><span class="origin engine">Kapsül</span><span>SYN20 · günlük · Motor</span><span class="grow"></span><span class="on-chart">Grafikte</span></div>
+  <h3>120,00 kırılımı tutunur (3 bar, günlük)</h3>
+  <p class="muted">Kilitli · Sicil var: 42 kayıt · görmek için BIST seviye 1</p><span class="btn" style="align-self:flex-start">Yetkiyi gör</span>
+  <p class="disclaimer">Sinyal, tavsiye değil</p>
+</div></div>
+</figure>
+</div>
+</section>
+<section class="profile tel-only" aria-label="Telefon"><h2>Telefon <span class="note">tavek-tel · alt sayfada iki satır (canlı, simüle); kayıtlar “Tümü” arkasında; “düşük güven” kısaltılmaz</span></h2>
+<div class="states">
+<figure class="state "><figcaption><span class="n">1</span><b>Canlı, yeterli örnek</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">2</span><b>Az örnek (n < 20)</b><code>yüzde gizli</code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span class="r-warn">Düşük güven</span><span class="muted">· az örnek:</span><span>12 kayıttan 8'i tuttu</span></div><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">3</span><b>Taban orandan ayrışmıyor</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span class="r-warn">Düşük güven</span><span class="muted">· taban orandan ayrışmıyor</span><span class="fig">(%52 / %51)</span></div><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">4</span><b>Örnek yok</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><p class="muted">Bu kalıp için henüz sicil yok</p><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">5</span><b>Sonuç kuralı yok</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><p class="muted">Puanlanmıyor: sonuç kuralı yok</p><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">6</span><b>Açık kayıt</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div class="rec"><span class="plain muted">15 Eyl</span><span></span><span><span class="ws r-muted"><i>◐</i>Açık · sonuç 3 bar içinde</span></span></div><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">7</span><b>Kapandı: tuttu / tutmadı</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div class="rec"><span class="plain muted">15 Eyl</span><span>3/3</span><span><span class="ws r-valid"><i>●</i>Tuttu</span></span></div><div class="rec"><span class="plain muted">18 Eyl</span><span>3. bar</span><span><span class="ws r-invalid"><i>○</i>Tutmadı</span></span></div><p class="note">Tümü · 42 kayıt ›</p><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">8</span><b>Yeniden oynatma (simüle)</b><code>iki satır</code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><div class="lrow simrow"><span class="lbl">Simüle</span><span>Yeniden oynatma · simüle: tutma</span><span class="plain">%58</span><span class="plain">(n = 310)</span></div><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">9</span><b>Yalnız simüle var</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span class="muted">Canlı kayıt yok</span></div><div class="lrow simrow"><span class="lbl">Simüle</span><span>Yeniden oynatma · simüle: tutma</span><span class="plain">%58</span><span class="plain">(n = 310)</span></div><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">10</span><b>Kurumsal işlem sonrası</b><code>K88</code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><div class="lrow "><span class="lbl">Canlı</span><span>Tutma</span><span class="fig">%64</span><span class="plain muted">(n = 42, %49–77)</span><span class="muted">·</span><span>taban</span><span class="fig">%51</span></div><p class="note">Düzeyler 1:2 bölünmeyle taşındı</p><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+<figure class="state "><figcaption><span class="n">11</span><b>Yetki yok</b><code></code></figcaption>
+<div class="frame phone tel part "><div class="sheet-b" style="margin-top:0"><h3>120,00 kırılımı tutunur (3 bar, günlük)</h3><p class="muted">Sicil var: 42 kayıt · görmek için BIST seviye 1</p><p class="disclaimer">Sinyal, tavsiye değil</p><div class="actions"><span class="btn">İzle</span><span class="btn primary">Grafikte göster</span></div></div></div>
+</figure>
+</div>
+</section>
+</body>
+</html>

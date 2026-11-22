@@ -1,0 +1,1775 @@
+/* RD2 M2/M3 — watch group (Y07, Y08, Y20, Y21, Y26, Y31–Y36): state sheets.
+ *
+ * Layering: _base/base.css → _base/phone.css → tavek/tavek.css → this file.
+ * One page = one surface. `?look=tavek` shows the desktop section (dense), `?look=tavek-tel`
+ * the phone section (390 px frames, 44 px targets); the look's variables decide the sizes.
+ * Every value is a var(--…) from `qp look css`; the only px literals are frame geometry
+ * (marked "frame"). No colour codes. Specification, not product code. */
+
+/* ---- Profile switch: the look picks the section ---------------------------------- */
+html[data-look="tavek-tel"] .desk,
+html:not([data-look="tavek-tel"]) .tel-only {
+  display: none;
+}
+
+/* Health "izleniyor" is the ink role in the spec (watch.md Y31), not the price-up hue. */
+.health.ok {
+  background: var(--m-fg);
+}
+
+.health.failed {
+  background: var(--m-alert-fg);
+}
+
+/* ---- Sheet: header, profile sections, labelled state frames ---------------------- */
+.sheet {
+  min-height: 100vh;
+  padding: var(--qp-space-5);
+  background: var(--m-page);
+}
+
+.sheet-h {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--qp-space-1) var(--qp-space-4);
+  align-items: end;
+  padding-bottom: var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.sheet-h h1 {
+  font-size: var(--m-fs-headline);
+  font-weight: var(--qp-head-weight);
+}
+
+.sheet-h h1 .id {
+  font-family: var(--m-font-figure);
+  color: var(--m-muted);
+  font-weight: normal;
+  margin-right: var(--qp-space-1);
+}
+
+.sheet-h p {
+  grid-column: 1;
+  max-width: 72ch;
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+.sheet-h .facts {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-1);
+  justify-content: flex-end;
+  max-width: 44ch;
+}
+
+.profile {
+  margin-top: var(--qp-space-4);
+}
+
+.profile > h2,
+.block-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-2);
+  margin-bottom: var(--qp-space-3);
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+}
+
+.profile > h2 .note,
+.block-h .note {
+  font-weight: normal;
+}
+
+.block-h {
+  margin-top: var(--qp-space-4);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-4) var(--qp-space-4);
+  align-items: flex-start;
+}
+
+.state {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+.state > figcaption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+  max-width: var(--cap-w, none);
+}
+
+.state > figcaption .n {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  min-width: 2ch;
+}
+
+.state > figcaption b {
+  font-weight: var(--qp-head-weight);
+}
+
+.state > figcaption code {
+  margin-left: auto;
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+/* The surface under test: the panel role, one hairline, the card radius. */
+.surface {
+  position: relative;
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+/* Frame widths (frame): desktop side column 256, side detail panel 360, chart cell 560
+   inside its two hairlines; phone viewport 390 (chart slot 388 inside the hairlines). */
+.w-side { width: 256px; }
+.w-panel { width: 360px; }
+.w-wide { width: calc(560px + 2 * var(--m-rule)); }
+.w-full { width: 100%; }
+.tel { width: 390px; }
+
+/* Desktop composition frames (main state in context): fixed comparison sizes (frame). */
+.desk-frame {
+  position: relative;
+  display: grid;
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  overflow: hidden;
+}
+
+/* ---- Flow strip: the surface's path, step by step (SURFACES "Akış kuralları") ----- */
+.flow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--qp-space-4);
+  counter-reset: step;
+}
+
+.flow > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  padding: var(--qp-space-2);
+  background: var(--m-panel);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  font-size: var(--m-fs-label);
+  counter-increment: step;
+}
+
+.flow > li::before {
+  content: counter(step);
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.flow > li + li::after {
+  content: "→";
+  position: absolute;
+  left: calc(var(--qp-space-4) * -1);
+  width: var(--qp-space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  color: var(--m-muted);
+}
+
+.flow > li .note {
+  display: block;
+}
+
+.flow > li .k {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* ---- Role words: shape + word, colour third ------------------------------------- */
+.r-fg { color: var(--m-fg); }
+.r-muted { color: var(--m-muted); }
+.r-valid { color: var(--qp-valid); }
+.r-invalid { color: var(--qp-invalid); }
+.r-warn { color: var(--m-warn); }
+.r-closed { color: var(--qp-closed); }
+.r-agent { color: var(--m-agent); }
+.r-engine { color: var(--m-engine); }
+.r-accent { color: var(--m-accent); }
+
+/* A lifecycle state: glyph (İ-* shape) then the word. */
+.ws {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--qp-space-0);
+  white-space: nowrap;
+}
+
+.ws > i {
+  font-style: normal;
+  font-family: var(--m-font-figure);
+  min-width: 1.1em;
+  text-align: center;
+}
+
+.ws.strong {
+  font-weight: var(--qp-head-weight);
+}
+
+/* Simulated: the note band word in front (D-simüle). */
+.sim {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+.band-sim {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+  font-size: var(--m-fs-note);
+}
+
+/* The one persistent strip (D-koptu, health failed). */
+.alert-strip {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  background: var(--m-alert-bg);
+  color: var(--m-alert-fg);
+  font-size: var(--m-fs-label);
+}
+
+.alert-strip .more {
+  margin-left: auto;
+  text-decoration: underline;
+  text-underline-offset: var(--qp-space-0);
+  white-space: nowrap;
+}
+
+.warn-strip {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  color: var(--m-warn);
+  font-size: var(--m-fs-label);
+}
+
+.warn-strip .muted {
+  color: var(--m-muted);
+}
+
+/* Pills: filters (accent only for the selection). */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-0);
+  padding: 0 var(--qp-space-3) var(--qp-space-1);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+  padding: var(--qp-badge-pad);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.pill.on {
+  color: var(--m-accent);
+  border-color: var(--m-accent);
+}
+
+.pill .x {
+  color: var(--m-muted);
+}
+
+/* Small counters in a heading. */
+.count {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.count.warn {
+  color: var(--m-warn);
+}
+
+/* Heading row of a panel: title, counter, small actions. */
+.pane-h {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-1);
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+}
+
+.pane-h .grow {
+  flex: 1;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--m-control-h);
+  min-height: var(--m-control-h);
+  border-radius: var(--m-radius-control);
+  color: var(--m-muted);
+  font-weight: normal;
+  font-size: var(--m-fs-label);
+}
+
+.icon-btn.on {
+  color: var(--m-fg);
+  border: var(--m-rule) solid var(--m-line);
+}
+
+/* ---- Watch task rows (Y07): two lines, origin stroke on the leading edge ---------- */
+.tasks {
+  display: flex;
+  flex-direction: column;
+}
+
+.task2 {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--qp-space-1);
+  row-gap: var(--m-rule);
+  margin-left: var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3) var(--qp-space-1) var(--qp-space-2);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.task2:first-child {
+  border-top-color: transparent;
+}
+
+.task2 .sel {
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border: var(--m-rule) solid var(--m-muted);
+  border-radius: var(--m-rule);
+}
+
+.task2 .sel.on {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+  box-shadow: inset 0 0 0 calc(var(--m-rule) * 2) var(--m-panel);
+}
+
+.task2 .l1,
+.task2 .l2 {
+  grid-column: 2;
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  min-width: 0;
+}
+
+.task2:not(.pick) .l1,
+.task2:not(.pick) .l2 {
+  grid-column: 1 / -1;
+}
+
+.task2 .l1 {
+  font-size: var(--m-fs-label);
+}
+
+.task2 .l1 .sym {
+  font-weight: var(--qp-head-weight);
+  flex: none;
+}
+
+.task2 .l1 .cond {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task2 .l2 {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.task2 .l2 .end {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-0);
+}
+
+.task2 .l2 .end .health {
+  width: var(--qp-space-1);
+  height: var(--qp-space-1);
+}
+
+.task2.hot {
+  background: var(--m-card);
+}
+
+/* The row that just changed: one highlight, then it rises to the top (Y07 Akış). */
+.task2.changed {
+  background: color-mix(in srgb, var(--m-accent) 10%, var(--m-panel));
+}
+
+.task2.hover {
+  background: var(--m-card);
+  box-shadow: inset 0 0 0 var(--m-rule) var(--m-line);
+}
+
+.task2.edge-human,
+.task2.edge-agent,
+.task2.edge-engine {
+  margin-left: var(--qp-space-2);
+}
+
+.src {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+/* Bulk bar under the list (Y07 Toplu işlem). */
+.bulk {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  background: var(--m-card);
+  font-size: var(--m-fs-label);
+}
+
+.bulk .grow {
+  flex: 1;
+}
+
+.bulk .btn {
+  min-height: calc(var(--m-control-h) - var(--qp-space-0));
+  padding: 0 var(--qp-space-2);
+}
+
+/* Empty state (O-boş): one line why + one next step; no illustration. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-3);
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+.empty .btn.primary {
+  font-size: var(--m-fs-label);
+}
+
+/* Skeleton rows (O-yükleniyor). */
+.skel {
+  display: block;
+  height: var(--qp-space-1);
+  border-radius: var(--m-rule);
+  background: var(--m-line);
+}
+
+/* ---- Status/health line (Y25 slice) --------------------------------------------- */
+.statusline {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-3);
+  padding: var(--qp-space-0) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.statusline .grow {
+  flex: 1;
+}
+
+.statusline .it {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+/* ---- Chart cell slice: toolbar + core chart + overlay ----------------------------- */
+.cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.cell-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+}
+
+.cell-bar .instr {
+  font-weight: var(--qp-head-weight);
+}
+
+.cell-bar .grow {
+  flex: 1;
+}
+
+/* Chart slot heights (frame): a 560-wide cell at 300, a phone chart at 240. */
+.cell .chart-slot {
+  height: 300px;
+}
+
+.tel .chart-slot.c-tel {
+  height: 240px;
+}
+
+/* A notch on the break bar: the engine's finding (dotted thin frame, Y32 Köken). */
+.notch {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--qp-space-0);
+  height: var(--qp-space-3);
+  transform: translate(-50%, -50%);
+  border: var(--m-rule) dotted var(--m-engine);
+  background: var(--m-human);
+}
+
+.notch.hollow {
+  background: var(--m-chart-bg);
+  border: var(--m-rule) solid var(--m-human);
+}
+
+.notch.inter {
+  background: var(--m-chart-bg);
+  border: var(--m-rule) dashed var(--m-human);
+  height: var(--qp-space-2);
+}
+
+/* The open (last) bar column: the open bar does not change state (K73). */
+.openbar {
+  position: absolute;
+  left: var(--x);
+  width: var(--w, var(--qp-space-1));
+  top: 0;
+  bottom: var(--t-time-h);
+  border-left: var(--m-rule) dashed var(--m-muted);
+  border-right: var(--m-rule) dashed var(--m-muted);
+  background: color-mix(in srgb, var(--m-muted) 8%, transparent);
+}
+
+/* Faded watch level (returned, evaluation frozen, on hold). */
+.overlay .watch.faded {
+  opacity: 0.3;
+}
+
+.overlay .watch.ghost {
+  stroke-dasharray: 2 4;
+  opacity: 0.35;
+}
+
+/* Silent bell (Y31): hollow, muted, ≤ chart.mark_max_px; the system speaks, no origin. */
+.bell {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(-50%, calc(-100% - var(--qp-space-0)));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--qp-space-3);
+  height: var(--qp-space-3);
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+  opacity: 0.8;
+}
+
+.bell svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.bell.hover {
+  color: var(--m-fg);
+  opacity: 1;
+  outline: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  background: var(--m-card);
+}
+
+/* Floating explanation card (Y31 hover). */
+.tip {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--tip-w, 32ch);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-2);
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+  pointer-events: auto;
+}
+
+.tip .actions {
+  justify-content: flex-start;
+}
+
+.tip .btn {
+  min-height: calc(var(--m-control-h) - var(--qp-space-0));
+  padding: 0 var(--qp-space-2);
+}
+
+/* ---- Detail panel (Y08, Y35): sections divided by hairlines, no box in a box ------- */
+.detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail > section {
+  padding: var(--qp-space-2) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.detail > section:first-child {
+  border-top: none;
+}
+
+.detail h3 {
+  font-size: var(--m-fs-note);
+  font-weight: var(--qp-head-weight);
+  color: var(--m-muted);
+  margin-bottom: var(--qp-space-1);
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+}
+
+.detail h3 .grow {
+  flex: 1;
+}
+
+.d-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+}
+
+.d-title .top {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.d-title .top .grow {
+  flex: 1;
+}
+
+.d-title h2 {
+  font-size: var(--m-fs-title);
+  font-weight: var(--qp-head-weight);
+  line-height: 1.3;
+}
+
+.d-title .meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--qp-space-1) var(--qp-space-2);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Status pill: shape + word, hairline in the role colour. */
+.spill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--qp-space-0);
+  padding: 0 var(--qp-space-1);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) solid currentColor;
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+/* Key–value rows (condition parts). */
+.kv {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--qp-space-0) var(--qp-space-2);
+  font-size: var(--m-fs-label);
+  align-items: baseline;
+}
+
+.kv dt {
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+}
+
+.kv dd {
+  margin: 0;
+}
+
+.kv .src {
+  text-align: right;
+}
+
+.kv .agentfield {
+  outline: var(--m-rule) dashed var(--m-agent);
+  outline-offset: var(--m-rule);
+  border-radius: var(--m-rule);
+}
+
+/* Origin trail: three origins in order, each with its own stroke. */
+.trail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-label);
+}
+
+.trail li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  padding-left: var(--qp-space-2);
+}
+
+.trail li .when {
+  margin-left: auto;
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* Event history: time column, sentence, evidence link. */
+.events {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--m-fs-label);
+}
+
+.events li {
+  display: grid;
+  grid-template-columns: 6ch minmax(0, 1fr) auto;
+  gap: var(--qp-space-2);
+  align-items: baseline;
+  padding: var(--qp-space-0) 0;
+}
+
+.events li .t {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.events li .ev {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  text-decoration: underline dotted;
+  text-underline-offset: var(--qp-space-0);
+}
+
+.events .sub {
+  margin-top: var(--qp-space-1);
+  padding-top: var(--qp-space-1);
+  border-top: var(--m-rule) dashed var(--m-line);
+}
+
+/* Evidence-linked engine figure: dotted underline (Y33 Köken). */
+.fig {
+  font-family: var(--m-font-figure);
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline dotted var(--m-engine);
+  text-underline-offset: var(--qp-space-0);
+}
+
+.plain {
+  font-family: var(--m-font-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.disclaimer {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* ---- Ledger rows (Y33) ---------------------------------------------------------- */
+.ledger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-2) var(--qp-space-3);
+  font-size: var(--m-fs-label);
+}
+
+.lrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--qp-space-0) var(--qp-space-1);
+}
+
+.lrow .lbl {
+  color: var(--m-muted);
+  font-size: var(--m-fs-note);
+  min-width: 7ch;
+}
+
+.lrow.simrow {
+  padding: var(--qp-space-0) var(--qp-space-1);
+  margin: 0 calc(var(--qp-space-1) * -1);
+  border-radius: var(--m-radius-control);
+  background: var(--m-note-bg);
+  color: var(--m-note-fg);
+}
+
+.lrow.simrow .lbl {
+  color: var(--m-note-fg);
+}
+
+.dots {
+  display: inline-flex;
+  gap: var(--qp-space-0);
+  font-family: var(--m-font-figure);
+  letter-spacing: 0;
+}
+
+.dots .h { color: var(--qp-valid); }
+.dots .m { color: var(--qp-invalid); }
+
+.rec {
+  display: grid;
+  grid-template-columns: 8ch minmax(0, 1fr) auto;
+  gap: var(--qp-space-2);
+  font-size: var(--m-fs-note);
+  padding: var(--qp-space-0) 0;
+  border-top: var(--m-rule) solid var(--m-line);
+  align-items: baseline;
+}
+
+/* ---- Capsule face slice (host of the Y33 line) ---------------------------------- */
+.capface {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-2) var(--qp-space-3);
+}
+
+.capface .head {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.capface .head .grow {
+  flex: 1;
+}
+
+.capface h3 {
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+}
+
+/* ---- Form card (Y21) ------------------------------------------------------------ */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-label);
+}
+
+.field > span:first-child {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.input {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-2);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  background: var(--m-card);
+}
+
+.input .grow {
+  flex: 1;
+}
+
+.input .dflt {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.input.agentfield {
+  border-style: dashed;
+  border-color: var(--m-agent);
+}
+
+.input.bad {
+  border-color: var(--m-warn);
+}
+
+.field .why {
+  color: var(--m-warn);
+  font-size: var(--m-fs-note);
+}
+
+.seg2 {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  overflow: hidden;
+}
+
+.seg2 span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--m-control-h);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.seg2 span + span {
+  border-left: var(--m-rule) solid var(--m-line);
+}
+
+.seg2 span.on {
+  color: var(--m-fg);
+  background: var(--m-card);
+  box-shadow: inset 0 calc(var(--m-rule) * -2) 0 var(--m-accent);
+}
+
+.preview {
+  padding: var(--qp-space-2);
+  border-radius: var(--m-radius-control);
+  border: var(--m-rule) dotted var(--m-engine);
+  font-size: var(--m-fs-label);
+}
+
+.preview .note {
+  display: block;
+  margin-bottom: var(--qp-space-0);
+}
+
+/* ---- Phone pieces (tavek-tel) --------------------------------------------------- */
+.tel.frame {
+  /* phone.css sets the 390×844 frame; a partial screen drops the fixed height. */
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+}
+
+.tel.frame.part {
+  height: auto;
+  padding-top: 0;
+}
+
+.tel .t-status {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  padding: 0 var(--qp-space-3) var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.tel .t-status .grow {
+  flex: 1;
+}
+
+.tel .phone-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.tel .sheet-b {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-3);
+  background: var(--m-card);
+  border-top: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card) var(--m-radius-card) 0 0;
+  box-shadow: var(--m-shadow);
+}
+
+.tel .sheet-b::before {
+  content: "";
+  align-self: center;
+  width: var(--qp-space-5);
+  height: var(--qp-space-0);
+  border-radius: var(--qp-space-0);
+  background: var(--m-line);
+}
+
+.tel .sheet-b h3 {
+  font-size: var(--m-fs-body);
+  font-weight: var(--qp-head-weight);
+}
+
+.tel .sheet-b .actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--qp-space-1);
+}
+
+.tel .task2 .l1 {
+  font-size: var(--m-fs-body);
+}
+
+.tel .task2 {
+  padding-top: var(--qp-space-2);
+  padding-bottom: var(--qp-space-2);
+}
+
+/* Swipe reveal (Y07 phone): the row slides, the action sits under it. */
+.swipe {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  overflow: hidden;
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.swipe .act {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--qp-space-3);
+  min-width: calc(var(--m-control-h) * 2);
+  background: var(--m-card);
+  color: var(--m-fg);
+  font-size: var(--m-fs-label);
+  font-weight: var(--qp-head-weight);
+}
+
+.swipe.left {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.swipe.left .act {
+  order: 2;
+  background: var(--m-alert-bg);
+  color: var(--m-alert-fg);
+}
+
+.swipe .task2 {
+  border-top: none;
+  background: var(--m-panel);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  margin: var(--qp-space-2) var(--qp-space-3);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  min-height: var(--m-control-h);
+  border-radius: var(--m-radius-card);
+  background: var(--m-fg);
+  color: var(--m-panel);
+  font-size: var(--m-fs-label);
+}
+
+.toast .grow {
+  flex: 1;
+}
+
+.toast b {
+  font-weight: var(--qp-head-weight);
+}
+
+/* Phone axis-tag form of a state: "122,40 │ ◐ Kırıldı 2/3" (Y32 phone). */
+.lvl {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--m-radius-control);
+  overflow: hidden;
+  font-size: var(--m-fs-note);
+  white-space: nowrap;
+}
+
+.lvl > .v {
+  padding: 0 var(--qp-space-1);
+  font-family: var(--m-font-figure);
+  background: var(--m-human);
+  color: var(--m-card);
+}
+
+.lvl > .s {
+  padding: 0 var(--qp-space-1);
+  border: var(--m-rule) solid var(--m-line);
+  border-left: none;
+  border-radius: 0 var(--m-radius-control) var(--m-radius-control) 0;
+}
+
+.lvl.engine > .v {
+  background: transparent;
+  color: var(--m-muted);
+  border: var(--m-rule) dotted var(--m-engine);
+  border-radius: var(--m-radius-control) 0 0 var(--m-radius-control);
+}
+
+.lvl.agent > .v {
+  background: transparent;
+  color: var(--m-agent);
+  border: var(--m-rule) dashed var(--m-agent);
+  border-radius: var(--m-radius-control) 0 0 var(--m-radius-control);
+}
+
+/* Spec cross-reference list (tier 2: the state list under the main mockup). */
+.statelist {
+  display: grid;
+  grid-template-columns: 3ch minmax(16ch, auto) minmax(0, 1fr) auto;
+  gap: 0 var(--qp-space-3);
+  font-size: var(--m-fs-label);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.statelist > * {
+  padding: var(--qp-space-1) 0;
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.statelist .n,
+.statelist code {
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.statelist .shown {
+  color: var(--m-fg);
+}
+
+.statelist a {
+  color: var(--m-muted);
+}
+
+.legend-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--qp-space-3);
+  margin-top: var(--qp-space-3);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+/* The same state, as its Y07 row would say it (under a chart frame). */
+.echo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--qp-space-1);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  white-space: nowrap;
+}
+
+.echo .sym {
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+}
+
+.echo .grow {
+  flex: 1;
+}
+
+/* Phone screen head inside a partial frame: back, title, period. */
+.t-head {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-2);
+  font-size: var(--m-fs-label);
+  border-bottom: var(--m-rule) solid var(--m-line);
+}
+
+.t-head .back {
+  color: var(--m-muted);
+  min-width: var(--m-control-h);
+}
+
+.t-head b {
+  font-weight: var(--qp-head-weight);
+  font-size: var(--m-fs-body);
+}
+
+.t-head .grow {
+  flex: 1;
+}
+
+/* Phone axis tag carrying the state (Y27: the chip goes inside the axis tag). */
+.ax-tag.wide {
+  width: auto;
+  display: inline-flex;
+  gap: var(--qp-space-0);
+  align-items: center;
+}
+
+.ax-tag.wide .bar {
+  opacity: 0.6;
+}
+
+.ax-tag.human.quiet {
+  background: var(--m-chart-bg);
+  color: var(--m-fg);
+  border: var(--m-rule) solid var(--m-human);
+  border-right: none;
+}
+
+.ax-tag.faded {
+  opacity: 0.55;
+}
+
+.sheet-b .row {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.sheet-b .row .grow {
+  flex: 1;
+}
+
+.sheet-b .big {
+  font-size: var(--m-fs-body);
+  color: var(--m-fg);
+}
+
+.tel .pips i {
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+}
+
+/* Chip variants by role (word colour; the frame stays the origin's). */
+.ax-chip .ws.r-valid,
+.ax-chip .ws.r-invalid,
+.ax-chip .ws.r-warn {
+  font-weight: var(--qp-head-weight);
+}
+
+.ax-chip.faded {
+  opacity: 0.8;
+}
+
+.ax-chip .sim {
+  margin-right: var(--qp-space-0);
+}
+
+/* A level near the top of the price pane: the chip hangs below the line, clear of the legend. */
+.ax-chip.below {
+  transform: translateY(var(--qp-space-0));
+}
+
+/* Group heading inside a task list (core order: decision pending → changed → watched). */
+.tasks .grp {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--qp-space-2) var(--qp-space-3) var(--qp-space-0);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.tasks .grp + .task2 {
+  border-top-color: transparent;
+}
+
+.tasks .foot {
+  padding: var(--qp-space-1) var(--qp-space-3);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.pane-sub {
+  padding: 0 var(--qp-space-3) var(--qp-space-1);
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.pane-sub.warn {
+  color: var(--m-warn);
+}
+
+.icon-btn.off {
+  opacity: 0.4;
+}
+
+/* Main state in context: side column + chart cell, fixed comparison size (frame:
+   256 + 560 wide, 560 high). The chart slot takes what the cell bar leaves. */
+.desk-frame.ctx {
+  width: calc(256px + 560px + 3 * var(--m-rule));
+  height: 560px;
+  grid-template-columns: 256px minmax(0, 1fr);
+}
+
+.desk-frame.ctx > aside {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.desk-frame.ctx > aside .tasks {
+  flex: 1 1 auto;
+}
+
+.desk-frame.ctx .cell {
+  min-height: 0;
+}
+
+.desk-frame.ctx .cell .chart-slot {
+  flex: 1 1 auto;
+  height: auto;
+}
+
+.t-status .it {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+}
+
+/* In-app notification card (Y12 form, engine edge): used for "İyileşti", "Taşındı". */
+.card.recover,
+.card.notice {
+  margin: var(--qp-space-2) var(--qp-space-3) 0;
+  padding: var(--qp-space-2) var(--qp-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--qp-space-0);
+  font-size: var(--m-fs-label);
+  border-left: var(--qp-space-0) dotted var(--m-engine);
+}
+
+.card.notice.agent {
+  border-left: var(--qp-space-0) dashed var(--m-agent);
+}
+
+.card .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--qp-space-1);
+}
+
+/* A capsule face: the engine's dotted rule on top (origin without a coloured fill). */
+.edge-engine-top {
+  border-top: calc(var(--m-rule) * 2) dotted var(--m-engine);
+}
+
+.capface .lrow + .lrow {
+  margin-top: var(--qp-space-0);
+}
+
+.tel.part > .sheet-b {
+  border-radius: var(--m-radius-card);
+  box-shadow: none;
+  border-top: none;
+}
+
+.capface {
+  font-size: var(--m-fs-label);
+}
+
+.plain,
+.fig {
+  font-size: var(--m-fs-figure);
+}
+
+/* ---- Y26 tower ---- */
+.tower .phone-body {
+  overflow: hidden;
+}
+
+.tabbar .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--qp-space-3);
+  margin-left: var(--qp-space-0);
+  padding: 0 var(--qp-space-0);
+  border-radius: var(--qp-space-2);
+  background: var(--m-agent);
+  color: var(--m-panel);
+  font-size: var(--m-fs-note);
+  font-weight: var(--qp-head-weight);
+}
+
+.tower .calm {
+  margin: var(--qp-space-2) var(--qp-space-3) 0;
+  font-size: var(--m-fs-label);
+  color: var(--m-muted);
+}
+
+.tower .feed-dis {
+  padding: var(--qp-space-2) var(--qp-space-3);
+  border-top: var(--m-rule) solid var(--m-line);
+}
+
+.tower .capsule-row.fresh {
+  background: color-mix(in srgb, var(--m-accent) 10%, var(--m-panel));
+}
+
+.tower .capsule-row .record {
+  flex-wrap: wrap;
+}
+
+.tower .hot3 > div:last-child .num {
+  font-weight: var(--qp-head-weight);
+}
+
+.tower .stale .num {
+  color: var(--m-muted);
+}
+
+.tower .pending .chart-slot {
+  height: calc(var(--m-control-h) * 3.5);
+}
+
+.tower .actions.off .btn {
+  opacity: 0.45;
+}
+
+.tower .q .opt {
+  font-size: var(--m-fs-label);
+  min-height: var(--m-control-h);
+}
+
+.tower .q .actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.empty.first {
+  padding: var(--qp-space-4) var(--qp-space-3);
+  gap: var(--qp-space-3);
+}
+
+.empty .big {
+  font-size: var(--m-fs-title);
+  color: var(--m-fg);
+  font-weight: var(--qp-head-weight);
+}
+
+.empty .field {
+  width: 100%;
+}
+
+.tabbar .badge {
+  min-height: 0;
+  border-top: none;
+  line-height: var(--qp-lh);
+  color: var(--m-panel);
+}
+
+/* Question options: full condition sentences, one rule each (Y05 form). */
+.opt {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  min-height: var(--m-control-h);
+  padding: 0 var(--qp-space-2);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-control);
+  font-size: var(--m-fs-label);
+}
+
+.opt::before {
+  content: "";
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  border-radius: 50%;
+  border: var(--m-rule) solid var(--m-muted);
+  flex: none;
+}
+
+.opt.chosen {
+  border-color: var(--m-focus);
+}
+
+.opt.chosen::before {
+  border-color: var(--m-focus);
+  background: var(--m-focus);
+  box-shadow: inset 0 0 0 calc(var(--qp-space-0) - var(--m-rule)) var(--m-card);
+}
+
+.input.free {
+  color: var(--m-muted);
+  font-size: var(--m-fs-label);
+}
+
+/* Workspace slice: side column + chart cell + side panel (frame: 256 + 560 + 360, 640 high). */
+.desk-frame.ctx3 {
+  width: calc(256px + 560px + 360px + 4 * var(--m-rule));
+  height: 640px;
+  grid-template-columns: 256px minmax(0, 1fr) 360px;
+}
+
+.desk-frame.ctx3 > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.desk-frame.ctx3 > * + * {
+  border-left: var(--m-rule) solid var(--m-line);
+}
+
+.desk-frame.ctx3 > aside {
+  display: flex;
+  flex-direction: column;
+}
+
+.desk-frame.ctx3 .cell .chart-slot,
+.desk-frame.wide .cell .chart-slot {
+  flex: 1 1 auto;
+  height: auto;
+}
+
+/* Wide chart cell (frame: 900 × 520). */
+.desk-frame.wide {
+  width: calc(900px + 2 * var(--m-rule));
+  height: 520px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.desk-frame.wide .cell {
+  min-height: 0;
+}
+
+/* Time-travel strip over the cell (Y34). */
+.travel {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-2);
+  padding: var(--qp-space-1) var(--qp-space-3);
+  background: var(--m-card);
+  border-bottom: var(--m-rule) solid var(--m-line);
+  font-size: var(--m-fs-label);
+}
+
+.travel .grow {
+  flex: 1;
+}
+
+.travel .btn {
+  min-height: calc(var(--m-control-h) - var(--qp-space-0));
+}
+
+/* Engine finding mark on a bar (≤ chart.mark_max_px): filled / hollow / half. */
+.fmark {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--qp-space-2);
+  height: var(--qp-space-2);
+  transform: translate(-50%, calc(-100% - var(--qp-space-0)));
+  border-radius: 50%;
+  border: var(--m-rule) solid var(--m-engine);
+  outline: var(--m-rule) dotted var(--m-engine);
+  outline-offset: var(--m-rule);
+  background: var(--m-chart-bg);
+}
+
+.fmark.held {
+  background: var(--qp-valid);
+  border-color: var(--qp-valid);
+}
+
+.fmark.miss {
+  border-color: var(--qp-invalid);
+}
+
+.fmark.open {
+  background: linear-gradient(90deg, var(--m-engine) 50%, var(--m-chart-bg) 50%);
+}
+
+/* Small table of past reactions (Y35). */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-fs-note);
+}
+
+.tbl th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--m-muted);
+  padding: var(--qp-space-0) 0;
+}
+
+.tbl td {
+  padding: var(--qp-space-0) 0;
+  border-top: var(--m-rule) solid var(--m-line);
+  font-family: var(--m-font-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.tbl td.r,
+.tbl th.r {
+  text-align: right;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: var(--qp-space-1);
+  font-size: var(--m-fs-label);
+}
+
+.member .grow {
+  flex: 1;
+}
+
+.member .btn {
+  min-height: calc(var(--m-control-h) - var(--qp-space-0));
+}
+
+.changed-sec {
+  box-shadow: inset calc(var(--m-rule) * 2) 0 0 var(--m-accent);
+}
+
+/* Floating form card (Y21): over the task list, the look's shadow. */
+.float {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 360px; /* frame: form card width */
+  background: var(--m-card);
+  border: var(--m-rule) solid var(--m-line);
+  border-radius: var(--m-radius-card);
+  box-shadow: var(--m-shadow);
+}
+
+.float .pane-h {
+  border-bottom: var(--m-rule) solid var(--m-line);
+  padding-bottom: var(--qp-space-2);
+}
+
+.form .actions {
+  justify-content: flex-end;
+}
+
+.dim {
+  opacity: 0.5;
+}
+
+.wl {
+  font-size: var(--m-fs-label);
+}
+
+.wl-row2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto var(--qp-space-3);
+  column-gap: var(--qp-space-2);
+  align-items: baseline;
+  padding: var(--qp-space-1) var(--qp-space-3);
+}
+
+.wl-row2.head {
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+  padding-top: 0;
+}
+
+.wl-row2 .sym small {
+  display: block;
+  font-size: var(--m-fs-note);
+  color: var(--m-muted);
+}
+
+.wl-row2 .num {
+  text-align: right;
+}
+
+.wl-row2 .mk {
+  text-align: center;
+  font-family: var(--m-font-figure);
+  font-size: var(--m-fs-note);
+}
+
+.wl-row2.selected {
+  background: var(--m-card);
+  box-shadow: inset var(--qp-space-0) 0 0 var(--m-focus);
+}

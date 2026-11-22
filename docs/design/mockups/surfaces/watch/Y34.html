@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- RD2 M2/M3 (watch) Y34 — Zaman gezintisi. Kademe 2: ana durumun tam maketi (masaüstü) + şartnamedeki durum listesi.
+     Açmak: ?look=tavek (masaüstü) ya da ?look=tavek-tel (telefon) &theme=dark|light &vars=<önek>
+     (README). Değerler yalnız var(--…); satır içi px yalnız çerçeve geometrisi (kesit boyu, yüzen
+     kartın konumu, bindirmenin grafik kesirleri); metin sentetik; grafik çekirdekten (`qp render`). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y34 Zaman gezintisi</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../_base/phone.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="watch.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body class="sheet">
+<header class="sheet-h">
+  <h1><span class="id">Y34</span>Zaman gezintisi</h1>
+  <p>Geçmişe gidildiğinde o aralıktaki tespitler, sonuçları (gerçekleşmiş ve gerçekleşmemiş) ve tutma yüzdesi. Zaman ekseninde aralık parantezi, hücrenin üstünde tek satırlık gezinti şeridi; tespitler barın üstünde küçük motor işaretleri.</p>
+  <div class="facts"><span class="chip">Kademe 2</span><span class="chip">K75</span><span class="chip">ledger.md · Y34</span></div>
+</header>
+<h3 class="block-h">Akış</h3>
+<ol class="flow"><li><span>Ekseni sürükle / sicil kaydına dokun</span><span class="k">aralık parantezi + şerit</span></li><li><span>İşarete gel</span><span class="k">sonuç cümlesi</span></li><li><span>“Bugüne dön”</span><span class="k">canlı görünüm</span></li></ol>
+<section class="profile"><h2>Ana durum <span class="note">grafik hücresi 900 × 520 · çekirdek grafiği (19 Eyl'e kadar) + bindirme</span></h2><div class="desk-frame wide"><div class="cell"><div class="cell-bar"><span class="instr">SYN20</span><span class="seg"><span class="chip">4sa</span><span class="chip on">Günlük</span></span><span class="grow"></span><span class="layers"><span class="stroke">İnsan</span><span class="stroke agent">Ajan</span><span class="stroke engine">Motor</span></span></div><div class="travel"><span class="ws r-muted"><i>⟲</i>Geçmiş</span><b>11–19 Eyl</b><span class="muted">bugünün verisi değil</span><span class="grow"></span><span>Bu aralıkta 3 tespit · 1 tuttu</span><span class="btn">Bugüne dön</span></div><div class="chart-slot"><img data-chart="y34-wide" data-tx="desk-186" alt="SYN20 günlük grafik, 19 Eyl'e kadar"><div class="overlay"><div class="band" style="--x: 83.34%; --x2: 92.77%; --top: 5%"></div><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line class="watch" x1="40" y1="21.99" x2="92.89" y2="21.99"></line><line class="watch faded" x1="60" y1="13.23" x2="92.89" y2="13.23"></line></svg><div class="ax-tag human" style="--y: 21.99%">120,00</div><span class="fmark held" style="--x: 83.94%; --y: 17.82%"></span><span class="fmark miss" style="--x: 88.06%; --y: 9.16%"></span><span class="fmark open" style="--x: 92.17%; --y: 10.46%"></span><div class="tip" style="--x: 49.94%; --y: 23.82%; --tip-w: 30ch"><span class="r-fg"><b>● Kırılım · tuttu (3/3)</b></span><span>11 Eyl 120,00 üstünde kapanış · 15 Eyl teyit · <span class="on-chart">Kanıt</span></span></div><div class="t-bracket" style="--x: 83.34%; --x2: 92.77%"><span>11–19 Eyl</span></div></div></div></div></div><p class="legend-key"><span>● gerçekleşmiş (tuttu)</span><span>○ gerçekleşmemiş (tutmadı)</span><span>◐ o tarihte açık · sonuç aralık dışında</span><span>n &lt; 20: aralık özetinde yüzde yok</span><span class="sim">Yeniden oynatma ayrı kip: imleçten sonrası gizli</span></p><h3 class="block-h">Şartnamedeki durumlar (8)</h3><div class="statelist" role="table"><span class="n">1</span><span class="shown">Gezinti açık <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Geçmiş · 14–22 Ağu · bugünün verisi değil · Bugüne dön”</span><code>şerit + aralık parantezi</code><span class="n">2</span><span class="shown">Gerçekleşmiş tespit <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Kırılım · tuttu (3/3)”</span><code>dolu motor işareti ●</code><span class="n">3</span><span class="shown">Gerçekleşmemiş tespit <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Kırılım · tutmadı”</span><code>boş işaret ○</code><span class="n">4</span><span class="shown">O tarihte açık olan <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Açık kaldı · sonuç 25 Ağu”</span><code>yarım işaret ◐</code><span class="n">5</span><span class="shown">Aralık özeti <span class="spill r-accent">bu sayfada</span></span><span class="muted">“Bu aralıkta 6 tespit · 4 tuttu” (n < 20: yüzde yok)</span><code>Y33 kuralları</code><span class="n">6</span><span class="">Aralıkta tespit yok</span><span class="muted">“Bu aralıkta tespit yok”</span><code>O-boş şerit içinde</code><span class="n">7</span><span class="">Yeniden oynatma imleci</span><span class="muted">“Yeniden oynatma · simüle · sonuçlar imleçten sonra gizli”</span><code>D-simüle</code><span class="n">8</span><span class="">Yetki yok</span><span class="muted">—</span><code>D-yetkiyok</code></div></section>
+</body>
+</html>

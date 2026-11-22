@@ -34,7 +34,7 @@ VIS_INLINE = re.compile(r"(?<![A-Za-z0-9_])pub(\((crate|super|self|in [^)]*)\))?
 ITEM = re.compile(
     r"(?<!')\b(fn|struct|enum|union|trait|type|const|static|macro_rules!)(?:\s+|(?<=!)\s*)([A-Za-z_][A-Za-z0-9_]*)?")
 PATH = re.compile(r"\b((?:crate|super|self|[a-z_][a-z0-9_]*)::)+(?=[A-Za-z_{*])")
-ALLOW = re.compile(r"^#\[allow\(clippy::[a-z_]+(,\s*clippy::[a-z_]+)*\)\]$")
+ALLOW_IN = re.compile(r"#\[allow\(clippy::[a-z_]+(,\s*clippy::[a-z_]+)*\)\]\s*")
 
 
 def git(*args):
@@ -78,6 +78,9 @@ def items(src):
         pos = m.start(1)
         if not depth_ok[pos]:
             continue
+        prev = code[:pos].rstrip()[-1:]
+        if kind == "const" and prev in ("<", ","):
+            continue  # a const generic parameter (`fn f<const N: usize>`), not an item
         if kind == "const" and code[m.end(1):m.end(1) + 4].lstrip().startswith("fn"):
             continue  # `const fn`: the fn match reports it
         if kind == "type" and not m.group(2):
@@ -141,6 +144,16 @@ def _not_in_fn_body(code):
     return ok
 
 
+def lead_strip(text):
+    """The item without the `#[allow(clippy::…)]` attributes at its very start (RG1/L puts
+    the grandfathering attribute above the item's own attributes and docs)."""
+    while True:
+        m = ALLOW_IN.match(text)
+        if not m:
+            return text
+        text = text[m.end():]
+
+
 def unpath(text):
     return PATH.sub("", text)
 
@@ -186,16 +199,19 @@ def main(argv):
     gone, added = before - moved, after - moved
     pathonly, changed, allows = [], [], []
     gone_by_unpath = collections.defaultdict(list)
+    gone_by_lead = collections.defaultdict(list)
     for t, n in gone.items():
         gone_by_unpath[unpath(t)] += [t] * n
+        gone_by_lead[lead_strip(t)] += [t] * n
     for t, n in sorted(added.items()):
         for _ in range(n):
             # an item that only gained `#[allow(clippy::…)]` lines
-            lines = t.split("\n")
-            stripped = "\n".join(l for l in lines if not ALLOW.match(l))
-            if stripped != t and gone[stripped] > 0:
-                gone[stripped] -= 1
-                gone_by_unpath[unpath(stripped)].remove(stripped)
+            key = lead_strip(t)
+            hit = next((g for g in gone_by_lead.get(key, []) if gone[g] > 0), None)
+            if hit is not None and hit != t:
+                gone[hit] -= 1
+                gone_by_lead[key].remove(hit)
+                gone_by_unpath[unpath(hit)].remove(hit)
                 allows.append(where_b[t])
                 continue
             cands = gone_by_unpath.get(unpath(t), [])

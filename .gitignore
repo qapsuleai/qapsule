@@ -22,8 +22,9 @@ secrets/
 .idea/
 .vscode/
 
-# Claude Code local state / worktrees
-/.claude/
+# Claude Code local state / worktrees (proje becerileri izlenir, RD2)
+/.claude/*
+!/.claude/skills/
 
 # Hesap ayarı; gizli bilgi içermez, qgh ve preflight buna bağlı
 !scripts/qapsule-gh.env

@@ -228,3 +228,4 @@ PLAYGROUND §6'daki tasarımı etkileyen sorular ve bu şartnamenin kendi sorula
 | S22 | Gecikmeli veride izleme değerlendirilir mi? | Evet, gecikmeyi satırda söyleyerek ("Veri 15 dk gecikmeli"); yalnız bayat ve kopuk veri değerlendirmeyi durdurur | Y07, Y25 |
 | S23 | Zaman gezintisinde sonuçlar görünsün mü? | Gezintide görünür (geçmiş biliniyor); yeniden oynatmada imleçten sonrası gizli | Y34 |
 | S24 | Kod düzeyinde uyarlama sınırı (K83)? | Ayrı karar satırı; bu şartname yalnız kalıp düzeyinde | — |
+| S25 | Telefonda komut paleti nasıl açılır? | Kule başlığındaki alanın altında tam genişlik liste; komutlar "Gezinme", kısayol yok; soru Ajan sekmesine geçer | Y22 |

@@ -24,6 +24,9 @@ gruplar: Semboller · Komutlar (kısayolu sağda) · "Ajana sor". Sözdizimi `<S
 **Köken:** Komut insanındır; "Ajana sor" satırı kesik kenar. **Veri durumu:** Satırda yalnız yetki.
 **Akış:** ⌘K → yaz → Enter → sembol etkin hücreye / komut çalışır / soru ajan paneline.
 **Masaüstü / telefon:** Telefonda Kule başlığında arama alanı; komutlar yalnız gezinme.
+**Varsayım (S25):** telefonda sonuçlar alanın altında tam genişlik (yüzen kart değil), komut grubu
+"Gezinme" adını alır, kısayol sütunu yoktur; soru gönderilince arama kapanır ve Ajan sekmesi açılır.
+Maket: `mockups/surfaces/system/Y22.html`.
 
 **Uyarlanan:** OV-23, AT-D1. **Roller:** `--card`, `--qp-shadow`, `--fg`, `--muted`, `--qp-origin-agent`, `--accent`.
 

@@ -1,0 +1,287 @@
+<!doctype html>
+<!-- RD2 B-sınama (sistem) — Y22 komut paleti ve sembol arama. Şartnamede kademe 3; bu sayfa
+     qapsule-design becerisinin "yeni yüzey" listesini sınamak için yapıldı: ana durum (Ç1 üst
+     kesiti, yazıyor) + 7/7 durum, iki profil. Sözdizimi <SEMBOL> <İŞLEV> (AT-D1); her satır bir
+     qp/0 komutuna eşli (OV-23). Kısayol harfleri kalıptır; kayıt çekirdekte (S25).
+     Px yalnız system.css çerçeve geometrisinde. Grafik yuvası çekirdekten (qp render). -->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Y22 Komut paleti ve sembol arama</title>
+  <link rel="stylesheet" href="../../_base/base.css">
+  <link rel="stylesheet" href="../../tavek/tavek.css">
+  <link rel="stylesheet" href="system.css">
+  <script src="../../_base/frame.js"></script>
+</head>
+<body>
+<main class="sheet">
+  <header class="sheet-head">
+    <div>
+      <span class="eyebrow">Y22 · kademe 3 (maket sınaması) · system.md · K71</span>
+      <h1>Komut paleti ve sembol arama</h1>
+      <p>Tek giriş: sembol, komut, ajana soru. ⌘K ile açılır; sonuçlar Semboller · Komutlar · Ajana sor
+        gruplarında. Enter sembolü etkin hücreye açar, komutu çalıştırır ya da soruyu ajan paneline gönderir.
+        Komut insanındır; yalnız “Ajana sor” satırı ajan kökenli ve kesik kenarlıdır.</p>
+    </div>
+    <div class="meta"><span class="stroke">İnsan, düz</span><span class="stroke agent">Ajan, kesik</span><span class="stroke engine">Motor, noktalı</span></div>
+  </header>
+
+  <!-- ================================ MASAÜSTÜ ================================ -->
+  <section class="profile desk" aria-label="Masaüstü">
+    <h2>Ana durum <span class="note">Ç1 üst kesiti · palet açık, “syn iz” yazılıyor · 2 · Yazıyor</span></h2>
+    <div class="desk-cut">
+      <div class="topbar">
+        <span class="sym">SYN20</span><span>günlük</span><span class="grow"></span>
+        <span class="search open"><span>Sembol ya da komut ara</span><span class="grow"></span><span class="kbd">⌘K</span></span>
+        <span class="grow"></span><span>Gelen <span class="mono">2</span></span><span>Ayarlar</span>
+      </div>
+      <div class="chart-slot bg-chart"><img data-chart="bg" alt=""></div>
+
+      <div class="pal" role="dialog" aria-label="Komut paleti">
+        <div class="pal-input"><span class="typed">syn iz</span><span class="grow"></span><span class="kbd">Esc</span></div>
+        <div class="pal-parse"><span>Okunan:</span><span class="mono">SYN20</span><span>·</span><span>işlev “izle”</span></div>
+        <div class="pal-list">
+          <div class="pal-h"><span>Semboller</span><span class="grow"></span><span class="mono">2</span></div>
+          <div class="prow sel"><span class="main"><b>SYN</b>20 <span class="name">Sentez Holding</span></span><span class="ex">BIST</span><span class="meta">etkin hücrede aç</span></div>
+          <div class="prow"><span class="main"><b>SYN</b>45 <span class="name">Sentez Kimya</span></span><span class="ex">BIST</span><span class="meta"></span></div>
+
+          <div class="pal-h"><span>Komutlar</span><span class="grow"></span><span>kısayol</span></div>
+          <div class="prow"><span class="main">SYN20 · <b>İz</b>leme kur</span><span class="meta">seviye seçili değil · çizimle başlar</span><span class="kbd">⌥ I</span></div>
+          <div class="prow"><span class="main">SYN20 · <b>İz</b>leme görevlerini göster</span><span class="meta">3 kurulu</span><span class="kbd">⌥ L</span></div>
+          <div class="prow"><span class="main">Bütün <b>iz</b>lemeleri duraklat</span><span class="meta">5 izleme</span><span class="kbd"></span></div>
+
+          <div class="pal-h"><span>Ajana sor</span></div>
+          <div class="prow agent"><span class="main">Ajana sor: ‘syn iz’</span><span class="meta">SYN20 · günlük bağlamında</span><span class="who">Ajan</span></div>
+        </div>
+        <div class="pal-foot"><span>↑↓ seç</span><span>Enter aç</span><span>Tab grup</span><span>Esc kapat</span><span class="grow"></span><span>? kısayollar</span></div>
+      </div>
+    </div>
+
+    <h2>Durumlar <span class="note">Şartname sırasıyla, 7 / 7</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Boş</b><span class="role">--muted · son kullanılanlar</span></figcaption>
+        <div class="stage">
+          <div class="pal">
+            <div class="pal-input"><span class="ph">Sembol, komut ya da soru</span><span class="grow"></span><span class="kbd">Esc</span></div>
+            <div class="pal-list">
+              <div class="pal-h"><span>Son kullanılanlar</span></div>
+              <div class="prow muted sel"><span class="main">SYN20 <span class="name">Sentez Holding</span></span><span class="ex">BIST</span><span class="meta">14:31</span></div>
+              <div class="prow muted"><span class="main">KRM12 <span class="name">Kerem Enerji</span></span><span class="ex">BIST</span><span class="meta">dün</span></div>
+              <div class="prow muted"><span class="main">Grafik düzeni: 2 hücre</span><span class="meta">dün</span><span class="kbd">⌥ 2</span></div>
+              <div class="prow muted"><span class="main">DNZ30 · Periyot: 4 saat</span><span class="meta">20 Kas</span><span class="kbd"></span></div>
+            </div>
+            <div class="pal-foot"><span>Sözdizimi: SEMBOL İŞLEV · örnek “krm12 izle”</span><span class="grow"></span><span>? kısayollar</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Yazıyor</b><span class="role">--fg · gruplu sonuçlar, eşleşen harf kalın · ana durumda</span></figcaption>
+        <div class="stage">
+          <div class="pal">
+            <div class="pal-input"><span class="typed">krm</span><span class="grow"></span><span class="kbd">Esc</span></div>
+            <div class="pal-list">
+              <div class="pal-h"><span>Semboller</span></div>
+              <div class="prow sel"><span class="main"><b>KRM</b>12 <span class="name">Kerem Enerji</span></span><span class="ex">BIST</span><span class="meta">etkin hücrede aç</span></div>
+              <div class="pal-h"><span>Komutlar</span></div>
+              <div class="prow"><span class="main"><b>KRM</b>12 · İkinci hücrede aç</span><span class="meta"></span><span class="kbd">⌥ ↵</span></div>
+              <div class="pal-h"><span>Ajana sor</span></div>
+              <div class="prow agent"><span class="main">Ajana sor: ‘krm’</span><span class="meta"></span><span class="who">Ajan</span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Sonuç yok</b><span class="role">--muted · tek satır + ajana yönlendirme</span></figcaption>
+        <div class="stage">
+          <div class="pal">
+            <div class="pal-input"><span class="typed">xyz</span><span class="grow"></span><span class="kbd">Esc</span></div>
+            <div class="pal-list">
+              <div class="pal-empty">‘xyz’ bulunamadı · <span class="link">ajana sor</span></div>
+            </div>
+            <div class="pal-foot"><span>Enter: ajana sor</span><span class="grow"></span><span>Esc kapat</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Belirsiz eşleşme</b><span class="role">--fg · birden çok sembol, borsa etiketiyle</span></figcaption>
+        <div class="stage">
+          <div class="pal">
+            <div class="pal-input"><span class="typed">SYN20</span><span class="grow"></span><span class="kbd">Esc</span></div>
+            <div class="pal-parse"><span>2 borsada aynı kod · borsayı seç</span></div>
+            <div class="pal-list">
+              <div class="pal-h"><span>Semboller</span><span class="grow"></span><span class="mono">2</span></div>
+              <div class="prow sel"><span class="main"><b>SYN20</b> <span class="name">Sentez Holding</span></span><span class="ex">BIST</span><span class="meta">TRY · son kullanılan</span></div>
+              <div class="prow"><span class="main"><b>SYN20</b> <span class="name">Synthesis Werke AG</span></span><span class="ex">XETRA</span><span class="meta">EUR</span></div>
+              <div class="pal-h"><span>Ajana sor</span></div>
+              <div class="prow agent"><span class="main">Ajana sor: ‘SYN20’</span><span class="meta"></span><span class="who">Ajan</span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Ajana yönlendirildi</b><span class="role">--qp-origin-agent · son satır seçili, kesik kenar</span></figcaption>
+        <div class="stage">
+          <div class="pal">
+            <div class="pal-input"><span class="typed">112,40 tutar mı</span><span class="grow"></span><span class="kbd">Esc</span></div>
+            <div class="pal-parse"><span>Sembol ya da işlev değil · soru olarak okundu</span></div>
+            <div class="pal-list">
+              <div class="pal-h"><span>Komutlar</span></div>
+              <div class="prow"><span class="main">SYN20 · Seviye çiz: <b>112,40</b></span><span class="meta">yatay seviye</span><span class="kbd">⌥ H</span></div>
+              <div class="pal-h"><span>Ajana sor</span></div>
+              <div class="prow agent sel"><span class="main">Ajana sor: ‘112,40 tutar mı’</span><span class="meta">SYN20 · günlük</span><span class="who">Ajan</span></div>
+            </div>
+            <div class="pal-foot"><span>Enter: soru ajan paneline gider · ajan öneri döndürür, uygulamaz</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Ajan çalışıyor</b><span class="role">--qp-origin-agent · palet kapanır, ajan panelinde canlı satır</span></figcaption>
+        <div class="stage flush">
+          <div class="topbar"><span class="sym">SYN20</span><span>günlük</span><span class="grow"></span><span class="search"><span>Sembol ya da komut ara</span><span class="grow"></span><span class="kbd">⌘K</span></span><span class="grow"></span></div>
+          <div class="ap-mini">
+            <span class="ap-h">Ajan paneli</span>
+            <div class="u-msg"><span class="who">Sen · 14:36 · paletten</span>112,40 tutar mı</div>
+            <div class="live"><span class="spin"></span><span class="who">Ajan</span><span>SYN20 günlük barlarını okuyor…</span><span class="grow"></span><span class="mono">2 sn</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Yetki yok</b><span class="role">--muted · sembol satırında kilit · D-yetkiyok</span></figcaption>
+        <div class="stage">
+          <div class="pal">
+            <div class="pal-input"><span class="typed">ege</span><span class="grow"></span><span class="kbd">Esc</span></div>
+            <div class="pal-list">
+              <div class="pal-h"><span>Semboller</span></div>
+              <div class="prow sel"><span class="main"><b>EGE</b>09 <span class="name">Ege Bankası</span></span><span class="ex">BIST</span><span class="meta"></span></div>
+              <div class="prow locked"><span class="main"><b>EGE</b>09 <span class="name">Ege Bankası</span></span><span class="ex">VİOP</span><span class="nolock">⊘ veri yetkin yok · <span class="link">Yetkiyi gör</span></span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+
+    <h2>Durum özeti</h2>
+    <table class="state-table">
+      <tr><th></th><th>Durum</th><th>Gösterilen</th><th>Rol</th><th>Metin kalıbı</th></tr>
+      <tr><td class="n">1</td><td>Boş</td><td>Son kullanılanlar; sözdizimi örneği altta</td><td><code>--muted</code></td><td>“Son kullanılanlar”</td></tr>
+      <tr><td class="n">2</td><td>Yazıyor</td><td>Gruplu sonuçlar, eşleşen harf kalın; ayrıştırıcının okuması üstte · <b>ana durumda</b></td><td><code>--fg</code></td><td>—</td></tr>
+      <tr><td class="n">3</td><td>Sonuç yok</td><td>Tek satır + ajana yönlendirme</td><td><code>--muted</code></td><td>“‘xyz’ bulunamadı · ajana sor”</td></tr>
+      <tr><td class="n">4</td><td>Belirsiz eşleşme</td><td>Birden çok sembol, borsa etiketiyle</td><td><code>--fg</code></td><td>“SYN20 · BIST” · “SYN20 · XETRA”</td></tr>
+      <tr><td class="n">5</td><td>Ajana yönlendirildi</td><td>Son satır seçili, kesik kenar, “Ajan” sözcüğü</td><td><code>--qp-origin-agent</code></td><td>“Ajana sor: ‘112,40 tutar mı’”</td></tr>
+      <tr><td class="n">6</td><td>Ajan çalışıyor</td><td>Palet kapanır, ajan panelinde canlı satır</td><td><code>--qp-origin-agent</code></td><td>“SYN20 günlük barlarını okuyor…”</td></tr>
+      <tr><td class="n">7</td><td>Yetki yok</td><td>Sembol satırında kilit şekli + sözcük; değer yok (<code>D-yetkiyok</code>)</td><td><code>--muted</code></td><td>“veri yetkin yok”</td></tr>
+    </table>
+  </section>
+
+  <!-- ================================ TELEFON ================================= -->
+  <section class="profile phone" aria-label="Telefon">
+    <h2>Telefon <span class="note">Kule başlığında arama alanı; komutlar yalnız gezinme (S25)</span></h2>
+    <div class="states">
+      <figure class="state">
+        <figcaption><span class="n">1</span><b>Boş</b><span class="role">--muted · son kullanılanlar</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <div class="phf-head"><span class="search open"><span>Sembol ara</span><span class="grow"></span></span><span class="btn quiet">Vazgeç</span></div>
+          <div class="pal"><div class="pal-list">
+            <div class="pal-h"><span>Son kullanılanlar</span></div>
+            <div class="prow muted"><span class="main">SYN20 <span class="name">Sentez Holding</span></span><span class="ex">BIST</span></div>
+            <div class="prow muted"><span class="main">KRM12 <span class="name">Kerem Enerji</span></span><span class="ex">BIST</span></div>
+            <div class="prow muted"><span class="main">İzleme görevleri</span><span class="meta">git</span></div>
+          </div></div>
+          <div class="phf-tabs"><span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">2</span><b>Yazıyor</b><span class="role">--fg · gruplu sonuçlar, eşleşen harf kalın</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <div class="phf-head"><span class="search open"><span class="typed">syn</span><span class="grow"></span></span><span class="btn quiet">Vazgeç</span></div>
+          <div class="pal"><div class="pal-list">
+            <div class="pal-h"><span>Semboller</span></div>
+            <div class="prow"><span class="main"><b>SYN</b>20 <span class="name">Sentez Holding</span></span><span class="ex">BIST</span></div>
+            <div class="prow"><span class="main"><b>SYN</b>45 <span class="name">Sentez Kimya</span></span><span class="ex">BIST</span></div>
+            <div class="pal-h"><span>Gezinme</span></div>
+            <div class="prow"><span class="main"><b>SYN</b>20 izleme görevleri</span><span class="meta">3</span></div>
+            <div class="pal-h"><span>Ajana sor</span></div>
+            <div class="prow agent"><span class="main">Ajana sor: ‘syn’</span><span class="who">Ajan</span></div>
+          </div></div>
+          <div class="phf-tabs"><span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">3</span><b>Sonuç yok</b><span class="role">--muted · tek satır + ajana yönlendirme</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <div class="phf-head"><span class="search open"><span class="typed">xyz</span><span class="grow"></span></span><span class="btn quiet">Vazgeç</span></div>
+          <div class="pal"><div class="pal-list"><div class="pal-empty">‘xyz’ bulunamadı · <span class="link">ajana sor</span></div></div></div>
+          <div class="phf-tabs"><span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">4</span><b>Belirsiz eşleşme</b><span class="role">--fg · borsa etiketiyle</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <div class="phf-head"><span class="search open"><span class="typed">SYN20</span><span class="grow"></span></span><span class="btn quiet">Vazgeç</span></div>
+          <div class="pal"><div class="pal-list">
+            <div class="pal-h"><span>2 borsada aynı kod · borsayı seç</span></div>
+            <div class="prow"><span class="main"><b>SYN20</b> <span class="name">Sentez Holding</span></span><span class="ex">BIST</span></div>
+            <div class="prow"><span class="main"><b>SYN20</b> <span class="name">Synthesis Werke AG</span></span><span class="ex">XETRA</span></div>
+          </div></div>
+          <div class="phf-tabs"><span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">5</span><b>Ajana yönlendirildi</b><span class="role">--qp-origin-agent · son satır seçili, kesik kenar</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:36</span></div>
+          <div class="phf-head"><span class="search open"><span class="typed">112,40 tutar mı</span><span class="grow"></span></span><span class="btn quiet">Vazgeç</span></div>
+          <div class="pal"><div class="pal-list">
+            <div class="pal-h"><span>Soru olarak okundu</span></div>
+            <div class="prow agent sel"><span class="main">Ajana sor: ‘112,40 tutar mı’</span><span class="who">Ajan</span></div>
+          </div></div>
+          <div class="phf-tabs"><span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">6</span><b>Ajan çalışıyor</b><span class="role">--qp-origin-agent · arama kapanır, Ajan sekmesinde canlı satır</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:36</span></div>
+          <div class="phf-head"><h3>Ajan</h3><span class="grow"></span><span class="note">SYN20 · günlük</span></div>
+          <div class="ap-mini">
+            <div class="u-msg"><span class="who">Sen · 14:36 · aramadan</span>112,40 tutar mı</div>
+            <div class="live"><span class="spin"></span><span class="who">Ajan</span><span>SYN20 günlük barlarını okuyor…</span><span class="grow"></span><span class="mono">2 sn</span></div>
+          </div>
+          <div class="phf-tabs"><span>Kule</span><span>Grafik</span><span>İzleme</span><span class="on">Ajan</span></div>
+        </div>
+      </figure>
+
+      <figure class="state">
+        <figcaption><span class="n">7</span><b>Yetki yok</b><span class="role">--muted · sembol satırında kilit · D-yetkiyok</span></figcaption>
+        <div class="phf">
+          <div class="phf-status"><span>Canlı · seans açık</span><span class="grow"></span><span class="mono">14:35</span></div>
+          <div class="phf-head"><span class="search open"><span class="typed">ege</span><span class="grow"></span></span><span class="btn quiet">Vazgeç</span></div>
+          <div class="pal"><div class="pal-list">
+            <div class="pal-h"><span>Semboller</span></div>
+            <div class="prow"><span class="main"><b>EGE</b>09 <span class="name">Ege Bankası</span></span><span class="ex">BIST</span></div>
+            <div class="prow locked"><span class="main"><b>EGE</b>09 <span class="name">VİOP</span></span><span class="nolock">⊘ veri yetkin yok</span></div>
+          </div></div>
+          <div class="phf-tabs"><span class="on">Kule</span><span>Grafik</span><span>İzleme</span><span>Ajan</span></div>
+        </div>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

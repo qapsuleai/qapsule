@@ -251,3 +251,95 @@ düzenlenmesi ve yeni istisna eklemek hâlâ yalnız inceleme ile yakalanır (ö
 `main`'e göre farkı basan ve `docs/decisions`'ta adlı satır arayan adım). B2, B4, B6 açık
 (düzeltme kapsamı dışındaydı). Genel hüküm değişmedi: **Koşullu kabul** (koşullar istisna
 onayları, kapanış ve kalan arch-check açıkları).
+
+## Kapanış denetimi (2026-11-22)
+
+Denetçi: ikinci bağımsız denetçi alt ajanı (işi yapmadı, önceki denetimi de yapmadı). Denetlenen
+durum: `main` = `b981a1f7` (dal `rg1/audit-close`, yalnız bu bölüm eklendi). Rust derlemesi
+yapılmadı (`target/` yok, öyle kaldı); `arch-check` denemeleri depo dışındaki karalama kopyasında
+(`git archive HEAD`), oturum klasöründe `audit-close/`, iş bitince silindi. Önceki denetimin
+"doğrulayamadıklarım" listesindeki üç kalem (REPORT içeriği, kapanış temizliği, CI) bu bölümde
+kapatıldı.
+
+### Hüküm: **Kabul** (istisna istekleri İ1–İ7 Arkin'in kararına bağlı)
+
+GOAL'ün kendi tanımıyla (ölçüt karşılandı **ya da** raporda gerekçeli istisna isteği **ya da**
+kesme sırasına göre kesilip yazıldı) 15 ölçütün 15'i kapandı: 10'u doğrudan (1, 2, 6, 8, 9, 11,
+12, 13, 14, 15); 4'ü (3, 4, 5, 7) adlı istisna isteğiyle (İ1–İ7); ölçüt 7'nin test klasörü kısmı
+kesme sırası (2), ölçüt 10'un "mevcut ihlallerin düzeltilmesi" kısmı kesme sırası (3) ile, ikisi de
+REPORT §12'de yazılı. İstisna isteklerinin hepsi gerekçeli ve ölçümle destekli; "oyun" saydığım
+yok (zayıf bulduklarım aşağıda). Kalan bulgular düşük ağırlıklı belge tutarsızlıkları (C1–C6);
+kabulü değiştirmez. Bir istisna reddedilirse ilgili ölçüt ❌ olur ve (yapılandırmadan silinince)
+`arch-check` kırmızıya döner — bu raporda açıkça yazılı (REPORT §4 giriş).
+
+### Kabul ölçütleri (son durum)
+
+| # | Son durum | Kanıt (komut → çıktı / dosya:satır) |
+|---|---|---|
+| 1 | ✅ | `git log --oneline -- rounds/RG1/experiments/baseline \| tail -2` → `26c513d7` (genişletme), `6d03df21` (ilk). `git log 27656b1..6d03df2 -- crates` boş; `git log 6d03df2..26c513d7 -- crates` boş; ilk crate commit'i `bce705b6` (14:00:58); `git merge-base --is-ancestor 26c513d7 bce705b6` → doğru. |
+| 2 | ✅ | `experiments/compare-final.txt`: "225 items byte-identical", commit `0d78c440`; `git diff --stat 0d78c440 HEAD -- crates shells Cargo.toml Cargo.lock clippy.toml` **boş** (sonraki 9 commit yalnız `scripts/arch*`, belge, rapor). `git diff --stat 6d03df2 HEAD -- fixtures/golden fixtures/compute fixtures/protocol fixtures/views` → boş. `verify-final.log`: 19/19 PASS, "verify: OK". CI: `scripts/qgh run list --limit 4` → `45035266520` (07430545, son kod) **success**, `45038366122` (ed74d036, REPORT + arch-check düzeltmeleri) **success**; `45040722870` (b981a1f7, yalnız `STATUS.md` satırı) denetim anında `in_progress` (C5). |
+| 3 | ✅ İ7 | `perf-final.txt:13,15` vs `baseline/perf.txt:13,15`: varsayılan WASM 2.280.713 → 2.281.954 (+%0,05), gzip 745.478 → 746.734 (+%0,17); kabuk paketi 8.923.686 → 9.101.130 (+%1,99), gzip 2.506.216 → 2.569.974 (**+%2,54**, kendim hesapladım) → İ7. K17: `perf-final.txt:249–253` aynı saatte A/B (27656b1 iki koşu vs HEAD) gürültü içinde. K52: tutanak kesik (önceki denetim B9), raporda kabul edildi. |
+| 4 | ✅ İ1, İ2 | `scripts/arch-check` → "0 error(s); 11 exception(s) awaiting approval", çıkış 0; `verify.sh` adım 19 `arch` (`scripts/verify.sh:591`); `--self-test` → PASS. Yukarı 0 yalnız İ1 ile (`arch-config.json` `layer_overrides.qp-source`), yan 5 yalnız İ2 ile (`exceptions` ilk 5 kalem). |
+| 5 | ✅ İ6 | `find crates -name '*.rs' -path '*/src/*' -exec wc -l {} + \| sort -rn \| sed -n 2,5p` → 910 `qp-session/src/ops/expand/op.rs`, 891 `qp-grammar/src/compile/layer/prepare.rs` (İ6), 878 `qp-grammar/src/advances.rs` (`generated_files`; başlık "GENERATED … do not edit"), 763 `data/plane.rs`. |
+| 6 | ✅ | `scripts/arch-check --table`: `qp-cli` 1.420, `qp-wasm` 1.324 test dışı satır (< 4.000). |
+| 7 | ✅ İ3, İ4, İ5 + kesme (2) | `--table`: `qp-session` 31.999, `qp-grammar` 19.330, `qp-capsule` 13.230 → İ3–İ5. Klasörde > 15 `.rs`: yalnız `qp-session/tests` 39, `qp-wasm/tests` 20, `qp-compute/tests` 16 — test klasörü düzeni GOAL kesme sırası (2), REPORT §12/2'de yazılı, `dir.files` taban çizgisinde. `src/` altında 0. `util/common/misc/helpers` adlı dosya ya da klasör: 0. |
+| 8 | ✅ | `ls -d crates/*/ \| wc -l` = 16, `ls crates/*/README.md \| wc -l` = 16. `root.logic` kesin kural, 0 hata. |
+| 9 | ✅ | `docs/DEBT.md`, `scripts/arch-baseline.json`; `experiments/ratchet.txt` (değer −1 → hata, yeni 91 satırlık fn → hata, `--write-baseline` reddi, gevşek kalem → "tighten" hatası). Kendi denemem (karalama kopyası): `qp-calendar`'a 94 satırlık fn → `ERROR [fn.lines] … (not in the baseline (new debt))` + `fn.lines: 178 findings > baseline count 177`, çıkış 1. |
+| 10 | ✅ (mevcutlar: kesme (3)) | Kök `Cargo.toml:15–22` `[workspace.lints.clippy]` `unwrap_used`, `expect_used`, `panic`, `too_many_lines`, `cognitive_complexity` = "warn" + `scripts/verify.sh:143` `clippy … -D warnings` (CI `verify.sh`'ı koşar) → yeni ihlal kırar. `clippy.toml`: `too-many-lines-threshold = 80`, testlerde unwrap/expect/panic serbest. 16/16 crate'te `[lints] workspace = true`; silinirse `ERROR [lints.workspace] … hard rule` (denedim). Mevcut 237 ihlal öğe başına `#[allow]`, `lint.allow` crate başına mandallı (kesme (3), REPORT §12). |
+| 11 | ✅ | Önceki denetim §1 satır 11 (17 sabit / 16 anahtar, değer ve tip birebir); kapanışta kod değişmedi (yukarıdaki boş diff). Yeniden doğrulamadım. |
+| 12 | ✅ | `python3 scripts/rg1-decisions-check.py b341e2d 1957752` → "satır kümesi eşit: 352 satır, 12 dosya / HEAD: özgün satırların hepsi duruyor / başlık 12/12 … / yeni kırık 0, önceden de kırık 1" (A46), çıkış 0. |
+| 13 | ✅ | REPORT §11 (karar listesi, öneri "24'ünü de sil", silme yok) = `experiments/recovered.md` (24 satır, hepsi "sil"; adlı `r5/m16-bertan`, `r5/m16-kivra` kalır); `git branch --list 'recovered/*' \| wc -l` → 24. Örnek: `git cherry main …/155233fafa` → 6 × `-`; `git cherry r5/m16-bertan …/bba97ec414` → 2 × `-`; `git cherry r5/m16-kivra …/f6fa700a4f` → 4 × `-`. §9 Kural önerileri K-1…K-11 ve §10 Fark edilenler somut. Fark edilenlerden 4 yoklama, hepsi doğru: (a) `crates/qp-host/src/demo.rs:34,36,213` `qp_wasm::gallery` / `qp_wasm::drive`; (b) `crates/qp-session/src/host/conform.rs:313` `drop(self.stdin.take());` (`impl Drop for Serve` içinde; wasm32 clippy'sini koşmadım); (c) `docs/decisions/rounds/R3.md:22` ve `R4.md:14` iki ayrı Ö39, Ö40/Ö41 için de ikişer satır; dizinde not `DECISIONS.md:30–31`; (d) `.gitignore:16` `*token*` → `git check-ignore -v crates/qp-live/src/mock/token.rs` eşleşiyor; dosya `mock/issuer.rs` adıyla duruyor. |
+| 14 | ✅ | Önceki denetim + yeniden denetim + bu bölüm. |
+| 15 | ✅ (küçük belge eksikleri C3, C4) | `git worktree list` → ana ağaç + bu denetimin worktree'si (harness kaldıracak). `du -sh target` → yok (0 ≤ 6 GB). `.claude/worktrees/` 172 MB = yalnız bu denetim worktree'si. `fixtures/local/` 1,5 GB. REPORT §16 silinen / bırakılan / kalan üç listeyi veriyor. `STATUS.md` (Şu an + RG1 geçmiş satırı) ve `ROADMAP.md` RG1 satırı "Tamamlandı (2026-11-22 …)". |
+
+### VERIFY 1–15 (son durum)
+
+`VERIFY.md` 15 numaralı denetim satırıdır; `scripts/verify.sh` 19 adımlık betiktir (1 fmt, 2 clippy,
+3 test, 4 schema, 5 fixtures, 6 golden, 7 views, 8 wasm, 9 hygiene, 10 browser, 11 compute,
+12 digest, 13 protocol, 14 conform, 15 replica, 16 replay, 17 shell, 18 demo, 19 arch). İki ayrı
+numaralandırma. Eşleme: VERIFY 3 = `verify.sh` 1–19'un tamamı (yeni adım 19 `arch` dahil);
+VERIFY 5–6 ayrıca `verify.sh` 19'un içinde koşar; VERIFY 13'ün varsayılan WASM boyutu `verify.sh` 8'in
+çıktısıdır; GOAL'deki "`verify.sh` 15–16" yansı (15 replica) ve yeniden oynatma (16 replay)
+adımlarıdır; VERIFY 2 (`rg1-compare.sh`) ve 4, 7–12, 14–15 `verify.sh` dışındaki elle / betikle
+denetimlerdir. İkisi de geçiyor: `verify-final.log:3068–3088` 19/19 PASS; aşağıdaki 15 satır.
+
+| # | Sonuç | Kanıt |
+|---|---|---|
+| 1 | ✅ | `tail -1` → `6d03df21`; ilk taşıma `bce705b6` sonra (ölçüt 1). |
+| 2 | ✅ | `compare-final.txt` 225/225 (0d78c440); o commit'ten bu yana kod farkı yok. Önceki denetçi kendisi de koştu (225/225). Ben yeniden koşmadım (derleme ister). |
+| 3 | ✅ | `verify-final.log` 19/19 PASS; CI 45035266520 ve 45038366122 success. |
+| 4 | ✅ | `git diff --stat 6d03df2 HEAD -- fixtures/golden fixtures/compute fixtures/protocol fixtures/views` boş. |
+| 5 | ✅ | `arch-check`: 0 hata; 11 EXCEPTION satırı = İ1 (1) + İ2 (5) + İ3 + İ4 + İ5 + İ6 (2) = REPORT §4'ün `arch-check`'e düşen kısmı (İ7 bir boyut ölçüsü, `arch-check` kuralı değil; doğru olarak yapılandırmada yok); taban çizgisi "dir.files 3, doc.size 2, file.soft 37, fn.lines 177, lint.allow 13, test.file 6"; üretilmiş dosya her koşuda basılıyor. |
+| 6 | ✅ | `--self-test` → "self-test: PASS" (lint.flags, lint.inner, lints.workspace, fake/tests.rs, mandal, istisna dahil). |
+| 7 | ✅ İ6 | Ölçüt 5. |
+| 8 | ✅ İ3–İ5 | Ölçüt 6–7. |
+| 9 | ✅ | `ratchet.txt` + kendi denemem (ölçüt 9). |
+| 10 | ✅ | 16 = 16. |
+| 11 | ✅ | `docs/PARAMETERS.md`, `docs/PARAMETERS.generated.md` (önceki denetim). |
+| 12 | ✅ | Ölçüt 12. |
+| 13 | ✅ İ7 | Ölçüt 3. |
+| 14 | ✅ | Ana ağaç + bu denetim worktree'si; `target/` yok. |
+| 15 | ✅ | `AUDIT.md` (bu hüküm), `STATUS.md`, `ROADMAP.md` güncel. |
+
+### İstisna istekleri: gerçekler ve dürüstlük
+
+| No | Doğruladığım gerçek | Değerlendirme |
+|---|---|---|
+| İ1 | `qp-session → qp-source` bağımlılığı tutanakta zaten var (`git show 6d03df2:crates/qp-session/Cargo.toml`); `authority/session.rs:404` `new_inner` gövdesi `qp_source::MemoryProvider::from_init` çağırıyor (+3 yer: `host/replayhost/setup.rs:300`, `replica/tape.rs:204`, `replica/viewer/open.rs:363`); oturumda 41 `qp_source::` başvurusu. | Dürüst. İhlal RG1'in yarattığı değil, önceden vardı; çözüm gövde değişikliği ister (taşıma kuralı dışı). Bir harita değişikliği isteği olduğu açıkça yazılı. |
+| İ2 | `qp-capsule → qp-facts` tutanakta var (`6d03df2:crates/qp-capsule/Cargo.toml:13`). `qp-host →` 4 kenar bu round'un yeni crate'inden. | Dürüst ama **ikinci en zayıf**: 5 kenarın 4'ü RG1'in kendi tasarım seçiminin (barındırmayı uyarlayıcı katmanına koymak) sonucu. Gerekçe doğru; K-2 / "barındırma alt katmanı" önerisi bunu kural düzeyinde çözer. |
+| İ3 | `qp-session` 31.644 → 31.999 (küçülmedi, klasörlendi). Gerekçe (inherent `impl` başka crate'te yazılamaz) Rust kuralı olarak doğru. | Dürüst; etkisi en büyük istisna. Önceki denetim B7 önerisi geçerli: A63 kapanmadan bu crate'e yeni kod eklenmesin (ENGINEERING §1.2). |
+| İ4 | 19.330; "döngüsüz kesimlerle ≈ 14,7 bin" M4a ölçümüne dayanıyor, yeniden ölçmedim. | Dürüst. |
+| İ5 | `voice/` ≈ 4,75 bin saf taşımayla ayrılabilir; yapılmadı çünkü İ2 türü iki yeni yan kenar açar. | **En zayıf**: ucuz bir çözüm var ve İ2 kararına bağlanarak ertelenmiş. Yine de tutarlı (yan bağımlılık kesin kural) ve açıkça yazılmış; oyun değil. |
+| İ6 | `wc -l`: 910 / 891; her dosyada tek üst düzey öğe (`op.rs:8 pub(crate) fn expand_op`, `prepare.rs:9 pub(crate) fn prepare`; `prepare.rs:206 main_or_err` `prepare`'in içinde iç içe fonksiyon); ikisi de son satırda `}` ile kapanıyor. | Dürüst; fonksiyon bölmek taşıma kuralına aykırıydı. K-7 sırayı doğru koyuyor. |
+| İ7 | +%2,54 / +%1,99 kayıtlı dosyalardan; `crates/qp-render/src/fonts.rs:16 pub const FILES`, `cpu.rs:15 pub const FONT_BYTES` (`const`, `static` değil); `IBMPlexMono-Regular.ttf` 135.580 B; kullananlar `qp-shellcore/src/shell/{paint,look}.rs` ve `qp-wasm/src/bind/shell.rs` (ayrı crate'ler). | Dürüst; neden ölçülmüş. "`static` ile −%4,0" iddiasını derleme gerektirdiği için doğrulamadım. |
+
+### Kalan bulgular (düşük; kabulü değiştirmez)
+
+| # | Bulgu | Kanıt | Öneri |
+|---|---|---|---|
+| C1 | `STATUS.md` "Sıradaki adım" kural önerilerini "K-1…K-8" diye anıyor; REPORT §9 ve A64 K-1…K-11. | `STATUS.md` "Şu an"; `docs/decisions/rounds/RG1.md` A64. | Ana akış "K-1…K-11" yapsın. |
+| C2 | REPORT §3 crate tablosu güncel `--table`'dan biraz farklı (`qp-host` 10.415 → 10.433, `qp-shellcore` 9.503 → 9.518, `qp-mcp` 7.177 → 7.193, `qp-cli` 1.419 → 1.420 …); kod değişmedi, fark sonraki `arch-check` sayım düzeltmelerinden (B3). Hiçbir eşik sonucunu değiştirmez. | `scripts/arch-check --table` vs `REPORT.md:63–78`. | Raporlarda tabloyu son `arch-check` sürümüyle üretin. |
+| C3 | `experiments/clean.log` kesik: "önce" bölümü ve iki `rm: … Directory not empty` hatasıyla bitiyor; REPORT §16'daki "`clean.sh --deep` → `cargo clean` 50,1 GiB" ve "sonra" boyutları günlükte yok. Sonuç doğru (`target/` yok), kanıt eksik. | `rounds/RG1/experiments/clean.log` (13 satır). | `clean.sh` `rm` hatasında da "sonra" bölümünü yazsın; `--deep` çıktısı günlüğe girsin. |
+| C4 | REPORT §16 "beklenmeyen artık yok" diyor, ama listede olmayan yoksayılmış artıklar var: `shells/web-spike/node_modules` (122 MB) ve `shells/web-spike/pkg` (2,1 MB) "bilerek bırakılanlar"da yok; `scripts/archcheck/__pycache__` (5 dosya, ≈ 60 KB, 18:22, temizlikten sonra bir `arch-check` koşusuyla yeniden oluşmuş) "silindi" denmesine karşın duruyor. Hepsi `.gitignore`'da; zararsız. (Yalıtım gereği ana ağaçta `git status --porcelain --ignored` koşamadım; ana ağacın dosya listesini bu worktree'nin `git ls-files`'ıyla karşılaştırdım: eksik izlenen dosya 0; izlenmeyenler yalnız `.DS_Store`'lar, `.env.local`, `fixtures/local/`, iki `node_modules`, iki `pkg`, R3 deney `target/`, `__pycache__`.) | dosya sistemi taraması; `git check-ignore -v`. | Ana akış `web-spike` artıklarını "bırakılanlar"a yazsın ya da silsin. |
+| C5 | Denetim anında son commit'in (`b981a1f7`, yalnız STATUS) CI koşusu `45040722870` `in_progress`. Kod içeren son durumlar yeşil. | `qgh run list --limit 4`. | Ana akış sonucu görsün. |
+| C6 | `arch-check` açıkları (önceki B2, B4, B6) hâlâ açık: kapanış denememde `const LONG: fn() -> u64 = \|\| { … 100 satır … }` 0 hatayla geçti. Kalan B1 açıklarının kapandığını doğruladım: `#[allow(clippy :: unwrap_used)]` ve `#[allow(clippy::nursery)]` → `lint.allow` yeni borç hatası; `.cargo/config.toml` `rustflags = ["-Aclippy::unwrap_used"]` → `ERROR [lint.flags] … hard rule`. | karalama kopyası denemeleri. | K-10 (sözdizimi ağacıyla denetim), REPORT §9'da yazılı. |

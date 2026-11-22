@@ -4,14 +4,13 @@
 günlüğünü, bağlantıları, abonelikleri, önerileri ve varlığı tutar; her gelen ileti
 `Session::handle_raw` sınırından geçer (boyut sınırı, ayrıştırma, JSON işaretçili şema
 denetimi, işleme). Belgeyi değiştiren her şey komut yolundan geçer. Hesapları `qp-compute`
-ile koşar, kapsül motorunu bağlar, görünümü `qp-grammar` ile sahneye derler. Belirlenimci:
-saat `clock` iletisiyle gelir, rastgelelik yok, çıktıda karma tablo yok.
+ile koşar, kapsül motorunu bağlar, görünümü `qp-grammar` ile sahneye derler. Saat `clock`
+iletisiyle gelir; rastgelelik yok.
 
 **Katman:** oturum (`docs/ENGINEERING.md` §2).
 
 **Bağımlılıklar:** `qp-schema`, `qp-calendar`, `qp-compute`, `qp-facts`, `qp-capsule`,
-`qp-grammar`, `qp-source`, `schemars`, `serde`, `serde_json`, `serde_path_to_error`,
-`tempfile`. Geliştirme: `tempfile`.
+`qp-grammar`, `qp-source`; `schemars`, `serde`, `serde_json`, `serde_path_to_error`, `tempfile`.
 
 **Dışa açık yüzey (`lib.rs`):** `Session`, `ENGINE_PRINCIPAL`, `permissions`, `confine`;
 `replay`, `apply_all`, `apply_change`; `Replica`, `ReplicaOptions`, `document_digest`,
@@ -29,8 +28,7 @@ saat `clock` iletisiyle gelir, rastgelelik yok, çıktıda karma tablo yok.
 - `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).
 - `host/` — yeniden oynatma barındırıcısı (`replayhost`) ve uygunluk koşucusu (`conform`).
 
-**Ne değildir:** kabuk ya da uyarlayıcı değildir (CLI, MCP, WASM bağlamaları üst
-katmanlardadır); kapsül motoru, veri kaynağı ya da çizici değildir.
+**Ne değildir:** kabuk, uyarlayıcı (CLI/MCP/WASM), kapsül motoru, veri kaynağı, çizici.
 
 **Bilinen borç:** crate ≈ 31,9 bin satır (`crate.lines`, bütçe 12 bin) — istisna isteği İ3
 (`rounds/RG1/PLAN.md` §4). Tek işlevlik 800 üstü `src/ops/expand/op.rs` (`expand_op`) — İ6.

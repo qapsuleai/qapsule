@@ -13,7 +13,7 @@ use super::num;
 
 /// Ledger sample size from which counts are stated plainly; below it the sentence says
 /// the record is still thin (and still gives the counts when not redacted).
-pub const LEDGER_MIN_N: u32 = 20;
+pub const LEDGER_MIN_N: u32 = qp_schema::params::system::SCORECARD_MIN_N_DEFAULT;
 
 /// Milliseconds in a day (calendar check for "dün / yesterday").
 const DAY_MS: i64 = 86_400_000;
@@ -479,4 +479,13 @@ pub enum Tendency {
     Even,
     /// Mostly did not.
     Rarely,
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn ledger_min_n_binds_scorecard_min_n() {
+        assert_eq!(super::LEDGER_MIN_N, 20);
+    }
 }

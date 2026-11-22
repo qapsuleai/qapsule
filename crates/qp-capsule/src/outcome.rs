@@ -50,9 +50,9 @@ use qp_schema::capsule::{Direction, MeaningKind, TimeKind};
 use qp_schema::Bar;
 
 /// ATR period for directional stories.
-pub const ATR_FAST: usize = 14;
+pub const ATR_FAST: usize = qp_schema::params::system::OUTCOME_ATR_FAST_DEFAULT;
 /// ATR period for neutral stories ("normal" volatility).
-pub const ATR_SLOW: usize = 100;
+pub const ATR_SLOW: usize = qp_schema::params::system::OUTCOME_ATR_SLOW_DEFAULT;
 
 /// Base horizon (bars) and directional barrier (ATR multiples) of one meaning kind.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -66,9 +66,9 @@ pub struct KindParams {
 }
 
 /// Directional barrier constant: `k = C_DIR · √h` (ATR(14) units).
-pub const C_DIR: f64 = 0.3;
+pub const C_DIR: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_DIR_DEFAULT;
 /// Neutral barrier constant: `k_n = C_NEUTRAL · √h` (ATR(100) units).
-pub const C_NEUTRAL: f64 = 0.65;
+pub const C_NEUTRAL: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_NEUTRAL_DEFAULT;
 
 /// The base table (see `NOTES.md` for the reasoning per kind). Barriers follow
 /// diffusive scaling from the kind's base horizon; a horizon perturbation does not move
@@ -406,7 +406,8 @@ impl OutcomeRule for HighLow {
 
 /// (RP4) Bars at least this far apart are not intraday: [`Rp4`] judges them with
 /// [`Barrier`]. Half a day, so a daily series stays daily across any time-zone shift.
-pub const INTRADAY_MAX_STEP_MS: i64 = 43_200_000;
+pub const INTRADAY_MAX_STEP_MS: i64 =
+    qp_schema::params::system::OUTCOME_INTRADAY_MAX_STEP_MS_DEFAULT;
 
 /// Whether the bar series `bars[..=born]` is intraday: its smallest positive time step is
 /// below [`INTRADAY_MAX_STEP_MS`]. Deterministic and without look-ahead (only bars up to
@@ -744,5 +745,18 @@ mod tests {
         assert!(intraday_at(&b, 1));
         assert!(!intraday_at(&mk(&[0, day, day + 300_000]), 1));
         assert!(intraday_at(&mk(&[0, day, day + 300_000]), 2));
+    }
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn outcome_constants_bind_registry() {
+        assert_eq!(super::ATR_FAST, 14);
+        assert_eq!(super::ATR_SLOW, 100);
+        assert_eq!(super::C_DIR.to_bits(), 0.3f64.to_bits());
+        assert_eq!(super::C_NEUTRAL.to_bits(), 0.65f64.to_bits());
+        assert_eq!(super::INTRADAY_MAX_STEP_MS, 43_200_000);
     }
 }

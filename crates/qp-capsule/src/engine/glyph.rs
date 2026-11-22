@@ -3,7 +3,7 @@
 use super::*;
 
 /// Bars after the last transition at which freshness is one half.
-pub const FRESHNESS_HALF_BARS: f64 = 5.0;
+pub const FRESHNESS_HALF_BARS: f64 = qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS_DEFAULT;
 
 /// Glyph parameters of a story at `now_bar` (K30 channels).
 ///
@@ -51,5 +51,14 @@ pub fn glyph_spec_at(
     GlyphSpec {
         validity: Some(validity),
         ..glyph_spec(story, now_bar, min_ledger_n)
+    }
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn capsule_freshness_half_bars_binds_registry() {
+        assert_eq!(super::FRESHNESS_HALF_BARS.to_bits(), 5.0f64.to_bits());
     }
 }

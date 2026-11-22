@@ -24,7 +24,7 @@ use crate::expand::Ctx;
 use crate::session::{out, Session};
 
 /// Active watches per person at most (`welcome.limits.max_watches`).
-pub const MAX_WATCHES: u32 = 32;
+pub const MAX_WATCHES: u32 = qp_schema::params::system::WATCH_MAX_PER_PERSON_DEFAULT;
 
 /// One match of a watch.
 #[derive(Debug, Clone)]
@@ -356,5 +356,14 @@ impl Session {
             }
         }
         lines
+    }
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn max_watches_binds_registry() {
+        assert_eq!(super::MAX_WATCHES, 32);
     }
 }

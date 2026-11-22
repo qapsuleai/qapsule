@@ -1,1 +1,15 @@
 # RG1: bilerek eklenen testler (ad, satır başına bir; rg1-snapshot bunları tests.names dışında tutar)
+params_resolve_order_object_user_plan_system
+params_resolve_falls_back_to_system_default
+params_defaults_equal_named_constants
+params_registry_is_well_formed
+params_generated_doc_is_current
+ledger_min_n_binds_scorecard_min_n
+capsule_freshness_half_bars_binds_registry
+theme_gap_and_confirm_bars_bind_registry
+outcome_constants_bind_registry
+chart_lookback_binds_registry
+card_glyph_constants_bind_registry
+max_watches_binds_registry
+dispute_limits_bind_registry
+story_zoom_min_binds_registry

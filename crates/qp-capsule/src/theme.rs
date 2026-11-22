@@ -43,9 +43,9 @@ use qp_schema::capsule::{Direction, Edge, MeaningKind};
 use qp_schema::Fact;
 
 /// Default join tolerance for same kind + direction, in bars.
-pub const GAP_BARS: u64 = 10;
+pub const GAP_BARS: u64 = qp_schema::params::system::STORY_THEME_GAP_BARS_DEFAULT;
 /// Default window in which a flow fact confirms a price-meaning story, in bars.
-pub const CONFIRM_BARS: u64 = 1;
+pub const CONFIRM_BARS: u64 = qp_schema::params::system::STORY_THEME_FLOW_CONFIRM_BARS_DEFAULT;
 
 /// The "kind + direction" theme rule (see the crate docs).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -197,5 +197,15 @@ impl ThemeRule for KindDir {
                 theme: format!("{}.{}", m.kind.name(), dir_name(m.direction)),
             },
         }
+    }
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn theme_gap_and_confirm_bars_bind_registry() {
+        assert_eq!(super::GAP_BARS, 10);
+        assert_eq!(super::CONFIRM_BARS, 1);
     }
 }

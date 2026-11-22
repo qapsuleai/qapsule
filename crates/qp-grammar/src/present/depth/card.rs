@@ -9,10 +9,10 @@ use super::*;
 
 /// Closed ledger rows a story needs at birth before its glyph shows a confidence fill
 /// (the M2 template's ledger-sentence threshold).
-pub const GLYPH_MIN_LEDGER_N: u32 = 20;
+pub const GLYPH_MIN_LEDGER_N: u32 = qp_schema::params::system::GLYPH_MIN_LEDGER_N_DEFAULT;
 
 /// Bars after the last transition at which a glyph's freshness is one half.
-pub const FRESHNESS_HALF_BARS: f64 = 5.0;
+pub const FRESHNESS_HALF_BARS: f64 = qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS_DEFAULT;
 
 /// Glyph size in the capsule card (the `r4` look's `glyph.card_px`).
 pub const CARD_GLYPH_PX: f64 = crate::look::R4.glyph.card_px;
@@ -437,4 +437,14 @@ pub(super) fn chart_view_r3(
             kind: EmphasisKind::Highlight,
         }],
     })
+}
+
+#[cfg(test)]
+mod params_binding {
+    // RG1/K3: the constant reads `qp_schema::params` and keeps its old literal.
+    #[test]
+    fn card_glyph_constants_bind_registry() {
+        assert_eq!(super::GLYPH_MIN_LEDGER_N, 20);
+        assert_eq!(super::FRESHNESS_HALF_BARS.to_bits(), 5.0f64.to_bits());
+    }
 }

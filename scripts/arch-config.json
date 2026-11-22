@@ -36,7 +36,8 @@
         "qp-live",
         "qp-matriks",
         "qp-source",
-        "qp-shellcore"
+        "qp-shellcore",
+        "qp-host"
       ]
     },
     {

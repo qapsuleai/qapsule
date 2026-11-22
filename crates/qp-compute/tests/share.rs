@@ -3,6 +3,14 @@
 //! bit, in any list order, with duplicates, mixed runs and singles, short series, and for
 //! every lane count.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

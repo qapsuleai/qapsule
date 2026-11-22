@@ -1,6 +1,14 @@
 //! Regression: a saved viewport must be clamped when the bar series gets shorter
 //! (security review finding: `last - width` underflow in `pan`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use serde_json::json;

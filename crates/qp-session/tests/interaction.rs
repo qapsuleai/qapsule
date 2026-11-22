@@ -2,6 +2,14 @@
 //! the bar-space gestures, the view state is presence (1000 inputs leave the log and the
 //! document untouched) and an agent reads it with `screen`.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::protocol::{OutboundLine, SessionInit};

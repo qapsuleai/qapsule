@@ -5,6 +5,14 @@
 //!   the host's `{"market":…}` frame): the status line says "Seans kapalı" / "Session
 //!   closed"; the feed rows say it too; no face shows the live mark.
 //! - Stale data: "Bağlantı yok — veri bayat · son veri HH:MM"; no capsule shows as live.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use std::collections::BTreeMap;

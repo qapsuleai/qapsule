@@ -4,6 +4,14 @@
 //! an agent working for an unentitled person never receives a licensed number; the three
 //! formats carry the same numbers.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 

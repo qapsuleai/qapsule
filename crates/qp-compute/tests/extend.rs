@@ -1,6 +1,14 @@
 //! RP1/E5: `Study::extend` (commit-only attach) leaves exactly the state of pushing the same
 //! bars, for every study and for chains, mixed randomly with `push` and `update_last`.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 
 use qp_compute::sweep::{bench_closes, bench_grid};

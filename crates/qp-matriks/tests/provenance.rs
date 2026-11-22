@@ -1,5 +1,13 @@
 //! The proto copy is byte-exact and matches its provenance record (K62).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 

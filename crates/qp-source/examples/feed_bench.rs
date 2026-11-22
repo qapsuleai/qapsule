@@ -2,6 +2,14 @@
 //! event apply cost and digest update cost (append / live update / correction) on
 //! 10 000 bars. Run: `cargo run --release -p qp-source --example feed_bench`.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::hint::black_box;
 use std::time::Instant;
 

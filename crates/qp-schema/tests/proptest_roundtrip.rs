@@ -1,5 +1,13 @@
 //! Property tests: any finite f64 survives a JSON round-trip bit-for-bit.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use proptest::prelude::*;

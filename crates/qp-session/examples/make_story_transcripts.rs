@@ -14,6 +14,14 @@
 //! cargo run --release -p qp-session --example make_story_transcripts -- --stats
 //! ```
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 

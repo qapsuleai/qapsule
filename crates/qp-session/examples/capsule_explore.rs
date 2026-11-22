@@ -5,6 +5,14 @@
 //! cargo run -p qp-session --example capsule_explore -- <seed> <n> <k>
 //! ```
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::Path;
 
 use qp_schema::protocol::SessionInit;

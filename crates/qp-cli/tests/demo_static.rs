@@ -3,6 +3,14 @@
 //! itself without it, never a compressed copy older than its source, and answers a matching
 //! `If-None-Match` with `304`. The Host rule is unchanged.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpStream;

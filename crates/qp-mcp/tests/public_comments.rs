@@ -2,6 +2,14 @@
 //! public-view reader (here `guest`, entitled to no licensed flow) receives it on no
 //! path, however its text carries a number (superscript digits, another instrument).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_mcp::{Hub, SharedHub};

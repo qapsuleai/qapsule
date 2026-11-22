@@ -4,6 +4,14 @@
 //! layout), even when the importance order would put it below the page size. The demo's
 //! host (`qp demo --synthetic`), the human test's audience (`rounds/R4/human-test/plan.json`
 //! G2), sensitivity `balanced`.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_schema::protocol::{CapsuleItem, QueryResult, ServerMsg};

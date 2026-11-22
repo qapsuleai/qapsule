@@ -7,6 +7,14 @@
 //! warm-up run) and the output digest (identical on every target). Then the RP1 load
 //! lane table and profiles B, C and D (`--profiles lanes,b,c,d` by default, `--profiles none` to skip).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::time::Instant;
 
 use qp_compute::sweep::{

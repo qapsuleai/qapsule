@@ -1,6 +1,14 @@
 //! RP1/E8: certified late start = full run, bit for bit, on every bar of the tail, for
 //! random walks, flat and constant stretches, zeros, short series and every `from`.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_compute::late::{ema_tail, rsi_tail};

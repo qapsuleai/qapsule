@@ -4,6 +4,14 @@
 //! ledger, "few cases" is never hidden, the feed and the story list agree, the empty
 //! feed's count, and the K42 exemption as a parameter.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

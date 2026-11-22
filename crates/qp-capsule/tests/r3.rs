@@ -2,6 +2,14 @@
 //! detectors (`qp_facts::default_detectors`): realizer fixture, look-ahead, history
 //! replay, sentences from the engine (K26, K33).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "../examples/support/mod.rs"]
 mod support;
 

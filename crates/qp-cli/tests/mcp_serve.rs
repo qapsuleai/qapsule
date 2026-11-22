@@ -2,6 +2,14 @@
 //! the local-only defaults (Origin, token, non-local address), agent principals only,
 //! `render`, the measurement log, and `qp demo --mcp`.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};

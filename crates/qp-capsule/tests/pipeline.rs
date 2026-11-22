@@ -1,5 +1,13 @@
 //! Pipeline: look-ahead test (§9.4), determinism and replay, with fake detectors.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeSet;

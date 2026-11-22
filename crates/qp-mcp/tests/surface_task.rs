@@ -3,6 +3,14 @@
 //! gets no licensed number from any tool, and the three answer formats carry the same
 //! numbers.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeSet;
 use std::path::Path;
 

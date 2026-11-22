@@ -2,6 +2,14 @@
 //! (`reset: true`, epoch + 1) that closes every connection; the tool connects its
 //! watching connection again (`hello`, `capsules` + `changes`) and the stream goes on.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use assert_cmd::Command;
 use serde_json::Value;
 

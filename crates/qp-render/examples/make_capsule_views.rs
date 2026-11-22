@@ -5,6 +5,14 @@
 //! `rounds/R3/experiments/S/S-B.md`); existing files are never overwritten unless
 //! `--force` is given.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "../tests/support/capsule_gen.rs"]
 mod capsule_gen;
 

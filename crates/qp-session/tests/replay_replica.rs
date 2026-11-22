@@ -4,6 +4,14 @@
 //! wrongly or early, and the replica's document digest equals the authority's after
 //! every step. Two runs give byte-identical message streams.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

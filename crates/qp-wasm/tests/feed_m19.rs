@@ -1,5 +1,13 @@
 //! R5/M19 (K53): the presentation's feed rule and orders, and the empty feed, in the shell
 //! core — the core writes the empty feed's text (the shell only paints header rows).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_capsule::feedrule::{FeedRule, HideRule};

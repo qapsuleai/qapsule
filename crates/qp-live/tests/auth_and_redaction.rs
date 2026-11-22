@@ -1,5 +1,13 @@
 //! Token request rate limiting and secret masking (R6 VERIFY 5). Loopback only.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::net::TcpListener;
 use std::sync::Arc;
 use std::time::Duration;

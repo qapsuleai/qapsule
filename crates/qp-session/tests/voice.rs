@@ -13,6 +13,14 @@
 //!   (`hit.term`) and opens nothing; a tap elsewhere opens the capsule (K49).
 //! - Under `r4` nothing changes: no `voice` on the items, no terms in the scenes.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

@@ -2,6 +2,14 @@
 //! (`qp_grammar::look::FONTS`) name the same assets, every file parses, its licence file is
 //! in the repository, and every look's roles name an embedded asset.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::Path;
 
 #[test]

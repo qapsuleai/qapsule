@@ -9,6 +9,14 @@
 //! once the server comments (the one channel left, Ö37) are taken out. The scan tests add
 //! the field and digit rules on top.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 

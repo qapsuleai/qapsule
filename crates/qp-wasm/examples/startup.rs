@@ -11,6 +11,14 @@
 //! Prints one line per message (`host ms`, `core ms`, bytes) and the totals; WASM in the
 //! browser is slower by a roughly constant factor, the split is what this is for.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 

@@ -4,6 +4,14 @@
 //! the authority's own verification of closed bars or by a replica's dispute; a claim the
 //! feed missed is asserted from settled data; the replica disputes once.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::VecDeque;
 use std::path::{Path, PathBuf};
 

@@ -4,6 +4,14 @@
 //! full trade list, the price card kept for phases only, special trades optional.
 //! Hand-built trades with made-up symbols and prices; no network.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::cell::RefCell;
 
 use prost::Message as _;

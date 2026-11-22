@@ -8,6 +8,14 @@
 //! ```
 //! The digest column must be compared across targets (aarch64, x86_64, wasm32).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::time::Instant;
 
 use qp_compute::profiles::a_series;

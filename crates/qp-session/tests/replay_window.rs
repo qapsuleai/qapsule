@@ -1,6 +1,14 @@
 //! R4/T6: the replay host's history window (`ReplayHost::with_window`, `qp demo --history`
 //! with `--from`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::Path;
 
 use qp_schema::protocol::{ReplayInit, ReplaySourceKind};

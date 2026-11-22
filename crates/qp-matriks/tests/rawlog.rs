@@ -1,5 +1,13 @@
 //! Raw message log round trip and damage detection (hand-built records only).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use prost::Message;
 use qp_matriks::messages::SymbolMessage;
 use qp_matriks::rawlog::{HEADER_LEN, MAGIC};

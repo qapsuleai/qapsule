@@ -1,6 +1,14 @@
 //! BIST and NYSE bar boundaries: intraday, daily, weekly, monthly; daylight-saving
 //! transitions, half days, holidays; display time zone does not change alignment.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use qp_calendar::{builtin, days_from_civil, format_display, ExchangeCalendar, Interval, Span};
 use qp_schema::Bar;
 

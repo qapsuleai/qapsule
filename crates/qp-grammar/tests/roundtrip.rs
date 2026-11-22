@@ -2,6 +2,14 @@
 //! box maps back through the scene's `XMap`/`YMap` inverses to the item's bar slot and to
 //! a value within the item's values (one pixel of tolerance). Fixed proptest seed.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use proptest::prelude::*;

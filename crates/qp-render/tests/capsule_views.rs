@@ -7,6 +7,14 @@
 //! verify `views` loop runs that CLI on the same files). `c1-sentence` (sentence depth) is
 //! checked by `qp conform fixtures/views` (the presenter's text) and here.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "support/capsule_gen.rs"]
 mod capsule_gen;
 #[path = "support/golden_check.rs"]

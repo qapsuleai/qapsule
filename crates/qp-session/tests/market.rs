@@ -10,6 +10,14 @@
 //!   digits for a redacted reader).
 //! - The status survives a backward seek (a new authority).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

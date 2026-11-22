@@ -9,6 +9,14 @@
 //!   nothing; a tap on the claim opens the chart.
 //! - The device's check changes the trust row's words only (same layout, same terms).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 

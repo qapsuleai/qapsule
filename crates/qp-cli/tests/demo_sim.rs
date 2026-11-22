@@ -3,6 +3,14 @@
 //! VERIFY 17); on 127.0.0.1 the simulated demo serves the live page and its stats.
 //! A temporary made-up trade cache; no network beyond 127.0.0.1.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpStream;
 use std::process::{Child, Command, Stdio};

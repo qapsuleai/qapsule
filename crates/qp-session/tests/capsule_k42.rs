@@ -5,6 +5,14 @@
 //!
 //! The bound THYAO feed of the R3 transcripts (38–44), fed bar by bar.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::data::DataEvent;

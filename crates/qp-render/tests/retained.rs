@@ -1,6 +1,14 @@
 //! RP3/M12a: the retained painter (`qp_render::retained`) gives exactly the reference
 //! renderer's pixels, frame after frame, whatever changes between frames.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use qp_render::cpu::rasterize;
 use qp_render::retained::{Retained, RetainedOpts, Scratch};
 use qp_render::scene::{scene_of, stress_scene, Prim, Rgba};

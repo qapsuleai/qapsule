@@ -1,6 +1,14 @@
 //! Connection behaviour against the loopback mock broker and token service.
 //! Every address is 127.0.0.1; nothing leaves the machine.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::sync::Arc;
 use std::time::Duration;
 

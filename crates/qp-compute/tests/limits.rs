@@ -2,6 +2,14 @@
 //! integer in `1..=MAX_PERIOD`, in single runs, streaming studies and sweeps, and the
 //! error says what is wrong.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

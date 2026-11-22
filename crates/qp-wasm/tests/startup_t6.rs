@@ -1,4 +1,12 @@
 //! R4/T6: the faster opening paths give the same results as the general ones.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

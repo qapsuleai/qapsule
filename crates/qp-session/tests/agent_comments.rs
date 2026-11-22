@@ -1,6 +1,14 @@
 //! (R5B, `docs/PROTOCOL.md` §25.4) Comments: validated against what the writer may read,
 //! stored with provenance, sent to the readers that may receive them.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_schema::protocol::{Principal, SessionInit, Transcript};

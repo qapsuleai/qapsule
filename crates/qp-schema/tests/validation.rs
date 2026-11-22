@@ -1,5 +1,13 @@
 //! Fixtures and serialized values validate against the generated JSON Schema.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_schema::{Author, CapsuleState, Command, Op, Provenance};

@@ -1,5 +1,13 @@
 //! Depth rules (`docs/GRAMMAR.md` §13) and the RD1 transcript 16 shape of the chart view.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_grammar::depth::{capsule_view, chart_view, effective_depth, present, sentence};

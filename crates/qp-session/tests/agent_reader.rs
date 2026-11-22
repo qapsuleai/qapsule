@@ -4,6 +4,14 @@
 //! for an unentitled person gets, on every query and subscription, the bytes the person
 //! gets (identity fields aside) — so never a licensed number.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_schema::data::DataEvent;

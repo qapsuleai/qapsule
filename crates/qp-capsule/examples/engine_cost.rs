@@ -23,6 +23,14 @@
 //! first 60 bars warm the detectors and the ledger). Reported: mean per run, median of
 //! `runs` runs; ns per instrument-tick = market tick / 30.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 #[path = "support/mod.rs"]
 mod support;
 

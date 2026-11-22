@@ -1,6 +1,14 @@
 //! RP1/E4: `sweep_chains` = nested `Chain` single runs, bit for bit, for any output index,
 //! depth and series length; the result cache returns the same bits as a fresh run.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeMap;
 
 use qp_compute::graph::{content_hash, sweep_chains, ResultCache, Stage};

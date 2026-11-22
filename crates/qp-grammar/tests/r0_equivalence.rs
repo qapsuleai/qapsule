@@ -2,6 +2,14 @@
 //! grammar view equals, primitive for primitive and value for value, what the R0 layout
 //! (`qp_render::scene::build_scene` at 761cca9, frozen in `r0_oracle/`) produces.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod r0_oracle;
 mod support;
 

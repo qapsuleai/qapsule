@@ -14,6 +14,14 @@
 //! include seed 0 only check what does not depend on the world; tests 3 and 4 exclude it
 //! (audit, K1-c check: "yapılandırma, veri değil", PROTOCOL §20.5).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 

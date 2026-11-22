@@ -2,6 +2,14 @@
 //! mock broker: own lock, one connection per endpoint, both open at once on one identity,
 //! level-2 trade topics refused locally. Every address is 127.0.0.1.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::sync::Arc;
 use std::time::Duration;
 

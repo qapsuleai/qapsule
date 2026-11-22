@@ -8,6 +8,14 @@
 //! Prints one JSON object: timings (ms), FNV-1a hashes of the RGBA output (compare across
 //! machines/targets), and the pixel diff of the sample render against the golden PNG.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::PathBuf;
 use std::time::Instant;
 

@@ -4,6 +4,14 @@
 //! evaluated only if every principal responsible for it is entitled; a series a
 //! condition rests on is not re-pointed at a feed by an unentitled writer).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_schema::data::DataEvent;

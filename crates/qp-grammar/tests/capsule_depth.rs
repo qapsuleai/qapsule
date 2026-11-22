@@ -3,6 +3,14 @@
 //! evidence geometry (including the redacted case), and the glyph rule cross-check
 //! against the engine (`qp_capsule::glyph_spec`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_grammar::depth::{

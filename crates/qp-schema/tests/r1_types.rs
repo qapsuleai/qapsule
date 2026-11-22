@@ -1,6 +1,14 @@
 //! R1 schema additions: nullable warmup points, `StudyOutput`, `Instrument`, `Calendar`,
 //! `display_tz`, library validation and the bar series fixture format.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeMap;

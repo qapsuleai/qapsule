@@ -1,4 +1,12 @@
 //! RP3/M12a: where the time of a software paint goes (native; `--ignored`, prints).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use std::time::Instant;

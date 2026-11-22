@@ -1,5 +1,13 @@
 //! R4/S1: the presentation's defaults (M9–M11 picks) and the human-test URL settings
 //! (`?seen=`, `?watch=`/`?long=`), all in the shell core.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

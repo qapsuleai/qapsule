@@ -1,6 +1,14 @@
 //! R4/T5 security review: `qp demo` serves only its own Host, and `/send` needs the
 //! connection's secret, a same-origin `Origin` and a JSON body.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpStream;
 use std::process::{Child, Command, Stdio};

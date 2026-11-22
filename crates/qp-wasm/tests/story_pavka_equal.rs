@@ -17,6 +17,14 @@
 //! the M19 host rule marks coin flips), which the old `pavka` code would draw alike. The
 //! performance change's equality with the old code stays proven in-process by
 //! `qp-grammar`'s `story_pavka_equal` (7,488 scenes against a copy of the old `extend`).
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
 #![cfg(feature = "replica")]
 
 use qp_session::ReplayHost;

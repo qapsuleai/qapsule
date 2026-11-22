@@ -1,6 +1,14 @@
 //! The embedded transition tables equal jiff's bundled tzdb (the generator's source), and
 //! offsets / local→UTC agree with jiff over 1900–2100.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use jiff::{tz::TimeZone, Timestamp};
 use qp_calendar::{LocalTime, Zone};
 

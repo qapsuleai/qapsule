@@ -3,6 +3,14 @@
 //! (1,000 presentations per depth, one serialized output each); both views compile.
 //! `presenter_timing` (ignored) repeats the RD1/T6e latency measurement.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use std::collections::BTreeSet;

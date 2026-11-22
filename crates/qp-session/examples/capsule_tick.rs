@@ -37,6 +37,14 @@
 //! session per run; a timer per market tick (30 events), split into bar-close ticks and
 //! revision ticks; per run the mean; reported: median and spread (min–max) over `runs`.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::Path;
 use std::time::Instant;
 

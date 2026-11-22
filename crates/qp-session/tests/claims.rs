@@ -2,6 +2,14 @@
 //! values are data-plane values and never reach a principal without the feed's data
 //! entitlement (§18.3); the meaning (t, maturity, cleanliness, series ids) does.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::data::DataEvent;

@@ -16,6 +16,14 @@
 //! to `SNAPSHOT_OUT` for `gzip -6`). Runs natively and on wasm32-wasip1 (Node WASI,
 //! `rounds/RP2/experiments/tick-bench/run-wasi.mjs`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::Path;
 use std::time::Instant;
 

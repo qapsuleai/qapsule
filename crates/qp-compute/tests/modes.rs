@@ -2,6 +2,14 @@
 //! - batch = streaming = "revise the last bar", bit for bit;
 //! - output length = bar count; warmup values are `None`, all later values finite.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use proptest::prelude::*;

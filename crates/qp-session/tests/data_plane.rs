@@ -2,6 +2,14 @@
 //! validation, anchor stamping and the replay invariant, host data events (gap → stale,
 //! rejected events, re-resolution), the reading document never leaking bars.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 use std::path::{Path, PathBuf};
 
 use qp_schema::data::{BindingState, DataEvent};

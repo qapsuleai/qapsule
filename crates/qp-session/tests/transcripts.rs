@@ -1,6 +1,14 @@
 //! Runs the crate's own transcripts and, when present, the official conformance
 //! transcripts in-process (the `qp serve` transport is tested in `qp-cli`).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::too_many_lines,
+    clippy::cognitive_complexity
+)]
+
 mod support;
 
 use qp_session::conform::{collect_files, run_file, subset, TransportKind};

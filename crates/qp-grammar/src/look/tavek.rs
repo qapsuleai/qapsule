@@ -129,7 +129,8 @@ pub const TAVEK: Look = Look {
     },
     space: Space {
         scale: [4, 8, 12, 16, 24, 32],
-        plot: [8, 64, 28, 24],
+        // Bottom: the time axis plus a row for a face's trust mark under it (RD2 polish).
+        plot: [8, 64, 28, 40],
         panel_gap: 8,
         glyph_gap: 8.0,
     },
@@ -242,7 +243,7 @@ pub const TAVEK_TEL: Look = Look {
         note: trole(13.5, 1.3, "atkinson-next"),
     },
     space: Space {
-        plot: [8, 56, 28, 24],
+        plot: [8, 56, 28, 44],
         panel_gap: 12,
         glyph_gap: 10.0,
         ..TAVEK.space
@@ -262,7 +263,8 @@ pub const TAVEK_TEL: Look = Look {
         tab_h: 48.0,
         tab_pad: 10.0,
         control_h: 44.0,
-        control_pad: [10.0, 14.0],
+        // Narrow sides: the replay bar fits 390 px with its step counter (RD2 polish).
+        control_pad: [10.0, 8.0],
         bar_h: 56.0,
         cell_pad: [8.0, 12.0],
         badge_pad: [3.0, 8.0],

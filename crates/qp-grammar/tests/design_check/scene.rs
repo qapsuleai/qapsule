@@ -260,8 +260,8 @@ fn time_labels(s: &SceneDesc) -> (usize, usize) {
     (n, colors.len())
 }
 
-/// P2: distinct tones of the drawn colours (alpha ignored: a tone is a colour role).
-pub fn p2(s: &SceneDesc, scheme: &'static str) -> Row {
+/// The distinct tones of a scene's drawn colours: (hues, whether a neutral is drawn).
+fn tones(s: &SceneDesc) -> (usize, bool) {
     let bg = s.background;
     let mut neutral = false;
     let mut tones: Vec<[u8; 4]> = Vec::new();
@@ -288,14 +288,24 @@ pub fn p2(s: &SceneDesc, scheme: &'static str) -> Row {
             tones.push(c);
         }
     }
-    let n = tones.len() + usize::from(neutral);
+    (tones.len(), neutral)
+}
+
+/// P2: distinct tones of the drawn colours (alpha ignored: a tone is a colour role), in
+/// the desk scene and in the `desk-levels` scene (RD2 polish); the larger counts.
+pub fn p2(desk: &SceneDesc, levels: &SceneDesc, scheme: &'static str) -> Row {
+    let n = |s| {
+        let (h, n) = tones(s);
+        (h + usize::from(n), h)
+    };
+    let ((a, ha), (b, hb)) = (n(desk), n(levels));
     Row::check(
         "P2",
         scheme,
-        "distinct tones in the chart scene",
-        format!("{n} ({} hues + neutral)", tones.len()),
+        "distinct tones in the chart scene (desk / levels)",
+        format!("{a} / {b} ({ha} / {hb} hues + neutral)"),
         format!("<= {}", th::P2_TONES_MAX),
-        n <= th::P2_TONES_MAX,
+        a.max(b) <= th::P2_TONES_MAX,
     )
 }
 

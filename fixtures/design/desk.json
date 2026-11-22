@@ -4,7 +4,7 @@
     "add_study",
     "put_view"
   ],
-  "description": "RD2/S1 design fixture (synthetic): chart view `desk` with candles, SMA20 and EMA50 over price, volume bars coloured by direction in a lower pane, and an RSI(14) pane; 200 daily bars of the synthetic sample (fixtures/views/docs/base.json). scripts/design-check compiles it for P2 and P4-P8. RD2/C2b: view `desk-levels` adds Qapsule's levels (a human watch level and an agent's proposed support, each from its author's fact; RSI 70/30 thresholds, the engine's) for the level tags and origin strokes (scripts/design-check, design-gallery Ç2).",
+  "description": "RD2/S1 design fixture (synthetic): chart view `desk` with candles, SMA20 and EMA50 over price, volume bars coloured by direction in a lower pane, and an RSI(14) pane; 200 daily bars of the synthetic sample under the design name SYN20 (fixtures/design/docs/syn20.json, a copy of fixtures/views/docs/base.json). scripts/design-check compiles it for P2 and P4-P8. RD2/C2b: view `desk-levels` adds Qapsule's levels (a human watch level and an agent's proposed support, each from its author's fact; RSI 70/30 thresholds, the engine's) for the level tags and origin strokes (scripts/design-check, design-gallery Ç2).",
   "final": {
     "document": {
       "views": [
@@ -19,7 +19,7 @@
   },
   "init": {
     "clock": 1760000000000,
-    "document": "fixtures/views/docs/base.json",
+    "document": "fixtures/design/docs/syn20.json",
     "epoch": 0,
     "principals": [
       {

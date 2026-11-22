@@ -96,7 +96,8 @@ derlenmiş sahneden okur; sahne ölçütleri `fixtures/design/desk.json` görün
 
 - **P2 (sahne):** çizilen her ilkelin rengi; tam saydam ilkel ve arka plan rengi sayılmaz,
   alfa yok sayılır (ton bir renk rolüdür). CIELAB kroması 6'nın altındaki bütün renkler
-  **tek nötr ton** sayılır; kalanlar ΔE00 > 5 ile kümelenir.
+  **tek nötr ton** sayılır; kalanlar ΔE00 > 5 ile kümelenir. İki sahne ayrı sayılır:
+  `desk` ve `desk-levels` (köken renkleriyle); büyüğü eşiğe bakar (RD2 cila).
 - **P4 (sahne):** fiyat etiketlerinin ortanca aralığı (masaüstü) ve 300 px çizim alanındaki
   etiket sayısı.
 - **P5 (sahne):** 390 px'te zaman ekseni etiket sayısı; iki düzey = kayıtta
@@ -112,7 +113,17 @@ derlenmiş sahneden okur; sahne ölçütleri `fixtures/design/desk.json` görün
   seviyesi ve ajanın önerdiği destek, her biri yazarının olgusundan; RSI 70/30 eşikleri,
   motorun) iki temada derlenir: her seviyenin çizgisi köken renginde ve biçiminde (insan tek
   düz çizgi, ajan `agent_dash`, motor `DOT`), eksen etiketi köken renginde dolu; P6 bu
-  sahneleri de sayar (`design_check/levels.rs`).
+  sahneleri de sayar (`design_check/levels.rs`). **Etiket önceliği** (bir bölmede iki
+  etiket bir hap boyundan yakınsa): önce son değer etiketi, sonra seviye etiketleri
+  görünümdeki katman sırasıyla; çakışan sonraki etiket çizilmez (seviye çizgisi kalır),
+  bir etiketin altındaki eksen değeri yazılmaz (`compile/alphabet/levels.rs`). Ör.
+  `desk-levels`'ta RSI 70 etiketi RSI'nin son değer etiketine çakışınca düşer; P6 = 0
+  bu kuralla sağlanır.
+- **Bilinen sınır (RD2 cila):** `korda` seçili hikâyenin etiketini doğduğu bardan sağa
+  yazar; pencerenin sonuna birkaç bar kala doğan hikâyede yer ~40 px'tir ve etiket
+  kısalır (`tavek`, `aşa…`) ya da düşer (`tavek-tel`, 13 px). Görünüş değeriyle
+  çözülmez (etiket P10 tabanında); çözüm `korda`'nın yerleşiminde (yer darsa etiketi
+  doğumun soluna yazmak).
 - **H3 (kayıt):** anlam ve köken rollerinin her çifti; yalnız adı konmuş, bilerek paylaşılan
   çiftler (`valid`=`text`, `invalid`=`closed`=`neutral`; `docs/DESIGN.md` §1.6) atlanır.
 
@@ -194,7 +205,7 @@ Ajan çizgisinin kesiği: `4.0 3.0`.
 | değer | kayıt |
 |---|---|
 | boşluk ölçeği | 4, 8, 12, 16, 24, 32 |
-| çizim alanı kenarı (sol, sağ, üst, alt) | 8, 64, 28, 24 |
+| çizim alanı kenarı (sol, sağ, üst, alt) | 8, 64, 28, 40 |
 | panel arası | 8 |
 | denetim yarıçapı | 6.0 |
 | kart yarıçapı | 8.0 |
@@ -285,7 +296,7 @@ Ajan çizgisinin kesiği: `4.0 3.0`.
 | değer | kayıt |
 |---|---|
 | boşluk ölçeği | 4, 8, 12, 16, 24, 32 |
-| çizim alanı kenarı (sol, sağ, üst, alt) | 8, 56, 28, 24 |
+| çizim alanı kenarı (sol, sağ, üst, alt) | 8, 56, 28, 44 |
 | panel arası | 12 |
 | denetim yarıçapı | 6.0 |
 | kart yarıçapı | 8.0 |

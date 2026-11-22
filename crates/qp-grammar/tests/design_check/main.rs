@@ -99,7 +99,7 @@ fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Va
         );
         out.extend([
             record::p1(t),
-            scene::p2(&desk, s),
+            scene::p2(&desk, &lv_desk, s),
             record::p3(t),
             scene::p4(&desk, &plot, s),
             scene::p5(&phone, look, s),

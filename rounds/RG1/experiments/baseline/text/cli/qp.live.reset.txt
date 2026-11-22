@@ -1,0 +1,9 @@
+(RP4/T5, K64) A person's reset of an endpoint halt — a multi-connect notice or unexplained server closes (A52) — after they checked why. Removes `fixtures/local/live-<key>.halted` only with a non-empty `--note`, which goes with the time into `live-<key>.halted.log`. Asks to type the key on a terminal; without one it needs `--i-am-human`. An agent never runs this on its own (`docs/matriks/LIVE.md`). No network
+
+Usage: qp live reset [OPTIONS] --endpoint <ENDPOINT>
+
+Options:
+      --endpoint <ENDPOINT>  Endpoint key as the halt names it (e.g. `delayed-market`)
+      --note <NOTE>          Who resets and what was checked (required, non-empty) [default: ""]
+      --i-am-human           Confirms a person runs this when there is no terminal to ask on
+  -h, --help                 Print help

@@ -1,0 +1,53 @@
+(R5B/T2) The Qapsule MCP server for agents over a running session: stdio (default) or Streamable HTTP (`--http`, this machine only unless `--listen` with `--token-env`); the principal must be an agent; `--surface` picks the tool surface
+
+Usage: qp mcp serve [OPTIONS]
+
+Options:
+      --stdio
+          Serve over stdin/stdout (the default)
+      --http
+          Serve Streamable HTTP at `/mcp`
+      --port <PORT>
+          HTTP port (0: any free port; the address is written to stderr as `{"listening":"http://127.0.0.1:<port>/mcp"}`) [default: 0]
+      --listen <LISTEN>
+          HTTP address to listen on. Anything but this machine needs `--token-env` [default: 127.0.0.1]
+      --token-env <VAR|ID=VAR,…>
+          Bearer token every HTTP request must carry (`Authorization: Bearer …`), read from the environment. `VAR`: the token of `--principal`. `ID=VAR,ID=VAR`: one token per principal; a request speaks as the principal of its token (`X-Qp-Principal` is ignored). Required with a non-local `--listen`
+      --source <SOURCE>
+          Session source: `synthetic` (default), `local` (real bars under `fixtures/local/`), `sim` or `live` (not yet: R6) [default: synthetic]
+      --init <INIT>
+          A ready session init (`SessionInit` JSON) instead of the synthetic replay
+      --root <ROOT>
+          Directory that paths in the init are relative to (and confined to) [default: .]
+      --instruments <INSTRUMENTS>
+          Synthetic replay: instruments (default 30)
+      --days <DAYS>
+          Synthetic replay: trading days (default 260)
+      --seed <SEED>
+          Synthetic replay: seed (default 1)
+      --history <HISTORY>
+          Synthetic replay: bars of history before the first replayed bar (default 120)
+      --speed <SPEED>
+          Replay speed, steps per wall-clock second
+      --running
+          Run the replay with the wall clock (default: paused; agents move it with the `replay_*` tools)
+      --seek <YYYY-MM-DD>
+          Move the replay to this day before serving (`YYYY-MM-DD`)
+      --principal <PRINCIPAL>
+          Principal the server speaks as (an `agent` principal of the init) [default: claude]
+      --principals <ID,ID>
+          (Measurements) Further agent principals an HTTP request may pick with `X-Qp-Principal`. Loopback `--listen` only; elsewhere use `--token-env ID=VAR,…`
+      --surface <SURFACE>
+          Tool surface (`thin`; see `crates/qp-mcp/src/surfaces/README.md`) [default: thin]
+      --capsule-format <CAPSULE_FORMAT>
+          (R5B/M29, measurement) Default capsule format for tools that take `format` (`card`, `json`, `layered`) when a call gives none [possible values: card, json, layered]
+      --device <DEVICE>
+          Device surface kind sent in the `hello`: desktop, phone, watch, voice, headless [default: headless]
+      --log <LOG>
+          Measurement log: one JSON line per tool call (sizes and time only)
+      --run <RUN>
+          Measurement run label of the log lines (stdio; HTTP takes `X-Qp-Run`)
+      --dump <DUMP>
+          (Measurements only) Writes the authority's document — the owner's view, not projected to any reader — to this file after every request that wrote to the log (replaced atomically). Never for a served product
+  -h, --help
+          Print help

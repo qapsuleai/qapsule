@@ -1,0 +1,15 @@
+Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1); or, with `serve`, the Qapsule MCP server for agents (R5B: stdio or HTTP, a running session, agent principals only, tool surfaces)
+
+Usage: qp mcp [OPTIONS]
+       qp mcp <COMMAND>
+
+Commands:
+  serve  (R5B/T2) The Qapsule MCP server for agents over a running session: stdio (default) or Streamable HTTP (`--http`, this machine only unless `--listen` with `--token-env`); the principal must be an agent; `--surface` picks the tool surface
+  help   Print this message or the help of the given subcommand(s)
+
+Options:
+      --init <INIT>            Session init (`SessionInit` JSON)
+      --principal <PRINCIPAL>  Principal the adapter speaks as (sent in its `hello`)
+      --surface <SURFACE>      Surface kind: desktop, phone, watch, voice or headless [default: headless]
+      --root <ROOT>            Directory that document paths in the init are relative to (and confined to) [default: .]
+  -h, --help                   Print help

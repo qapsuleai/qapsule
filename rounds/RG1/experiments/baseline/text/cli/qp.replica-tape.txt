@@ -1,0 +1,9 @@
+Authority ↔ replica check (docs/PROTOCOL.md §19.6): run the reference authority and a replica on one tick stream (replica data `--lag` events behind), check the display rule with an independent oracle, and write the replica's input tape with the digests after every step (replayed by the WASM replica in Node)
+
+Usage: qp replica-tape [OPTIONS] --out <OUT>
+
+Options:
+      --lag <LAG>  Replica data delay in events [default: 0]
+  -o, --out <OUT>  Output tape (JSON)
+      --viewer     (RP3/M15, §22) The viewer variant: the device opens the capsule and holds only that instrument's slice, claims and data (a second instrument stays on the authority); writes the outcome instead of a tape
+  -h, --help       Print help

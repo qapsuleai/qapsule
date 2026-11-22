@@ -1,0 +1,29 @@
+M22: build bars from raw logs with the live feed and compare them with REST bars (`qp live bars` files); prints only an aggregate table
+
+Usage: qp live compare [OPTIONS] --raw <RAW>
+
+Options:
+      --raw <RAW>
+          Raw logs, comma-separated, replayed in this order as one recording (a file after the first starts with a connection loss unless the previous one ended with one)
+      --rest-dir <REST_DIR>
+          REST bars directory (`<SYM>.<period>.<start>.<end>.<adj|unadj>.json`) [default: fixtures/local/live/rest]
+      --intervals <INTERVALS>
+          Intervals (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`) [default: 1m,5m,1h,1d]
+      --methods <METHODS>
+          Methods: `ticks`, `card`, `mixed` (`card` is reported on `1d` only: intraday it is `ticks`) [default: ticks,card,mixed]
+      --volume-fields <VOLUME_FIELDS>
+          Volume fields: `daily`, `volume` [default: daily,volume]
+      --volume-unit <VOLUME_UNIT>
+          Volume unit: `value` (REST `volume`) or `quantity` (REST `quantity`) [default: value]
+      --time <TIME>
+          Tick time: `update_date` or `arrival` [default: update_date]
+      --finalize-grace-ms <FINALIZE_GRACE_MS>
+          Finalize grace (ms) [default: 2000]
+      --price-tol <PRICE_TOL>
+          Absolute price tolerance for the "within tolerance" columns [default: 0.000001]
+      --volume-tol <VOLUME_TOL>
+          Relative volume tolerance for the "within tolerance" columns [default: 0.01]
+      --adjusted
+          Prefer adjusted REST files (default: unadjusted, falling back to adjusted)
+  -h, --help
+          Print help

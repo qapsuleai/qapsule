@@ -1,0 +1,11 @@
+Fetch settled REST bars into `fixtures/local/live/rest/` (sequential, paced)
+
+Usage: qp live bars [OPTIONS] --symbols <SYMBOLS> --period <PERIOD> --start <START>
+
+Options:
+      --symbols <SYMBOLS>  Comma-separated symbols or `@file`
+      --period <PERIOD>    REST period (`1min`, `5min`, `1hour`, `1day`, `15min`, …)
+      --start <START>      First local date `YYYY-MM-DD`
+      --end <END>          Last local date (default: `start`)
+      --unadjusted         Unadjusted prices (`divide=false`)
+  -h, --help               Print help

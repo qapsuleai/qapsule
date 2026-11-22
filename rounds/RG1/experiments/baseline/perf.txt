@@ -1,0 +1,56 @@
+# rg1-perf 2026-11-22T10:35Z Darwin arm64 commit 27656b1
+## K17 sweep_bench
+machine: aarch64-macos, cpu: Apple M4 Max, threads: 16
+bars=10000 reps=15 (single thread, release)
+study       variants    min ms    med ms    max ms  digest
+sma             1000      4.21      4.76      4.84  d9a393c2f397ae9e
+ema             1000      3.59      3.88      3.96  f9be271e91103539
+rsi             1000      9.06      9.21      9.41  9515526d5288453b
+macd            1000      7.69      7.93      8.12  d5a6c407256992e6
+bollinger       1000      8.84      9.44      9.61  7e683c082fb95dc9
+
+## WASM (verify step 8)
+raw=2280713 gzip9=745478
+## WASM shell package (web, replica)
+raw=8923686 gzip9=2506216
+## K52 metrics.mjs (CPU x4)
+   "n": 269,
+   "p50": 1.6,
+   "p95": 3.8,
+   "p99": 10.5
+  },
+  "pass_wait": {
+   "max": 42.8,
+   "mean": 4.846,
+   "n": 268,
+   "p50": 4.6,
+   "p95": 9.1,
+   "p99": 15
+  },
+  "scene": {
+   "max": 25.1,
+   "mean": 5.475,
+   "n": 8,
+   "p50": 2.1,
+   "p95": 25.1,
+   "p99": 25.1
+  },
+  "scene_build": {
+   "max": 21.4,
+   "mean": 0.811,
+   "n": 119,
+   "p50": 0.7,
+   "p95": 1.2,
+   "p99": 6.2
+  },
+  "tick": {
+   "max": 2,
+   "mean": 0.147,
+   "n": 125,
+   "p50": 0.1,
+   "p95": 0.6,
+   "p99": 0.8
+  }
+ },
+ "warnings": []
+}

@@ -1,0 +1,89 @@
+crate           non-test    test
+qp-session         31644   15267
+qp-grammar         19966    8924
+qp-capsule         13059    5621
+qp-cli             11653    6131
+qp-wasm            10660    4522
+qp-mcp              7929    3110
+qp-schema           7893     778
+qp-live             5081    2130
+qp-compute          4752    2380
+qp-source           4201    2898
+qp-matriks          3655    2681
+qp-facts            2097     983
+qp-render           1746    1854
+qp-calendar         1178     400
+crates/qp-calendar files=7
+crates/qp-capsule files=43
+crates/qp-cli files=24
+crates/qp-compute files=40
+crates/qp-facts files=15
+crates/qp-grammar files=60
+crates/qp-live files=18
+crates/qp-matriks files=19
+crates/qp-mcp files=18
+crates/qp-render files=24
+crates/qp-schema files=17
+crates/qp-session files=90
+crates/qp-source files=17
+crates/qp-wasm files=34
+  136708 total
+    4916 crates/qp-schema/src/protocol.rs
+    3713 crates/qp-session/src/session.rs
+    3425 crates/qp-session/src/capsule.rs
+    3419 crates/qp-wasm/src/shell.rs
+    3067 crates/qp-cli/src/livehost.rs
+    2550 crates/qp-mcp/src/surfaces/query.rs
+    2472 crates/qp-cli/src/live.rs
+    2291 crates/qp-session/src/expand.rs
+    2160 crates/qp-capsule/src/voice/selvi.rs
+    2001 crates/qp-capsule/src/voice/marla.rs
+    1942 crates/qp-grammar/src/look.rs
+    1919 crates/qp-session/src/select.rs
+    1761 crates/qp-grammar/src/layer.rs
+    1718 crates/qp-cli/src/demo.rs
+    1662 crates/qp-mcp/src/surfaces/task.rs
+    1631 crates/qp-cli/src/live_trades.rs
+    1603 crates/qp-cli/src/sim.rs
+    1488 crates/qp-session/src/canon.rs
+    1408 crates/qp-session/src/viewer.rs
+    1395 crates/qp-matriks/src/feed.rs
+    1387 crates/qp-cli/src/main.rs
+    1343 crates/qp-grammar/src/compile.rs
+    1336 crates/qp-session/src/replayhost.rs
+    1300 crates/qp-session/src/interact.rs
+    1296 crates/qp-wasm/src/lib.rs
+    1229 crates/qp-cli/src/mcp_serve.rs
+    1204 crates/qp-mcp/src/surfaces/mixed.rs
+    1188 crates/qp-wasm/src/gallery.rs
+    1128 crates/qp-live/src/conn.rs
+    1113 crates/qp-wasm/src/shell/paint_canvas.rs
+    1089 crates/qp-grammar/src/stories/korda.rs
+    1056 crates/qp-mcp/src/lib.rs
+    1056 crates/qp-capsule/src/engine.rs
+    1040 crates/qp-capsule/src/comment.rs
+    1038 crates/qp-session/src/query.rs
+    1036 crates/qp-session/src/live.rs
+    1034 crates/qp-wasm/src/drive.rs
+    1018 crates/qp-cli/src/sim/tests.rs
+    1012 crates/qp-grammar/src/depth.rs
+     992 crates/qp-grammar/src/stories/pavka.rs
+     950 crates/qp-source/src/livebar.rs
+     946 crates/qp-session/src/replica.rs
+     920 crates/qp-grammar/src/transitions/nabiz.rs
+     912 crates/qp-live/src/mock.rs
+     878 crates/qp-grammar/src/advances.rs
+     875 crates/qp-grammar/src/open/nobra.rs
+     869 crates/qp-session/src/capidx.rs
+     860 crates/qp-wasm/src/shell/paint_gpu.rs
+     856 crates/qp-grammar/src/draw.rs
+     828 crates/qp-session/src/public.rs
+     821 crates/qp-grammar/src/glyph/siluet.rs
+     819 crates/qp-grammar/src/open/tesir.rs
+     817 crates/qp-session/src/summary.rs
+     816 crates/qp-grammar/src/motion.rs
+     816 crates/qp-capsule/src/realize/elapsed.rs
+     808 crates/qp-schema/src/types.rs
+     763 crates/qp-session/src/plane.rs
+     751 crates/qp-source/src/replay.rs
+     748 crates/qp-capsule/src/outcome.rs

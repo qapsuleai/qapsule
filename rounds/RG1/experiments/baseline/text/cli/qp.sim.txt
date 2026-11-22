@@ -1,0 +1,19 @@
+(RP4/T4) Accelerated simulation: cached historical trades (`fixtures/local/trades`) through the live path (`LiveFeed` with trades → live host → capsule engine) on a simulated exchange clock, `--speed N` or `max`, over several days (XIST calendar). Prints counts and a digest; `--out` (under `fixtures/local/`) gets the event stream. Same cache and arguments → byte-equal stream (`docs/matriks/LIVE.md` §8)
+
+Usage: qp sim [OPTIONS] --start <START>
+
+Options:
+      --symbols <SYMBOLS>        Universe: comma-separated symbols or `@file` (one per line) [default: @fixtures/local/live/u100.txt]
+      --start <START>            First day (`YYYY-MM-DD`, exchange time zone)
+      --end <END>                Last day (inclusive; default: `--start`)
+      --at <HH:MM>               (RP4/T6) Start time on the first day (`HH:MM`, exchange time zone; default: midnight). That day's earlier trades are history
+      --interval <INTERVAL>      Bar interval (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`) [default: 5m]
+      --speed <SPEED>            Pace: `N` (N× real time inside sessions) or `max` (no waiting) [default: max]
+      --history <HISTORY>        Settled bars of history before the start (the first resolution) [default: 120]
+      --out <OUT>                Event stream (JSON lines) — only under `fixtures/local/` (real data)
+      --rule <RULE>              Capsule constant record by name (`r3`, the default; `rp4`) [default: r3]
+      --feed-rule <FEED_RULE>    The host's feed rule (as `qp demo --feed-rule`) [default: rate55]
+      --trades-dir <TRADES_DIR>  Cached trades (`<dir>/<SYM>/<start>_<end>.csv.gz`) [default: fixtures/local/trades]
+      --rest-dir <REST_DIR>      Cached REST bars (`<SYM>.<period>.<start>.<end>.unadj.json`) [default: fixtures/local/live/rest]
+      --root <ROOT>              Repository root (relative paths of the session init; `--out` must be under its `fixtures/local/`) [default: .]
+  -h, --help                     Print help

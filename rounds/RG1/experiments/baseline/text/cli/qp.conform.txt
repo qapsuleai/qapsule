@@ -1,0 +1,11 @@
+Run protocol conformance transcripts (docs/PROTOCOL.md §15)
+
+Usage: qp conform [OPTIONS] <INPUTS>...
+
+Arguments:
+  <INPUTS>...  Transcript files or directories of `*.json` transcripts
+
+Options:
+      --transport <TRANSPORT>  Transport: `inproc` (default), `serve` (spawns `qp serve`) or `mcp` (one MCP adapter per connection over an in-process session) [default: inproc]
+      --root <ROOT>            Repository root (paths in transcripts are relative to it) [default: .]
+  -h, --help                   Print help

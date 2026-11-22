@@ -1,0 +1,11 @@
+Validate a JSON instance against a root schema
+
+Usage: qp schema validate [OPTIONS] --type <TYPE_NAME> <FILE>
+
+Arguments:
+  <FILE>  JSON instance file
+
+Options:
+      --type <TYPE_NAME>         Root type name (e.g. Capsule, Document)
+      --schema-dir <SCHEMA_DIR>  Read `<DIR>/<Name>.schema.json` instead of the built-in schema
+  -h, --help                     Print help

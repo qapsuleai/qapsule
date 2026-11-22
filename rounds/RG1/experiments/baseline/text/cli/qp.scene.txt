@@ -1,0 +1,17 @@
+Print the compiled scene description (`SceneDesc` JSON) of a view
+
+Usage: qp scene [OPTIONS]
+
+Options:
+      --init <INIT>              Session init (`SessionInit` JSON). Default: the transcript's init
+      --transcript <TRANSCRIPT>  A conformance transcript whose messages are sent first (its expectations are not checked), e.g. one that builds the view with grammar operations
+      --view <VIEW>              View id
+      --present <PRESENT>        Instead of `--view`: present this finding (`present` query) on `--surface` and use the presentation's view (`capsule_view` at capsule depth, `view` at chart depth)
+      --surface <SURFACE>        Surface kind for `--present`: desktop, phone, watch, voice or headless [default: desktop]
+      --root <ROOT>              Directory that paths in the init and transcript are relative to (and confined to) [default: .]
+      --width <WIDTH>            Frame width in pixels [default: 1200]
+      --height <HEIGHT>          Frame height in pixels [default: 600]
+      --pretty                   Pretty-print the JSON (`qp scene`)
+      --look <LOOK>              (R5/T3) Look to compile with (`qp look list`; default `r4`)
+      --roles                    (R5/T3) Write each text's type role into the scene (`role`; for measurement)
+  -h, --help                     Print help

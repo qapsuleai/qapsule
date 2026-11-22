@@ -1,0 +1,55 @@
+Replay historical bars like a live feed (docs/PROTOCOL.md §21): local real data (`fixtures/local/bars`, or `--local-bars`) or the synthetic market, through the reference authority with the capsule engine on every instrument. Writes one JSON line per message the authority sends a watching connection (owner `arkin`, subscribed to `capsules` and `changes`) and per replay result; after a backward seek (a new authority, `reset: true`) it connects again the same way and goes on; two runs with the same arguments write the same bytes
+
+Usage: qp replay [OPTIONS]
+
+Options:
+      --init <INIT>
+          Session init with `init.replay` (default: the demo init built from the flags)
+      --source <SOURCE>
+          `synthetic` or `local` (falls back to synthetic, and says so, without data) [default: synthetic]
+      --local-bars <LOCAL_BARS>
+          Local bars directory (default: `$QAPSULE_LOCAL_BARS` or `fixtures/local/bars`)
+      --instruments <INSTRUMENTS>
+          Number of instruments [default: 30]
+      --days <DAYS>
+          Synthetic market: trading days [default: 260]
+      --seed <SEED>
+          Synthetic market: seed [default: 1]
+      --interval <INTERVAL>
+          Feed interval [default: 1d]
+      --fine <FINE>
+          Finer interval that moves a bar inside its day (`1h`; `none` for the OHLC path) [default: 1h]
+      --history <HISTORY>
+          Bars of history before the first replayed bar (without `--from`) [default: 120]
+      --from <FROM>
+          First replayed day (`YYYY-MM-DD`)
+      --to <TO>
+          Last replayed day (`YYYY-MM-DD`)
+      --steps <STEPS>
+          Steps to take (default: all)
+      --controls <CONTROLS>
+          Recorded controls: a JSON array of `{"at": <step>, "control": <ReplayControl>}`, applied when the replay has taken `at` steps (before the next one)
+      --emit <EMIT>
+          What to write: `messages` (default), `events` (the data events, `{"t","event"}`) or `none` [default: messages]
+      --stats
+          Print a timing summary to stderr (steps, events, ms per step, per virtual day)
+  -o, --out <OUT>
+          Write here instead of stdout
+      --root <ROOT>
+          Directory that document paths in `--init` are relative to [default: .]
+      --raw <RAW>
+          (R6/T5) Replay a Matriks raw log (`*.qpraw`, under `fixtures/local/`) through the live feed (`qp_matriks::LiveFeed`, the same pipeline as the live connector): one JSON line per output (data event, clock, connection, phase, final bar). The other flags above do not apply; see `--intervals`, `--method`, `--volume-field`, `--time`
+      --intervals <INTERVALS>
+          Bar intervals (comma-separated) [default: 1m,5m,1h,1d]
+      --method <METHOD>
+          Bar method: `ticks`, `card` (card day fields on `1d`, ticks elsewhere) or `mixed` [default: ticks]
+      --volume-field <VOLUME_FIELD>
+          Volume counters: `daily` (`dailyVolume`/`dailyQuantity`) or `volume` (`volume`/`quantity`) [default: daily]
+      --volume-unit <VOLUME_UNIT>
+          Volume unit: `value` (TL, like REST `volume`) or `quantity` (lots) [default: value]
+      --time <TIME>
+          Tick time: `update_date` (exchange time from `updateDate`) or `arrival` [default: update_date]
+      --finalize-grace-ms <FINALIZE_GRACE_MS>
+          Bars are closed this long after the clock passes their end (ms) [default: 2000]
+  -h, --help
+          Print help

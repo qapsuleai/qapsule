@@ -1,0 +1,12 @@
+(R4/T5) Drive the demo session with protocol messages only (no shell) and print the document and scene digests the web shell reports (parity check)
+
+Usage: qp drive [OPTIONS] --script <SCRIPT>
+
+Options:
+      --mode <MODE>                (RP3/M15) `replica` (the R4 full replica, default) or `viewer` (§22) [default: replica]
+      --instruments <INSTRUMENTS>  (RP3/M15) Instruments of the synthetic universe [default: 30]
+      --script <SCRIPT>            Script (JSON array of steps; see `qp_wasm::drive`)
+      --principal <PRINCIPAL>      Principal [default: arkin]
+      --lang <LANG>                Language (`tr`, `en`) [default: tr]
+      --out <OUT>                  Output file (default: standard output)
+  -h, --help                       Print help

@@ -1,0 +1,10 @@
+One look's whole record as JSON (fonts, type roles, colour roles of both schemes, spacing, surface, glyph, motion)
+
+Usage: qp look show [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>  Look name
+
+Options:
+      --pretty  Pretty-print the JSON
+  -h, --help    Print help

@@ -1,0 +1,25 @@
+Qapsule command line
+
+Usage: qp <COMMAND>
+
+Commands:
+  schema        JSON Schema export and validation
+  compute       Run a study (sma, ema, rsi, macd, bollinger) over a bar series and print the result as `StudyOutput` JSON: one value per bar, warmup `null` (K13)
+  render        Render to PNG with the reference renderer: a bars JSON file as the R0 chart (candles + SMA(20)), or a view of a session built from an init/transcript (`--view`), or the view of a presentation (`--present`, `--surface`)
+  serve         Run the protocol authority (`qp/0`) over stdin/stdout: one JSON line per message, `{"conn":…,"msg":…}` in and out (docs/PROTOCOL.md §3)
+  mcp           Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1); or, with `serve`, the Qapsule MCP server for agents (R5B: stdio or HTTP, a running session, agent principals only, tool surfaces)
+  explain       Print a plain-text semantic summary of a view, read from its compiled scene (panels, scales and visible domains, layers with data, origins and last values, emphasis). Headless: nothing is rendered
+  scene         Print the compiled scene description (`SceneDesc` JSON) of a view
+  look          (R5/T3) The looks (design records): list them, show one as JSON, or its CSS custom properties
+  replica-tape  Authority ↔ replica check (docs/PROTOCOL.md §19.6): run the reference authority and a replica on one tick stream (replica data `--lag` events behind), check the display rule with an independent oracle, and write the replica's input tape with the digests after every step (replayed by the WASM replica in Node)
+  replay        Replay historical bars like a live feed (docs/PROTOCOL.md §21): local real data (`fixtures/local/bars`, or `--local-bars`) or the synthetic market, through the reference authority with the capsule engine on every instrument. Writes one JSON line per message the authority sends a watching connection (owner `arkin`, subscribed to `capsules` and `changes`) and per replay result; after a backward seek (a new authority, `reset: true`) it connects again the same way and goes on; two runs with the same arguments write the same bytes
+  demo          (R4/T5) The local demo: replay host + authority + the web shell on one origin (`scripts/demo.sh`; `shells/web/README.md`)
+  sim           (RP4/T4) Accelerated simulation: cached historical trades (`fixtures/local/trades`) through the live path (`LiveFeed` with trades → live host → capsule engine) on a simulated exchange clock, `--speed N` or `max`, over several days (XIST calendar). Prints counts and a digest; `--out` (under `fixtures/local/`) gets the event stream. Same cache and arguments → byte-equal stream (`docs/matriks/LIVE.md` §8)
+  drive         (R4/T5) Drive the demo session with protocol messages only (no shell) and print the document and scene digests the web shell reports (parity check)
+  live          (R6) The live Matriks connection: record raw messages, inspect a raw log (`docs/matriks/LIVE.md`). Values come from the environment (`scripts/live.sh`)
+  conform       Run protocol conformance transcripts (docs/PROTOCOL.md §15)
+  help          Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version

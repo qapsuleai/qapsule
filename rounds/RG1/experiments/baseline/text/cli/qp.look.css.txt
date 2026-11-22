@@ -1,0 +1,10 @@
+The shell chrome's CSS custom properties of a look in a scheme, one per line
+
+Usage: qp look css [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>  Look name
+
+Options:
+      --theme <THEME>  `dark` or `light` (default: the look's own)
+  -h, --help           Print help

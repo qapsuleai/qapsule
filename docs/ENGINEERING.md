@@ -32,7 +32,9 @@ kalıpları gibi) da aynı düzensizliğin içine düşer.
 
 ## 2. Katmanlar ve bağımlılık yönü
 
-Bağımlılık yalnız aşağı doğrudur; yukarı ya da yana bağımlılık denetimde hata verir.
+Bağımlılık yalnız aşağı doğrudur; yukarı bağımlılık denetimde hata verir. Aynı katmanda bağımlılık
+yalnız bildirilmiş, döngüsüz bir sırayla olur (`scripts/arch-config.json`; K87). Geliştirme
+bağımlılıkları (testler, örnekler) katmanlanmaz.
 
 ```
 kabuklar        qp-cli, qp-wasm, shells/*            (yalnız bağlama; alan mantığı yok)
@@ -110,7 +112,7 @@ Her parametrenin tanımı:
 | Hak mı? | satılabilir kullanım hakkı mı (soru adedi, yapay zekâ kullanımı, kontör, hesap bütçesi) |
 | Açıklama, eklendiği sürüm | kullanıcıya gösterilecek metin |
 
-- **Çözümleme sırası:** nesne > kullanıcı > plan > sistem. Etkin değer her zaman kaynağıyla
+- **Çözümleme sırası:** nesne > enstrüman > kullanıcı > plan > sistem (K87). Etkin değer her zaman kaynağıyla
   birlikte sorulabilir ("neden 3?" → "sistem varsayılanı").
 - **Türler:** davranış varsayılanları (tutunma barı, kırılımda kapanış / dokunmada fitil,
   ara periyot seçimi), sınırlar ve haklar (günlük soru, model kullanımı, etkin görev sayısı,
@@ -183,3 +185,24 @@ karıştırılmaz:
 | `DECISIONS.md` | 90 KB | alan dosyaları + dizin |
 | Parametre kayıt defteri | yok | §6 |
 | `arch-check` | yok (yalnız `shells/web/arch-check.mjs`) | depo geneli |
+
+## 12. RG1 sonrası inceltmeler (K87)
+
+- **Katman haritası güncel hali** `scripts/arch-config.json`'dadır: `qp-host` ve `qp-shellcore`
+  uyarlayıcı katmanında, `qp-source` alan katmanında (dosya okuma kısmı RF1'de uyarlayıcıya ayrılır).
+- **Sayım:** crate ve kabuk bütçesi test dışı satırla sayılır; dosya sınırı ham satırdır.
+- **Üretilmiş dosya ve veri tablosu** bütçe dışı sayılmak için adıyla listelenir
+  (`arch-config.json` `generated_files`); başlıktaki "üretilmiştir" sözü tek başına yetmez.
+- **Tek fonksiyonu 800 satırı aşan dosya:** önce fonksiyon bölünür, sonra dosya. Taşıma
+  round'larında istisna olarak adıyla yazılır.
+- **İstisna ve taban çizgisi:** `arch-config.json` ve `arch-baseline.json` farkları her round'da
+  denetçinin kontrol listesindedir. Yeni istisna ya da üretilmiş dosya eklemek karar satırı ister.
+  İstisna değerleri mandallıdır: yalnız azalır.
+- **Lint:** `unimplemented` ve `unreachable` de kütüphane kodunda yasaktır (RF1'de açılır).
+- **Doğrulama derlemesi:** ortak `CARGO_TARGET_DIR` yalnız disk içindir. Kesin hükmü veren
+  derleme (denetçi, birleştirme öncesi ve sonrası karşılaştırma) iş başına ayrı klasörde koşar
+  ve iş bitince silinir.
+- **Taşıma denetimi** (öğe parmak izi) kalıcı araçtır; `arch-check` sözcük taraması yerine
+  sözdizimi ağacına geçer (RF1).
+- **RF1'e kadar (K89):** `qp-session`'a net satır eklenmez; yeni alt sistem yeni crate'te doğar.
+- Güncel borç `docs/DEBT.md`'dedir; §11 tarihsel kayıttır.

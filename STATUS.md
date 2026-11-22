@@ -5,10 +5,10 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. RG1 (yönetişim turu) tamamlandı (2026-11-22; `rounds/RG1/REPORT.md`, `AUDIT.md`). Sıradaki RD2 (K81).
+- **Aktif round:** yok. RG1 tamamlandı ve kabul edildi (K87). Sıradaki **RD2** (tasarım; paket `rounds/RD2/`), ardından **RF1** (oturumun bölünmesi, K89).
 - **Son güncelleme:** 2026-11-22
 - **Hedef düzeltmesi (K69–K83):** ana akış araştırma kanalıyla birleşti; yeni oturum `docs/HANDOFF.md`'den başlar. Yeni sıra (K81): RG1 → RD2 → RL1 → R7 → RS1 → RA1 → R8 → R9.
-- **Sıradaki adım:** İ1–İ7 istisnaları onaylandı (K85). Ana akış RG1 raporunu okur ve karar verir: kural önerileri K-1…K-11 (§9), önerilen kararlar Ö103–Ö108 / A63–A64 (`docs/decisions/rounds/RG1.md`), `recovered/worktree-agent/*` 24 dal (öneri: hepsi silinsin, §11). Sonra RD2 tasarlanır. Bundan sonra her round `scripts/arch-check` yeşil ve borç taban çizgisi (`docs/DEBT.md`) büyümeden kapanır (K80). Ana akışta ayrıca bekleyenler: R5B önerileri (Ö94–Ö102, A57–A62) ve RP4 önerileri (Ö77–Ö93, A53–A56); `recovered/worktree-agent/*` dallarının kararı; beş dakikalık ajan denemesi (`rounds/R5B/REPORT.md` son bölüm); ilk iş gününde RP4 canlı doğrulamaları.
+- **Sıradaki adım:** RD2'yi başlat (`rounds/RD2/PROMPT.md`). Kararlar işlendi: K86 (RP4 ve R5B önerileri), K87 (RG1 kabul, kural inceltmeleri), K88 (kurumsal işlemde izleme), K89 (RF1 ve sıra: RG1 → RD2 → RF1 → RL1 → R7 → RS1 → RA1 → R8 → R9). RF1'e kadar `qp-session`'a net satır eklenmez. Arkin'de bekleyenler: beş dakikalık ajan denemesi (`rounds/R5B/REPORT.md` son bölüm); ilk iş gününde RP4 canlı doğrulamaları; RD2'de iki karar noktası (yön seçimi, son kabul).
 
 ## Round geçmişi
 
@@ -53,8 +53,10 @@ Her round sonunda güncellenir.
 
 ## Arkin'den beklenenler
 
-- **R5B:** beş dakikalık deneme (`rounds/R5B/REPORT.md` son bölüm); önerilen kararlar Ö94–Ö102, açık A57–A60 (`DECISIONS.md`); `recovered/worktree-agent/*` (24 dal) silinsin mi (`rounds/R5B/REPORT.md` §6).
-- **RP4:** önerilen kararlar Ö77–Ö93, açık A53–A56 (`DECISIONS.md`); ilk iş günü listesi `rounds/RP4/REPORT.md` §13; gün içi gösterimde `--rule rp4` varsayılan olsun mu (Ö79).
+- **RD2:** iki karar noktası (yön seçimi, son kabul). Başvurular `../refs` içindeki incelenmiş projelerden; ayrıca görsel beklenmiyor.
+- **R5B:** beş dakikalık deneme (`rounds/R5B/REPORT.md` son bölüm). Öneriler kabul edildi (K86).
+- **RP4:** ilk iş günü listesi `rounds/RP4/REPORT.md` §13. Öneriler kabul edildi (K86).
+- Kurumsal işlemde izleme kararı verildi (K88; RS1 kapsamı).
 
 - **R6:**
   - Anlık kip: `.env.local`'da `MATRIKS_MQTT_MODE=realtime` yap ve haber ver (A49).

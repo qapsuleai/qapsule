@@ -83,7 +83,9 @@ Worktree başına ayrı `target/` klasörü diski hızla doldurur (bir kez 400 G
 
 - Bütün worktree'ler tek bir ortak derleme klasörü kullanır: alt ajanı başlatırken
   `CARGO_TARGET_DIR` ana ağacın `target/` klasörünü göstersin. Worktree içinde ayrı
-  `target/` oluşturma. Eşzamanlı derlemeler kilit bekler; bu kabul edilir.
+  `target/` oluşturma. Eşzamanlı derlemeler kilit bekler; bu kabul edilir. Kesin hükmü veren
+  derleme (denetçi, birleştirme öncesi karşılaştırma) iş başına ayrı klasörde koşar
+  (`target/wt/<iş>`) ve iş bitince silinir (K87).
 - Bir alt görev birleştirildiğinde ya da elendiğinde worktree'sini hemen kaldır
   (`git worktree remove`), dalı raporda adıyla bırak. Elenen alternatifin kodu dalda
   kalır, klasörü kalmaz.
@@ -112,6 +114,12 @@ Worktree başına ayrı `target/` klasörü diski hızla doldurur (bir kez 400 G
   `git status --porcelain --ignored` özetinde beklenmeyen artık dosya yok.
 - Temizlik depo dışına (oturumun kendi geçici klasörleri hariç), `.env.local`'a ve başka
   projelere dokunmaz. Emin olmadığın dosyayı silme; raporda sor.
+
+## Yapı (K80, K89)
+
+- Her round `scripts/arch-check` yeşil ve borç taban çizgisi büyümeden kapanır.
+- RF1'e kadar `qp-session`'a net satır eklenmez; yeni alt sistem yeni crate'te doğar.
+- Yeni istisna ya da taban çizgisi gevşetmesi karar satırı ister; kendin ekleme, sor.
 
 ## Round kapanışı
 

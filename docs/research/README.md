@@ -12,6 +12,7 @@ belgelerinin kopyasını ve geri kalanının dizinini tutar. `../refs` salt okun
 | `RX-DECISIONS.md` | Araştırma kanalının kararları X1–X35 (ayrıntılı; K69–K83'ün kaynağı) |
 | `RX-PROPOSALS.md` | Qapsule için öneriler: kuzey yıldızı ekleri E1–E16, yol haritası Y1–Y31, aday deneyler |
 | `SICIL.md` | Tek sicil tasarımı: iddia + sonuç; yeniden oynatma, tutma ihtimali, zaman aralığı, paylaşım |
+| `KURUMSAL-ISLEMLER.md` | Bölünme ve öbür kurumsal işlemlerde izleme, çizim ve sicilin taşınması (K88; RS1 girdisi) |
 
 ## `../refs` içindeki kaynaklar (konuya göre)
 

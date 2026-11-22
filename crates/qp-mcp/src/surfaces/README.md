@@ -41,7 +41,7 @@ pub type Factory = fn() -> Box<dyn ToolSurface>;
 
 `qp mcp serve` her yüzeyin araçlarından sonra `render` (görünümü PNG olarak çizer, MCP
 `image` içeriği) ve `notifications` (bekleyen bildirimler; `qapsule://notifications`
-kaynağıyla aynı) araçlarını ekler (`crate::common`). Yüzey aynı adda bir araç tanımlarsa
+kaynağıyla aynı) araçlarını ekler (`crate::server_tools`). Yüzey aynı adda bir araç tanımlarsa
 onunki geçer.
 
 ## Bildirimler

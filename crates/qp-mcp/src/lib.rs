@@ -9,7 +9,7 @@
 //!   `subscriptions/listen` (and ignores other notifications).
 //! - [`tools`]: the protocol tool list, generated from the protocol JSON Schema.
 //! - [`surfaces`]: (R5B, M28) the tool surfaces `qp mcp serve --surface` chooses from;
-//!   [`common`]: the tools every served surface gets (`render`, `notifications`).
+//!   [`server_tools`]: the tools every served surface gets (`render`, `notifications`).
 //! - [`calllog`]: (R5B) the measurement log of tool calls.
 //! - [`conform`]: the conformance transcript runner over MCP.
 //!
@@ -18,13 +18,13 @@
 //! message is the tool result.
 
 pub mod calllog;
-pub mod common;
 mod config;
 pub mod conform;
 mod hub;
 mod notify;
 mod rpc;
 mod server;
+pub mod server_tools;
 pub mod surfaces;
 pub mod tools;
 

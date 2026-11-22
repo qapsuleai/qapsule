@@ -412,7 +412,7 @@ impl McpServer {
                 self.reconnect_if_reset();
                 let v = {
                     let mut ctx = self.ctx(None);
-                    common::notifications_json(&mut ctx)
+                    server_tools::notifications_json(&mut ctx)
                 };
                 Ok(json!({
                     "resultType": "complete",
@@ -444,7 +444,7 @@ impl McpServer {
     pub fn tool_defs(&self) -> Vec<ToolDef> {
         let mut t = self.surface.tools();
         if self.opts.common_tools {
-            for c in common::tools() {
+            for c in server_tools::tools() {
                 if !t.iter().any(|x| x.name == c.name) {
                     t.push(c);
                 }
@@ -548,7 +548,7 @@ impl McpServer {
             inbox: &mut self.inbox,
         };
         if common {
-            if let Some(r) = common::call(&mut ctx, name, &args) {
+            if let Some(r) = server_tools::call(&mut ctx, name, &args) {
                 return r;
             }
         }

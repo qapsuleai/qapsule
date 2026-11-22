@@ -118,7 +118,7 @@ kaybolmaz; gizli sekmede saklanmaz ama sayfa çalışır). **Seçimlerin bağlan
 `?pick=voice.selvi,look.r4` olarak taşır (notlar bağlantıya girmez). Üstte tema ve dil
 (TR/EN) seçilir. Sayfa dış ağa istek yapmaz.
 
-Finalistler tek yerde: `crates/qp-wasm/src/gallery.rs` `FINALISTS` (boşsa her konunun
+Finalistler tek yerde: `crates/qp-shellcore/src/gallery/topics.rs` `FINALISTS` (boşsa her konunun
 kayıttaki bütün adayları). Konular ve gösterdikleri derinlik: aynı dosyada `TOPICS`. Yeni bir
 konunun adayları görünsün diye çekirdekte: `choices()` anahtarı ve `set_look` alanı.
 

@@ -195,8 +195,24 @@ pub(crate) fn render_view(args: &RenderArgs) -> Result<Outcome, String> {
         Err(Ok(e)) => return Ok(print_protocol_error(&e)),
         Err(Err(m)) => return Err(m),
     };
-    let png = qp_render::render_scene_png(&scene).map_err(|e| e.to_string())?;
-    std::fs::write(&args.out, png)
-        .map_err(|e| format!("cannot write {}: {e}", args.out.display()))?;
+    write_png(&scene, args.scale, &args.out)
+}
+
+/// Writes `scene` as PNG at device scale `scale` (RD2/G). Scale 1 keeps the reference
+/// path (`render_scene_png`) so existing outputs stay byte-identical.
+pub(crate) fn write_png(
+    scene: &qp_schema::scene::SceneDesc,
+    scale: u32,
+    out: &std::path::Path,
+) -> Result<Outcome, String> {
+    let png = if scale == 1 {
+        qp_render::render_scene_png(scene)
+    } else {
+        qp_render::render_scene_rgba_scaled(scene, scale).and_then(|rgba| {
+            qp_render::encode_png(&rgba, scene.width * scale, scene.height * scale)
+        })
+    }
+    .map_err(|e| e.to_string())?;
+    std::fs::write(out, png).map_err(|e| format!("cannot write {}: {e}", out.display()))?;
     Ok(Outcome::Ok)
 }

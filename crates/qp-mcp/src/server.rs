@@ -41,7 +41,9 @@ pub(crate) fn hello_reply(hub: &SharedHub, conn: &str, config: &Config) -> Resul
 
 impl McpServer {
     /// Opens protocol connection `conn` on the hub and sends the configured `hello`:
-    /// the thin surface, RD1 notification delivery, no common tools.
+    /// the thin surface with the decision tools, RD1 notification delivery, no common
+    /// tools, an unmarked connection. In-process only (the conformance runner, tests);
+    /// RD2/A62 removed the command that served it (`qp mcp --init --principal`).
     ///
     /// # Errors
     /// The authority's reply when it is not `welcome` (normally a `handshake` error).

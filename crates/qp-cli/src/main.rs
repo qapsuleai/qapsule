@@ -57,11 +57,12 @@ enum Command {
         #[arg(long)]
         no_local_data: bool,
     },
-    /// Run an MCP server over stdin/stdout (newline-delimited JSON-RPC, MCP stdio
-    /// transport), speaking `qp/0` as one principal (rounds/RD1/EMBEDDING.md §1); or,
-    /// with `serve`, the Qapsule MCP server for agents (R5B: stdio or HTTP, a running
-    /// session, agent principals only, tool surfaces).
-    Mcp(McpArgs),
+    /// MCP: `serve` runs the Qapsule MCP server for agents (R5B: stdio or HTTP, a
+    /// running session, agent principals only, tool surfaces).
+    Mcp {
+        #[command(subcommand)]
+        command: McpCommand,
+    },
     /// Print a plain-text semantic summary of a view, read from its compiled scene
     /// (panels, scales and visible domains, layers with data, origins and last values,
     /// emphasis). Headless: nothing is rendered.
@@ -225,26 +226,8 @@ struct ViewSource {
     root: PathBuf,
 }
 
-/// `qp mcp`: the RD1 adapter (flags) or `qp mcp serve` (R5B).
-#[derive(Debug, clap::Args)]
-#[command(args_conflicts_with_subcommands = true)]
-struct McpArgs {
-    #[command(subcommand)]
-    command: Option<McpCommand>,
-    /// Session init (`SessionInit` JSON).
-    #[arg(long)]
-    init: Option<PathBuf>,
-    /// Principal the adapter speaks as (sent in its `hello`).
-    #[arg(long)]
-    principal: Option<String>,
-    /// Surface kind: desktop, phone, watch, voice or headless.
-    #[arg(long, default_value = "headless")]
-    surface: String,
-    /// Directory that document paths in the init are relative to (and confined to).
-    #[arg(long, default_value = ".")]
-    root: PathBuf,
-}
-
+/// `qp mcp` subcommands. (RD2/A62: the RD1 one-principal adapter, `qp mcp --init
+/// --principal`, is removed.)
 #[derive(Debug, Subcommand)]
 enum McpCommand {
     /// (R5B/T2) The Qapsule MCP server for agents over a running session: stdio
@@ -434,22 +417,9 @@ fn run(command: Command) -> Result<Outcome, String> {
                 serve(init, &root, batch_end, host_frames)
             }
         }
-        Command::Mcp(McpArgs {
-            command: Some(McpCommand::Serve(args)),
-            ..
-        }) => mcp_serve::serve(&args).map(|()| Outcome::Ok),
-        Command::Mcp(McpArgs {
-            command: None,
-            init,
-            principal,
-            surface,
-            root,
-        }) => {
-            let (Some(init), Some(principal)) = (init, principal) else {
-                return Err("qp mcp needs --init and --principal (or: qp mcp serve)".to_owned());
-            };
-            mcp(&init, &principal, &surface, &root)
-        }
+        Command::Mcp {
+            command: McpCommand::Serve(args),
+        } => mcp_serve::serve(&args).map(|()| Outcome::Ok),
         Command::Conform {
             inputs,
             transport,

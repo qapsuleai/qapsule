@@ -5,6 +5,12 @@
 //! the authority (`forbidden`, `reason: human_only`) — even for a human principal on a
 //! connection the host marked as an agent's. The proposal stays pending and out of the
 //! document until a person decides it on a connection of their own.
+//!
+//! (RD2/A62) The RD1 adapter `qp mcp --init … --principal …`, which handed an MCP client
+//! an unmarked connection with the decision tools under any principal, is removed: no
+//! served surface offers a decision tool even to a human principal, and the unmarked
+//! decision-tool endpoint ([`McpServer::connect`]) is reached only by the in-process
+//! conformance runner.
 
 #![allow(
     clippy::unwrap_used,
@@ -37,11 +43,15 @@ fn headless() -> Surface {
 
 /// An agent's endpoint as `qp mcp serve` opens it (registry surface, marked connection).
 fn served(h: &SharedHub, conn: &str, principal: &str) -> McpServer {
+    served_on(h, conn, "thin", principal)
+}
+
+fn served_on(h: &SharedHub, conn: &str, surface: &str, principal: &str) -> McpServer {
     McpServer::open(
         h.clone(),
         conn,
         Config::new(principal, headless()),
-        surfaces::by_name("thin").unwrap(),
+        surfaces::by_name(surface).unwrap(),
         Options {
             notify: NotifyMode::Spec,
             common_tools: true,
@@ -241,4 +251,89 @@ fn a_rejection_is_a_human_decision_too_and_leaves_no_trace_in_the_document() {
     assert_eq!(r[0]["status"], "applied", "{r:?}");
     assert!(pending(&h, "arkin-desk").is_empty());
     assert_eq!(view_domain(&h, "arkin-desk"), before);
+}
+
+/// (A62) Every surface `qp mcp serve --surface` can serve, opened as the server opens it,
+/// offers no decision tool — not even when the principal is a person.
+#[test]
+fn no_served_surface_offers_a_decision_tool_even_to_a_person() {
+    for name in surfaces::names() {
+        for who in ["scout", "arkin"] {
+            let h = hub();
+            let mut s = served_on(&h, "mcp-a62", name, who);
+            let list = rpc(&mut s, 1, "tools/list", json!({}));
+            let tools = list["result"]["tools"].as_array().unwrap();
+            assert!(!tools.is_empty(), "{name}: {list}");
+            for t in tools {
+                let n = t["name"].as_str().unwrap();
+                assert!(
+                    !HUMAN_DECISION_TOOLS.contains(&n),
+                    "surface {name} offers {n} to {who}"
+                );
+            }
+        }
+    }
+}
+
+/// (A62) The old adapter's entry point is gone: outside the conformance runner no
+/// workspace source opens the unmarked decision-tool endpoint (`McpServer::connect`,
+/// `thin::with_decisions`), so no command (the RD1 `qp mcp --init … --principal …`
+/// was one) can hand it to an MCP client. Tests may still use it in process.
+#[test]
+fn the_rd1_adapter_entry_point_no_longer_exists() {
+    // The definitions themselves and the in-process conformance runner.
+    const ALLOWED: [&str; 3] = [
+        "crates/qp-mcp/src/server.rs",
+        "crates/qp-mcp/src/surfaces/thin.rs",
+        "crates/qp-mcp/src/conform.rs",
+    ];
+    let r = root();
+    let mut files = Vec::new();
+    for krate in std::fs::read_dir(r.join("crates")).unwrap() {
+        let k = krate.unwrap().path();
+        for sub in ["src", "examples"] {
+            rust_files(&k.join(sub), &mut files);
+        }
+    }
+    assert!(
+        files
+            .iter()
+            .any(|f| f.ends_with("crates/qp-cli/src/main.rs")),
+        "the walk must see the qp command line"
+    );
+    let mut callers = Vec::new();
+    for f in &files {
+        let rel = f
+            .strip_prefix(&r)
+            .unwrap()
+            .to_string_lossy()
+            .replace('\\', "/");
+        if ALLOWED.contains(&rel.as_str()) {
+            continue;
+        }
+        let text = std::fs::read_to_string(f).unwrap();
+        for needle in ["McpServer::connect(", "with_decisions("] {
+            if text.contains(needle) {
+                callers.push(format!("{rel}: {needle}"));
+            }
+        }
+    }
+    assert!(
+        callers.is_empty(),
+        "unmarked decision-tool endpoint opened by {callers:?}"
+    );
+}
+
+fn rust_files(dir: &Path, out: &mut Vec<PathBuf>) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for e in entries {
+        let p = e.unwrap().path();
+        if p.is_dir() {
+            rust_files(&p, out);
+        } else if p.extension().is_some_and(|x| x == "rs") {
+            out.push(p);
+        }
+    }
 }

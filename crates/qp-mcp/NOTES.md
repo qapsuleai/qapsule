@@ -69,9 +69,10 @@ statelessly. `initialize` gets a legacy answer.
    send it without `logLevel`, as the task asks. The 2026-07-28-native mapping would be
    a `subscriptions/listen` stream plus the `log` query (EMBEDDING §1.1). That is left
    as a suggestion.
-9. **stdio** (`qp mcp`): one JSON-RPC message per line, nothing else on stdout, exits
-   at EOF. In this mode there is one adapter and no host, so no `clock` arrives and
-   proposals do not expire.
+9. **stdio** (`qp mcp serve`): one JSON-RPC message per line, nothing else on stdout,
+   exits at EOF. (RD2/A62: the RD1 one-adapter `qp mcp --init --principal` mode, with no
+   host, no `clock` and the decision tools, is removed; [`McpServer::connect`] remains
+   only for the in-process conformance runner.)
 10. **Threading.** `SharedHub = Rc<RefCell<Hub>>` (single-threaded, like
     `qp serve`). An HTTP host would need `Arc<Mutex<_>>`.
 

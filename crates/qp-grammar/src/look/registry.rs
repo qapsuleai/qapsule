@@ -4,7 +4,7 @@
 use super::*;
 
 /// Looks a connection may choose; the first is the default.
-pub static LOOKS: &[Look] = &[R4, ORNEK, OLTAN, ZEMRE];
+pub static LOOKS: &[Look] = &[R4, ORNEK, OLTAN, ZEMRE, TAVEK, TAVEK_TEL];
 
 /// The default look's name.
 pub const DEFAULT_LOOK: &str = "r4";

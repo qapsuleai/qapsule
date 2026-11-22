@@ -15,7 +15,7 @@ baseline="$root/rounds/RG1/experiments/baseline/manifest.sha256"
 
 target_dir="${CARGO_TARGET_DIR:-$root/target}"
 case "$target_dir" in /*) ;; *) target_dir="$root/$target_dir" ;; esac
-dir="$target_dir/rg1-compare"
+dir="$target_dir/rg1-compare-$(printf %s "$root" | shasum | cut -c1-8)"
 pass=()
 while [ $# -gt 0 ]; do
   case "$1" in

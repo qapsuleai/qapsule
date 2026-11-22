@@ -21,6 +21,9 @@
 #   look/       `qp look list`, every `look show` and `look css`
 #   cli/        `--help` of every command and subcommand, `qp --version`
 #   scorer/     R5B scorer tests (agents/test_score.py, harness test_score.py)
+#   tests.names every test's name (last path segment), sorted
+#   conform/replies/ the actual reply stream of every transcript over `qp serve`
+#   mcp/calls/  fixed `tools/call` requests on every surface
 #   tests.count total number of `cargo test --workspace` tests (from `--list`)
 # Browser goldens (fixtures/golden/demo) are compared by verify.sh step 18 against the
 # committed files; their hashes are under fixtures/.
@@ -47,7 +50,17 @@ target_dir="${CARGO_TARGET_DIR:-$root/target}"
 case "$target_dir" in /*) ;; *) target_dir="$root/$target_dir" ;; esac
 qp="$target_dir/release/qp"
 
+# One snapshot at a time per target dir (worktrees share CARGO_TARGET_DIR, K56): the
+# release `qp` and the wasm package are built and copied to a private place under a lock.
+priv=""
+lock="$target_dir/rg1-snapshot.lock"
+mkdir -p "$target_dir"
+until mkdir "$lock" 2>/dev/null; do sleep 2; done
+trap 'rm -rf "$lock" "$priv"' EXIT
+priv="$(mktemp -d)"
 cargo build -q -p qp-cli --release
+cp "$target_dir/release/qp" "$priv/qp"
+qp="$priv/qp"
 
 # --- committed fixtures -----------------------------------------------------------
 mkdir -p "$out/fixtures"
@@ -98,7 +111,7 @@ if [ "$want_x86" = 1 ] && [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 
 fi
 wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
 if [ "$want_wasm" = 1 ] && command -v node >/dev/null 2>&1 && [ -x "$wp" ]; then
-  pkg="$target_dir/rg1-snapshot/pkg"
+  pkg="$priv/pkg"
   "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg" >/dev/null 2>&1
   node -e "console.log(require('$pkg/qp_wasm.js').compute_digest())" >"$out/compute/digest.wasm32.txt"
 fi
@@ -109,6 +122,8 @@ for t in inproc serve mcp; do
   "$qp" conform fixtures/protocol/conformance --transport "$t" >"$out/conform/$t.txt"
 done
 "$qp" conform fixtures/views >"$out/conform/views.txt"
+# the authority's actual replies (every output line) for every transcript over `qp serve`
+python3 scripts/rg1/serve_dump.py "$qp" "$out/conform/replies" fixtures/protocol/conformance/*.json fixtures/views/*.json
 
 # --- replica, replay --------------------------------------------------------------
 mkdir -p "$out/replica" "$out/replay"
@@ -132,6 +147,7 @@ rpc='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"
 for s in thin task query mixed; do
   printf '%s\n' "$rpc" | "$qp" mcp serve --surface "$s" >"$out/mcp/serve-$s.jsonl" 2>/dev/null
 done
+scripts/rg1/mcp_calls.sh "$qp" "$out/mcp/calls"
 printf '%s\n' "$rpc" | "$qp" mcp --init fixtures/protocol/init/thyao.json --principal editor \
   >"$out/mcp/adapter.jsonl" 2>/dev/null
 
@@ -171,7 +187,10 @@ for f in "$out"/scorer/*.txt; do
 done
 
 # --- test count -------------------------------------------------------------------
-cargo test -q --workspace -- --list 2>/dev/null | grep -c ': test$' >"$out/tests.count" || true
+cargo test -q --workspace -- --list 2>/dev/null | grep ': test$' >"$priv/tests.list" || true
+wc -l <"$priv/tests.list" | tr -d ' ' >"$out/tests.count"
+# test names by their last path segment (module moves change the prefix, not the name)
+sed -E 's/: test$//; s/.*:://' "$priv/tests.list" | LC_ALL=C sort >"$out/tests.names"
 
 # --- manifest ---------------------------------------------------------------------
 (cd "$out" && find . -type f ! -name manifest.sha256 | LC_ALL=C sort | sed 's|^\./||' \

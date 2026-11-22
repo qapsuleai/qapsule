@@ -40,6 +40,11 @@ serde_json = "1"
 wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = { version = "0.4", optional = true }
 
+[dev-dependencies]
+# RG1/M1b: the `replica` tests ran in `cargo test --workspace` only because qp-cli enabled
+# the feature; this self-dependency keeps them running (as qp-schema does with `validate`).
+qp-wasm = { path = ".", features = ["replica"] }
+
 [package.metadata.wasm-pack.profile.release]
 # Size is measured on the raw rustc output and on wasm-opt output separately (see
 # crates/qp-render/SPIKE.md); wasm-pack's own wasm-opt step is disabled so builds do not

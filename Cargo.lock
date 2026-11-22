@@ -1911,7 +1911,6 @@ dependencies = [
  "qp-schema",
  "qp-session",
  "qp-source",
- "qp-wasm",
  "serde_json",
  "tempfile",
 ]
@@ -2102,6 +2101,7 @@ dependencies = [
  "qp-session",
  "qp-shellcore",
  "qp-source",
+ "qp-wasm",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",

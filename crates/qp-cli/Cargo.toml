@@ -33,10 +33,5 @@ qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
 qp-compute = { path = "../qp-compute" }
 qp-live = { path = "../qp-live", features = ["mock"] }
 qp-matriks = { version = "0.0.0", path = "../qp-matriks" }
-# RG1/M1b: not used by qp-cli's code or tests. Before M1b qp-cli depended on qp-wasm
-# (`replica`), and feature unification made `cargo test --workspace` build and run
-# qp-wasm's `replica` tests (74). This test-only edge keeps them running until qp-wasm
-# enables its own feature for its tests (a self dev-dependency, as qp-schema does).
-qp-wasm = { version = "0.0.0", path = "../qp-wasm", features = ["replica"] }
 assert_cmd = "2.2.2"
 tempfile = "3.27.0"

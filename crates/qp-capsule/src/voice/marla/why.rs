@@ -18,54 +18,7 @@ pub(super) const DETAIL_MASKS: [(bool, bool, bool); 8] = [
     (false, false, false),
 ];
 
-pub(super) fn detail(
-    f: &Frame<'_>,
-    lang: Lang,
-    mask: (bool, bool, bool),
-) -> (String, Vec<Concept>) {
-    let (with_now, with_rem, with_change) = mask;
-    let mut concepts: Vec<Concept> = lead_concepts(f);
-    let mut out: Vec<String> = Vec::new();
-    out.push(why(f, lang));
-    if f.validity == Validity::Closed {
-        out.push(closing(f, lang));
-    } else {
-        // The change sentence already says where an exit left the lead's own measure.
-        let said = with_change
-            && f.latest.as_ref().is_some_and(|l| {
-                l.det == f.det && (l.edge == Edge::Exit || l.code.ends_with("_end"))
-            });
-        let now = if with_now && !said {
-            now(f, lang)
-        } else {
-            None
-        };
-        let rem = if with_rem { remaining(f, lang) } else { None };
-        match (now, rem) {
-            (Some(a), Some(b)) => out.push(format!("{}, {b}.", capitalize(&a))),
-            (Some(a), None) => out.push(format!("{}.", capitalize(&a))),
-            (None, Some(b)) => out.push(format!("{}.", capitalize(&b))),
-            (None, None) => {}
-        }
-        if with_change {
-            if let Some((s, c)) = change(f, lang) {
-                out.push(s);
-                for x in c {
-                    if !concepts.contains(&x) {
-                        concepts.push(x);
-                    }
-                }
-            }
-        }
-    }
-    if f.validity == Validity::NoLonger {
-        concepts.push(Concept::NoLonger);
-    }
-    concepts.push(Concept::Similar);
-    (out.join(" "), concepts)
-}
-
-fn lead_concepts(f: &Frame<'_>) -> Vec<Concept> {
+pub(super) fn lead_concepts(f: &Frame<'_>) -> Vec<Concept> {
     det_concepts(f.det, f.up())
 }
 
@@ -84,7 +37,7 @@ pub(super) fn det_concepts(det: &str, up: bool) -> Vec<Concept> {
 
 /// The numbers behind the claim, each against its reference.
 #[allow(clippy::too_many_lines)]
-fn why(f: &Frame<'_>, lang: Lang) -> String {
+pub(super) fn why(f: &Frame<'_>, lang: Lang) -> String {
     if f.red {
         return match (f.det, lang) {
             ("flow.institutional", Lang::Tr) => {
@@ -324,7 +277,7 @@ fn generic_why(lang: Lang) -> String {
 /// Where things stand now against the threshold (open stories with a current value),
 /// without a final period. `None` when there is nothing to say or the side disagrees
 /// with the validity (never contradict the face).
-fn now(f: &Frame<'_>, lang: Lang) -> Option<String> {
+pub(super) fn now(f: &Frame<'_>, lang: Lang) -> Option<String> {
     if f.fresh {
         return None;
     }
@@ -389,7 +342,7 @@ fn now(f: &Frame<'_>, lang: Lang) -> Option<String> {
 }
 
 /// How long until the outcome is known, without a final period.
-fn remaining(f: &Frame<'_>, lang: Lang) -> Option<String> {
+pub(super) fn remaining(f: &Frame<'_>, lang: Lang) -> Option<String> {
     let r = f.remaining?;
     if r == 0 {
         let w = f.unit.words();

@@ -402,7 +402,7 @@ mod words;
 use head::{headline, tr_gen_w, HEAD_LEVELS, HEAD_PLAN};
 use record::{ledger, LEDGER_LEVELS};
 use since::{anchor, change, closing};
-use why::{det_concepts, detail, dir_past, DETAIL_MASKS};
+use why::{det_concepts, dir_past, lead_concepts, now, remaining, why, DETAIL_MASKS};
 use words::{abl, dat, en_adj, mult, n, param, pct, span, span_loc_tr, that, tr_adj, tr_gen};
 pub(super) use words::{words_en, words_tr};
 
@@ -411,6 +411,49 @@ pub(super) use words::{words_en, words_tr};
 // ---------------------------------------------------------------------------
 
 use qp_facts::{BandSqueeze, InstitutionalFlow, MaStack, RangeBreakout, VolumeSurge};
+
+fn detail(f: &Frame<'_>, lang: Lang, mask: (bool, bool, bool)) -> (String, Vec<Concept>) {
+    let (with_now, with_rem, with_change) = mask;
+    let mut concepts: Vec<Concept> = lead_concepts(f);
+    let mut out: Vec<String> = Vec::new();
+    out.push(why(f, lang));
+    if f.validity == Validity::Closed {
+        out.push(closing(f, lang));
+    } else {
+        // The change sentence already says where an exit left the lead's own measure.
+        let said = with_change
+            && f.latest.as_ref().is_some_and(|l| {
+                l.det == f.det && (l.edge == Edge::Exit || l.code.ends_with("_end"))
+            });
+        let now = if with_now && !said {
+            now(f, lang)
+        } else {
+            None
+        };
+        let rem = if with_rem { remaining(f, lang) } else { None };
+        match (now, rem) {
+            (Some(a), Some(b)) => out.push(format!("{}, {b}.", capitalize(&a))),
+            (Some(a), None) => out.push(format!("{}.", capitalize(&a))),
+            (None, Some(b)) => out.push(format!("{}.", capitalize(&b))),
+            (None, None) => {}
+        }
+        if with_change {
+            if let Some((s, c)) = change(f, lang) {
+                out.push(s);
+                for x in c {
+                    if !concepts.contains(&x) {
+                        concepts.push(x);
+                    }
+                }
+            }
+        }
+    }
+    if f.validity == Validity::NoLonger {
+        concepts.push(Concept::NoLonger);
+    }
+    concepts.push(Concept::Similar);
+    (out.join(" "), concepts)
+}
 
 #[cfg(test)]
 mod tests;

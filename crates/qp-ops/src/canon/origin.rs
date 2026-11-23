@@ -105,7 +105,7 @@ fn origin_value(
 /// A numeric field of a fact: `bar`, `t`, an evidence key, or `value` (the main output
 /// of the fact's series at the fact's bar when the evidence has no `value`).
 #[allow(clippy::cast_precision_loss)]
-pub fn fact_value(doc: &Document, f: &Fact, field: &str) -> Option<f64> {
+pub(crate) fn fact_value(doc: &Document, f: &Fact, field: &str) -> Option<f64> {
     match field {
         "bar" => Some(f.bar as f64),
         "t" => Some(f.t as f64),

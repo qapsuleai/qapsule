@@ -31,7 +31,7 @@ pub fn profile_for(kind: SurfaceKind, max_depth: Option<Depth>) -> Profile {
     }
 }
 
-pub fn rank(d: Depth) -> u8 {
+pub(crate) fn rank(d: Depth) -> u8 {
     match d {
         Depth::Sentence => 0,
         Depth::Capsule => 1,
@@ -53,7 +53,7 @@ pub fn rank(d: Depth) -> u8 {
 ///
 /// # Errors
 /// The finding has no facts, or its first fact's series has no bars.
-pub fn presenter_view(
+pub(crate) fn presenter_view(
     doc: &Document,
     reader: Option<qp_plane::plane::Reader<'_>>,
     finding: &Finding,

@@ -72,7 +72,6 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-session/src/host/conform.rs` | 645 |
 | `crates/qp-shellcore/src/shell/paint_canvas.rs` | 644 |
 | `crates/qp-ops/src/select.rs` | 643 |
-| `crates/qp-plane/src/values.rs` | 642 |
 | `crates/qp-capsule/src/realize/en.rs` | 641 |
 | `crates/qp-session/src/capsule/reader.rs` | 639 |
 | `crates/qp-session/src/capsule/claims.rs` | 632 |
@@ -87,6 +86,7 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-shellcore/src/shell.rs` | 610 |
 | `crates/qp-compute/src/sweep/share.rs` | 605 |
 | `crates/qp-glyph/src/rozet.rs` | 604 |
+| `crates/qp-plane/src/values.rs` | 603 |
 | `crates/qp-session/src/capsule.rs` | 603 |
 
 ## `fn.lines` — Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi)
@@ -176,12 +176,12 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-host/src/mcp_serve/host.rs::post` | 117 |
 | `crates/qp-mcp/src/surfaces/query.rs::shape` | 117 |
 | `crates/qp-session/src/read/interact/scenes.rs::transition` | 117 |
+| `crates/qp-ops/src/watch.rs::expand_watch` | 116 |
 | `crates/qp-session/src/read/interact/style.rs::set_style` | 116 |
 | `crates/qp-shellcore/src/gallery/build_impl.rs::shots` | 116 |
 | `crates/qp-session/src/authority/session/intake.rs::resolve_selectors` | 115 |
 | `crates/qp-voice/src/selvi/detail.rs::d1_compact` | 114 |
 | `crates/qp-mcp/src/surfaces/query/find.rs::find_instrument` | 113 |
-| `crates/qp-ops/src/watch.rs::expand_watch` | 111 |
 | `crates/qp-ops/src/canon/layer.rs::check_channels` | 108 |
 | `crates/qp-ops/src/select/resolve.rs::resolve_kind` | 108 |
 | `crates/qp-render/src/retained.rs::paint` | 108 |

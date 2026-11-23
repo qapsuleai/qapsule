@@ -78,7 +78,7 @@ fn in_use_by_emphasis(
 }
 
 /// Refuses deleting layer `id` while an emphasis of its view targets it.
-pub fn layer_in_use(view: &View, id: &str, p: &str) -> PResult<()> {
+pub(crate) fn layer_in_use(view: &View, id: &str, p: &str) -> PResult<()> {
     in_use_by_emphasis(
         view,
         |t| t.layer.as_deref() == Some(id),
@@ -115,7 +115,7 @@ fn assign_ids(view: &View, layers: &mut [Layer], base: &str) -> PResult<()> {
 }
 
 /// A new layer at `index` of `view`, canonical and checked; returns the layer.
-pub fn new_layer(
+pub(crate) fn new_layer(
     doc: &Document,
     view: &View,
     layer: &Layer,
@@ -150,7 +150,7 @@ fn layer_id(l: &Layer) -> String {
 #[allow(clippy::cognitive_complexity)]
 /// Expands one grammar op.
 #[allow(clippy::too_many_lines)]
-pub fn expand_grammar(
+pub(crate) fn expand_grammar(
     doc: &Document,
     op: &Op,
     p: &str,

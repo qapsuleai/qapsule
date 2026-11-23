@@ -6,7 +6,12 @@ use super::*;
 /// tells its outcome to whoever wrote it: the writer needs the data entitlement of every
 /// bound feed the condition reads, through study inputs (§18.3); otherwise
 /// `no_entitlement` at the series path.
-pub fn cond_entitled(doc: &Document, ctx: &Ctx<'_>, c: &Condition, path: &str) -> PResult<()> {
+pub(crate) fn cond_entitled(
+    doc: &Document,
+    ctx: &Ctx<'_>,
+    c: &Condition,
+    path: &str,
+) -> PResult<()> {
     condition_entitled(ctx.plane, doc, ctx.speaker, c, path)
 }
 
@@ -101,7 +106,7 @@ pub(super) fn bound_no_bar_writes(s: &Series, path: &str) -> PResult<()> {
 }
 
 /// Most bound series a document may hold (`max_ops × 4`, §18.7).
-pub const MAX_BOUND_SERIES: usize = 256;
+pub(crate) const MAX_BOUND_SERIES: usize = 256;
 
 /// Canonical interval spelling (§18.2): `Nm` only when N is not a multiple of 60, no
 /// leading zeros. Returns the canonical form when `s` is a valid but non-canonical one.

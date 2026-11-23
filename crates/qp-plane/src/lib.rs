@@ -6,9 +6,6 @@
 // Protocol errors are returned on the cold path only and are built to be read by an
 // agent (message, path, expected, suggestions, hint); boxing them buys nothing here.
 #![allow(clippy::result_large_err)]
-// (RF1 S2) `values::Computed::len` became `pub` at the crate boundary (the presenter in
-// `qp-ops` reads it); it has no `is_empty` and gets none (pure move).
-#![allow(clippy::len_without_is_empty)]
 
 pub mod capidx;
 pub mod error;

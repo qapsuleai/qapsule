@@ -199,7 +199,7 @@ fn check_channels(
 /// constants; constants written from origins). The layer's id must be assigned and its
 /// panel must be in `site.view.panels`; `site.view.layers` are the other layers (the
 /// layer itself may be among them, matched by id).
-pub fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PResult<()> {
+pub(crate) fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PResult<()> {
     let n = usize::from(l.series.is_some())
         + usize::from(l.fact.is_some())
         + usize::from(l.finding.is_some());
@@ -303,7 +303,12 @@ pub fn check_layer(doc: &Document, l: &mut Layer, site: &Site<'_>) -> PResult<()
 }
 
 /// Checks a target inside view `view` (emphasis).
-pub fn check_view_target(doc: &Document, view: &View, t: &Target, path: &str) -> PResult<()> {
+pub(crate) fn check_view_target(
+    doc: &Document,
+    view: &View,
+    t: &Target,
+    path: &str,
+) -> PResult<()> {
     if let Some(v) = &t.view {
         if *v != view.id {
             return Err(E::new(
@@ -345,7 +350,7 @@ pub fn check_view_target(doc: &Document, view: &View, t: &Target, path: &str) ->
     Ok(())
 }
 
-pub fn check_emphasis(
+pub(crate) fn check_emphasis(
     doc: &Document,
     view: &View,
     emphasis: &[Emphasis],

@@ -13,15 +13,15 @@ use super::*;
 /// display zone. The reader's `relevant`, `coin_flip` and the market note are not part of
 /// it: they are applied to the item on every use.
 #[derive(Debug, Clone, PartialEq)]
-pub struct ItemKey {
-    pub capsule: Capsule,
-    pub facts: Vec<Option<Fact>>,
-    pub series: Option<qp_schema::Series>,
-    pub lang: qp_schema::protocol::Language,
-    pub voice: Option<String>,
-    pub clock: bool,
-    pub cal: Option<qp_schema::Calendar>,
-    pub tz: Option<String>,
+pub(crate) struct ItemKey {
+    pub(crate) capsule: Capsule,
+    pub(crate) facts: Vec<Option<Fact>>,
+    pub(crate) series: Option<qp_schema::Series>,
+    pub(crate) lang: qp_schema::protocol::Language,
+    pub(crate) voice: Option<String>,
+    pub(crate) clock: bool,
+    pub(crate) cal: Option<qp_schema::Calendar>,
+    pub(crate) tz: Option<String>,
 }
 
 /// [`ItemKey`] by reference (a lookup clones nothing).

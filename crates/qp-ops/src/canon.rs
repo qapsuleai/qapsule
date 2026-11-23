@@ -9,9 +9,9 @@ mod layer;
 mod origin;
 mod scale;
 
-pub use layer::*;
+pub(crate) use layer::*;
 pub use origin::*;
-pub use scale::*;
+pub(crate) use scale::*;
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -28,7 +28,7 @@ use qp_plane::error::{invalid, num, ptr, PResult, E};
 use qp_plane::values::{main_output, study_outputs, values, Cache};
 
 /// Named thresholds v0 (`docs/GRAMMAR.md` §10), sorted by name.
-pub const THRESHOLDS: [(&str, f64); 4] = [
+pub(crate) const THRESHOLDS: [(&str, f64); 4] = [
     ("macd.zero", 0.0),
     ("rsi.mid", 50.0),
     ("rsi.overbought", 70.0),
@@ -36,18 +36,18 @@ pub const THRESHOLDS: [(&str, f64); 4] = [
 ];
 
 /// At most this many panels per view.
-pub const MAX_PANELS: usize = 16;
+pub(crate) const MAX_PANELS: usize = 16;
 /// At most this many layers per view.
-pub const MAX_LAYERS: usize = 64;
+pub(crate) const MAX_LAYERS: usize = 64;
 
 /// Theme colour tokens (`docs/GRAMMAR.md` §9).
-pub const THEME_TOKENS: [&str; 17] = [
+pub(crate) const THEME_TOKENS: [&str; 17] = [
     "bg", "grid", "axis", "text", "muted", "up", "down", "accent", "warn", "s1", "s2", "s3", "s4",
     "s5", "s6", "s7", "s8",
 ];
 
 /// Channel names of [`qp_schema::grammar::Encoding`].
-pub const CHANNELS: [&str; 9] = [
+pub(crate) const CHANNELS: [&str; 9] = [
     "x", "x2", "y", "y2", "color", "opacity", "width", "size", "text",
 ];
 
@@ -55,7 +55,7 @@ pub const CHANNELS: [&str; 9] = [
 const THEMES: [&str; 2] = ["dark", "light"];
 
 /// The value of a named threshold.
-pub fn threshold(name: &str) -> Option<f64> {
+pub(crate) fn threshold(name: &str) -> Option<f64> {
     THRESHOLDS.iter().find(|(n, _)| *n == name).map(|(_, v)| *v)
 }
 
@@ -69,12 +69,12 @@ pub fn thresholds() -> BTreeMap<String, f64> {
 }
 
 /// A string channel value that is a numeric constant (`"70"`, the `qp/0` form).
-pub fn numeric(s: &str) -> Option<f64> {
+pub(crate) fn numeric(s: &str) -> Option<f64> {
     s.parse::<f64>().ok()
 }
 
 /// The constant written in a position channel, if it is one.
-pub fn position_constant(p: &Position) -> Option<f64> {
+pub(crate) fn position_constant(p: &Position) -> Option<f64> {
     match p {
         Position::Number(v) => Some(*v),
         Position::Name(s) => numeric(s),
@@ -88,7 +88,7 @@ pub fn position_constant(p: &Position) -> Option<f64> {
 
 /// What a layer draws.
 #[derive(Clone, Copy)]
-pub enum Data<'a> {
+pub(crate) enum Data<'a> {
     None,
     Series(&'a Series),
     Fact(&'a Fact),
@@ -96,7 +96,7 @@ pub enum Data<'a> {
 }
 
 /// Fields of a series: `o h l c v` for bars, the outputs of a study, `v` for points.
-pub fn series_fields(s: &Series) -> Vec<String> {
+pub(crate) fn series_fields(s: &Series) -> Vec<String> {
     match (&s.source, &s.data) {
         (SeriesSource::Study { study, .. }, _) => study_outputs(study),
         (_, Some(SeriesData::Points { .. })) => vec!["v".to_owned()],
@@ -105,7 +105,7 @@ pub fn series_fields(s: &Series) -> Vec<String> {
 }
 
 /// Main field of a series.
-pub fn series_main(s: &Series) -> String {
+pub(crate) fn series_main(s: &Series) -> String {
     match (&s.source, &s.data) {
         (SeriesSource::Study { study, output, .. }, _) => main_output(study, output.as_ref()),
         (_, Some(SeriesData::Points { .. })) => "v".to_owned(),
@@ -123,7 +123,7 @@ fn fact_fields(f: &Fact) -> Vec<String> {
     v
 }
 
-pub fn data_fields(doc: &Document, d: Data<'_>) -> Vec<String> {
+pub(crate) fn data_fields(doc: &Document, d: Data<'_>) -> Vec<String> {
     match d {
         Data::None => Vec::new(),
         Data::Series(s) => series_fields(s),
@@ -150,7 +150,7 @@ pub fn data_fields(doc: &Document, d: Data<'_>) -> Vec<String> {
 }
 
 /// Main field of a layer's data (`docs/GRAMMAR.md` §6).
-pub fn data_main(doc: &Document, d: Data<'_>) -> Option<String> {
+pub(crate) fn data_main(doc: &Document, d: Data<'_>) -> Option<String> {
     let fact_main = |f: &Fact| {
         if f.evidence.contains_key("level") {
             "level".to_owned()
@@ -171,7 +171,7 @@ pub fn data_main(doc: &Document, d: Data<'_>) -> Option<String> {
 }
 
 /// The data a layer refers to (already checked to exist).
-pub fn layer_data<'a>(doc: &'a Document, l: &Layer) -> Data<'a> {
+pub(crate) fn layer_data<'a>(doc: &'a Document, l: &Layer) -> Data<'a> {
     if let Some(s) = &l.series {
         if let Some(x) = doc.series.iter().find(|x| &x.id == s) {
             return Data::Series(x);
@@ -219,7 +219,7 @@ fn panel_names(view: &View) -> Vec<String> {
 }
 
 /// Position of panel `id` in the stack, or `not_found` naming the panels.
-pub fn need_panel(view: &View, id: u32, path: &str) -> PResult<usize> {
+pub(crate) fn need_panel(view: &View, id: u32, path: &str) -> PResult<usize> {
     view.panels
         .iter()
         .position(|p| p.id == Some(id))
@@ -246,7 +246,7 @@ pub fn need_panel(view: &View, id: u32, path: &str) -> PResult<usize> {
 }
 
 /// Position of layer `id` in the paint order, or `not_found` naming the layers.
-pub fn need_layer(view: &View, id: &str, path: &str) -> PResult<usize> {
+pub(crate) fn need_layer(view: &View, id: &str, path: &str) -> PResult<usize> {
     view.layers
         .iter()
         .position(|l| l.id.as_deref() == Some(id))
@@ -264,19 +264,19 @@ pub fn need_layer(view: &View, id: &str, path: &str) -> PResult<usize> {
 }
 
 /// The smallest `l<k>` not in `taken`.
-pub fn next_layer_id(taken: &BTreeSet<String>) -> String {
+pub(crate) fn next_layer_id(taken: &BTreeSet<String>) -> String {
     (0u32..)
         .map(|k| format!("l{k}"))
         .find(|c| !taken.contains(c))
         .unwrap_or_else(|| "l0".to_owned())
 }
 
-pub fn layer_ids(view: &View) -> BTreeSet<String> {
+pub(crate) fn layer_ids(view: &View) -> BTreeSet<String> {
     view.layers.iter().filter_map(|l| l.id.clone()).collect()
 }
 
 /// Checks a given layer id: valid and not used by another layer of the view.
-pub fn check_new_layer_id(view: &View, id: &str, path: &str) -> PResult<()> {
+pub(crate) fn check_new_layer_id(view: &View, id: &str, path: &str) -> PResult<()> {
     if !valid_id(id) {
         return Err(
             E::new(ErrorCode::Invalid, format!("invalid layer id `{id}`"))
@@ -297,7 +297,7 @@ pub fn check_new_layer_id(view: &View, id: &str, path: &str) -> PResult<()> {
     Ok(())
 }
 
-pub fn limit_layers(view: &View, adding: usize, path: &str) -> PResult<()> {
+pub(crate) fn limit_layers(view: &View, adding: usize, path: &str) -> PResult<()> {
     if view.layers.len() + adding > MAX_LAYERS {
         return Err(E::new(
             ErrorCode::Limit,
@@ -311,7 +311,7 @@ pub fn limit_layers(view: &View, adding: usize, path: &str) -> PResult<()> {
     Ok(())
 }
 
-pub fn limit_panels(view: &View, adding: usize, path: &str) -> PResult<()> {
+pub(crate) fn limit_panels(view: &View, adding: usize, path: &str) -> PResult<()> {
     if view.panels.len() + adding > MAX_PANELS {
         return Err(E::new(
             ErrorCode::Limit,
@@ -335,13 +335,13 @@ pub struct Site<'a> {
     pub view: &'a View,
     pub base: &'a str,
     /// Bound data for origins, when a command writes (absent on load).
-    pub reads: Option<Reads<'a>>,
+    pub(crate) reads: Option<Reads<'a>>,
 }
 
 /// What a writing command may read for an origin (§18.3): the `value` of a fact on a
 /// bound series comes from the reading document, if the writer is entitled to it.
 #[derive(Clone, Copy)]
-pub struct Reads<'a> {
+pub(crate) struct Reads<'a> {
     /// The data plane's reader.
     pub reader: qp_plane::plane::Reader<'a>,
     /// The principal who writes.
@@ -373,7 +373,7 @@ impl Site<'_> {
 /// `panels`, panel and scale ids, layer ids, origins of constants, references. `base` is
 /// the JSON pointer of the view in the incoming message (or document).
 #[allow(clippy::too_many_lines)]
-pub fn canon_view(
+pub(crate) fn canon_view(
     doc: &Document,
     view: &View,
     base: &str,

@@ -50,7 +50,7 @@ impl<'a> DocProvider<'a> {
 
     /// The same provider reading bound bars through the data plane's `reader` (command
     /// expansion: `doc` is the command's scratch document, without bound bars).
-    pub fn with_reader(mut self, reader: Option<qp_plane::plane::Reader<'a>>) -> Self {
+    pub(crate) fn with_reader(mut self, reader: Option<qp_plane::plane::Reader<'a>>) -> Self {
         self.reader = reader;
         self
     }

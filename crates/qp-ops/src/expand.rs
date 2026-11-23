@@ -62,14 +62,14 @@ pub struct Ctx<'a> {
 
 impl<'a> Ctx<'a> {
     /// Bound data for origins of constants (§18.3), read as the speaker.
-    pub fn reads(&self) -> Option<crate::canon::Reads<'a>> {
+    pub(crate) fn reads(&self) -> Option<crate::canon::Reads<'a>> {
         self.data.map(|reader| crate::canon::Reads {
             reader,
             writer: self.speaker,
         })
     }
 
-    pub fn prov(&self, based_on: Vec<String>) -> Provenance {
+    pub(crate) fn prov(&self, based_on: Vec<String>) -> Provenance {
         Provenance {
             author: self.author.clone(),
             at: self.at,
@@ -79,7 +79,7 @@ impl<'a> Ctx<'a> {
     }
 
     /// Takes the given id (checked) or assigns `<kind>-<seq>-<n>`; records it as created.
-    pub fn new_id(
+    pub(crate) fn new_id(
         &mut self,
         doc: &Document,
         kind: &str,
@@ -113,7 +113,7 @@ impl<'a> Ctx<'a> {
     }
 }
 
-pub fn coll_name(c: qp_schema::protocol::Collection) -> &'static str {
+pub(crate) fn coll_name(c: qp_schema::protocol::Collection) -> &'static str {
     use qp_schema::protocol::Collection as C;
     match c {
         C::Series => "series",
@@ -176,7 +176,7 @@ pub fn need_finding<'a>(doc: &'a Document, id: &str, path: &str) -> PResult<&'a 
     })
 }
 
-pub fn need_item(doc: &Document, id: &str, path: &str) -> PResult<()> {
+pub(crate) fn need_item(doc: &Document, id: &str, path: &str) -> PResult<()> {
     if find_collection(doc, id).is_some() {
         Ok(())
     } else {
@@ -258,7 +258,7 @@ pub fn need_proposal<'a>(
     Ok(pr)
 }
 
-pub fn proposal_state_name(s: ProposalState) -> &'static str {
+pub(crate) fn proposal_state_name(s: ProposalState) -> &'static str {
     match s {
         ProposalState::Pending => "pending",
         ProposalState::Accepted => "accepted",

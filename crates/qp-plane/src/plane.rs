@@ -43,7 +43,7 @@ pub enum Provider {
 }
 
 impl Provider {
-    pub fn get(&self) -> Option<&dyn SourceProvider> {
+    pub(crate) fn get(&self) -> Option<&dyn SourceProvider> {
         match self {
             Self::None => None,
             Self::Memory(m) => Some(m),

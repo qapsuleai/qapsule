@@ -87,7 +87,7 @@ pub fn sentence_pair_memo(
 /// `bars`: the same input [`sentence_pair_memo`] gives the R3 sentence (lead and latest
 /// fact, still-holds, the condition's current value, redaction). A capsule voice
 /// (`qp_capsule::voice`) speaks from it. `None` as [`sentence_pair_memo`].
-pub fn with_sentence_input<R>(
+pub(crate) fn with_sentence_input<R>(
     story: &Story,
     facts: &[&Fact],
     bars: &[Bar],

@@ -15,11 +15,11 @@ use qp_plane::error::ptr;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Violation {
     pub path: String,
-    pub kind: ViolationKind,
+    pub(crate) kind: ViolationKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ViolationKind {
+pub(crate) enum ViolationKind {
     /// A key the object does not accept.
     UnknownField {
         field: String,
@@ -38,7 +38,7 @@ pub enum ViolationKind {
 }
 
 impl Violation {
-    pub fn message(&self) -> String {
+    pub(crate) fn message(&self) -> String {
         match &self.kind {
             ViolationKind::UnknownField { field, .. } => format!("unknown field `{field}`"),
             ViolationKind::UnknownValue { field, value, .. } => match field {

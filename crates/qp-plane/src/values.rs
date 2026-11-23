@@ -6,48 +6,9 @@ use std::rc::Rc;
 
 use qp_schema::{Bar, CompareOp, Condition, Document, Series, SeriesSource};
 
-/// Values of one series, aligned with its bars.
-#[derive(Debug, Clone, PartialEq)]
-pub struct Computed {
-    /// Bar times.
-    pub t: Vec<i64>,
-    /// Output name -> one value per bar.
-    pub outputs: BTreeMap<String, Vec<Option<f64>>>,
-    /// The output used in conditions.
-    pub main: String,
-    /// Position of `main` among the keys of `outputs` (they never change once computed:
-    /// the live path reads the main output without a string lookup).
-    main_ix: Option<usize>,
-}
+mod computed;
 
-impl Computed {
-    fn new(t: Vec<i64>, outputs: BTreeMap<String, Vec<Option<f64>>>, main: String) -> Self {
-        let main_ix = outputs.keys().position(|k| *k == main);
-        Self {
-            t,
-            outputs,
-            main,
-            main_ix,
-        }
-    }
-
-    #[inline]
-    pub fn len(&self) -> usize {
-        self.t.len()
-    }
-
-    #[inline]
-    pub fn main_values(&self) -> &[Option<f64>] {
-        // The main output first in key order (bar columns: `c`; one-output studies): no
-        // key comparison; else a lookup by name (faster than walking the map in WASM).
-        let v = match self.main_ix {
-            Some(0) => self.outputs.values().next(),
-            Some(_) => self.outputs.get(&self.main),
-            None => None,
-        };
-        v.map_or(&[], Vec::as_slice)
-    }
-}
+pub use computed::Computed;
 
 /// How the bars of one bar series changed (the incremental live path, §18.8).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

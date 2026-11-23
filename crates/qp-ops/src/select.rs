@@ -47,7 +47,7 @@ const MAX_NOT_FOUND: usize = 5;
 
 /// What kind of item a field names.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Kind {
+pub(crate) enum Kind {
     Series,
     View,
     Panel,
@@ -116,7 +116,7 @@ impl Kind {
 pub struct Site {
     /// JSON pointer of the field.
     pub path: String,
-    pub kind: Kind,
+    pub(crate) kind: Kind,
     /// Pointer of the field that names the view a panel/layer/scale belongs to.
     pub view: Option<String>,
 }
@@ -442,7 +442,7 @@ pub fn finding_about(doc: &Document, f: &Finding) -> String {
 }
 
 /// Effective title of a view: its own, or `SYMBOL interval` of its first bar series.
-pub fn view_title(doc: &Document, v: &View) -> Option<String> {
+pub(crate) fn view_title(doc: &Document, v: &View) -> Option<String> {
     if let Some(t) = &v.title {
         return Some(t.clone());
     }

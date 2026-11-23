@@ -4,7 +4,7 @@ use super::*;
 
 #[allow(clippy::too_many_lines)]
 /// Short deterministic summary of one op.
-pub fn summarize(op: &Op) -> String {
+pub(crate) fn summarize(op: &Op) -> String {
     fn params(p: &BTreeMap<String, f64>) -> String {
         p.iter()
             .map(|(k, v)| format!("{k}={}", num(*v)))

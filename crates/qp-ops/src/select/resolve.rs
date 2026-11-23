@@ -37,7 +37,7 @@ impl<'a> Resolver<'a> {
     }
 
     /// Resolves the selector at `site` of `msg`: the value to write there and the id.
-    pub fn resolve(&self, msg: &Value, site: &Site) -> PResult<(Value, String)> {
+    pub(crate) fn resolve(&self, msg: &Value, site: &Site) -> PResult<(Value, String)> {
         let sel = msg.pointer(&site.path).cloned().unwrap_or(Value::Null);
         let view = match site.kind {
             Kind::Panel | Kind::Layer | Kind::Scale => self.context(msg, site)?,
@@ -226,7 +226,7 @@ impl<'a> Resolver<'a> {
     }
 
     /// A selector that resolves to series `s` now.
-    pub fn series_hint(&self, s: &Series) -> Option<SeriesSel> {
+    pub(crate) fn series_hint(&self, s: &Series) -> Option<SeriesSel> {
         let mut cands = Vec::new();
         match &s.source {
             SeriesSource::Study { study, params, .. } => {
@@ -274,7 +274,7 @@ impl<'a> Resolver<'a> {
     }
 
     /// A selector that resolves to view `v` now.
-    pub fn view_hint(&self, v: &View) -> Option<ViewSel> {
+    pub(crate) fn view_hint(&self, v: &View) -> Option<ViewSel> {
         let mut cands = vec![ViewSel::default()];
         if let Some(t) = view_title(self.doc, v) {
             cands.push(ViewSel {

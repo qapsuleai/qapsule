@@ -25,7 +25,7 @@ fn hints(doc: &Document) -> crate::select::Resolver<'_> {
 }
 
 /// Lists longer than this are cut (`truncated: true`).
-pub const MAX_ITEMS: usize = 50;
+pub(crate) const MAX_ITEMS: usize = 50;
 
 /// Longest text (fact text, finding claim) kept, in characters.
 const MAX_TEXT: usize = 120;
@@ -42,7 +42,7 @@ fn short(s: &str) -> String {
 
 /// Legend text of a series: `RSI14`, `SMA20`, `MACD(12,26,9)`, `BOLLINGER(20,2)`; for
 /// bars the symbol and interval.
-pub fn series_label(s: &Series) -> String {
+pub(crate) fn series_label(s: &Series) -> String {
     match &s.source {
         SeriesSource::Study { study, params, .. } => {
             let up = study.to_uppercase();
@@ -116,7 +116,7 @@ fn summary_fields(s: &Series) -> Vec<String> {
 }
 
 /// Outputs a `line` draws by default (`docs/GRAMMAR.md` §5).
-pub fn drawing_outputs(s: &Series) -> Vec<String> {
+pub(crate) fn drawing_outputs(s: &Series) -> Vec<String> {
     match &s.source {
         SeriesSource::Study { study, output, .. } if output.is_none() => match study.as_str() {
             "bollinger" => vec!["upper".into(), "middle".into(), "lower".into()],
@@ -157,7 +157,7 @@ fn mark_name(m: Mark) -> &'static str {
 
 /// What a layer draws, in a few words: `px candles`, `rsi14.rsi line`,
 /// `rule 70 (rsi.overbought)`.
-pub fn layer_about(doc: &Document, l: &Layer) -> String {
+pub(crate) fn layer_about(doc: &Document, l: &Layer) -> String {
     let d = layer_data(doc, l);
     if l.mark == Mark::Rule {
         for (k, p) in [

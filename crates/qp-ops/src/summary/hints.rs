@@ -131,11 +131,11 @@ impl<'a> FastHints<'a> {
         index.get(id).map_or_else(|| Rc::new(Vec::new()), Rc::clone)
     }
 
-    pub fn fact_pos(&self, id: &str) -> Option<usize> {
+    pub(crate) fn fact_pos(&self, id: &str) -> Option<usize> {
         self.fact_at.get(id).copied()
     }
 
-    pub fn finding_pos(&self, id: &str) -> Option<usize> {
+    pub(crate) fn finding_pos(&self, id: &str) -> Option<usize> {
         self.finding_at.get(id).copied()
     }
 

@@ -17,7 +17,8 @@ başlık yapı taşları (`headparts`). RF1 S2'de `qp-session`'dan saf taşımay
 `capidx`, `sentences`, `headparts`; kökte `DataError`, `DataOutcome`, `HostNotice`,
 `did_you_mean`, `edit_distance`.
 
-**Düzen (`src/`):** her modül bir dosya; `capidx/` kapsül öğe belleği (`items`).
+**Düzen (`src/`):** her modül bir dosya; `capidx/` kapsül öğe belleği (`items`), `values/`
+serinin değerleri (`computed`: `Computed`).
 
 **Ne değildir:** oturum değildir (`Session`'ı tanımaz); işlem açmaz (`qp-ops`); dış veri
 kaynağı değildir (sağlayıcılar `qp-source`'ta); kapsül motoru değildir (`qp-capsule`).

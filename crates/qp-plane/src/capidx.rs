@@ -144,7 +144,7 @@ impl IdIndex {
 /// The realizer's input for one sentence pair (`qp_capsule::SentenceInput`, owned): the
 /// realizer is a pure function of it.
 #[derive(Debug, Clone)]
-pub struct SentenceKey {
+pub(crate) struct SentenceKey {
     pub story: Story,
     pub lead: Fact,
     pub latest: Fact,
@@ -157,7 +157,7 @@ pub struct SentenceKey {
 }
 
 /// Borrowed form of [`SentenceKey`] (compared without copying).
-pub struct SentenceKeyRef<'a> {
+pub(crate) struct SentenceKeyRef<'a> {
     pub story: &'a Story,
     pub lead: &'a Fact,
     pub latest: &'a Fact,
@@ -207,7 +207,7 @@ pub struct SentenceMemo {
 }
 
 impl SentenceMemo {
-    pub fn get(&self, capsule: &str, k: &SentenceKeyRef<'_>) -> Option<(String, String)> {
+    pub(crate) fn get(&self, capsule: &str, k: &SentenceKeyRef<'_>) -> Option<(String, String)> {
         self.by
             .get(capsule)?
             .iter()
@@ -215,7 +215,7 @@ impl SentenceMemo {
             .map(|(_, v)| v.clone())
     }
 
-    pub fn put(&mut self, capsule: &str, k: &SentenceKeyRef<'_>, v: (String, String)) {
+    pub(crate) fn put(&mut self, capsule: &str, k: &SentenceKeyRef<'_>, v: (String, String)) {
         let e = self.by.entry(capsule.to_owned()).or_default();
         if e.len() >= PER_CAPSULE {
             e.remove(0);
@@ -511,7 +511,7 @@ pub fn proj_breaks(entries: &[LogEntry]) -> bool {
 /// The reading document's bars, per series (in order), bit for bit; `None`: no reading
 /// document. The reading document is the document (followed by the log) plus the bound
 /// series' bars, so this and the log position say when it is unchanged.
-pub type RdSnap = Option<Vec<BarsSnap>>;
+pub(crate) type RdSnap = Option<Vec<BarsSnap>>;
 
 pub fn rd_snap(rd: Option<&qp_schema::Document>) -> RdSnap {
     rd.map(|d| d.series.iter().map(|s| snap(s.bars())).collect())

@@ -188,7 +188,7 @@ fn lang_of(lang: Language) -> Lang {
 /// (RP4/T7) The time a story's row is about: its birth while open, its close once closed
 /// (the moment the headline's "when" names: the birth phrase, or the closing chip).
 #[must_use]
-pub fn story_event_t(story: &Story) -> Option<i64> {
+pub(crate) fn story_event_t(story: &Story) -> Option<i64> {
     if story.stage.is_closed() {
         story.history.last().map(|h| h.t)
     } else {
@@ -225,7 +225,7 @@ pub fn event_stamp(
 
 /// The grammar's plain pieces from the realizer's.
 #[must_use]
-pub fn from_parts(p: &Parts, lang: Language) -> HeadlineParts {
+pub(crate) fn from_parts(p: &Parts, lang: Language) -> HeadlineParts {
     let l = match lang {
         Language::Tr => Lang::Tr,
         Language::En => Lang::En,

@@ -18,6 +18,11 @@ Yeni öğeler (eski gövdeler buraya taşındı):
 - `impl qp_ops::HeadlineSource for Session` (`qp-session` `capsule/headsource.rs`): eski iki gövde
   aynen, `s` → `self`.
 
-Toplam: 4 yeniden yazılan öğe, 2 yeni öğe. `moved.py`'nin bir CHANGED'ı daha var:
+- `qp_plane::values::Computed::is_empty` (yeni, kullanılmıyor): `Computed` ve `len` crate
+  sınırını geçince clippy `len_without_is_empty` istedi; modül/crate düzeyinde susturma yerine
+  eklendi. `Computed` ve `impl`'i `values.rs`'ten `values/computed.rs`'e saf taşımayla gitti
+  (`new` ve `main_ix` `pub(super)`), böylece `values.rs` taban çizgisi değerini aşmadı.
+
+Toplam: 4 yeniden yazılan öğe, 3 yeni öğe. `moved.py`'nin bir CHANGED'ı daha var:
 `qp-shellcore` `drive/viewer_less.rs` `fn deliver` — yalnız yol (`qp_session::headparts` →
 `qp_plane::headparts`) ve rustfmt'in kısalan satırı yeniden sarması; gövde aynı.

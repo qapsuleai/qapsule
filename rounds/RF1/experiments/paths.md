@@ -65,6 +65,35 @@ listeler; her birleştirmede güncellenir. Kaynaklar: ajan raporları ve denetim
 - `qp_ops::{apply, canon, expand, gops, live, locate, present, provider, select, summary, watch}` modülleri
 - `qp_plane::{capidx, error, headparts, plane, proj, sentences, suggest, values}` modülleri
 
-**`pub(crate)` → `pub`:** taşınan iki crate'te bütün `pub(crate)` öğeler `pub` oldu (252 yer;
-crate sınırını geçtikleri için, tek tek ayıklanmadı). Ayrıca özel olan `qp_ops::watch::on` ve
-`qp_ops::live::cond_ids` `pub` oldu (oturum kullanıyor).
+**`pub(crate)` → `pub` (derleyiciyle ölçüldü):** taşınan iki crate'te öğeler önce `pub(crate)`'e
+geri alındı; yalnız başka crate'ten (çoğu `qp-session`, birkaçı `qp-ops` → `qp-plane`) kullanıldığı
+için derleyicinin hata verdiği yerler açıldı, ayrıca `pub` yöntemlerin/alanların tipleri
+(`private_bounds`/`private_interfaces`: `Indexed`, `Computed`, `Expanded`, `BoundSeries`, …).
+Satır sayımıyla ≈ 160 bildirim (modül başına; `x::*` glob yeniden dışa aktarmalardır, `(özel idi)`
+önceden özeldi). Ters yönde üç alan daraldı (main'de `pub`, artık `pub(crate)`; tipleri
+`pub(crate)`): `canon::Site::reads`, `locate::Violation::kind`, `select::Site::kind`.
+
+- `qp-ops::canon` (2): `origin::*`, `Site`
+- `qp-ops::canon::origin` (1): `origin_text`
+- `qp-ops::expand` (15): `bind::*`, `describe::summarize_ops`, `op::expand_op`, `Ctx`, `valid_id`, `need_series`, `need_view`, `need_finding`, `check_condition`, `view_bar_series_any`, `view_bar_series`, `undone_set`, `need_proposal`, `expand_ops`, `Expanded`
+- `qp-ops::expand::bind` (1): `condition_entitled`
+- `qp-ops::expand::describe` (1): `summarize_ops`
+- `qp-ops::live` (2): `closure_of`, `cond_ids (özel idi)`
+- `qp-ops::locate` (1): `locate`
+- `qp-ops::present` (1): `present`
+- `qp-ops::provider` (6): `new`, `with_headlines`, `with_parts`, `with_voice`, `with_clock`, `warm`
+- `qp-ops::select` (7): `sites::*`, `Site`, `violation_error`, `finding_bar`, `finding_about`, `Resolver`, `resolve_group`
+- `qp-ops::select::resolve` (4): `panel_hint`, `layer_hint`, `fact_hint`, `finding_hint`
+- `qp-ops::select::sites` (2): `sites`, `is_selector`
+- `qp-ops::summary` (2): `FastHints`, `summarize_doc`
+- `qp-ops::summary::hints` (3): `new`, `fact_hint`, `finding_hint`
+- `qp-ops::watch` (1): `on (özel idi)`
+- `qp-plane::capidx` (24): `items::*`, `IdIndex`, `Indexed`, `refresh`, `get`, `by_finding`, `SentenceMemo`, `BarsSnap`, `snap`, `HeadState`, `unregister`, `Contrib`, `ReaderProj`, `new`, `contains`, `capsules_of_fact`, `remove`, `add`, `result`, `proj_breaks`, `rd_snap`, `rd_same`, `ReaderView`, `VIEWS: usize`
+- `qp-plane::capidx::items` (14): `ItemKeyRef`, `capsule`, `facts`, `series`, `voice`, `clock`, `cal`, `tz`, `ItemMemo`, `hits`, `misses`, `put`, `clear`, `prune`
+- `qp-plane::error` (14): `PResult`, `E`, `new`, `at`, `expected`, `dym`, `suggest`, `hint`, `reason`, `conflicts`, `build`, `invalid`, `ptr`, `num`
+- `qp-plane::headparts` (3): `story_parts`, `story_voice`, `event_stamp`
+- `qp-plane::plane` (27): `Provider`, `BoundSeries`, `Blocked`, `state_str`, `unentitled`, `error`, `EventOutcome`, `DataPlane`, `binding_of`, `is_bar_series`, `bar_root`, `same_but_anchor`, `new`, `sync`, `refresh`, `bars`, `host_state`, `entitled`, `state_for`, `gate_layer`, `apply_event`, `layer_reads`, `inject`, `reading_doc`, `Reader`, `bars_for`, `evidence_ref`
+- `qp-plane::proj` (2): `Proj`, `mentions_hidden`
+- `qp-plane::sentences` (3): `sentence_pair_memo`, `story_validity`, `story_fact_ids`
+- `qp-plane::values` (23): `Delta`, `first_bar`, `Cache`, `clear`, `get`, `slot_of`, `val`, `touched_now`, `gen`, `forget`, `begin_tick`, `apply_delta`, `find_series`, `bar_series`, `bars_of`, `main_output`, `study_outputs`, `values`, `condition_series`, `cmp`, `eval_condition`, `eval_on`, `holds`
+- `qp-plane::values::computed` (3): `Computed`, `len`, `main_values`

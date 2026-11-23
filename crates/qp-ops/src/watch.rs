@@ -18,7 +18,12 @@ pub fn on(i: &Intent) -> bool {
 
 #[allow(clippy::too_many_lines)]
 /// `add_watch` and `remove_watch` (§25.5).
-pub fn expand_watch(doc: &Document, op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<ChangeOp>> {
+pub(crate) fn expand_watch(
+    doc: &Document,
+    op: &Op,
+    p: &str,
+    ctx: &mut Ctx<'_>,
+) -> PResult<Vec<ChangeOp>> {
     let person_of_speaker = ctx
         .plane
         .delegates
@@ -132,18 +137,18 @@ pub fn expand_watch(doc: &Document, op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PRes
 
 /// (Privacy, §25.5) The one rule for who may see (and so touch, or learn the existence
 /// of) a watch: an `owner`, its person, or an agent working for its person.
-pub fn watch_visible(w: &Watch, ctx: &Ctx<'_>) -> bool {
+pub(crate) fn watch_visible(w: &Watch, ctx: &Ctx<'_>) -> bool {
     ctx.is_owner || w.for_ == ctx.speaker || w.for_ == person_of(ctx.plane, ctx.speaker)
 }
 
 /// Whether intent `i` is visible to the speaker of `ctx` (an intent without a watch is).
-pub fn intent_visible(i: &Intent, ctx: &Ctx<'_>) -> bool {
+pub(crate) fn intent_visible(i: &Intent, ctx: &Ctx<'_>) -> bool {
     i.watch.as_ref().is_none_or(|w| watch_visible(w, ctx))
 }
 
 /// Every item id of `doc` the speaker of `ctx` may learn of (another person's watches
 /// left out), for `did_you_mean`.
-pub fn visible_ids<'d>(doc: &'d Document, ctx: &Ctx<'_>) -> Vec<&'d str> {
+pub(crate) fn visible_ids<'d>(doc: &'d Document, ctx: &Ctx<'_>) -> Vec<&'d str> {
     let hidden: std::collections::BTreeSet<&str> = doc
         .intents
         .iter()
@@ -157,7 +162,7 @@ pub fn visible_ids<'d>(doc: &'d Document, ctx: &Ctx<'_>) -> Vec<&'d str> {
 }
 
 /// The reserved prefix of the authority's watch ids.
-pub const WATCH_PREFIX: &str = "watch-";
+pub(crate) const WATCH_PREFIX: &str = "watch-";
 
 /// The person principal `p` reads for (an agent: its `on_behalf`).
 pub fn person_of<'a>(plane: &'a qp_plane::plane::DataPlane, p: &'a str) -> &'a str {

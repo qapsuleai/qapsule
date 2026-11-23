@@ -43,7 +43,7 @@ fn check_domain(d: [f64; 2], log: bool, strict: bool, path: &str) -> PResult<()>
 }
 
 /// Checks a panel's value scale (kind, id, domain); fills its id.
-pub fn check_value_scale(s: &mut Scale, panel: u32, path: &str) -> PResult<()> {
+pub(crate) fn check_value_scale(s: &mut Scale, panel: u32, path: &str) -> PResult<()> {
     let id = format!("y{panel}");
     if s.kind == ScaleKind::Time {
         return Err(E::new(
@@ -72,7 +72,7 @@ pub fn check_value_scale(s: &mut Scale, panel: u32, path: &str) -> PResult<()> {
     Ok(())
 }
 
-pub fn check_weight(w: f64, path: &str) -> PResult<()> {
+pub(crate) fn check_weight(w: f64, path: &str) -> PResult<()> {
     if w.is_finite() && w > 0.0 {
         Ok(())
     } else {
@@ -87,7 +87,7 @@ pub fn check_weight(w: f64, path: &str) -> PResult<()> {
 }
 
 /// Checks a panel whose id is assigned; fills its scale id.
-pub fn check_panel(p: &mut Panel, path: &str) -> PResult<()> {
+pub(crate) fn check_panel(p: &mut Panel, path: &str) -> PResult<()> {
     let id = p.id.unwrap_or_default();
     if let Some(w) = p.weight {
         check_weight(w, &ptr(path, "weight"))?;
@@ -129,7 +129,7 @@ fn is_hex(c: &str) -> bool {
     (b.len() == 7 || b.len() == 9) && b[0] == b'#' && b[1..].iter().all(u8::is_ascii_hexdigit)
 }
 
-pub fn check_color(c: &str, path: &str) -> PResult<()> {
+pub(crate) fn check_color(c: &str, path: &str) -> PResult<()> {
     if is_hex(c) || THEME_TOKENS.contains(&c) {
         return Ok(());
     }

@@ -1,0 +1,141 @@
+PASS desk
+1 transcript(s), 1 passed, 0 failed (inproc)
+## design-check `c2a-trial` (profile dense): PASS
+| P# | scheme | rule | measured | threshold | result |
+|---|---|---|---|---|---|
+| P4 | dark | price label spacing px / labels in 300 px plot | 52 / 5 | 40-60 / >= 4 | PASS |
+| P5 | dark | two-level time axis / labels at 390 px | yes / 6 | yes / >= 4 | PASS |
+| P6 | dark | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
+| P8 | dark | on-plot mark height px (record / drawn) | 28 / 0 | <= 28 | PASS |
+| P4 | light | price label spacing px / labels in 300 px plot | 52 / 5 | 40-60 / >= 4 | PASS |
+| P5 | light | two-level time axis / labels at 390 px | yes / 6 | yes / >= 4 | PASS |
+| P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
+| P8 | light | on-plot mark height px (record / drawn) | 28 / 0 | <= 28 | PASS |
+## design-check `tavek` (profile dense): PASS
+| P# | scheme | rule | measured | threshold | result |
+|---|---|---|---|---|---|
+| P1 | dark | chrome surface+text OKLCH C | 0.012 (chrome.control) | <= 0.02 | PASS |
+| P1 | light | chrome surface+text OKLCH C | 0.012 (chrome.muted) | <= 0.02 | PASS |
+| P2 | dark | distinct tones in the chart scene (desk / levels) | 5 / 6 (4 / 5 hues + neutral) | <= 6 | PASS |
+| P2 | light | distinct tones in the chart scene (desk / levels) | 5 / 6 (4 / 5 hues + neutral) | <= 6 | PASS |
+| P3 | dark | up/down HSL S, L | up 44/59, down 60/59 | S <= 65, L 40-60 | PASS |
+| P3 | light | up/down HSL S, L (dark only) | - | - | n.a. |
+| P4 | dark | price label spacing px / labels in 300 px plot | 51 / 5 | 40-60 / >= 4 | PASS |
+| P4 | light | price label spacing px / labels in 300 px plot | 51 / 5 | 40-60 / >= 4 | PASS |
+| P5 | dark | two-level time axis / labels at 390 px | yes / 6 | yes / >= 4 | PASS |
+| P5 | light | two-level time axis / labels at 390 px | yes / 6 | yes / >= 4 | PASS |
+| P6 | dark | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
+| P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
+| P8 | dark | on-plot mark height px (record / drawn) | 20 / 0 | <= 28 | PASS |
+| P8 | light | on-plot mark height px (record / drawn) | 20 / 0 | <= 28 | PASS |
+| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P10 | - | dense: body / figure / smallest px | 13 / 11 / 11 | 13-14 / 11-12 / >= 11 | PASS |
+| P11 | - | figure font 0-9 advance spread (1000 px) | 0 (plex-mono: 600-600) | 0 | PASS |
+| P12 | - | control / card radius px | 6 / 8 | <= 8 / 12 | PASS |
+| P13 | dark | border roles / line:bg / control:bg,card | 1 / 1.39 / 3.29 | 1 / 1.2-1.6 / >= 3 | PASS |
+| P13 | light | border roles / line:bg / control:bg,card | 1 / 1.33 / 3.52 | 1 / 1.2-1.6 / >= 3 | PASS |
+| H1 | dark | text contrast, every ground (worst) | 5.27 (muted/evidence band on strip) | >= 4.5 | PASS |
+| H1 | light | text contrast, every ground (worst) | 5.26 (muted/evidence band on strip) | >= 4.5 | PASS |
+| H2 | dark | non-text contrast, every ground (worst) | 3.04 (grey/evidence band on strip) | >= 3 | PASS |
+| H2 | light | non-text contrast, every ground (worst) | 3.06 (up/own volume on strip) | >= 3 | PASS |
+| H3 | dark | semantic + origin ΔE00, 5 conditions | 11.3 (up/down grey) | >= 10 | PASS |
+| H3 | light | semantic + origin ΔE00, 5 conditions | 10.7 (agent/engine grey) | >= 10 | PASS |
+## design-check `tavek-tel` (profile touch): PASS
+| P# | scheme | rule | measured | threshold | result |
+|---|---|---|---|---|---|
+| P1 | dark | chrome surface+text OKLCH C | 0.012 (chrome.control) | <= 0.02 | PASS |
+| P1 | light | chrome surface+text OKLCH C | 0.012 (chrome.muted) | <= 0.02 | PASS |
+| P2 | dark | distinct tones in the chart scene (desk / levels) | 5 / 6 (4 / 5 hues + neutral) | <= 6 | PASS |
+| P2 | light | distinct tones in the chart scene (desk / levels) | 5 / 6 (4 / 5 hues + neutral) | <= 6 | PASS |
+| P3 | dark | up/down HSL S, L | up 44/59, down 60/59 | S <= 65, L 40-60 | PASS |
+| P3 | light | up/down HSL S, L (dark only) | - | - | n.a. |
+| P4 | dark | price label spacing px / labels in 300 px plot | 50 / 5 | 40-60 / >= 4 | PASS |
+| P4 | light | price label spacing px / labels in 300 px plot | 50 / 5 | 40-60 / >= 4 | PASS |
+| P5 | dark | two-level time axis / labels at 390 px | yes / 5 | yes / >= 4 | PASS |
+| P5 | light | two-level time axis / labels at 390 px | yes / 5 | yes / >= 4 | PASS |
+| P6 | dark | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / C only | Y / Y / Y / OHLC (touch: C) | PASS |
+| P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / C only | Y / Y / Y / OHLC (touch: C) | PASS |
+| P8 | dark | on-plot mark height px (record / drawn) | 24 / 0 | <= 28 | PASS |
+| P8 | light | on-plot mark height px (record / drawn) | 24 / 0 | <= 28 | PASS |
+| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P10 | - | touch: body / smallest / control px | 16 / 13 / 44 | >= 15 / 13 / 44 | PASS |
+| P11 | - | figure font 0-9 advance spread (1000 px) | 0 (plex-mono: 600-600) | 0 | PASS |
+| P12 | - | control / card radius px | 6 / 8 | <= 8 / 12 | PASS |
+| P13 | dark | border roles / line:bg / control:bg,card | 1 / 1.39 / 3.29 | 1 / 1.2-1.6 / >= 3 | PASS |
+| P13 | light | border roles / line:bg / control:bg,card | 1 / 1.33 / 3.52 | 1 / 1.2-1.6 / >= 3 | PASS |
+| H1 | dark | text contrast, every ground (worst) | 5.27 (muted/evidence band on strip) | >= 4.5 | PASS |
+| H1 | light | text contrast, every ground (worst) | 5.26 (muted/evidence band on strip) | >= 4.5 | PASS |
+| H2 | dark | non-text contrast, every ground (worst) | 3.04 (grey/evidence band on strip) | >= 3 | PASS |
+| H2 | light | non-text contrast, every ground (worst) | 3.06 (up/own volume on strip) | >= 3 | PASS |
+| H3 | dark | semantic + origin ΔE00, 5 conditions | 11.3 (up/down grey) | >= 10 | PASS |
+| H3 | light | semantic + origin ΔE00, 5 conditions | 10.7 (agent/engine grey) | >= 10 | PASS |
+## design-check `oltan` (profile legacy, for comparison, never fails): 19 FAIL
+| P# | scheme | rule | measured | threshold | result |
+|---|---|---|---|---|---|
+| P1 | dark | chrome surface+text OKLCH C | 0.017 (axis) | <= 0.02 | PASS |
+| P1 | light | chrome surface+text OKLCH C | 0.015 (muted) | <= 0.02 | PASS |
+| P2 | dark | distinct tones in the chart scene (desk / levels) | 6 / 6 (5 / 5 hues + neutral) | <= 6 | PASS |
+| P2 | light | distinct tones in the chart scene (desk / levels) | 5 / 5 (4 / 4 hues + neutral) | <= 6 | PASS |
+| P3 | dark | up/down HSL S, L | up 70/59, down 91/63 | S <= 65, L 40-60 | FAIL |
+| P3 | light | up/down HSL S, L (dark only) | - | - | n.a. |
+| P4 | dark | price label spacing px / labels in 300 px plot | 139 / 2 | 40-60 / >= 4 | FAIL |
+| P4 | light | price label spacing px / labels in 300 px plot | 139 / 2 | 40-60 / >= 4 | FAIL |
+| P5 | dark | two-level time axis / labels at 390 px | no / 3 | yes / >= 4 | FAIL |
+| P5 | light | two-level time axis / labels at 390 px | no / 3 | yes / >= 4 | FAIL |
+| P6 | dark | axis-label overlaps + overflow (desk + phone) | 2 (2 + 0) | = 0 | FAIL |
+| P6 | light | axis-label overlaps + overflow (desk + phone) | 2 (2 + 0) | = 0 | FAIL |
+| P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
+| P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
+| P8 | dark | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
+| P8 | light | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
+| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P10 | - | dense: body / figure / smallest px | 16 / 13 / 13 | 13-14 / 11-12 / >= 11 | FAIL |
+| P11 | - | figure font 0-9 advance spread (1000 px) | 0 (atkinson-next: 632-632) | 0 | PASS |
+| P12 | - | control / card radius px | 14 / 14 | <= 8 / 12 | FAIL |
+| P13 | dark | border roles / line:bg / control:bg,card | 1 / 1.41 / 3.75 | 1 / 1.2-1.6 / >= 3 | PASS |
+| P13 | light | border roles / line:bg / control:bg,card | 1 / 1.25 / 3.40 | 1 / 1.2-1.6 / >= 3 | PASS |
+| H1 | dark | text contrast, every ground (worst) | 1.97 (closed label/evidence band on strip) | >= 4.5 | FAIL |
+| H1 | light | text contrast, every ground (worst) | 2.07 (closed label/evidence band on strip) | >= 4.5 | FAIL |
+| H2 | dark | non-text contrast, every ground (worst) | 1.70 (axis/evidence band on strip) | >= 3 | FAIL |
+| H2 | light | non-text contrast, every ground (worst) | 1.91 (axis/evidence band on strip) | >= 3 | FAIL |
+| H3 | dark | semantic + origin ΔE00, 5 conditions | 4.3 (agent/engine grey) | >= 10 | FAIL |
+| H3 | light | semantic + origin ΔE00, 5 conditions | 7.3 (human/engine grey) | >= 10 | FAIL |
+## design-check `r4` (profile legacy, for comparison, never fails): 22 FAIL
+| P# | scheme | rule | measured | threshold | result |
+|---|---|---|---|---|---|
+| P1 | dark | chrome surface+text OKLCH C | 0.024 (axis) | <= 0.02 | FAIL |
+| P1 | light | chrome surface+text OKLCH C | 0.022 (muted) | <= 0.02 | FAIL |
+| P2 | dark | distinct tones in the chart scene (desk / levels) | 8 / 8 (7 / 7 hues + neutral) | <= 6 | FAIL |
+| P2 | light | distinct tones in the chart scene (desk / levels) | 7 / 7 (6 / 6 hues + neutral) | <= 6 | FAIL |
+| P3 | dark | up/down HSL S, L | up 63/40, down 83/63 | S <= 65, L 40-60 | FAIL |
+| P3 | light | up/down HSL S, L (dark only) | - | - | n.a. |
+| P4 | dark | price label spacing px / labels in 300 px plot | 139 / 2 | 40-60 / >= 4 | FAIL |
+| P4 | light | price label spacing px / labels in 300 px plot | 139 / 2 | 40-60 / >= 4 | FAIL |
+| P5 | dark | two-level time axis / labels at 390 px | no / 3 | yes / >= 4 | FAIL |
+| P5 | light | two-level time axis / labels at 390 px | no / 3 | yes / >= 4 | FAIL |
+| P6 | dark | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
+| P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
+| P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
+| P8 | dark | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
+| P8 | light | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
+| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P10 | - | dense: body / figure / smallest px | 14 / 11 / 9 | 13-14 / 11-12 / >= 11 | FAIL |
+| P11 | - | figure font 0-9 advance spread (1000 px) | 0 (plex-mono: 600-600) | 0 | PASS |
+| P12 | - | control / card radius px | 6 / 6 | <= 8 / 12 | PASS |
+| P13 | dark | border roles / line:bg / control:bg,card | 1 / 1.32 / 1.22 | 1 / 1.2-1.6 / >= 3 | FAIL |
+| P13 | light | border roles / line:bg / control:bg,card | 2 / 1.28 / 1.28 | 1 / 1.2-1.6 / >= 3 | FAIL |
+| H1 | dark | text contrast, every ground (worst) | 2.22 (muted/evidence band on strip) | >= 4.5 | FAIL |
+| H1 | light | text contrast, every ground (worst) | 3.85 (muted/evidence band on strip) | >= 4.5 | FAIL |
+| H2 | dark | non-text contrast, every ground (worst) | 1.14 (axis/evidence band on strip) | >= 3 | FAIL |
+| H2 | light | non-text contrast, every ground (worst) | 1.50 (axis/evidence band on strip) | >= 3 | FAIL |
+| H3 | dark | semantic + origin ΔE00, 5 conditions | 0.5 (down/invalid grey) | >= 10 | FAIL |
+| H3 | light | semantic + origin ΔE00, 5 conditions | 4.6 (up/down grey) | >= 10 | FAIL |
+design-contract: generated tables equal the look record (difference 0)
+design-check: PASS

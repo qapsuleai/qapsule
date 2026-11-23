@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "HalfDay": {
+      "additionalProperties": false,
+      "description": "A trading day that closes early.",
+      "properties": {
+        "close": {
+          "description": "Local early close time, `HH:MM`.",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "type": "string"
+        },
+        "date": {
+          "description": "Local date, `YYYY-MM-DD`.",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "close"
+      ],
+      "type": "object"
+    },
+    "Session": {
+      "additionalProperties": false,
+      "description": "One trading session in exchange local time (`HH:MM`, 24h). `close` is exclusive.",
+      "properties": {
+        "close": {
+          "description": "Local close time, `HH:MM`.",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "type": "string"
+        },
+        "open": {
+          "description": "Local open time, `HH:MM`.",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "open",
+        "close"
+      ],
+      "type": "object"
+    },
+    "Weekday": {
+      "description": "Weekday, ISO numbering order.",
+      "oneOf": [
+        {
+          "const": "mon",
+          "description": "Monday.",
+          "type": "string"
+        },
+        {
+          "const": "tue",
+          "description": "Tuesday.",
+          "type": "string"
+        },
+        {
+          "const": "wed",
+          "description": "Wednesday.",
+          "type": "string"
+        },
+        {
+          "const": "thu",
+          "description": "Thursday.",
+          "type": "string"
+        },
+        {
+          "const": "fri",
+          "description": "Friday.",
+          "type": "string"
+        },
+        {
+          "const": "sat",
+          "description": "Saturday.",
+          "type": "string"
+        },
+        {
+          "const": "sun",
+          "description": "Sunday.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An exchange calendar: time zone, sessions and holidays (K14). Data only; bar\nboundary logic lives in `qp-calendar`.",
+  "properties": {
+    "half_days": {
+      "default": [],
+      "description": "Early-close days.",
+      "items": {
+        "$ref": "#/$defs/HalfDay"
+      },
+      "type": "array"
+    },
+    "holidays": {
+      "default": [],
+      "description": "Full holidays, local dates `YYYY-MM-DD`.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "id": {
+      "description": "Calendar id, e.g. `XIST`.",
+      "type": "string"
+    },
+    "sessions": {
+      "description": "Regular sessions of a trading day, in local time, ascending.",
+      "items": {
+        "$ref": "#/$defs/Session"
+      },
+      "type": "array"
+    },
+    "tz": {
+      "description": "IANA time zone of the exchange, e.g. `Europe/Istanbul`.",
+      "type": "string"
+    },
+    "weekend": {
+      "default": [],
+      "description": "Non-trading weekdays.",
+      "items": {
+        "$ref": "#/$defs/Weekday"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "tz",
+    "sessions"
+  ],
+  "title": "Calendar",
+  "type": "object"
+}

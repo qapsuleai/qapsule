@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "Bar": {
+      "additionalProperties": false,
+      "description": "One OHLCV bar.",
+      "properties": {
+        "c": {
+          "description": "Close price.",
+          "format": "double",
+          "type": "number"
+        },
+        "h": {
+          "description": "High price.",
+          "format": "double",
+          "type": "number"
+        },
+        "l": {
+          "description": "Low price.",
+          "format": "double",
+          "type": "number"
+        },
+        "o": {
+          "description": "Open price.",
+          "format": "double",
+          "type": "number"
+        },
+        "t": {
+          "description": "Bar open time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "v": {
+          "description": "Volume.",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "o",
+        "h",
+        "l",
+        "c",
+        "v"
+      ],
+      "type": "object"
+    },
+    "BarPatch": {
+      "additionalProperties": false,
+      "description": "Field-level values of a bar; absent fields are unchanged.",
+      "properties": {
+        "c": {
+          "description": "Close.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "h": {
+          "description": "High.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "l": {
+          "description": "Low.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "o": {
+          "description": "Open.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "v": {
+          "description": "Volume.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "DataChange": {
+      "description": "What a data event does.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A new bar after the last one (strictly later `t`).",
+          "properties": {
+            "bar": {
+              "$ref": "#/$defs/Bar",
+              "description": "The bar."
+            },
+            "kind": {
+              "const": "bar",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "bar"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Only the changed fields of an existing bar, by its time: on the last bar a live\nupdate; on an earlier bar a correction.",
+          "properties": {
+            "fields": {
+              "$ref": "#/$defs/BarPatch",
+              "description": "Changed fields (at least one)."
+            },
+            "kind": {
+              "const": "patch",
+              "type": "string"
+            },
+            "t": {
+              "description": "Time of the bar to change.",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "t",
+            "fields"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "FeedKey": {
+      "additionalProperties": false,
+      "description": "One data stream: a symbol and interval on a named feed. Series bound to the same\nfeed share its data.",
+      "properties": {
+        "feed": {
+          "description": "Named feed; the host's default if absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interval": {
+          "description": "Bar interval.",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "Exchange symbol.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symbol",
+        "interval"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One step of a feed, as the source delivers it (field-level, K23). Not a protocol\nmessage: hosts feed it to the engine directly; transcripts inject it with a `data`\nstep (`docs/PROTOCOL.md` §15, §18).",
+  "properties": {
+    "change": {
+      "$ref": "#/$defs/DataChange",
+      "description": "What changes."
+    },
+    "feed": {
+      "$ref": "#/$defs/FeedKey",
+      "description": "The feed."
+    },
+    "seq": {
+      "description": "The source's sequence number for this feed: 1, 2, 3… without gaps. A gap or a\nrepeat is detected by the receiver (market-data practice: sequence + gap fill).",
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "feed",
+    "seq",
+    "change"
+  ],
+  "title": "DataEvent",
+  "type": "object"
+}

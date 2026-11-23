@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "Direction": {
+      "description": "Direction of a meaning.",
+      "oneOf": [
+        {
+          "const": "up",
+          "description": "Upwards.",
+          "type": "string"
+        },
+        {
+          "const": "down",
+          "description": "Downwards.",
+          "type": "string"
+        },
+        {
+          "const": "neutral",
+          "description": "No direction (e.g. a squeeze).",
+          "type": "string"
+        }
+      ]
+    },
+    "GlyphPhase": {
+      "description": "Phase of a glyph's line style (K30: dashed candidate, solid final, outcome).",
+      "oneOf": [
+        {
+          "const": "candidate",
+          "description": "Candidate (open bar).",
+          "type": "string"
+        },
+        {
+          "const": "final",
+          "description": "Final, still open.",
+          "type": "string"
+        },
+        {
+          "const": "realized",
+          "description": "Closed: realized.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "Closed: not realized (invalidated or expired).",
+          "type": "string"
+        },
+        {
+          "const": "retracted",
+          "description": "Closed: retracted (data was wrong).",
+          "type": "string"
+        }
+      ]
+    },
+    "MeaningKind": {
+      "description": "The six meaning kinds (K30). The glyph's shape encodes this.",
+      "oneOf": [
+        {
+          "const": "continuation",
+          "description": "Devam: the move goes on (trend, MA alignment, flag).",
+          "type": "string"
+        },
+        {
+          "const": "reversal",
+          "description": "Dönüş: the move may be turning (divergence, double top/bottom).",
+          "type": "string"
+        },
+        {
+          "const": "breakout",
+          "description": "Kırılım: a boundary was crossed (range, channel, support/resistance).",
+          "type": "string"
+        },
+        {
+          "const": "squeeze",
+          "description": "Sıkışma: the move is narrowing; direction unknown (band squeeze, low volatility).",
+          "type": "string"
+        },
+        {
+          "const": "extreme",
+          "description": "Aşırılık: unusual stretch (overbought/oversold, outside the band).",
+          "type": "string"
+        },
+        {
+          "const": "flow",
+          "description": "Akış: money in/out independent of price (volume, settlement, institutional flow).",
+          "type": "string"
+        }
+      ]
+    },
+    "Validity": {
+      "description": "Whether a capsule's claim still holds **today** (R4, K42/A28; `docs/CONCEPTS.md`\n\"Geçerlilik\"). The headline and the glyph say the same thing.",
+      "oneOf": [
+        {
+          "const": "valid",
+          "description": "Geçerli: the story is open and its state condition holds (or it has none).",
+          "type": "string"
+        },
+        {
+          "const": "no_longer",
+          "description": "Artık geçerli değil: the state condition no longer holds; the story is not\nclosed yet (its expected resolution is still pending).",
+          "type": "string"
+        },
+        {
+          "const": "closed",
+          "description": "Kapandı: the story closed (realized, invalidated, expired or retracted).",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Parameters of one meaning glyph (K30 visual channels). All engine-derived.",
+  "properties": {
+    "confidence": {
+      "description": "Fill: confidence from the ledger in `[0, 1]`; absent when the ledger is too small.",
+      "format": "double",
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "confirmations": {
+      "description": "Confirmation marks: number of independent evidence families (1–5).",
+      "format": "uint8",
+      "maximum": 255,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "direction": {
+      "$ref": "#/$defs/Direction",
+      "description": "Direction."
+    },
+    "freshness": {
+      "description": "Opacity: freshness in `[0, 1]` (1 = this bar).",
+      "format": "double",
+      "type": "number"
+    },
+    "kind": {
+      "$ref": "#/$defs/MeaningKind",
+      "description": "Shape: the kind."
+    },
+    "phase": {
+      "$ref": "#/$defs/GlyphPhase",
+      "description": "Line style: phase."
+    },
+    "server": {
+      "description": "Server-verified mark (K38).",
+      "type": "boolean"
+    },
+    "strength": {
+      "description": "Size/weight: strength in `[0, 1]`.",
+      "format": "double",
+      "type": "number"
+    },
+    "validity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Validity"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "(R4, K42/A28) Validity today, when the producer knows it (it needs the bars and\nthe state condition, not only the story). An alphabet draws a mark only for\n[`Validity::NoLonger`]; `valid` and `closed` look as before (closed is the\nphase). Absent: unknown, drawn as before."
+    }
+  },
+  "required": [
+    "kind",
+    "direction",
+    "strength",
+    "phase",
+    "freshness",
+    "confirmations"
+  ],
+  "title": "GlyphSpec",
+  "type": "object"
+}

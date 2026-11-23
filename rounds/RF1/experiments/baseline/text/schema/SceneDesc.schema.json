@@ -1,0 +1,1021 @@
+{
+  "$defs": {
+    "Align": {
+      "description": "Horizontal text alignment relative to the anchor `x`.",
+      "oneOf": [
+        {
+          "const": "left",
+          "description": "Text starts at `x`.",
+          "type": "string"
+        },
+        {
+          "const": "right",
+          "description": "Text ends at `x`.",
+          "type": "string"
+        }
+      ]
+    },
+    "DataSource": {
+      "description": "Where a layer's data comes from, as resolved by the compiler.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A series.",
+          "properties": {
+            "kind": {
+              "const": "series",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "series"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A fact.",
+          "properties": {
+            "fact": {
+              "description": "Fact id.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "fact",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "fact"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The facts of a finding.",
+          "properties": {
+            "finding": {
+              "description": "Finding id.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "finding",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Constants only (each traced by an origin).",
+          "properties": {
+            "kind": {
+              "const": "constant",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "EmphasisKind": {
+      "description": "How an emphasis changes the drawing.",
+      "oneOf": [
+        {
+          "const": "highlight",
+          "description": "Mark the target (accent band behind its bars, thicker stroke for its layer).",
+          "type": "string"
+        },
+        {
+          "const": "focus",
+          "description": "Dim everything except the target.",
+          "type": "string"
+        },
+        {
+          "const": "dim",
+          "description": "Dim the target.",
+          "type": "string"
+        }
+      ]
+    },
+    "Item": {
+      "additionalProperties": false,
+      "description": "One data-bound element of a layer (a candle, a line vertex, a bar, a point, a rule):\nwhat the point query returns and what the data → pixel → data round trip checks.",
+      "properties": {
+        "bar": {
+          "description": "Bar index (slot) of the element; absent for a horizontal rule.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "bars": {
+          "description": "For an item drawn from several values of an aggregated slot (LOD), how many bars\nit stands for; 1 when absent.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "hit": {
+          "$ref": "#/$defs/PixelRect",
+          "description": "Pixel hit box (inclusive-exclusive like [`PixelRect`])."
+        },
+        "t": {
+          "description": "Time of the bar (or point), epoch ms; absent for a horizontal rule.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "values": {
+          "additionalProperties": {
+            "format": "double",
+            "type": "number"
+          },
+          "description": "Data values drawn by this element, by field (`o`,`h`,`l`,`c` for a candle; the\n`y` field for a line vertex; `y` and `y2` fields for a band slice...).",
+          "type": "object"
+        }
+      },
+      "required": [
+        "values",
+        "hit"
+      ],
+      "type": "object"
+    },
+    "Lod": {
+      "additionalProperties": false,
+      "description": "Level-of-detail information when the visible bars outnumber the pixel columns.",
+      "properties": {
+        "bars_per_bucket": {
+          "description": "Bars aggregated per column bucket (>= 2).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "buckets": {
+          "description": "Number of buckets drawn.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bars_per_bucket",
+        "buckets"
+      ],
+      "type": "object"
+    },
+    "Mark": {
+      "description": "Visual mark of a layer.",
+      "oneOf": [
+        {
+          "const": "candle",
+          "description": "Candlesticks; needs a bar series (`o`, `h`, `l`, `c`).",
+          "type": "string"
+        },
+        {
+          "const": "line",
+          "description": "Polyline through `y` (one line per default output when `y` is absent).",
+          "type": "string"
+        },
+        {
+          "const": "area",
+          "description": "Fill from `y` down to `y2`, or to the bottom of the panel when `y2` is absent.",
+          "type": "string"
+        },
+        {
+          "const": "bar",
+          "description": "Vertical columns from `y2` (default 0, clamped to the panel) to `y`.",
+          "type": "string"
+        },
+        {
+          "const": "rule",
+          "description": "Horizontal (`y`) or vertical (`x`) reference line across the panel.",
+          "type": "string"
+        },
+        {
+          "const": "point",
+          "description": "Points at (`x`, `y`).",
+          "type": "string"
+        },
+        {
+          "const": "text",
+          "description": "Text label at (`x`, `y`); the text comes from the `text` channel.",
+          "type": "string"
+        },
+        {
+          "const": "band",
+          "description": "Fill between two values `y` and `y2` (both required): bands, envelopes, fans.",
+          "type": "string"
+        },
+        {
+          "const": "glyph",
+          "description": "Meaning glyph (R3, `docs/GRAMMAR.md` §18) of the capsule that presents the layer's\n`finding`; drawn by the product alphabet from the capsule's glyph parameters.",
+          "type": "string"
+        }
+      ]
+    },
+    "Origin": {
+      "description": "Where a numeric constant of a layer comes from (principle 6). The authority rejects a\nconstant it cannot trace (`no_origin`).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A field of a fact: an evidence key (`level`), or `bar` / `t` / `value`, or (R3) a\nbar of the fact's evidence geometry: `geometry.<i>.from_bar`,\n`geometry.<i>.to_bar`, `geometry.<i>.points.<j>.bar` (`docs/GRAMMAR.md` §18).",
+          "properties": {
+            "fact": {
+              "description": "Fact id.",
+              "type": "string"
+            },
+            "field": {
+              "description": "Field name.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "fact",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "fact",
+            "field"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A named threshold of a study, e.g. `rsi.overbought` (70). The list is the\nengine's (`describe` → `thresholds`).",
+          "properties": {
+            "kind": {
+              "const": "threshold",
+              "type": "string"
+            },
+            "name": {
+              "description": "Threshold name `<study>.<name>`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A value of a series (live: no constant is written, the value follows the data).",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SeriesAt",
+              "description": "Which bar."
+            },
+            "field": {
+              "description": "Field; main output when absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "const": "series",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "series",
+            "at"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "PixelRect": {
+      "additionalProperties": false,
+      "description": "A pixel rectangle; `right` and `bottom` are exclusive.",
+      "properties": {
+        "bottom": {
+          "description": "Bottom edge (exclusive).",
+          "format": "int32",
+          "type": "integer"
+        },
+        "left": {
+          "description": "Left edge.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "right": {
+          "description": "Right edge (exclusive).",
+          "format": "int32",
+          "type": "integer"
+        },
+        "top": {
+          "description": "Top edge.",
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ],
+      "type": "object"
+    },
+    "Prim": {
+      "description": "One drawing primitive.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Pixel-aligned filled rectangle, drawn without anti-aliasing.",
+          "properties": {
+            "color": {
+              "description": "Colour.",
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            "h": {
+              "description": "Height.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "prim": {
+              "const": "rect",
+              "type": "string"
+            },
+            "w": {
+              "description": "Width.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "x": {
+              "description": "Left.",
+              "format": "int32",
+              "type": "integer"
+            },
+            "y": {
+              "description": "Top.",
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "prim",
+            "x",
+            "y",
+            "w",
+            "h",
+            "color"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Anti-aliased polyline stroke.",
+          "properties": {
+            "color": {
+              "description": "Colour.",
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            "points": {
+              "description": "Points in pixels.",
+              "items": {
+                "items": {
+                  "format": "float",
+                  "type": "number"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "prim": {
+              "const": "polyline",
+              "type": "string"
+            },
+            "width": {
+              "description": "Stroke width in pixels.",
+              "format": "float",
+              "type": "number"
+            }
+          },
+          "required": [
+            "prim",
+            "points",
+            "width",
+            "color"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Anti-aliased filled polygon (non-zero winding), e.g. an area or band segment.",
+          "properties": {
+            "color": {
+              "description": "Colour.",
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            "points": {
+              "description": "Closed outline in pixels (the last point connects to the first).",
+              "items": {
+                "items": {
+                  "format": "float",
+                  "type": "number"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "prim": {
+              "const": "fill",
+              "type": "string"
+            }
+          },
+          "required": [
+            "prim",
+            "points",
+            "color"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Anti-aliased filled circle.",
+          "properties": {
+            "color": {
+              "description": "Colour.",
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            "cx": {
+              "description": "Centre x.",
+              "format": "float",
+              "type": "number"
+            },
+            "cy": {
+              "description": "Centre y.",
+              "format": "float",
+              "type": "number"
+            },
+            "prim": {
+              "const": "circle",
+              "type": "string"
+            },
+            "r": {
+              "description": "Radius.",
+              "format": "float",
+              "type": "number"
+            }
+          },
+          "required": [
+            "prim",
+            "cx",
+            "cy",
+            "r",
+            "color"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One line of text. `x` is the anchor, `baseline` the baseline y, `px` the size.",
+          "properties": {
+            "align": {
+              "$ref": "#/$defs/Align",
+              "description": "Alignment."
+            },
+            "baseline": {
+              "description": "Baseline y.",
+              "format": "int32",
+              "type": "integer"
+            },
+            "color": {
+              "description": "Colour.",
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            "font": {
+              "description": "(R5/T3) Font asset the text is drawn with (`qp_grammar::look::FONTS`, the\nrenderers' embedded files); absent: the default asset (`plex-mono`, IBM Plex Mono\nRegular). Set only when a look's type role uses another asset, so `r4` scenes\nare unchanged.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prim": {
+              "const": "text",
+              "type": "string"
+            },
+            "px": {
+              "description": "Font size in pixels.",
+              "format": "float",
+              "type": "number"
+            },
+            "role": {
+              "description": "(R5/T3) The look's type role the text is drawn with (`headline`, `label`,\n`figure`...), written only when the compile asks for it\n(`CompileOptions::roles`, the measurement harness); absent otherwise.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "text": {
+              "description": "The text.",
+              "type": "string"
+            },
+            "x": {
+              "description": "Anchor x.",
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "prim",
+            "x",
+            "baseline",
+            "px",
+            "text",
+            "color",
+            "align"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ResolvedConstant": {
+      "additionalProperties": false,
+      "description": "A constant with the origin that justifies it.",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/Origin",
+          "description": "Where it comes from."
+        },
+        "value": {
+          "description": "Its value.",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "origin",
+        "value"
+      ],
+      "type": "object"
+    },
+    "ScaleKind": {
+      "description": "Scale type.",
+      "oneOf": [
+        {
+          "const": "time",
+          "description": "Bar-ordered time (horizontal only): one slot per bar of the view's first bar\nseries; session gaps (nights, weekends, holidays) take no space. `domain` is in\nepoch milliseconds.",
+          "type": "string"
+        },
+        {
+          "const": "linear",
+          "description": "Linear numeric.",
+          "type": "string"
+        },
+        {
+          "const": "log",
+          "description": "Base-10 logarithmic numeric; values `<= 0` are not drawn.",
+          "type": "string"
+        }
+      ]
+    },
+    "SceneEmphasis": {
+      "additionalProperties": false,
+      "description": "An emphasis as drawn.",
+      "properties": {
+        "from_bar": {
+          "description": "First bar.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/EmphasisKind",
+          "description": "Kind."
+        },
+        "layer": {
+          "description": "Layer it covers, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "panels": {
+          "description": "Panels it covers (all when empty).",
+          "items": {
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "to_bar": {
+          "description": "Last bar (inclusive).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "panels"
+      ],
+      "type": "object"
+    },
+    "SceneLayer": {
+      "additionalProperties": false,
+      "description": "A compiled layer.",
+      "properties": {
+        "constants": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ResolvedConstant"
+          },
+          "description": "Resolved constants: JSON pointer inside the layer → (origin, value).",
+          "type": "object"
+        },
+        "data": {
+          "$ref": "#/$defs/DataSource",
+          "description": "Data source."
+        },
+        "fields": {
+          "description": "Fields drawn, in channel order (`y` first), e.g. `[\"upper\",\"lower\"]`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "Layer id.",
+          "type": "string"
+        },
+        "items": {
+          "description": "Data-bound elements, in bar order.",
+          "items": {
+            "$ref": "#/$defs/Item"
+          },
+          "type": "array"
+        },
+        "label": {
+          "description": "Legend text, if the layer has one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mark": {
+          "$ref": "#/$defs/Mark",
+          "description": "Mark."
+        },
+        "prims": {
+          "description": "Primitives that draw this layer, in paint order.",
+          "items": {
+            "$ref": "#/$defs/Prim"
+          },
+          "type": "array"
+        },
+        "skipped": {
+          "description": "Values not drawn (e.g. `<= 0` on a log scale, `null` warmup), counted.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "mark",
+        "data",
+        "fields",
+        "items",
+        "prims"
+      ],
+      "type": "object"
+    },
+    "ScenePanel": {
+      "additionalProperties": false,
+      "description": "A compiled panel.",
+      "properties": {
+        "id": {
+          "description": "Panel id.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "layers": {
+          "description": "Layers in paint order.",
+          "items": {
+            "$ref": "#/$defs/SceneLayer"
+          },
+          "type": "array"
+        },
+        "name": {
+          "description": "Panel name, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rect": {
+          "$ref": "#/$defs/PixelRect",
+          "description": "Plot rectangle."
+        },
+        "y": {
+          "$ref": "#/$defs/YMap",
+          "description": "Vertical mapping."
+        }
+      },
+      "required": [
+        "id",
+        "rect",
+        "y",
+        "layers"
+      ],
+      "type": "object"
+    },
+    "SeriesAt": {
+      "description": "Which value of a series an [`Origin::Series`] takes.",
+      "oneOf": [
+        {
+          "const": "last",
+          "description": "The last bar (follows live updates).",
+          "type": "string"
+        }
+      ]
+    },
+    "TermMark": {
+      "additionalProperties": false,
+      "description": "(R5/m17-int, K49) A glossary term as drawn: where it is in the scene, its text and its\nexplanation.",
+      "properties": {
+        "hit": {
+          "$ref": "#/$defs/PixelRect",
+          "description": "The drawn words' box (inclusive-exclusive like [`PixelRect`])."
+        },
+        "layer": {
+          "description": "The layer whose text holds it (`headline`, `ledger`, `detail`).",
+          "type": "string"
+        },
+        "term": {
+          "description": "The glossary term.",
+          "type": "string"
+        },
+        "text": {
+          "description": "Its explanation.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "term",
+        "text",
+        "layer",
+        "hit"
+      ],
+      "type": "object"
+    },
+    "XMap": {
+      "additionalProperties": false,
+      "description": "The horizontal mapping shared by all panels: bar slot `i` is centred at\n`floor(left + (i - from_bar + 0.5) * slot)`.",
+      "properties": {
+        "from_bar": {
+          "description": "First visible slot (bar index; may be negative-free only, so `u64`).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "left": {
+          "description": "Left edge of the plot in pixels.",
+          "format": "double",
+          "type": "number"
+        },
+        "slot": {
+          "description": "Slot width in pixels.",
+          "format": "double",
+          "type": "number"
+        },
+        "to_bar": {
+          "description": "Last visible slot, inclusive. May lie beyond the last bar (future points).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "from_bar",
+        "to_bar",
+        "left",
+        "slot"
+      ],
+      "type": "object"
+    },
+    "YMap": {
+      "additionalProperties": false,
+      "description": "A panel's vertical mapping. Linear: `y = top + (max - v) / (max - min) * (bottom -\ntop)`. Log: the same on `log10(v)`, computed with the deterministic logarithm.",
+      "properties": {
+        "bottom": {
+          "description": "Pixel y of `min`.",
+          "format": "double",
+          "type": "number"
+        },
+        "kind": {
+          "$ref": "#/$defs/ScaleKind",
+          "description": "Scale kind (`linear` or `log`)."
+        },
+        "max": {
+          "description": "Domain maximum (data units).",
+          "format": "double",
+          "type": "number"
+        },
+        "min": {
+          "description": "Domain minimum (data units).",
+          "format": "double",
+          "type": "number"
+        },
+        "top": {
+          "description": "Pixel y of `max`.",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "min",
+        "max",
+        "top",
+        "bottom"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A complete compiled frame.",
+  "properties": {
+    "background": {
+      "description": "Background colour.",
+      "items": {
+        "format": "uint8",
+        "maximum": 255,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "type": "array"
+    },
+    "bars": {
+      "description": "Number of bars in the view's first bar series.",
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "emphasis": {
+      "description": "Emphasis drawn.",
+      "items": {
+        "$ref": "#/$defs/SceneEmphasis"
+      },
+      "type": "array"
+    },
+    "height": {
+      "description": "Height in pixels.",
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "lod": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Lod"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Level of detail, when aggregated."
+    },
+    "over": {
+      "description": "Paint order: primitives drawn **after** the layers (last-value tags, title,\nlegends, dimming veils).",
+      "items": {
+        "$ref": "#/$defs/Prim"
+      },
+      "type": "array"
+    },
+    "panels": {
+      "description": "Panels, top to bottom.",
+      "items": {
+        "$ref": "#/$defs/ScenePanel"
+      },
+      "type": "array"
+    },
+    "terms": {
+      "description": "(R5/m17-int, K49) Glossary terms drawn in this scene's texts, with their boxes\n(each also underlined in its layer's primitives): a tap inside a box opens the\nexplanation. Only a capsule scene under a voice has them.",
+      "items": {
+        "$ref": "#/$defs/TermMark"
+      },
+      "type": "array"
+    },
+    "under": {
+      "description": "Paint order: primitives drawn **before** the panels' layers (emphasis bands,\ngrid, axis lines, axis labels).",
+      "items": {
+        "$ref": "#/$defs/Prim"
+      },
+      "type": "array"
+    },
+    "view": {
+      "description": "View id.",
+      "type": "string"
+    },
+    "width": {
+      "description": "Width in pixels.",
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "x": {
+      "$ref": "#/$defs/XMap",
+      "description": "Horizontal mapping."
+    }
+  },
+  "required": [
+    "view",
+    "width",
+    "height",
+    "background",
+    "x",
+    "bars",
+    "panels",
+    "under",
+    "over"
+  ],
+  "title": "SceneDesc",
+  "type": "object"
+}

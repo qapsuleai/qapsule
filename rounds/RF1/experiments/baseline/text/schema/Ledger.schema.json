@@ -1,0 +1,201 @@
+{
+  "$defs": {
+    "CapsuleState": {
+      "description": "Lifecycle state of a capsule:\n`draft -> live -> (updated)* -> invalidated | expired | approved | rejected`.",
+      "oneOf": [
+        {
+          "const": "draft",
+          "description": "Not yet shown as live.",
+          "type": "string"
+        },
+        {
+          "const": "live",
+          "description": "Updates itself as its series change.",
+          "type": "string"
+        },
+        {
+          "const": "invalidated",
+          "description": "The invalidation condition happened.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Validity window elapsed.",
+          "type": "string"
+        },
+        {
+          "const": "approved",
+          "description": "A person approved it.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "A person rejected it.",
+          "type": "string"
+        }
+      ]
+    },
+    "LedgerEntry": {
+      "additionalProperties": false,
+      "description": "One record in the ledger.",
+      "properties": {
+        "bar": {
+          "description": "Bar at which the outcome was decided (R3).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "capsule": {
+          "description": "Capsule id (R3).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "finding": {
+          "description": "Finding id.",
+          "type": "string"
+        },
+        "key": {
+          "description": "Ledger key `kind/detector@version` (R3).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "note": {
+          "description": "Optional note.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "outcome": {
+          "$ref": "#/$defs/Outcome",
+          "description": "Outcome against reality."
+        },
+        "recorded_at": {
+          "description": "Record time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Stage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Closing stage (R3): `realized`, `invalidated` or `expired` (`retracted` is never\nrecorded, K37)."
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapsuleState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Final capsule state, if any (e.g. approved / rejected by a person)."
+        }
+      },
+      "required": [
+        "finding",
+        "outcome",
+        "recorded_at"
+      ],
+      "type": "object"
+    },
+    "Outcome": {
+      "description": "Outcome of a finding compared against what actually happened.",
+      "oneOf": [
+        {
+          "const": "pending",
+          "description": "Not yet decided.",
+          "type": "string"
+        },
+        {
+          "const": "confirmed",
+          "description": "Reality agreed with the claim.",
+          "type": "string"
+        },
+        {
+          "const": "refuted",
+          "description": "Reality contradicted the claim.",
+          "type": "string"
+        }
+      ]
+    },
+    "Stage": {
+      "description": "Lifecycle stage of a capsule story (K28, K37):\n`candidate → born → strengthened | weakened → confirmed → realized | invalidated |\nexpired | retracted`.",
+      "oneOf": [
+        {
+          "const": "candidate",
+          "description": "Aday: seen on an open bar; only on the watching replica; never in the authority's\nlog or the ledger.",
+          "type": "string"
+        },
+        {
+          "const": "born",
+          "description": "Doğdu: finalized on bar close; the authority gave it an id.",
+          "type": "string"
+        },
+        {
+          "const": "strengthened",
+          "description": "Güçlendi: a new supporting fact of the same family.",
+          "type": "string"
+        },
+        {
+          "const": "weakened",
+          "description": "Zayıfladı: a fact against it, or its state weakened.",
+          "type": "string"
+        },
+        {
+          "const": "confirmed",
+          "description": "Teyit edildi: a second (or further) independent evidence family supports it.",
+          "type": "string"
+        },
+        {
+          "const": "realized",
+          "description": "Gerçekleşti: the outcome rule says it came true. Closes; ledger hit.",
+          "type": "string"
+        },
+        {
+          "const": "invalidated",
+          "description": "Geçersiz: its invalidation happened. Closes; ledger miss.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Süresi doldu: its natural life (in bars) ended without an outcome. Closes; ledger miss.",
+          "type": "string"
+        },
+        {
+          "const": "retracted",
+          "description": "Geri çekildi: the data it rested on proved wrong (K37). Closes; NOT in the ledger.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The record of findings compared with reality afterwards.",
+  "properties": {
+    "entries": {
+      "default": [],
+      "description": "Entries, in record order.",
+      "items": {
+        "$ref": "#/$defs/LedgerEntry"
+      },
+      "type": "array"
+    }
+  },
+  "title": "Ledger",
+  "type": "object"
+}

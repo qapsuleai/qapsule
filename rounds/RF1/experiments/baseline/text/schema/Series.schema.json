@@ -1,0 +1,397 @@
+{
+  "$defs": {
+    "Bar": {
+      "additionalProperties": false,
+      "description": "One OHLCV bar.",
+      "properties": {
+        "c": {
+          "description": "Close price.",
+          "format": "double",
+          "type": "number"
+        },
+        "h": {
+          "description": "High price.",
+          "format": "double",
+          "type": "number"
+        },
+        "l": {
+          "description": "Low price.",
+          "format": "double",
+          "type": "number"
+        },
+        "o": {
+          "description": "Open price.",
+          "format": "double",
+          "type": "number"
+        },
+        "t": {
+          "description": "Bar open time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "v": {
+          "description": "Volume.",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "o",
+        "h",
+        "l",
+        "c",
+        "v"
+      ],
+      "type": "object"
+    },
+    "Instrument": {
+      "additionalProperties": false,
+      "description": "A traded asset: where it trades and which calendar aligns its bars (K14).",
+      "properties": {
+        "calendar": {
+          "description": "Calendar id, e.g. `XIST`, `XNYS`. Bars are aligned to this calendar.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exchange": {
+          "description": "Exchange code, e.g. `BIST`, `NYSE`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symbol": {
+          "description": "Exchange symbol, e.g. `THYAO`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "symbol"
+      ],
+      "type": "object"
+    },
+    "Point": {
+      "additionalProperties": false,
+      "description": "One point of a single-valued series (e.g. an indicator output).\n\nWarmup rule (K13): a study output always has one point per input bar, at the same\n`t`. Points inside the warmup period have `v: null`; nothing is trimmed.",
+      "properties": {
+        "t": {
+          "description": "Point time, epoch milliseconds UTC (the time of the bar it belongs to).",
+          "format": "int64",
+          "type": "integer"
+        },
+        "v": {
+          "description": "Value; `null` during warmup.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "t"
+      ],
+      "type": "object"
+    },
+    "SeriesData": {
+      "description": "Materialized series data.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "OHLCV bars, ascending by `t`.",
+          "properties": {
+            "bars": {
+              "description": "Bars, ascending by time.",
+              "items": {
+                "$ref": "#/$defs/Bar"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "bars",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "bars"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Single-valued points, ascending by `t`.",
+          "properties": {
+            "kind": {
+              "const": "points",
+              "type": "string"
+            },
+            "points": {
+              "description": "Points, ascending by time.",
+              "items": {
+                "$ref": "#/$defs/Point"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "points"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "SeriesSource": {
+      "description": "Where a series comes from. The core does not depend on the kind of source.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Data is embedded in the series itself (`data`).",
+          "properties": {
+            "kind": {
+              "const": "inline",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A local file.",
+          "properties": {
+            "kind": {
+              "const": "file",
+              "type": "string"
+            },
+            "path": {
+              "description": "Path to the file.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A Matriks market data feed.",
+          "properties": {
+            "interval": {
+              "description": "Bar interval, e.g. `1d`, `5m`.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "matriks",
+              "type": "string"
+            },
+            "symbol": {
+              "description": "Exchange symbol, e.g. `THYAO`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "symbol",
+            "interval"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A NATS subject.",
+          "properties": {
+            "kind": {
+              "const": "nats",
+              "type": "string"
+            },
+            "subject": {
+              "description": "Subject name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "subject"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A data binding (RP2, K23): the series' bars come from the data plane, resolved\nper principal by the host's source provider; the document carries no bars\n(`docs/PROTOCOL.md` §18). Fields as in [`crate::data::DataBinding`].",
+          "properties": {
+            "anchor_t": {
+              "description": "Time of bar 0, fixed by the authority on first resolution (engine entry; §18.3).",
+              "format": "int64",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "feed": {
+              "description": "Named feed of the host; the host's default if absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "interval": {
+              "description": "Bar interval, e.g. `1d`, `5m`.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "bind",
+              "type": "string"
+            },
+            "symbol": {
+              "description": "Exchange symbol, e.g. `THYAO`.",
+              "type": "string"
+            },
+            "window": {
+              "$ref": "#/$defs/Window",
+              "description": "Which bars: `{\"last\": n}`, `{\"from_t\": t}` or `{\"from_t\": a, \"to_t\": b}`."
+            }
+          },
+          "required": [
+            "kind",
+            "symbol",
+            "interval",
+            "window"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Local computation: a study applied to other series.",
+          "properties": {
+            "inputs": {
+              "description": "Input series ids.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "study",
+              "type": "string"
+            },
+            "output": {
+              "description": "Which output of a multi-output study, if any.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "params": {
+              "additionalProperties": {
+                "format": "double",
+                "type": "number"
+              },
+              "default": {},
+              "description": "Numeric study parameters, e.g. `{\"period\": 14}`.",
+              "type": "object"
+            },
+            "study": {
+              "description": "Study name, e.g. `rsi`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "study",
+            "inputs"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Window": {
+      "additionalProperties": false,
+      "description": "Which bars a binding asks for.\n\nWire form: exactly one of `{\"last\": n}`, `{\"from_t\": t}`, `{\"from_t\": a, \"to_t\": b}`\n(inclusive). Bar numbers of a bound series count from the first bar of the window as\nresolved by the authority (its *anchor*, announced in the `binding` query); bars that\narrive later are appended, the window does not slide.",
+      "properties": {
+        "from_t": {
+          "description": "Bars with `t >= from_t` (epoch ms).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "last": {
+          "description": "The last `n` bars at resolution time.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_t": {
+          "description": "With `from_t`: bars with `t <= to_t`; the window is closed (no live bars).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Time-based numeric data: bars, an indicator output or a stream.\n\nIn a [`Document`] a series acts as a binding: `source` says where data comes\nfrom and `data` may be omitted.",
+  "properties": {
+    "data": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SeriesData"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Materialized data, if present."
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "instrument": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Instrument"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The instrument the series belongs to, if any. Its symbol lives here (there is no\nseparate `symbol` field), so exchange and calendar travel with it (K14)."
+    },
+    "interval": {
+      "description": "Bar interval, e.g. `1d`, `5m`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source": {
+      "$ref": "#/$defs/SeriesSource",
+      "description": "Where the data comes from."
+    }
+  },
+  "required": [
+    "id",
+    "source"
+  ],
+  "title": "Series",
+  "type": "object"
+}

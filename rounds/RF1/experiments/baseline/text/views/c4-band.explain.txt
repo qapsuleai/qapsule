@@ -1,0 +1,11 @@
+view v-c4-band (1200x600)
+x: slots 215..251 of 252 bar(s), 2023-10-30 .. 2023-12-19, 30.27027027027027 px per slot
+panel 0: y0 linear [4.414, 4.766], 3 layer(s)
+  band band constant fields y y2: 20 item(s); last y=4.69873182178768 y2=4.475268178212314 (bar 245, 2023-12-11)
+    /encoding/x = 226 from fx.SYN01.squeeze.bandwidth.squeeze.245.geometry.0.from_bar
+    /encoding/x2 = 245 from fx.SYN01.squeeze.bandwidth.squeeze.245.geometry.0.to_bar
+    /encoding/y = 4.69873182178768 from fx.SYN01.squeeze.bandwidth.squeeze.245.upper
+    /encoding/y2 = 4.475268178212314 from fx.SYN01.squeeze.bandwidth.squeeze.245.lower
+  candles candle px "SYN01 1d" fields o h l c: 37 item(s); last c=4.68 h=4.7 l=4.6 o=4.6 (bar 251, 2023-12-19)
+  glyph glyph finding fnd.SYN01.squeeze-neutral.245 fields glyph: 1 item(s); last confirmations=1 freshness=0.45454545454545453 strength=0.7921186223833427 (bar 245, 2023-12-11)
+emphasis: highlight bars 245..245 (all panels)

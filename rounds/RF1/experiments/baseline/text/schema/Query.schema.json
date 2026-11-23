@@ -1,0 +1,1523 @@
+{
+  "$defs": {
+    "CapsuleRef": {
+      "anyOf": [
+        {
+          "description": "Capsule id or finding id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/CapsuleSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "(R4) A capsule id (or its finding's id) or a [`CapsuleSel`]."
+    },
+    "CapsuleSel": {
+      "additionalProperties": false,
+      "description": "(R4) Selects a capsule with a story, e.g.\n`{\"instrument\":\"THYAO\",\"meaning\":\"breakout\",\"open\":true}` (\"THYAO's open breakout\ncapsule\"). Order: the latest transition's bar, then the birth bar, then document\norder; so `latest` is the one that moved last.",
+      "properties": {
+        "born_bar": {
+          "description": "Birth bar.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Direction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Direction."
+        },
+        "first": {
+          "description": "Pick the first match (the one that moved earliest).",
+          "type": "boolean"
+        },
+        "instrument": {
+          "description": "Instrument symbol.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latest": {
+          "description": "Pick the last match (the one that moved last).",
+          "type": "boolean"
+        },
+        "meaning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeaningKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Meaning kind."
+        },
+        "open": {
+          "description": "Open (`true`) or closed (`false`).",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "series": {
+          "description": "Bar series of the story.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Stage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Story stage."
+        }
+      },
+      "type": "object"
+    },
+    "CapsuleState": {
+      "description": "Lifecycle state of a capsule:\n`draft -> live -> (updated)* -> invalidated | expired | approved | rejected`.",
+      "oneOf": [
+        {
+          "const": "draft",
+          "description": "Not yet shown as live.",
+          "type": "string"
+        },
+        {
+          "const": "live",
+          "description": "Updates itself as its series change.",
+          "type": "string"
+        },
+        {
+          "const": "invalidated",
+          "description": "The invalidation condition happened.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Validity window elapsed.",
+          "type": "string"
+        },
+        {
+          "const": "approved",
+          "description": "A person approved it.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "A person rejected it.",
+          "type": "string"
+        }
+      ]
+    },
+    "Collection": {
+      "description": "Item collections of a document.",
+      "oneOf": [
+        {
+          "const": "series",
+          "description": "Series.",
+          "type": "string"
+        },
+        {
+          "const": "views",
+          "description": "Views.",
+          "type": "string"
+        },
+        {
+          "const": "facts",
+          "description": "Facts.",
+          "type": "string"
+        },
+        {
+          "const": "findings",
+          "description": "Findings.",
+          "type": "string"
+        },
+        {
+          "const": "capsules",
+          "description": "Capsules.",
+          "type": "string"
+        },
+        {
+          "const": "intents",
+          "description": "Intents.",
+          "type": "string"
+        },
+        {
+          "const": "narratives",
+          "description": "Narratives.",
+          "type": "string"
+        },
+        {
+          "const": "comments",
+          "description": "(R5B) Comments.",
+          "type": "string"
+        },
+        {
+          "const": "proposals",
+          "description": "Proposals.",
+          "type": "string"
+        }
+      ]
+    },
+    "Direction": {
+      "description": "Direction of a meaning.",
+      "oneOf": [
+        {
+          "const": "up",
+          "description": "Upwards.",
+          "type": "string"
+        },
+        {
+          "const": "down",
+          "description": "Downwards.",
+          "type": "string"
+        },
+        {
+          "const": "neutral",
+          "description": "No direction (e.g. a squeeze).",
+          "type": "string"
+        }
+      ]
+    },
+    "FactRef": {
+      "anyOf": [
+        {
+          "description": "Fact id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/FactSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "A fact id or a [`FactSel`]."
+    },
+    "FactSel": {
+      "additionalProperties": false,
+      "description": "Selects a fact, e.g. `{\"kind\":\"breakout\",\"latest\":true}`.",
+      "properties": {
+        "bar": {
+          "description": "Bar index.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "first": {
+          "description": "Pick the first match (by bar: the oldest).",
+          "type": "boolean"
+        },
+        "kind": {
+          "description": "Fact kind, exact (`cross_above`, `breakout`...).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latest": {
+          "description": "Pick the last match (by bar: the most recent).",
+          "type": "boolean"
+        },
+        "on": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The fact is about this series."
+        }
+      },
+      "type": "object"
+    },
+    "FindingRef": {
+      "anyOf": [
+        {
+          "description": "Finding id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/FindingSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "A finding id or a [`FindingSel`]."
+    },
+    "FindingSel": {
+      "additionalProperties": false,
+      "description": "Selects a finding, e.g. `{\"kind\":\"breakout\",\"latest\":true}` (\"the latest breakout\").",
+      "properties": {
+        "fact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "It rests on this fact."
+        },
+        "first": {
+          "description": "Pick the first match (by its latest fact bar: the oldest).",
+          "type": "boolean"
+        },
+        "instrument": {
+          "description": "(R4) Its capsule's story is about this instrument (symbol).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "description": "One of its facts has this kind.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latest": {
+          "description": "Pick the last match (by its latest fact bar: the most recent).",
+          "type": "boolean"
+        },
+        "meaning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeaningKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "(R4) Its capsule's story has this meaning kind (`breakout`; `kind` is a fact kind\nsuch as `breakout.range.up`)."
+        },
+        "on": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "One of its facts is about this series."
+        },
+        "open": {
+          "description": "(R4) Its capsule's story is open (`true`) or closed (`false`).",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Stage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "(R4) Its capsule's story is at this stage."
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapsuleState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "State of its capsule (a finding without a capsule has none)."
+        }
+      },
+      "type": "object"
+    },
+    "ItemRef": {
+      "anyOf": [
+        {
+          "description": "Item id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/ItemSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "An item id (any collection) or an [`ItemSel`]."
+    },
+    "ItemSel": {
+      "description": "Selects any item, naming its kind: `{\"finding\":{\"kind\":\"breakout\",\"latest\":true}}`,\n`{\"fact\":{\"bar\":120}}`. Used where a field takes an id of any collection\n(`target.item`, `add_narrative.about`, `remove.id`, `get.id`, `changes.ids`).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A series.",
+          "properties": {
+            "series": {
+              "$ref": "#/$defs/SeriesSel"
+            }
+          },
+          "required": [
+            "series"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A view.",
+          "properties": {
+            "view": {
+              "$ref": "#/$defs/ViewSel"
+            }
+          },
+          "required": [
+            "view"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A fact.",
+          "properties": {
+            "fact": {
+              "$ref": "#/$defs/FactSel"
+            }
+          },
+          "required": [
+            "fact"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A finding.",
+          "properties": {
+            "finding": {
+              "$ref": "#/$defs/FindingSel"
+            }
+          },
+          "required": [
+            "finding"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A proposal.",
+          "properties": {
+            "proposal": {
+              "$ref": "#/$defs/ProposalSel"
+            }
+          },
+          "required": [
+            "proposal"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "MeaningKind": {
+      "description": "The six meaning kinds (K30). The glyph's shape encodes this.",
+      "oneOf": [
+        {
+          "const": "continuation",
+          "description": "Devam: the move goes on (trend, MA alignment, flag).",
+          "type": "string"
+        },
+        {
+          "const": "reversal",
+          "description": "Dönüş: the move may be turning (divergence, double top/bottom).",
+          "type": "string"
+        },
+        {
+          "const": "breakout",
+          "description": "Kırılım: a boundary was crossed (range, channel, support/resistance).",
+          "type": "string"
+        },
+        {
+          "const": "squeeze",
+          "description": "Sıkışma: the move is narrowing; direction unknown (band squeeze, low volatility).",
+          "type": "string"
+        },
+        {
+          "const": "extreme",
+          "description": "Aşırılık: unusual stretch (overbought/oversold, outside the band).",
+          "type": "string"
+        },
+        {
+          "const": "flow",
+          "description": "Akış: money in/out independent of price (volume, settlement, institutional flow).",
+          "type": "string"
+        }
+      ]
+    },
+    "ProposalRef": {
+      "anyOf": [
+        {
+          "description": "Proposal id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/ProposalSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "A proposal id or a [`ProposalSel`]."
+    },
+    "ProposalSel": {
+      "additionalProperties": false,
+      "description": "Selects a proposal, e.g. `{\"state\":\"pending\",\"latest\":true}`.",
+      "properties": {
+        "first": {
+          "description": "Pick the first match (document order).",
+          "type": "boolean"
+        },
+        "latest": {
+          "description": "Pick the last match (document order: the most recent).",
+          "type": "boolean"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProposalState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "State."
+        }
+      },
+      "type": "object"
+    },
+    "ProposalState": {
+      "description": "State of a proposal.",
+      "oneOf": [
+        {
+          "const": "pending",
+          "description": "Waiting for a decision.",
+          "type": "string"
+        },
+        {
+          "const": "accepted",
+          "description": "Accepted and applied.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "Rejected.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Not decided before `expires_at`.",
+          "type": "string"
+        }
+      ]
+    },
+    "Range": {
+      "additionalProperties": false,
+      "description": "A bar range. Exactly one form: `last` (the last n bars) or `from_bar`/`to_bar`\n(0-based, inclusive) or `from_t`/`to_t` (epoch ms, inclusive).",
+      "properties": {
+        "from_bar": {
+          "description": "First bar index.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "from_t": {
+          "description": "From time (inclusive).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "last": {
+          "description": "The last n bars.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_bar": {
+          "description": "Last bar index (inclusive).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_t": {
+          "description": "To time (inclusive).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Reduce": {
+      "description": "Reduction applied over a range (warmup `null`s are skipped).",
+      "oneOf": [
+        {
+          "const": "min",
+          "description": "Smallest value (and its bar).",
+          "type": "string"
+        },
+        {
+          "const": "max",
+          "description": "Largest value (and its bar).",
+          "type": "string"
+        },
+        {
+          "const": "mean",
+          "description": "Arithmetic mean.",
+          "type": "string"
+        },
+        {
+          "const": "first",
+          "description": "First non-null value.",
+          "type": "string"
+        },
+        {
+          "const": "last",
+          "description": "Last non-null value.",
+          "type": "string"
+        },
+        {
+          "const": "count",
+          "description": "Number of non-null values.",
+          "type": "string"
+        }
+      ]
+    },
+    "SeriesKind": {
+      "description": "Kind of a series, as in `welcome.summary` (`SeriesSummary::kind`).",
+      "oneOf": [
+        {
+          "const": "bars",
+          "description": "A bar series (OHLCV).",
+          "type": "string"
+        },
+        {
+          "const": "study",
+          "description": "A computed (study) series.",
+          "type": "string"
+        },
+        {
+          "const": "points",
+          "description": "A point series (e.g. a forecast).",
+          "type": "string"
+        }
+      ]
+    },
+    "SeriesRef": {
+      "anyOf": [
+        {
+          "description": "Series id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/SeriesSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "A series id or a [`SeriesSel`]."
+    },
+    "SeriesSel": {
+      "additionalProperties": false,
+      "description": "Selects a series by meaning, e.g. `{\"study\":\"rsi\",\"params\":{\"period\":14}}` (\"RSI(14)\"),\n`{\"kind\":\"bars\"}` (\"the price series\"), `{\"study\":\"sma\",\"params\":{\"period\":50}}`.",
+      "properties": {
+        "first": {
+          "description": "Pick the first match (document order).",
+          "type": "boolean"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "`bars`, `study` or `points`."
+        },
+        "label": {
+          "description": "Legend text, case-insensitive (as in `welcome.summary`: `RSI14`, `MACD(12,26,9)`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "latest": {
+          "description": "Pick the last match (document order: the most recently added).",
+          "type": "boolean"
+        },
+        "on": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A study computed on this series (one of its inputs matches)."
+        },
+        "params": {
+          "additionalProperties": {
+            "format": "double",
+            "type": "number"
+          },
+          "description": "Study parameters that must be equal (each one given; others free). Parameters\nare complete with defaults in the document, so `{\"period\":14}` matches a default\nRSI.",
+          "type": "object"
+        },
+        "study": {
+          "description": "Study name (`sma`, `ema`, `rsi`, `macd`, `bollinger`), exact.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symbol": {
+          "description": "Instrument symbol, case-insensitive (e.g. `\"THYAO\"`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Stage": {
+      "description": "Lifecycle stage of a capsule story (K28, K37):\n`candidate → born → strengthened | weakened → confirmed → realized | invalidated |\nexpired | retracted`.",
+      "oneOf": [
+        {
+          "const": "candidate",
+          "description": "Aday: seen on an open bar; only on the watching replica; never in the authority's\nlog or the ledger.",
+          "type": "string"
+        },
+        {
+          "const": "born",
+          "description": "Doğdu: finalized on bar close; the authority gave it an id.",
+          "type": "string"
+        },
+        {
+          "const": "strengthened",
+          "description": "Güçlendi: a new supporting fact of the same family.",
+          "type": "string"
+        },
+        {
+          "const": "weakened",
+          "description": "Zayıfladı: a fact against it, or its state weakened.",
+          "type": "string"
+        },
+        {
+          "const": "confirmed",
+          "description": "Teyit edildi: a second (or further) independent evidence family supports it.",
+          "type": "string"
+        },
+        {
+          "const": "realized",
+          "description": "Gerçekleşti: the outcome rule says it came true. Closes; ledger hit.",
+          "type": "string"
+        },
+        {
+          "const": "invalidated",
+          "description": "Geçersiz: its invalidation happened. Closes; ledger miss.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Süresi doldu: its natural life (in bars) ended without an outcome. Closes; ledger miss.",
+          "type": "string"
+        },
+        {
+          "const": "retracted",
+          "description": "Geri çekildi: the data it rested on proved wrong (K37). Closes; NOT in the ledger.",
+          "type": "string"
+        }
+      ]
+    },
+    "SurfaceKind": {
+      "description": "Kind of surface a connection presents on.",
+      "oneOf": [
+        {
+          "const": "desktop",
+          "description": "Large screen, pointer and keyboard.",
+          "type": "string"
+        },
+        {
+          "const": "phone",
+          "description": "Phone: small touch screen.",
+          "type": "string"
+        },
+        {
+          "const": "watch",
+          "description": "Watch: glance-sized screen.",
+          "type": "string"
+        },
+        {
+          "const": "voice",
+          "description": "Voice only: no screen; answers are spoken.",
+          "type": "string"
+        },
+        {
+          "const": "headless",
+          "description": "No presentation at all (an agent, a batch job).",
+          "type": "string"
+        }
+      ]
+    },
+    "ViewRef": {
+      "anyOf": [
+        {
+          "description": "View id.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/ViewSel",
+          "description": "Selector."
+        }
+      ],
+      "description": "A view id or a [`ViewSel`]."
+    },
+    "ViewSel": {
+      "additionalProperties": false,
+      "description": "Selects a view, e.g. `{}` (the only view), `{\"shows\":{\"study\":\"macd\"}}`.",
+      "properties": {
+        "first": {
+          "description": "Pick the first match (document order).",
+          "type": "boolean"
+        },
+        "latest": {
+          "description": "Pick the last match (document order).",
+          "type": "boolean"
+        },
+        "shows": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A layer of the view draws this series."
+        },
+        "title": {
+          "description": "Title, case-insensitive (the given title, or the derived `SYMBOL interval`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A read request.",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "description": "What this protocol endpoint offers: operations, queries, topics, principals,\nand the asker's own role and permissions.",
+      "properties": {
+        "kind": {
+          "const": "describe",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "One item by id, from any collection.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ItemRef",
+          "description": "Item id.\nAlso takes a selector (§17)."
+        },
+        "kind": {
+          "const": "get",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "All items of a collection. For proposals, `state` filters (e.g. `pending`).",
+      "properties": {
+        "collection": {
+          "$ref": "#/$defs/Collection",
+          "description": "Collection."
+        },
+        "full": {
+          "description": "Include bulky data (the bars of bar series). Default false: series are listed\nwithout `data`; read values with the `study` or `at` query, or `get` one item.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "list",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProposalState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Proposal state filter (proposals only)."
+        }
+      },
+      "required": [
+        "kind",
+        "collection"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "The whole document and its log position (a snapshot, e.g. for hand-over).",
+      "properties": {
+        "kind": {
+          "const": "document",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Log entries. Filters combine with AND.",
+      "properties": {
+        "after_seq": {
+          "description": "Entries with `seq` greater than this.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "author": {
+          "description": "Only entries by this principal.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "log",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Return at most this many (the latest ones).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "since_t": {
+          "description": "Entries at or after this time (epoch ms).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "until_t": {
+          "description": "Entries at or before this time.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "within_ms": {
+          "description": "Entries from the last this-many milliseconds (relative to `now`), e.g.\n`1800000` for \"the last 30 minutes\".",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Values of a series over a range, aligned with its bars (K13/K20), optionally\nreduced to one number. For a bar series, outputs are `o`,`h`,`l`,`c`,`v`.",
+      "properties": {
+        "kind": {
+          "const": "study",
+          "type": "string"
+        },
+        "output": {
+          "description": "Only this output (e.g. `\"signal\"` of MACD); all if absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Range"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Range; the whole series if absent."
+        },
+        "reduce": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Reduce"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Reduce to one value per output."
+        },
+        "series": {
+          "$ref": "#/$defs/SeriesRef",
+          "description": "Series id (a study series or a bar series).\nAlso takes a selector (§17)."
+        }
+      },
+      "required": [
+        "kind",
+        "series"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Everything at one bar: OHLCV and the value of every study on that bar series.",
+      "properties": {
+        "bar": {
+          "description": "Bar index (0-based). Give `bar` or `t`.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "at",
+          "type": "string"
+        },
+        "series": {
+          "$ref": "#/$defs/SeriesRef",
+          "description": "Bar series id.\nAlso takes a selector (§17)."
+        },
+        "t": {
+          "description": "Bar time (epoch ms); the bar with exactly this `t`.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "series"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "What a principal's surfaces show right now, semantically (views, panels, series,\nvisible bar range, capsules). The asker's own if `principal` is absent.",
+      "properties": {
+        "kind": {
+          "const": "screen",
+          "type": "string"
+        },
+        "principal": {
+          "description": "Principal id.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Point query (R2): what is drawn at pixel (`x`, `y`) of a view rendered at\n`width` x `height`. Answered from the scene description, without rendering. The\nvisible range is the asker's viewport of that view if it has one, otherwise the\nview's persistent range, otherwise all bars.",
+      "properties": {
+        "height": {
+          "description": "Frame height in pixels (default 600).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "hit",
+          "type": "string"
+        },
+        "view": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ViewRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "View id; the asker's current view if absent.\nAlso takes a selector (§17)."
+        },
+        "width": {
+          "description": "Frame width in pixels (default 1200).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "x": {
+          "description": "Pixel x (0 = left edge).",
+          "format": "double",
+          "type": "number"
+        },
+        "y": {
+          "description": "Pixel y (0 = top edge).",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "x",
+        "y"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "Where a principal is looking (last viewport and focus) and the attention\ndirectives addressed to them.",
+      "properties": {
+        "kind": {
+          "const": "attention",
+          "type": "string"
+        },
+        "principal": {
+          "description": "Principal id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "principal"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "A finding presented for a surface. Depth follows the asker's negotiated profile\nunless `surface` names another surface kind.",
+      "properties": {
+        "finding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FindingRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Finding id. If absent: the only live finding; with several live findings the\nauthority does not pick one (`ambiguous`, every live finding as a candidate;\nK25). Also takes a selector (§17), e.g. `{\"latest\":true}`."
+        },
+        "kind": {
+          "const": "present",
+          "type": "string"
+        },
+        "surface": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SurfaceKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present for this surface kind instead of the asker's."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(RP2, §18.3) Data bindings and their state for the asker: resolved or not, why\nnot, the anchor (first bar time) and the data position. All bound series if\n`series` is absent.",
+      "properties": {
+        "kind": {
+          "const": "binding",
+          "type": "string"
+        },
+        "series": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SeriesRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A bound series.\nAlso takes a selector (§17)."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(RP2, §18.5) Re-checks the frozen evidence of a fact, or of every fact of a\nfinding, against today's data: content digest of the referenced bar range and the\nfact's evidence values recomputed.",
+      "properties": {
+        "item": {
+          "$ref": "#/$defs/ItemRef",
+          "description": "A fact or a finding.\nAlso takes a selector (§17)."
+        },
+        "kind": {
+          "const": "verify_evidence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "item"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(R3, §20) The capsules (stories) the asker may see, most important first\n(importance descending, then latest transition, then id). Filters combine with\nAND. Sentences are written for the asker (its language and data entitlement).",
+      "properties": {
+        "audience": {
+          "description": "Apply the asker's audience: watch list (and positions, intents) and\nsensitivity, with the position/intent override (§9.8). Default false: every\nstory the asker may see.",
+          "type": "boolean"
+        },
+        "born_since_bar": {
+          "description": "(R4) Only stories born at or after this bar (of their own bar series).",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "born_since_t": {
+          "description": "(R4) Only stories born at or after this time (epoch ms; the birth bar's time).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "instrument": {
+          "description": "Only this instrument (symbol).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "capsules",
+          "type": "string"
+        },
+        "latest": {
+          "description": "(R4) Only the most recently born of the matching stories (\"the latest\ncapsule\"): the greatest birth time, then the greatest birth bar, then the\ngreatest id. Applied after every other filter, before `limit`.",
+          "type": "boolean"
+        },
+        "limit": {
+          "description": "Return at most this many.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "meaning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeaningKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Only this meaning kind."
+        },
+        "open": {
+          "description": "`true`: only open stories; `false`: only closed ones.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "since_bar": {
+          "description": "Only stories with a transition at or after this bar.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "since_t": {
+          "description": "Only stories with a transition at or after this time (epoch ms).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "stages": {
+          "description": "Only these stages.",
+          "items": {
+            "$ref": "#/$defs/Stage"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(R3, §20) One capsule opened to its evidence (K34): story history with\ntransitions and reasons, facts, sentences, ledger, glyph and, per fact, the\nevidence values if the asker is entitled, otherwise the entitlement it requires\nand what it rests on.",
+      "properties": {
+        "capsule": {
+          "$ref": "#/$defs/CapsuleRef",
+          "description": "Capsule id, or its finding's id.\n(R4) Also takes a capsule selector (§17, [`CapsuleSel`])."
+        },
+        "kind": {
+          "const": "capsule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "capsule"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(R3, §20) The ledger: closed capsules and realized ones per ledger key\n(`kind/direction/detector@version`, R4), or summed per kind. Retracted capsules\nnever count.\nThe ledger is license-independent (K33): every principal that may read gets it.",
+      "properties": {
+        "by_kind": {
+          "description": "Group rows per kind instead of per key (every direction summed; with\n`direction`, that direction only).",
+          "type": "boolean"
+        },
+        "detector": {
+          "description": "Only this detector.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Direction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "(R4, K42/A23) Only this direction."
+        },
+        "key": {
+          "description": "Only this ledger key.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "ledger",
+          "type": "string"
+        },
+        "meaning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeaningKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Only this meaning kind."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(R5/M18, §23, K50) The instrument's story list: every story (capsule) of one\ninstrument whose life (birth to closing, or to the last closed bar when open)\nmeets `range`, as the reader may receive it — no bars (K23). Ordered by birth\n(time, bar, id), paged with `limit` and `after`.",
+      "properties": {
+        "after": {
+          "description": "The page after this capsule id (the previous answer's `next`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrument": {
+          "description": "Instrument symbol.",
+          "type": "string"
+        },
+        "kind": {
+          "const": "stories",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Rows per answer (default 200, at most 500).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "range": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Range"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Bars or times of that series the story's life must meet (default: all)."
+        },
+        "series": {
+          "description": "Its bar series (needed only when the instrument has more than one).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "instrument"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "description": "(R5B, §25.6) What a pending proposal would do, without doing it: its operations\nexpanded on a copy of the document as the asker reads it, the changes, and a scene\nsummary of every view it would add or change (the document does not change).",
+      "properties": {
+        "height": {
+          "description": "Scene height in pixels (default 600).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "kind": {
+          "const": "preview",
+          "type": "string"
+        },
+        "proposal": {
+          "$ref": "#/$defs/ProposalRef",
+          "description": "Proposal id.\nAlso takes a selector (§17)."
+        },
+        "width": {
+          "description": "Scene width in pixels (default 1200).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "proposal"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "Query"
+}

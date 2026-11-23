@@ -1,0 +1,10 @@
+MCP: `serve` runs the Qapsule MCP server for agents (R5B: stdio or HTTP, a running session, agent principals only, tool surfaces)
+
+Usage: qp mcp <COMMAND>
+
+Commands:
+  serve  (R5B/T2) The Qapsule MCP server for agents over a running session: stdio (default) or Streamable HTTP (`--http`, this machine only unless `--listen` with `--token-env`); the principal must be an agent; `--surface` picks the tool surface
+  help   Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help  Print help

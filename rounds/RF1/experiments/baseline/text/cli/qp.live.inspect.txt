@@ -1,0 +1,9 @@
+Aggregate statistics of a raw log (no market values)
+
+Usage: qp live inspect <FILE>
+
+Arguments:
+  <FILE>  Raw log file (`*.qpraw`)
+
+Options:
+  -h, --help  Print help

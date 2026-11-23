@@ -1,0 +1,73 @@
+(R4/T5) The local demo: replay host + authority + the web shell on one origin (`scripts/demo.sh`; `shells/web/README.md`)
+
+Usage: qp demo [OPTIONS]
+
+Options:
+      --port <PORT>
+          Port [default: 8390]
+      --bind <BIND>
+          Address to listen on. Default `127.0.0.1` (this machine only); see `--lan` [default: 127.0.0.1]
+      --lan
+          Listen on every interface (`0.0.0.0`) so that a phone on the same network can open the page. Devices on the local network can then see the demo
+      --https-host <NAME>
+          (RP3) The name of an HTTPS reverse proxy in front of this host (e.g. a private tunnel that terminates TLS and forwards to 127.0.0.1:PORT keeping `Host`): that name (with or without `:443`) is accepted as `Host`, and `https://NAME` as the `Origin` of `/send`. Off by default. A phone needs a secure context (`https://`) for the JIT on iOS 27 and for WebGPU (rounds/RP3/CALIBRATION.md); whoever can reach the proxy can see the demo
+      --web <WEB>
+          The web shell's directory (index.html, main.js, pkg/) [default: shells/web]
+      --data <DATA>
+          Local bars directory (default: `fixtures/local/bars` or `QAPSULE_LOCAL_BARS`); the synthetic market is used, and the page says so, when there is no data
+      --synthetic
+          Use the synthetic market even if local data exists
+      --feed-rule <FEED_RULE>
+          (R5/M19, K53) The host's feed rule (`rate55`, `none`; M19's pick by default). A page may ask for another with `?feed_rule=` (for its principal) [default: rate55]
+      --rule <RULE>
+          (RP4, `docs/CAPSULE.md` §9.9) The capsule engine's named constant record (`r3`, the protocol default; `rp4`), in every mode (replay, `--live`, `--sim`) [default: r3]
+      --speed <SPEED>
+          Steps per second [default: 4]
+      --from <FROM>
+          Start date of the replay (`YYYY-MM-DD`, exchange time zone)
+      --instruments <INSTRUMENTS>
+          Instruments [default: 30]
+      --history <HISTORY>
+          Bars of history before the replay starts (with `--from` too: the bars just before that date) [default: 120]
+      --days <DAYS>
+          Synthetic trading days [default: 260]
+      --paused
+          Start paused
+      --gallery
+          (R5/G) Also serve the comparison gallery (`/gallery.html`): every topic's candidates one under the other, painted by the core over the synthetic, paused world (independent of this demo's data), in both languages and themes
+      --root <ROOT>
+          Repository root (relative paths of the session init) [default: .]
+      --mcp
+          (R5B) Also serve the session to agents at `/mcp` (Streamable HTTP, the same rules as `qp mcp serve --http`: this machine's origins only), as principal `claude` (only; another `X-Qp-Principal` is refused). The person in the web shell and the agent read and write the same document
+      --live
+          (R6/T7) Live data: the universe's history from REST (`--history` bars of `--interval`), then one live connection (environment variables, `docs/DATA_ACCESS.md`). This machine only: refused with `--lan`, `--https-host` or another `--bind` (real data does not go to the local network)
+      --symbols <SYMBOLS>
+          (R6/T7) The live universe: comma-separated symbols or `@file` (one per line) [default: @fixtures/local/live/u30.txt]
+      --interval <INTERVAL>
+          (R6/T7) The live bars' interval (`1m`, `5m`, `15m`, `30m`, `1h`, `1d`) [default: 5m]
+      --live-bars <DIR>
+          (R6/T7) Read history and repair bars from this directory (`<SYMBOL>.<period>.unadj.json`) instead of REST: offline tests, a cached history
+      --trades
+          (RP4, L-prep, K66) With `--live`: bars from the trade endpoint (`/trade`, a second connection with its own lock; `mx/trade/<SYM>`, level 1) while the market endpoint gives the session phases, the day fields and the clock. Trade gaps (the opening, every trade reconnect) are filled from the REST trade history. `POST /live/drop?endpoint=trade` drops the trade connection
+      --tradeex
+          (RP4, L-prep) With `--trades`: also subscribe special trades (`mx/tradeex/<SYM>`; they do not join the bars)
+      --trade-time-unit <TRADE_TIME_UNIT>
+          (RP4, L-prep) Unit of the live trade `timestamp`: `ns_from_midnight` (documented, unverified), `epoch_ms`, `epoch_us`, `epoch_ns` or `auto` (`qp live inspect` shows which one the stream uses) [default: ns_from_midnight]
+      --live-trades <DIR>
+          (RP4, L-prep) Trade history from cached files (`<DIR>/<SYM>/*.csv.gz`, the `qp live trades` cache) instead of REST: offline tests
+      --sim
+          (RP4/T4) Accelerated simulation (`qp sim`) shown live: cached trades of `--start`..`--end` for `--symbols` through the live path on a simulated exchange clock at `--sim-speed`. No connection, no token. This machine only: refused with `--lan`, `--https-host` or another `--bind` (real data does not go to the local network)
+      --start <START>
+          (RP4/T4) First simulated day (`YYYY-MM-DD`)
+      --end <END>
+          (RP4/T4) Last simulated day (default: `--start`)
+      --sim-at <HH:MM>
+          (RP4/T6) Simulated start time on the first day (`HH:MM`; default: midnight). That day's earlier trades are history
+      --sim-speed <SIM_SPEED>
+          (RP4/T4) Simulation pace: `N` (N× real time in sessions) or `max` [default: 60]
+      --sim-trades <SIM_TRADES>
+          (RP4/T4) Cached trades (`<dir>/<SYM>/<start>_<end>.csv.gz`) [default: fixtures/local/trades]
+      --sim-rest <SIM_REST>
+          (RP4/T4) Cached REST bars (history) [default: fixtures/local/live/rest]
+  -h, --help
+          Print help

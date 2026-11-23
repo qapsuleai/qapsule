@@ -1,0 +1,17 @@
+view v-c5-points (1200x600)
+x: slots 165..201 of 202 bar(s), 2023-08-21 .. 2023-10-10, 30.27027027027027 px per slot
+panel 0: y0 linear [4.3915, 5.2385], 5 layer(s)
+  candles candle px "SYN01 1d" fields o h l c: 37 item(s); last c=4.69 h=4.7 l=4.65 o=4.66 (bar 201, 2023-10-10)
+  swing rule constant: 1 item(s); last y=4.56 y2=4.43
+    /encoding/x = 187 from fx.SYN01.reversal.rsi_divergence.bullish.195.geometry.0.points.0.bar
+    /encoding/x2 = 193 from fx.SYN01.reversal.rsi_divergence.bullish.195.geometry.0.points.1.bar
+    /encoding/y = 4.56 from fx.SYN01.reversal.rsi_divergence.bullish.195.p1_price
+    /encoding/y2 = 4.43 from fx.SYN01.reversal.rsi_divergence.bullish.195.p2_price
+  swing-point point constant fields y: 1 item(s); last y=4.56 (bar 187, 2023-09-20)
+    /encoding/x = 187 from fx.SYN01.reversal.rsi_divergence.bullish.195.geometry.0.points.0.bar
+    /encoding/y = 4.56 from fx.SYN01.reversal.rsi_divergence.bullish.195.p1_price
+  swing-point-2 point constant fields y: 1 item(s); last y=4.43 (bar 193, 2023-09-28)
+    /encoding/x = 193 from fx.SYN01.reversal.rsi_divergence.bullish.195.geometry.0.points.1.bar
+    /encoding/y = 4.43 from fx.SYN01.reversal.rsi_divergence.bullish.195.p2_price
+  glyph glyph finding fnd.SYN01.reversal-up.195 fields glyph: 1 item(s); last confirmations=1 freshness=0.45454545454545453 strength=0.05121342871155932 (bar 195, 2023-10-02)
+emphasis: highlight bars 195..195 (all panels)

@@ -1,0 +1,9 @@
+(RP4/T2) The price card's `priceStep` against the BIST step table, and trade prices on that grid (aggregate counts only)
+
+Usage: qp live price-steps [OPTIONS] --raw <RAW>
+
+Options:
+      --raw <RAW>                Price-card raw logs (comma-separated)
+      --symbols <SYMBOLS>        Symbols whose trades are checked against the grid (comma-separated or `@file`) [default: @fixtures/local/live/u30.txt]
+      --trades-dir <TRADES_DIR>  Trade cache [default: fixtures/local/trades]
+  -h, --help                     Print help

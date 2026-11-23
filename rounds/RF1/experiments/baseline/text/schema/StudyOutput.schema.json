@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The result of running one study over a bar series (K13).\n\n`t` has one entry per input bar; every vector in `outputs` has exactly the same\nlength as `t`. Warmup values are `null`.",
+  "properties": {
+    "outputs": {
+      "additionalProperties": {
+        "items": {
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "type": "array"
+      },
+      "description": "Named outputs, e.g. `macd`, `signal`, `histogram`. `null` during warmup.",
+      "type": "object"
+    },
+    "params": {
+      "additionalProperties": {
+        "format": "double",
+        "type": "number"
+      },
+      "default": {},
+      "description": "Numeric parameters, e.g. `{\"period\": 14}`.",
+      "type": "object"
+    },
+    "study": {
+      "description": "Study name, e.g. `rsi`, `macd`.",
+      "type": "string"
+    },
+    "t": {
+      "description": "Bar times, epoch milliseconds UTC; same length as every output.",
+      "items": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "warmup": {
+      "additionalProperties": {
+        "format": "uint32",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "default": {},
+      "description": "Number of leading `null` values per output (warmup length).",
+      "type": "object"
+    }
+  },
+  "required": [
+    "study",
+    "t",
+    "outputs"
+  ],
+  "title": "StudyOutput",
+  "type": "object"
+}

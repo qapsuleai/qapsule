@@ -1,0 +1,5 @@
+{"conn":"a","msg":{"type":"welcome","protocol":"qp/0","doc":"doc-base","principal":"arkin","role":"owner","permissions":{"read":true,"write":true,"propose":true,"decide":true,"attend":true,"feed":false},"seq":0,"now":1760000000000,"epoch":0,"profile":{"depth":"chart","series_data":true,"max_points":500,"max_glyphs":6,"speech":false},"limits":{"max_message_bytes":1048576,"max_ops":64,"max_bars":10000,"max_subscriptions":32,"max_string":4096,"max_bind_bars":100000},"summary":{"series":[{"id":"px","kind":"bars","fields":["o","h","l","c","v"],"symbol":"SAMPLE","interval":"1d","len":200,"label":"SAMPLE 1d"}],"views":[],"pending_proposals":0,"select":{"series":{"px":{"kind":"bars"}}}}}}
+{"batch_end":true}
+{"conn":"a","msg":{"type":"ack","id":"c1","status":"applied","seq":1,"created":["bb","boll"]}}
+{"batch_end":true}
+# exit 0

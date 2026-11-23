@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "ExternalQuote": {
+      "additionalProperties": false,
+      "description": "A quotation from an external (named) source, e.g. a news item or a report.",
+      "properties": {
+        "quote": {
+          "description": "The quoted text.",
+          "type": "string"
+        },
+        "source": {
+          "description": "Who said it (e.g. `\"matriks:news/123\"`); must not be empty.",
+          "type": "string"
+        },
+        "values": {
+          "description": "The numbers taken from the quote; each must appear in `quote`.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "source",
+        "quote"
+      ],
+      "type": "object"
+    },
+    "Language": {
+      "description": "Language of capsule sentences (R3, §20).",
+      "oneOf": [
+        {
+          "const": "tr",
+          "description": "Turkish (default).",
+          "type": "string"
+        },
+        {
+          "const": "en",
+          "description": "English.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A comment as an agent submits it.",
+  "properties": {
+    "cites": {
+      "description": "Cited fact / capsule / finding ids.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "external": {
+      "description": "External source quotations.",
+      "items": {
+        "$ref": "#/$defs/ExternalQuote"
+      },
+      "type": "array"
+    },
+    "lang": {
+      "$ref": "#/$defs/Language",
+      "description": "Language of `text` (decides how ambiguous numbers such as `1.234` are read)."
+    },
+    "text": {
+      "description": "The comment. `[n]` marks a citation of `cites[n-1]`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "lang",
+    "text",
+    "cites"
+  ],
+  "title": "CommentDraft",
+  "type": "object"
+}

@@ -1,0 +1,7 @@
+Write `<Name>.schema.json` for every root type into a directory
+
+Usage: qp schema export --out <OUT>
+
+Options:
+      --out <OUT>  Output directory (created if missing)
+  -h, --help       Print help

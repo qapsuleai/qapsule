@@ -1,0 +1,25 @@
+(RP4/T2, M27) Bars from the cached trades through the live bar builder (`BarMethod::Trades`) against settled REST bars; with `--raw`, also the card / trades / mixed source table. Prints only an aggregate table
+
+Usage: qp live compare-trades [OPTIONS]
+
+Options:
+      --symbols <SYMBOLS>              Symbols: comma-separated or `@file` [default: @fixtures/local/live/u30.txt]
+      --trades-dir <TRADES_DIR>        Trade cache (`<dir>/<SYM>/<a>_<b>.csv.gz`) [default: fixtures/local/trades]
+      --trades-ex-dir <TRADES_EX_DIR>  Special-trade cache (`trade_ex`, same layout); a missing directory means none [default: fixtures/local/trades_ex]
+      --rest-dir <REST_DIR>            REST bars directory (`<SYM>.<period>.<start>.<end>.unadj.json`) [default: fixtures/local/live/rest]
+      --from <FROM>                    First local trading day compared (`YYYY-MM-DD`) [default: 2026-10-05]
+      --to <TO>                        Last local trading day compared [default: 2026-11-20]
+      --intervals <INTERVALS>          Intervals [default: 1m,5m,1h,1d]
+      --time <TIME>                    Trade time: `ns` (`date` + `timestamp_ns`, nanoseconds since local midnight) and/or `date_time` (the whole-second `date_time` column) [default: ns]
+      --edges <EDGES>                  Session edges: `session` (the live rule: opening auction into the first bar, closing session into the last bar) and/or `none` (trades outside the session dropped) [default: session]
+      --special <SPECIAL>              Special trades: `day_only` (the live default: the `1d` bar only), `exclude`, `include` (every interval) [default: day_only]
+      --volume-units <VOLUME_UNITS>    Volume units: `value` (TL, Σ price·quantity vs REST `volume`) and/or `quantity` (lots vs REST `quantity`) [default: value,quantity]
+      --rest-price <REST_PRICE>        REST prices: `raw` (as sent) and/or `mill` (rounded to 0.001, see [`to_mill`]) [default: raw,mill]
+      --rest-close <REST_CLOSE>        Where REST's closing-session bar (18:00+) goes: `last` (the day's last session bar, the live rule; created if REST has none there) or `prev` (the previous REST bar, `qp live compare` / R3) [default: last]
+      --price-tol <PRICE_TOL>          Absolute price tolerance ("within tolerance" columns) [default: 0.000001]
+      --volume-tol <VOLUME_TOL>        Relative volume tolerance ("within tolerance" columns) [default: 0.01]
+      --by-day                         Also print, per row, matched and all-exact bars per trading day
+      --detail                         Also print, per row, where the bars that are not all-exact sit (first / last / other bar of the day) and which fields differ
+      --raw <RAW>                      Price-card raw logs (comma-separated): adds the M27 source table (card, trades, mixed) on the bars these recordings cover
+      --card-method <CARD_METHOD>      Card bar method for the source table (`ticks` or `mixed`) [default: mixed]
+  -h, --help                           Print help

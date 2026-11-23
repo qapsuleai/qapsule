@@ -1,0 +1,814 @@
+{
+  "$defs": {
+    "Cmp": {
+      "description": "Comparison in a colour condition.",
+      "oneOf": [
+        {
+          "const": "lt",
+          "description": "`<`",
+          "type": "string"
+        },
+        {
+          "const": "le",
+          "description": "`<=`",
+          "type": "string"
+        },
+        {
+          "const": "gt",
+          "description": "`>`",
+          "type": "string"
+        },
+        {
+          "const": "ge",
+          "description": "`>=`",
+          "type": "string"
+        }
+      ]
+    },
+    "ColorSpec": {
+      "anyOf": [
+        {
+          "description": "One colour.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/ColorWhen",
+          "description": "Colour by condition."
+        },
+        {
+          "$ref": "#/$defs/ColorSteps",
+          "description": "Colour by value steps."
+        }
+      ],
+      "description": "The colour channel: constant, conditional or bound to a value.\n\nA colour is `#rrggbb`, `#rrggbbaa` or a theme token (`up`, `down`, `accent`, `text`,\n`muted`, `warn`, `s1`…`s8`; see `docs/GRAMMAR.md` §Tema)."
+    },
+    "ColorSteps": {
+      "additionalProperties": false,
+      "description": "Colour chosen per bar by the value of a field, in steps:\n`colors[i]` for `thresholds[i-1] <= value < thresholds[i]`.",
+      "properties": {
+        "colors": {
+          "description": "`thresholds.len() + 1` colours.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "field": {
+          "description": "Field of the layer's data.",
+          "type": "string"
+        },
+        "thresholds": {
+          "description": "Ascending thresholds (each needs an [`Origin`]).",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "thresholds",
+        "colors"
+      ],
+      "type": "object"
+    },
+    "ColorWhen": {
+      "additionalProperties": false,
+      "description": "Colour chosen per bar by a condition.",
+      "properties": {
+        "else": {
+          "description": "Colour where it does not (and where a side is `null`).",
+          "type": "string"
+        },
+        "then": {
+          "description": "Colour where it holds.",
+          "type": "string"
+        },
+        "when": {
+          "$ref": "#/$defs/Predicate",
+          "description": "The condition."
+        }
+      },
+      "required": [
+        "when",
+        "then",
+        "else"
+      ],
+      "type": "object"
+    },
+    "DataRef": {
+      "additionalProperties": false,
+      "description": "A reference to a field of a series: `{\"series\": \"sma50\", \"field\": \"sma\"}`. Within a\nlayer, `series` may be omitted (the layer's own data); `field` may be omitted for the\nseries' main output (`c` for bars).",
+      "properties": {
+        "field": {
+          "description": "Field name: a bar field (`o`, `h`, `l`, `c`, `v`), a study output (`rsi`,\n`upper`, `histogram`...), `v` for a point series, or a fact/finding field.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "series": {
+          "description": "Series id; the layer's own series when absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Emphasis": {
+      "additionalProperties": false,
+      "description": "A persistent emphasis on part of a view (a finding, a layer, a bar range). Attention\ndirectives and narration steps use the same target and are drawn the same way, but\nthey are presence, not document.",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/EmphasisKind",
+          "description": "How."
+        },
+        "target": {
+          "$ref": "#/$defs/Target",
+          "description": "What is emphasised. `item` (a fact or finding) resolves to its bars."
+        }
+      },
+      "required": [
+        "target",
+        "kind"
+      ],
+      "type": "object"
+    },
+    "EmphasisKind": {
+      "description": "How an emphasis changes the drawing.",
+      "oneOf": [
+        {
+          "const": "highlight",
+          "description": "Mark the target (accent band behind its bars, thicker stroke for its layer).",
+          "type": "string"
+        },
+        {
+          "const": "focus",
+          "description": "Dim everything except the target.",
+          "type": "string"
+        },
+        {
+          "const": "dim",
+          "description": "Dim the target.",
+          "type": "string"
+        }
+      ]
+    },
+    "Encoding": {
+      "additionalProperties": false,
+      "description": "The closed set of encoding channels. Unknown channel names are rejected\n(`schema`, with `did_you_mean`).",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ColorSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Colour (stroke for lines and rules, fill for areas, bands, bars and points)."
+        },
+        "opacity": {
+          "description": "Opacity `0..=1` (multiplies the colour's alpha).",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SizeSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Size in pixels (point diameter, text size)."
+        },
+        "text": {
+          "description": "Text of a `text` mark: a field of the layer's data (`text` of a fact, `claim` of a\nfinding).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "width": {
+          "description": "Stroke width in pixels (lines, rules, band edges).",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "x": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Horizontal position. Default: the row's bar. A constant makes a vertical rule."
+        },
+        "x2": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Second horizontal position (R3): the last bar of a bar extent. With `x`, a\nhorizontal `rule` becomes a segment from bar `x` to bar `x2` (sloped when `y2` is\nalso given), and a `band`/`area` covers only bars `x..=x2` (evidence geometry,\n`docs/GRAMMAR.md` §18)."
+        },
+        "y": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Vertical position. Default: the main output of the layer's series (`c` for bars,\n`v` for points, `level` for facts); for `line` on a multi-output study, one line\nper default output."
+        },
+        "y2": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Second vertical position: the lower edge of `band`/`area`, the base of `bar`."
+        }
+      },
+      "type": "object"
+    },
+    "Layer": {
+      "additionalProperties": false,
+      "description": "One layer of a view: a mark bound to data through encoding channels.\n\nData is at most one of `series`, `fact`, `finding`. A layer with none of them draws\nonly constants, and every constant needs an origin.",
+      "properties": {
+        "encoding": {
+          "$ref": "#/$defs/Encoding",
+          "default": {},
+          "description": "Encoding channels."
+        },
+        "fact": {
+          "description": "Data: one fact (one row: `bar`, `t`, `value`, `text` and its evidence keys).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "finding": {
+          "description": "Data: the facts of a finding (one row per fact, plus `claim`, `confidence`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "Stable id, unique within the view. Assigned when absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "description": "Legend text; derived from the data when absent (e.g. `SMA20`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mark": {
+          "$ref": "#/$defs/Mark",
+          "description": "Visual mark."
+        },
+        "origin": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Origin"
+          },
+          "description": "Origins of the layer's numeric constants, keyed by JSON pointer inside the layer\n(`\"/encoding/y\"`, `\"/encoding/color/when/than\"`,\n`\"/encoding/color/thresholds/0\"`). Filled by the authority when it can trace a\nconstant (see `docs/GRAMMAR.md` §Köken); a constant may also be omitted when an\norigin is given, and the authority writes its value.",
+          "type": "object"
+        },
+        "panel": {
+          "default": 0,
+          "description": "Id of the panel the layer is drawn in (not a position).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "series": {
+          "description": "Data: a series (bars, study, points).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mark"
+      ],
+      "type": "object"
+    },
+    "Mark": {
+      "description": "Visual mark of a layer.",
+      "oneOf": [
+        {
+          "const": "candle",
+          "description": "Candlesticks; needs a bar series (`o`, `h`, `l`, `c`).",
+          "type": "string"
+        },
+        {
+          "const": "line",
+          "description": "Polyline through `y` (one line per default output when `y` is absent).",
+          "type": "string"
+        },
+        {
+          "const": "area",
+          "description": "Fill from `y` down to `y2`, or to the bottom of the panel when `y2` is absent.",
+          "type": "string"
+        },
+        {
+          "const": "bar",
+          "description": "Vertical columns from `y2` (default 0, clamped to the panel) to `y`.",
+          "type": "string"
+        },
+        {
+          "const": "rule",
+          "description": "Horizontal (`y`) or vertical (`x`) reference line across the panel.",
+          "type": "string"
+        },
+        {
+          "const": "point",
+          "description": "Points at (`x`, `y`).",
+          "type": "string"
+        },
+        {
+          "const": "text",
+          "description": "Text label at (`x`, `y`); the text comes from the `text` channel.",
+          "type": "string"
+        },
+        {
+          "const": "band",
+          "description": "Fill between two values `y` and `y2` (both required): bands, envelopes, fans.",
+          "type": "string"
+        },
+        {
+          "const": "glyph",
+          "description": "Meaning glyph (R3, `docs/GRAMMAR.md` §18) of the capsule that presents the layer's\n`finding`; drawn by the product alphabet from the capsule's glyph parameters.",
+          "type": "string"
+        }
+      ]
+    },
+    "Operand": {
+      "anyOf": [
+        {
+          "description": "Numeric constant.",
+          "format": "double",
+          "type": "number"
+        },
+        {
+          "$ref": "#/$defs/DataRef",
+          "description": "A field of the layer's data or of another series."
+        }
+      ],
+      "description": "Right-hand side of a condition: a constant (needs an [`Origin`]) or a field."
+    },
+    "Origin": {
+      "description": "Where a numeric constant of a layer comes from (principle 6). The authority rejects a\nconstant it cannot trace (`no_origin`).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A field of a fact: an evidence key (`level`), or `bar` / `t` / `value`, or (R3) a\nbar of the fact's evidence geometry: `geometry.<i>.from_bar`,\n`geometry.<i>.to_bar`, `geometry.<i>.points.<j>.bar` (`docs/GRAMMAR.md` §18).",
+          "properties": {
+            "fact": {
+              "description": "Fact id.",
+              "type": "string"
+            },
+            "field": {
+              "description": "Field name.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "fact",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "fact",
+            "field"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A named threshold of a study, e.g. `rsi.overbought` (70). The list is the\nengine's (`describe` → `thresholds`).",
+          "properties": {
+            "kind": {
+              "const": "threshold",
+              "type": "string"
+            },
+            "name": {
+              "description": "Threshold name `<study>.<name>`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A value of a series (live: no constant is written, the value follows the data).",
+          "properties": {
+            "at": {
+              "$ref": "#/$defs/SeriesAt",
+              "description": "Which bar."
+            },
+            "field": {
+              "description": "Field; main output when absent.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "const": "series",
+              "type": "string"
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "series",
+            "at"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Panel": {
+      "additionalProperties": false,
+      "description": "One horizontal strip of a view. Panels are stacked top to bottom in list order and\nshare the view's time axis; each has its own value scale.",
+      "properties": {
+        "id": {
+          "description": "Stable panel id (a number, unique within the view). It is **not** the position:\nmoving or inserting panels never changes it. Layers refer to it (`Layer::panel`).\nAssigned (largest id + 1) when absent.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "Optional name for people and for reference by meaning, e.g. `\"price\"`, `\"rsi\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "weight": {
+          "description": "Relative height (> 0). Default: 3 for the first panel, 1 for the others.",
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "y": {
+          "$ref": "#/$defs/Scale",
+          "description": "The panel's value scale (`linear` or `log`)."
+        }
+      },
+      "required": [
+        "y"
+      ],
+      "type": "object"
+    },
+    "PanelPos": {
+      "additionalProperties": false,
+      "description": "A panel-relative layout position (R3, `docs/GRAMMAR.md` §18): `panel` is the fraction\nof the panel's width (`x`) or height (`y`) from its left/top edge, `px` a pixel offset\nadded to it. A layout constant, like a size: it claims nothing about the data, so it\nneeds no [`Origin`]. Used by `text` and `glyph` (a capsule card's sentence, ledger line\nand glyph).",
+      "properties": {
+        "panel": {
+          "description": "Fraction `0..=1` of the panel's extent from its left (`x`) or top (`y`) edge.",
+          "format": "double",
+          "type": "number"
+        },
+        "px": {
+          "description": "Pixel offset added to it (may be negative).",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "panel"
+      ],
+      "type": "object"
+    },
+    "Position": {
+      "anyOf": [
+        {
+          "description": "Numeric constant.",
+          "format": "double",
+          "type": "number"
+        },
+        {
+          "description": "Field name, or a numeric constant written as a string.",
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/DataRef",
+          "description": "Field of a (possibly other) series."
+        },
+        {
+          "$ref": "#/$defs/PanelPos",
+          "description": "Panel-relative layout position (not data; needs no origin)."
+        }
+      ],
+      "description": "A position channel (`x`, `x2`, `y`, `y2`).\n\n- a string: a field of the layer's data (`\"c\"`, `\"upper\"`, `\"level\"`); a string that\n  parses as a number (`\"70\"`) is a numeric constant (the `qp/0` form);\n- a number: a numeric constant (needs an [`Origin`]);\n- an object: a field of another series ([`DataRef`]), e.g. the other edge of a band;\n- `{\"panel\": f, \"px\": d}`: a panel-relative layout position ([`PanelPos`], R3; `text`\n  and `glyph` only)."
+    },
+    "Predicate": {
+      "additionalProperties": false,
+      "description": "A per-bar condition: `field op than`, e.g. `{\"field\":\"c\",\"op\":\"ge\",\"than\":{\"field\":\"o\"}}`.",
+      "properties": {
+        "field": {
+          "description": "Left-hand field of the layer's data.",
+          "type": "string"
+        },
+        "op": {
+          "$ref": "#/$defs/Cmp",
+          "description": "Comparison."
+        },
+        "than": {
+          "$ref": "#/$defs/Operand",
+          "description": "Right-hand side."
+        }
+      },
+      "required": [
+        "field",
+        "op",
+        "than"
+      ],
+      "type": "object"
+    },
+    "Scale": {
+      "additionalProperties": false,
+      "description": "A scale mapping data values to a visual axis.",
+      "properties": {
+        "domain": {
+          "description": "Fixed domain `[min, max]`; automatic (fit to the visible data, 5 % padding) when\nabsent. On the time axis this is the view's **persistent range** in epoch ms\n(`set_view_range`); a connection's transient viewport is presence, not this.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "Stable id within the view: `\"x\"` for the time axis, `\"y<panel id>\"` for a panel's\nvalue scale. Filled by the authority; if given it must match.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ScaleKind",
+          "description": "Scale type."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "ScaleKind": {
+      "description": "Scale type.",
+      "oneOf": [
+        {
+          "const": "time",
+          "description": "Bar-ordered time (horizontal only): one slot per bar of the view's first bar\nseries; session gaps (nights, weekends, holidays) take no space. `domain` is in\nepoch milliseconds.",
+          "type": "string"
+        },
+        {
+          "const": "linear",
+          "description": "Linear numeric.",
+          "type": "string"
+        },
+        {
+          "const": "log",
+          "description": "Base-10 logarithmic numeric; values `<= 0` are not drawn.",
+          "type": "string"
+        }
+      ]
+    },
+    "SeriesAt": {
+      "description": "Which value of a series an [`Origin::Series`] takes.",
+      "oneOf": [
+        {
+          "const": "last",
+          "description": "The last bar (follows live updates).",
+          "type": "string"
+        }
+      ]
+    },
+    "SizeByField": {
+      "additionalProperties": false,
+      "description": "Size bound to a field, mapped linearly onto `range` pixels over the visible values.",
+      "properties": {
+        "field": {
+          "description": "Field of the layer's data.",
+          "type": "string"
+        },
+        "range": {
+          "description": "`[min, max]` size in pixels.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "range"
+      ],
+      "type": "object"
+    },
+    "SizeSpec": {
+      "anyOf": [
+        {
+          "description": "Constant size in pixels.",
+          "format": "double",
+          "type": "number"
+        },
+        {
+          "$ref": "#/$defs/SizeByField",
+          "description": "Size by value."
+        }
+      ],
+      "description": "Size channel (point diameter, text size), in pixels."
+    },
+    "Target": {
+      "additionalProperties": false,
+      "description": "A step of a narration or an attention directive points at something.",
+      "properties": {
+        "from_bar": {
+          "description": "First bar index (0-based) of the region.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "item": {
+          "description": "Document item id (finding, fact, capsule...).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "layer": {
+          "description": "Layer id (R2).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output": {
+          "description": "Output or field of the series, e.g. `\"v\"` (volume of a bar series), `\"signal\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "panel": {
+          "description": "Panel id.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "series": {
+          "description": "Series id (e.g. the series whose value matters).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "to_bar": {
+          "description": "Last bar index (inclusive) of the region; equal to `from_bar` for one bar.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "view": {
+          "description": "View id.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A presentation recipe written in the visual grammar.",
+  "properties": {
+    "display_tz": {
+      "description": "Display time zone override (IANA); display only, see `Document::display_tz`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "emphasis": {
+      "description": "Persistent emphasis.",
+      "items": {
+        "$ref": "#/$defs/Emphasis"
+      },
+      "type": "array"
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "layers": {
+      "description": "Layers, drawn in order (later layers on top).",
+      "items": {
+        "$ref": "#/$defs/Layer"
+      },
+      "type": "array"
+    },
+    "panels": {
+      "description": "Panels, top to bottom.",
+      "items": {
+        "$ref": "#/$defs/Panel"
+      },
+      "type": "array"
+    },
+    "theme": {
+      "description": "Theme name (`dark`, the default, or `light`). The theme lives in the engine, not\nin the view: the same view can be drawn with another theme.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "title": {
+      "description": "Optional title; derived from the first bar series (symbol and interval) when\nabsent.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "x": {
+      "$ref": "#/$defs/Scale",
+      "description": "Horizontal scale (always `time`)."
+    },
+    "y": {
+      "deprecated": true,
+      "description": "**Deprecated (`qp/0`).** Value scales by panel position. The authority converts\nit into `panels` (ids `0..n`) when loading; do not write both.",
+      "items": {
+        "$ref": "#/$defs/Scale"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "x",
+    "layers"
+  ],
+  "title": "View",
+  "type": "object"
+}

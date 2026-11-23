@@ -1,0 +1,4 @@
+view logv (1200x600)
+x: slots 0..199 of 200 bar(s), 2025-01-02 .. 2025-10-08, 5.6 px per slot
+panel 0: y0 log [8.266780866409277, 476.90900045744763], 1 layer(s)
+  candles candle px "GROWTH 1d" fields o h l c: 200 item(s); last c=394.06 h=396.63 l=387.71 o=389.39 (bar 199, 2025-10-08)

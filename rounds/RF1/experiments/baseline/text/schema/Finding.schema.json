@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "Author": {
+      "description": "Who produced an item.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A person.",
+          "properties": {
+            "kind": {
+              "const": "human",
+              "type": "string"
+            },
+            "name": {
+              "description": "Display name or user id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An AI agent.",
+          "properties": {
+            "kind": {
+              "const": "agent",
+              "type": "string"
+            },
+            "model": {
+              "description": "Model identifier, if known.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "description": "Agent name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The deterministic engine.",
+          "properties": {
+            "kind": {
+              "const": "engine",
+              "type": "string"
+            },
+            "name": {
+              "description": "Engine component name.",
+              "type": "string"
+            },
+            "version": {
+              "description": "Engine version.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "version"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "CompareOp": {
+      "description": "Comparison operator used in conditions.",
+      "oneOf": [
+        {
+          "const": "lt",
+          "description": "Strictly less than.",
+          "type": "string"
+        },
+        {
+          "const": "le",
+          "description": "Less than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "gt",
+          "description": "Strictly greater than.",
+          "type": "string"
+        },
+        {
+          "const": "ge",
+          "description": "Greater than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "cross_above",
+          "description": "Crosses the value upwards.",
+          "type": "string"
+        },
+        {
+          "const": "cross_below",
+          "description": "Crosses the value downwards.",
+          "type": "string"
+        }
+      ]
+    },
+    "Condition": {
+      "description": "A condition evaluated over series (invalidation, intent trigger).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Last value of a series compared against a constant.",
+          "properties": {
+            "kind": {
+              "const": "threshold",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/CompareOp",
+              "description": "Comparison."
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            },
+            "value": {
+              "description": "Constant to compare against.",
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "series",
+            "op",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One series compared against another, both at the last bar (and the bar before,\nfor crossings). E.g. SMA(20) crosses above SMA(50):\n`{\"kind\":\"compare\",\"left\":\"sma20\",\"op\":\"cross_above\",\"right\":\"sma50\"}`.\nFor a bar series the compared value is the close.",
+          "properties": {
+            "kind": {
+              "const": "compare",
+              "type": "string"
+            },
+            "left": {
+              "description": "Left series id.",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/CompareOp",
+              "description": "Comparison."
+            },
+            "right": {
+              "description": "Right series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "left",
+            "op",
+            "right"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Free text; evaluated by a person.",
+          "properties": {
+            "kind": {
+              "const": "text",
+              "type": "string"
+            },
+            "text": {
+              "description": "Condition statement.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Who produced an item, based on what, and when.",
+      "properties": {
+        "approved_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Author"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who approved it, when it entered the document through an accepted proposal\n(protocol: `accept_proposal`). Absent for direct writes."
+        },
+        "at": {
+          "description": "Production time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "author": {
+          "$ref": "#/$defs/Author",
+          "description": "Producer."
+        },
+        "based_on": {
+          "default": [],
+          "description": "Ids of the items this one is based on.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "author",
+        "at"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A claim derived from facts.",
+  "properties": {
+    "claim": {
+      "description": "The claim, in one sentence.",
+      "type": "string"
+    },
+    "confidence": {
+      "description": "Confidence in `[0, 1]`.",
+      "format": "double",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "type": "number"
+    },
+    "facts": {
+      "description": "Ids of the facts the claim rests on.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "invalidation": {
+      "$ref": "#/$defs/Condition",
+      "description": "When this condition holds, the finding is invalid."
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "Author and basis."
+    }
+  },
+  "required": [
+    "id",
+    "claim",
+    "facts",
+    "confidence",
+    "invalidation",
+    "provenance"
+  ],
+  "title": "Finding",
+  "type": "object"
+}

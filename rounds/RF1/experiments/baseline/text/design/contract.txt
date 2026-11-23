@@ -1,0 +1,1 @@
+design-contract: generated tables equal the look record (difference 0)

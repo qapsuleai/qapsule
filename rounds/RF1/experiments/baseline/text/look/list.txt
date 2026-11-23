@@ -1,0 +1,6 @@
+r4	dark	R4 reference: IBM Plex Mono throughout, R0 colours, flat surfaces
+ornek	dark	T3 trial: warm colours, larger type (mechanism check, not a proposal)
+oltan	dark	M16: the mark leads (watch face): 120 px glyph, lightness-ladder meaning colours, Atkinson Hyperlegible Next
+zemre	light	M16 time strip: ink on paper, Atkinson Hyperlegible Next, blue/vermilion meaning colours
+tavek	dark	RD2 B: the chart carries the meaning; origin as stroke + axis tag, watch state at the axis, evidence window as a band
+tavek-tel	dark	RD2 B on a phone: touch type and targets, same colours and chart grammar

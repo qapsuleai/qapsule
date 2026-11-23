@@ -1,0 +1,6 @@
+Fetch the symbol list (REST meta) into `fixtures/local/live/meta.json` and write universe lists `u30.txt` (BIST30), `u100.txt` (BIST100), `utum.txt` (BISTTUM) and `uall.txt` (all BIST equities); prints only counts
+
+Usage: qp live symbols
+
+Options:
+  -h, --help  Print help

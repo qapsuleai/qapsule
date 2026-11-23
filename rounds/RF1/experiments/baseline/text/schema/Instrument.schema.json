@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A traded asset: where it trades and which calendar aligns its bars (K14).",
+  "properties": {
+    "calendar": {
+      "description": "Calendar id, e.g. `XIST`, `XNYS`. Bars are aligned to this calendar.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "exchange": {
+      "description": "Exchange code, e.g. `BIST`, `NYSE`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "symbol": {
+      "description": "Exchange symbol, e.g. `THYAO`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "symbol"
+  ],
+  "title": "Instrument",
+  "type": "object"
+}

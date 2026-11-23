@@ -1,0 +1,9 @@
+view cond (1200x600)
+x: slots 0..199 of 200 bar(s), 2025-01-02 .. 2025-10-08, 5.6 px per slot
+panel 0: y0 linear [88.8295, 130.2005], 2 layer(s)
+  fill area px "SAMPLE 1d" fields c sma50.sma: 151 item(s), 49 value(s) not drawn; last c=124.69 sma50.sma=120.85939999999997 (bar 199, 2025-10-08)
+  close line px "SAMPLE 1d" fields c: 200 item(s); last c=124.69 (bar 199, 2025-10-08)
+panel 1: y1 linear [0, 100], 1 layer(s)
+  rsi line rsi14 "RSI14" fields rsi: 186 item(s), 14 value(s) not drawn; last rsi=55.09991178461079 (bar 199, 2025-10-08)
+    /encoding/color/thresholds/0 = 30 from rsi.oversold
+    /encoding/color/thresholds/1 = 70 from rsi.overbought

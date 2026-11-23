@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "DataBinding": {
+      "additionalProperties": false,
+      "description": "A data binding: what a bound series' data is, without the data (K23).",
+      "properties": {
+        "anchor_t": {
+          "description": "Time of bar 0 as fixed by the authority on first resolution (§18.3). Written by the\nauthority (an engine entry), never by clients; once set, every resolution (the\nauthority's after a restart, each replica's) starts at this bar, so bar numbers and\nthe calculation start are the same everywhere.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "feed": {
+          "description": "Named feed of the host (e.g. `matriks`, `delayed`); the host's default if absent\n(same id pattern as the symbol).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interval": {
+          "description": "Bar interval: `1m`…`1440m`, `1h`…`24h`, `1d`, `1w`, `1M`.",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "Exchange symbol, e.g. `THYAO` (`^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$`).",
+          "type": "string"
+        },
+        "window": {
+          "$ref": "#/$defs/Window",
+          "description": "Which bars."
+        }
+      },
+      "required": [
+        "symbol",
+        "interval",
+        "window"
+      ],
+      "type": "object"
+    },
+    "Window": {
+      "additionalProperties": false,
+      "description": "Which bars a binding asks for.\n\nWire form: exactly one of `{\"last\": n}`, `{\"from_t\": t}`, `{\"from_t\": a, \"to_t\": b}`\n(inclusive). Bar numbers of a bound series count from the first bar of the window as\nresolved by the authority (its *anchor*, announced in the `binding` query); bars that\narrive later are appended, the window does not slide.",
+      "properties": {
+        "from_t": {
+          "description": "Bars with `t >= from_t` (epoch ms).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "last": {
+          "description": "The last `n` bars at resolution time.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_t": {
+          "description": "With `from_t`: bars with `t <= to_t`; the window is closed (no live bars).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Frozen evidence: the data a fact rests on, by reference and content digest (K23).\nStamped by the authority when a fact is added; `verify_evidence` re-checks it.",
+  "properties": {
+    "alg": {
+      "description": "Digest algorithm (`fnv1a64`).",
+      "type": "string"
+    },
+    "bars": {
+      "description": "Number of bars in the range.",
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "binding": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DataBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The binding of that series at stamping time (absent for inline data)."
+    },
+    "digest": {
+      "description": "[`data_digest`] of the bars in the range.",
+      "type": "string"
+    },
+    "from_t": {
+      "description": "Time of the first bar of the range (inclusive).",
+      "format": "int64",
+      "type": "integer"
+    },
+    "series": {
+      "description": "The bar series the evidence lies on (the fact's series, or the bar series a study\nseries is computed from).",
+      "type": "string"
+    },
+    "to_t": {
+      "description": "Time of the last bar of the range (inclusive): the fact's bar.",
+      "format": "int64",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "series",
+    "from_t",
+    "to_t",
+    "bars",
+    "alg",
+    "digest"
+  ],
+  "title": "EvidenceRef",
+  "type": "object"
+}

@@ -1,0 +1,22 @@
+Render to PNG with the reference renderer: a bars JSON file as the R0 chart (candles + SMA(20)), or a view of a session built from an init/transcript (`--view`), or the view of a presentation (`--present`, `--surface`)
+
+Usage: qp render [OPTIONS] --out <OUT> [INPUT]
+
+Arguments:
+  [INPUT]  Input bars JSON file, rendered as the R0 chart (candles + SMA(20))
+
+Options:
+      --init <INIT>              Session init (`SessionInit` JSON). Default: the transcript's init
+      --transcript <TRANSCRIPT>  A conformance transcript whose messages are sent first (its expectations are not checked), e.g. one that builds the view with grammar operations
+      --view <VIEW>              View id
+      --present <PRESENT>        Instead of `--view`: present this finding (`present` query) on `--surface` and use the presentation's view (`capsule_view` at capsule depth, `view` at chart depth)
+      --surface <SURFACE>        Surface kind for `--present`: desktop, phone, watch, voice or headless [default: desktop]
+      --root <ROOT>              Directory that paths in the init and transcript are relative to (and confined to) [default: .]
+  -o, --out <OUT>                Output PNG file
+      --width <WIDTH>            Image width in pixels [default: 1200]
+      --height <HEIGHT>          Image height in pixels [default: 600]
+      --look <LOOK>              (R5/T3) Look to draw with (`qp look list`; default `r4`)
+      --scale <SCALE>            (RD2/G) Device pixel scale: the PNG is `width·N × height·N` (same layout, sharper; the comparison gallery uses 2 for desktop, 3 for phone). 1 is the reference path [default: 1]
+      --theme <THEME>            (RD2/G) Scheme override, `dark` or `light` (default: the view's theme; not with a bars file: the R0 chart has one scheme)
+      --cursor <BAR[,PRICE]>     (RD2/C2a) Pointer at `<bar>[,<price>]` (a look with chart conventions draws the crosshair, its pills and that bar's legend; the gallery rig)
+  -h, --help                     Print help

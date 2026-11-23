@@ -1,0 +1,11 @@
+Run the protocol authority (`qp/0`) over stdin/stdout: one JSON line per message, `{"conn":…,"msg":…}` in and out (docs/PROTOCOL.md §3)
+
+Usage: qp serve [OPTIONS] --init <INIT>
+
+Options:
+      --init <INIT>    Session init (`SessionInit` JSON)
+      --root <ROOT>    Directory that document paths in the init are relative to (and confined to) [default: .]
+      --batch-end      After the outputs of each input line, write `{"batch_end":true}`
+      --host-frames    Accept host frames `{"host":{"data":<DataEvent>}}` (data events on the host's path, docs/PROTOCOL.md §3, §18.4). Only for a stream that belongs to the host; without this flag such a line is a framing error
+      --no-local-data  With `init.replay` (docs/PROTOCOL.md §21): never read local data (a `local` source falls back to the synthetic market). Conformance runs use it
+  -h, --help           Print help

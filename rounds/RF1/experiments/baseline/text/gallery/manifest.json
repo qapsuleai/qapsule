@@ -1,0 +1,276 @@
+{
+ "fixture": "fixtures/design/desk.json",
+ "view": "desk",
+ "real": null,
+ "looks": [
+  "tavek",
+  "oltan",
+  "r4"
+ ],
+ "shots": [
+  {
+   "anchor": "c1",
+   "look": "tavek",
+   "theme": "dark",
+   "file": "shots/c1-tavek-dark.png",
+   "css": [
+    1440,
+    900
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c1",
+   "look": "tavek",
+   "theme": "light",
+   "file": "shots/c1-tavek-light.png",
+   "css": [
+    1440,
+    900
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c2",
+   "look": "tavek",
+   "theme": "dark",
+   "file": "shots/c2-tavek-dark.png",
+   "css": [
+    960,
+    600
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c2",
+   "look": "tavek",
+   "theme": "light",
+   "file": "shots/c2-tavek-light.png",
+   "css": [
+    960,
+    600
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c3",
+   "look": "tavek-tel",
+   "theme": "dark",
+   "file": "shots/c3-tavek-tel-dark.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c3",
+   "look": "tavek-tel",
+   "theme": "light",
+   "file": "shots/c3-tavek-tel-light.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c4",
+   "look": "tavek-tel",
+   "theme": "dark",
+   "file": "shots/c4-tavek-tel-dark.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c4",
+   "look": "tavek-tel",
+   "theme": "light",
+   "file": "shots/c4-tavek-tel-light.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c1",
+   "look": "oltan",
+   "theme": "dark",
+   "file": "shots/c1-oltan-dark.png",
+   "css": [
+    1440,
+    900
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c1",
+   "look": "oltan",
+   "theme": "light",
+   "file": "shots/c1-oltan-light.png",
+   "css": [
+    1440,
+    900
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c2",
+   "look": "oltan",
+   "theme": "dark",
+   "file": "shots/c2-oltan-dark.png",
+   "css": [
+    960,
+    600
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c2",
+   "look": "oltan",
+   "theme": "light",
+   "file": "shots/c2-oltan-light.png",
+   "css": [
+    960,
+    600
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c3",
+   "look": "oltan",
+   "theme": "dark",
+   "file": "shots/c3-oltan-dark.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c3",
+   "look": "oltan",
+   "theme": "light",
+   "file": "shots/c3-oltan-light.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c4",
+   "look": "oltan",
+   "theme": "dark",
+   "file": "shots/c4-oltan-dark.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c4",
+   "look": "oltan",
+   "theme": "light",
+   "file": "shots/c4-oltan-light.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c1",
+   "look": "r4",
+   "theme": "dark",
+   "file": "shots/c1-r4-dark.png",
+   "css": [
+    1440,
+    900
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c1",
+   "look": "r4",
+   "theme": "light",
+   "file": "shots/c1-r4-light.png",
+   "css": [
+    1440,
+    900
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c2",
+   "look": "r4",
+   "theme": "dark",
+   "file": "shots/c2-r4-dark.png",
+   "css": [
+    960,
+    600
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c2",
+   "look": "r4",
+   "theme": "light",
+   "file": "shots/c2-r4-light.png",
+   "css": [
+    960,
+    600
+   ],
+   "dpr": 2
+  },
+  {
+   "anchor": "c3",
+   "look": "r4",
+   "theme": "dark",
+   "file": "shots/c3-r4-dark.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c3",
+   "look": "r4",
+   "theme": "light",
+   "file": "shots/c3-r4-light.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c4",
+   "look": "r4",
+   "theme": "dark",
+   "file": "shots/c4-r4-dark.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  },
+  {
+   "anchor": "c4",
+   "look": "r4",
+   "theme": "light",
+   "file": "shots/c4-r4-light.png",
+   "css": [
+    390,
+    844
+   ],
+   "dpr": 3
+  }
+ ]
+}

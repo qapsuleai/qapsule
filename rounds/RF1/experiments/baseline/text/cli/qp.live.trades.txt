@@ -1,0 +1,11 @@
+(RP4/T1) Fetch historical trades (`trade.gz`, level 1 only) into `fixtures/local/trades/<SYM>/<start>_<end>.csv.gz`, in windows of at most `--window-days` calendar days (≤ 15, the endpoint's limit). A window already in the cache is never fetched again; every request is appended to `fixtures/local/trades/requests.jsonl` (counts only)
+
+Usage: qp live trades [OPTIONS] --symbols <SYMBOLS> --start <START> --end <END>
+
+Options:
+      --symbols <SYMBOLS>          Comma-separated symbols or `@file`
+      --start <START>              First local date `YYYY-MM-DD`
+      --end <END>                  Last local date
+      --window-days <WINDOW_DAYS>  Window length in calendar days (1–15) [default: 14]
+      --ex                         Special (reported) trades (`trade_ex`) into `fixtures/local/trades_ex/` instead
+  -h, --help                       Print help

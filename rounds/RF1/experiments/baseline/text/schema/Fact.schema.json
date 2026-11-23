@@ -1,0 +1,753 @@
+{
+  "$defs": {
+    "Author": {
+      "description": "Who produced an item.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A person.",
+          "properties": {
+            "kind": {
+              "const": "human",
+              "type": "string"
+            },
+            "name": {
+              "description": "Display name or user id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An AI agent.",
+          "properties": {
+            "kind": {
+              "const": "agent",
+              "type": "string"
+            },
+            "model": {
+              "description": "Model identifier, if known.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "description": "Agent name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The deterministic engine.",
+          "properties": {
+            "kind": {
+              "const": "engine",
+              "type": "string"
+            },
+            "name": {
+              "description": "Engine component name.",
+              "type": "string"
+            },
+            "version": {
+              "description": "Engine version.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "version"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "CompareOp": {
+      "description": "Comparison operator used in conditions.",
+      "oneOf": [
+        {
+          "const": "lt",
+          "description": "Strictly less than.",
+          "type": "string"
+        },
+        {
+          "const": "le",
+          "description": "Less than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "gt",
+          "description": "Strictly greater than.",
+          "type": "string"
+        },
+        {
+          "const": "ge",
+          "description": "Greater than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "cross_above",
+          "description": "Crosses the value upwards.",
+          "type": "string"
+        },
+        {
+          "const": "cross_below",
+          "description": "Crosses the value downwards.",
+          "type": "string"
+        }
+      ]
+    },
+    "DataBinding": {
+      "additionalProperties": false,
+      "description": "A data binding: what a bound series' data is, without the data (K23).",
+      "properties": {
+        "anchor_t": {
+          "description": "Time of bar 0 as fixed by the authority on first resolution (§18.3). Written by the\nauthority (an engine entry), never by clients; once set, every resolution (the\nauthority's after a restart, each replica's) starts at this bar, so bar numbers and\nthe calculation start are the same everywhere.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "feed": {
+          "description": "Named feed of the host (e.g. `matriks`, `delayed`); the host's default if absent\n(same id pattern as the symbol).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interval": {
+          "description": "Bar interval: `1m`…`1440m`, `1h`…`24h`, `1d`, `1w`, `1M`.",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "Exchange symbol, e.g. `THYAO` (`^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$`).",
+          "type": "string"
+        },
+        "window": {
+          "$ref": "#/$defs/Window",
+          "description": "Which bars."
+        }
+      },
+      "required": [
+        "symbol",
+        "interval",
+        "window"
+      ],
+      "type": "object"
+    },
+    "Direction": {
+      "description": "Direction of a meaning.",
+      "oneOf": [
+        {
+          "const": "up",
+          "description": "Upwards.",
+          "type": "string"
+        },
+        {
+          "const": "down",
+          "description": "Downwards.",
+          "type": "string"
+        },
+        {
+          "const": "neutral",
+          "description": "No direction (e.g. a squeeze).",
+          "type": "string"
+        }
+      ]
+    },
+    "Edge": {
+      "description": "Whether a fact is a point event, or the start or end of a state.",
+      "oneOf": [
+        {
+          "const": "point",
+          "description": "A point event (a crossing, a breakout).",
+          "type": "string"
+        },
+        {
+          "const": "enter",
+          "description": "A state started (RSI went above 70 and stays there while the state holds).",
+          "type": "string"
+        },
+        {
+          "const": "exit",
+          "description": "A state ended.",
+          "type": "string"
+        }
+      ]
+    },
+    "EvidenceFamily": {
+      "description": "Evidence family (K30). Several facts from one family count as one confirmation.",
+      "oneOf": [
+        {
+          "const": "price",
+          "description": "Price and indicators computed from price.",
+          "type": "string"
+        },
+        {
+          "const": "volume",
+          "description": "Traded volume.",
+          "type": "string"
+        },
+        {
+          "const": "flow",
+          "description": "Money flow: settlement, institutional (broker) flow.",
+          "type": "string"
+        },
+        {
+          "const": "derivative",
+          "description": "Derivatives (futures, options).",
+          "type": "string"
+        },
+        {
+          "const": "news",
+          "description": "News and fundamentals.",
+          "type": "string"
+        }
+      ]
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "description": "Frozen evidence: the data a fact rests on, by reference and content digest (K23).\nStamped by the authority when a fact is added; `verify_evidence` re-checks it.",
+      "properties": {
+        "alg": {
+          "description": "Digest algorithm (`fnv1a64`).",
+          "type": "string"
+        },
+        "bars": {
+          "description": "Number of bars in the range.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "binding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The binding of that series at stamping time (absent for inline data)."
+        },
+        "digest": {
+          "description": "[`data_digest`] of the bars in the range.",
+          "type": "string"
+        },
+        "from_t": {
+          "description": "Time of the first bar of the range (inclusive).",
+          "format": "int64",
+          "type": "integer"
+        },
+        "series": {
+          "description": "The bar series the evidence lies on (the fact's series, or the bar series a study\nseries is computed from).",
+          "type": "string"
+        },
+        "to_t": {
+          "description": "Time of the last bar of the range (inclusive): the fact's bar.",
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "series",
+        "from_t",
+        "to_t",
+        "bars",
+        "alg",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "FactMeaning": {
+      "additionalProperties": false,
+      "description": "The meaning of a fact (R3): what a detector found, in the six-kind vocabulary.\nOptional on [`crate::Fact`]; facts written before R3 have none.",
+      "properties": {
+        "condition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeaningCondition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Machine-checkable condition of an expectation (`time = expectation`) or of a\nstate's continuation (`time = state`): a sentence slot, not free text."
+        },
+        "detector": {
+          "description": "Detector id, e.g. `breakout.donchian`.",
+          "type": "string"
+        },
+        "detector_version": {
+          "description": "Detector version; part of the ledger key.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction",
+          "description": "Direction."
+        },
+        "edge": {
+          "$ref": "#/$defs/Edge",
+          "description": "Edge: a point event, or a state's start or end."
+        },
+        "family": {
+          "$ref": "#/$defs/EvidenceFamily",
+          "description": "Evidence family."
+        },
+        "geometry": {
+          "description": "Geometry drawn at chart depth.",
+          "items": {
+            "$ref": "#/$defs/Geometry"
+          },
+          "type": "array"
+        },
+        "instrument": {
+          "description": "Instrument symbol.",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/MeaningKind",
+          "description": "Meaning kind."
+        },
+        "license": {
+          "$ref": "#/$defs/License",
+          "description": "License class of the data."
+        },
+        "server": {
+          "description": "`true` when produced on the server from licensed data (server fact, K33).",
+          "type": "boolean"
+        },
+        "strength": {
+          "description": "Strength in `[0, 1]` (detector-defined, deterministic).",
+          "format": "double",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "time": {
+          "$ref": "#/$defs/TimeKind",
+          "description": "Time kind."
+        }
+      },
+      "required": [
+        "kind",
+        "direction",
+        "family",
+        "time",
+        "detector",
+        "detector_version",
+        "instrument",
+        "strength",
+        "license"
+      ],
+      "type": "object"
+    },
+    "GeoPoint": {
+      "additionalProperties": false,
+      "description": "One marked point of [`Geometry::Points`].",
+      "properties": {
+        "bar": {
+          "description": "Bar index.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "key": {
+          "description": "Evidence key of the value at that bar.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bar",
+        "key"
+      ],
+      "type": "object"
+    },
+    "Geometry": {
+      "description": "Evidence geometry: what the chart depth draws for a fact. Values are never stored\nhere; they are keys into [`crate::Fact::evidence`], so redacting the evidence removes\nthe geometry's numbers too.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A horizontal level from one bar to another (a broken resistance, a threshold).",
+          "properties": {
+            "from_bar": {
+              "description": "First bar of the segment.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "key": {
+              "description": "Evidence key of the level value.",
+              "type": "string"
+            },
+            "shape": {
+              "const": "level",
+              "type": "string"
+            },
+            "to_bar": {
+              "description": "Last bar of the segment.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "shape",
+            "key",
+            "from_bar",
+            "to_bar"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A band between two evidence values over a bar range (a squeeze's band).",
+          "properties": {
+            "from_bar": {
+              "description": "First bar.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "lower": {
+              "description": "Evidence key of the lower value.",
+              "type": "string"
+            },
+            "shape": {
+              "const": "band",
+              "type": "string"
+            },
+            "to_bar": {
+              "description": "Last bar.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "upper": {
+              "description": "Evidence key of the upper value.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "shape",
+            "upper",
+            "lower",
+            "from_bar",
+            "to_bar"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Marked points (swing peaks of a divergence): one bar and one evidence key each.",
+          "properties": {
+            "points": {
+              "description": "`(bar, evidence key)` pairs, in bar order.",
+              "items": {
+                "$ref": "#/$defs/GeoPoint"
+              },
+              "type": "array"
+            },
+            "shape": {
+              "const": "points",
+              "type": "string"
+            }
+          },
+          "required": [
+            "shape",
+            "points"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "License": {
+      "additionalProperties": false,
+      "description": "License class of the data a fact rests on (K33).",
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/LicenseClass",
+          "description": "`public`: the user's own data entitlement for the bar series is enough to see the\nvalues (the replica can recompute it). `licensed`: rests on data only the server\nmay read; computed only on the server (server fact) and shown to an unentitled\nuser as a comment without numbers."
+        },
+        "entitlement": {
+          "description": "The data entitlement needed to see the evidence values (`flow/THYAO`, `flow/*`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "class"
+      ],
+      "type": "object"
+    },
+    "LicenseClass": {
+      "description": "See [`License::class`].",
+      "oneOf": [
+        {
+          "const": "public",
+          "description": "Recomputable from the user's own bar data.",
+          "type": "string"
+        },
+        {
+          "const": "licensed",
+          "description": "Server-only data; numbers never reach an unentitled user.",
+          "type": "string"
+        }
+      ]
+    },
+    "MeaningCondition": {
+      "additionalProperties": false,
+      "description": "A machine-checkable condition attached to a meaning (sentence slot).\n\n(R4, K42/A28) The same shape serves two different roles, which a story keeps in two\nseparate fields ([`Story::condition`], [`Story::resolution`]):\n\n- **state condition** (durum koşulu): whether the claim still holds **now** (\"RSI is\n  above 70\", \"the close is still above the broken level\"); it decides the capsule's\n  [`Validity`];\n- **expected resolution** (beklenen çözüm): how the story is expected to close (\"a\n  close outside the band within 20 bars\"); a state may have ended while the story is\n  still open.\n\nOn a fact ([`FactMeaning::condition`]) the role follows from the time kind\n(`qp_capsule::sentence::split_condition`): a state's condition with `within_bars` is\nits expected resolution, an expectation's condition is what resolves it, and every\nother condition is a state condition.",
+      "properties": {
+        "key": {
+          "description": "Evidence key of the threshold value.",
+          "type": "string"
+        },
+        "op": {
+          "$ref": "#/$defs/CompareOp",
+          "description": "Comparison."
+        },
+        "subject": {
+          "description": "What is compared: `close`, `rsi`, `bandwidth`, … (detector-defined name).",
+          "type": "string"
+        },
+        "within_bars": {
+          "description": "Within how many bars (expectation), if bounded.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "subject",
+        "op",
+        "key"
+      ],
+      "type": "object"
+    },
+    "MeaningKind": {
+      "description": "The six meaning kinds (K30). The glyph's shape encodes this.",
+      "oneOf": [
+        {
+          "const": "continuation",
+          "description": "Devam: the move goes on (trend, MA alignment, flag).",
+          "type": "string"
+        },
+        {
+          "const": "reversal",
+          "description": "Dönüş: the move may be turning (divergence, double top/bottom).",
+          "type": "string"
+        },
+        {
+          "const": "breakout",
+          "description": "Kırılım: a boundary was crossed (range, channel, support/resistance).",
+          "type": "string"
+        },
+        {
+          "const": "squeeze",
+          "description": "Sıkışma: the move is narrowing; direction unknown (band squeeze, low volatility).",
+          "type": "string"
+        },
+        {
+          "const": "extreme",
+          "description": "Aşırılık: unusual stretch (overbought/oversold, outside the band).",
+          "type": "string"
+        },
+        {
+          "const": "flow",
+          "description": "Akış: money in/out independent of price (volume, settlement, institutional flow).",
+          "type": "string"
+        }
+      ]
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Who produced an item, based on what, and when.",
+      "properties": {
+        "approved_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Author"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who approved it, when it entered the document through an accepted proposal\n(protocol: `accept_proposal`). Absent for direct writes."
+        },
+        "at": {
+          "description": "Production time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "author": {
+          "$ref": "#/$defs/Author",
+          "description": "Producer."
+        },
+        "based_on": {
+          "default": [],
+          "description": "Ids of the items this one is based on.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "author",
+        "at"
+      ],
+      "type": "object"
+    },
+    "TimeKind": {
+      "description": "The three time kinds of a capsule (K27).",
+      "oneOf": [
+        {
+          "const": "event",
+          "description": "Olay: happened at a bar; past tense with its time; freshness fades.",
+          "type": "string"
+        },
+        {
+          "const": "state",
+          "description": "Durum: holds while the condition holds; present tense; ends when it breaks.",
+          "type": "string"
+        },
+        {
+          "const": "expectation",
+          "description": "Beklenti: conditional; lives until the condition is met or voided.",
+          "type": "string"
+        }
+      ]
+    },
+    "Window": {
+      "additionalProperties": false,
+      "description": "Which bars a binding asks for.\n\nWire form: exactly one of `{\"last\": n}`, `{\"from_t\": t}`, `{\"from_t\": a, \"to_t\": b}`\n(inclusive). Bar numbers of a bound series count from the first bar of the window as\nresolved by the authority (its *anchor*, announced in the `binding` query); bars that\narrive later are appended, the window does not slide.",
+      "properties": {
+        "from_t": {
+          "description": "Bars with `t >= from_t` (epoch ms).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "last": {
+          "description": "The last `n` bars at resolution time.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "to_t": {
+          "description": "With `from_t`: bars with `t <= to_t`; the window is closed (no live bars).",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "An indisputable numeric event detected by the engine. Carries its evidence.",
+  "properties": {
+    "bar": {
+      "description": "Bar index within the series.",
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "evidence": {
+      "additionalProperties": {
+        "format": "double",
+        "type": "number"
+      },
+      "default": {},
+      "description": "Evidence values, e.g. `{\"level\": 70, \"prev\": 68.9, \"value\": 71.4}`.",
+      "type": "object"
+    },
+    "evidence_ref": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidenceRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Frozen evidence (RP2): the data this fact rests on, by reference and content\ndigest; stamped by the authority (`docs/PROTOCOL.md` §18.5). Clients never send it."
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Event kind, e.g. `cross_above`.",
+      "type": "string"
+    },
+    "meaning": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FactMeaning"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Meaning (R3): kind, direction, family, time kind, detector, license, geometry.\nAbsent on facts written before R3."
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "Who detected it."
+    },
+    "series": {
+      "description": "Id of the series the event happened on.",
+      "type": "string"
+    },
+    "t": {
+      "description": "Bar time, epoch milliseconds UTC.",
+      "format": "int64",
+      "type": "integer"
+    },
+    "text": {
+      "description": "Short human-readable statement.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "series",
+    "bar",
+    "t",
+    "text",
+    "provenance"
+  ],
+  "title": "Fact",
+  "type": "object"
+}

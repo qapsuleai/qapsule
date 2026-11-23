@@ -1,0 +1,522 @@
+{
+  "$defs": {
+    "Author": {
+      "description": "Who produced an item.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A person.",
+          "properties": {
+            "kind": {
+              "const": "human",
+              "type": "string"
+            },
+            "name": {
+              "description": "Display name or user id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An AI agent.",
+          "properties": {
+            "kind": {
+              "const": "agent",
+              "type": "string"
+            },
+            "model": {
+              "description": "Model identifier, if known.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "description": "Agent name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The deterministic engine.",
+          "properties": {
+            "kind": {
+              "const": "engine",
+              "type": "string"
+            },
+            "name": {
+              "description": "Engine component name.",
+              "type": "string"
+            },
+            "version": {
+              "description": "Engine version.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "version"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "CompareOp": {
+      "description": "Comparison operator used in conditions.",
+      "oneOf": [
+        {
+          "const": "lt",
+          "description": "Strictly less than.",
+          "type": "string"
+        },
+        {
+          "const": "le",
+          "description": "Less than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "gt",
+          "description": "Strictly greater than.",
+          "type": "string"
+        },
+        {
+          "const": "ge",
+          "description": "Greater than or equal.",
+          "type": "string"
+        },
+        {
+          "const": "cross_above",
+          "description": "Crosses the value upwards.",
+          "type": "string"
+        },
+        {
+          "const": "cross_below",
+          "description": "Crosses the value downwards.",
+          "type": "string"
+        }
+      ]
+    },
+    "Condition": {
+      "description": "A condition evaluated over series (invalidation, intent trigger).",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Last value of a series compared against a constant.",
+          "properties": {
+            "kind": {
+              "const": "threshold",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/CompareOp",
+              "description": "Comparison."
+            },
+            "series": {
+              "description": "Series id.",
+              "type": "string"
+            },
+            "value": {
+              "description": "Constant to compare against.",
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "series",
+            "op",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One series compared against another, both at the last bar (and the bar before,\nfor crossings). E.g. SMA(20) crosses above SMA(50):\n`{\"kind\":\"compare\",\"left\":\"sma20\",\"op\":\"cross_above\",\"right\":\"sma50\"}`.\nFor a bar series the compared value is the close.",
+          "properties": {
+            "kind": {
+              "const": "compare",
+              "type": "string"
+            },
+            "left": {
+              "description": "Left series id.",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/CompareOp",
+              "description": "Comparison."
+            },
+            "right": {
+              "description": "Right series id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "left",
+            "op",
+            "right"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Free text; evaluated by a person.",
+          "properties": {
+            "kind": {
+              "const": "text",
+              "type": "string"
+            },
+            "text": {
+              "description": "Condition statement.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Direction": {
+      "description": "Direction of a meaning.",
+      "oneOf": [
+        {
+          "const": "up",
+          "description": "Upwards.",
+          "type": "string"
+        },
+        {
+          "const": "down",
+          "description": "Downwards.",
+          "type": "string"
+        },
+        {
+          "const": "neutral",
+          "description": "No direction (e.g. a squeeze).",
+          "type": "string"
+        }
+      ]
+    },
+    "IntentState": {
+      "description": "(R5B, §25.5) Lifecycle state of a watch.",
+      "oneOf": [
+        {
+          "const": "active",
+          "description": "Matching.",
+          "type": "string"
+        },
+        {
+          "const": "matched",
+          "description": "Reached `max_matches`.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "The clock reached `expires_t`.",
+          "type": "string"
+        },
+        {
+          "const": "removed",
+          "description": "Removed by `remove_watch`.",
+          "type": "string"
+        }
+      ]
+    },
+    "MeaningKind": {
+      "description": "The six meaning kinds (K30). The glyph's shape encodes this.",
+      "oneOf": [
+        {
+          "const": "continuation",
+          "description": "Devam: the move goes on (trend, MA alignment, flag).",
+          "type": "string"
+        },
+        {
+          "const": "reversal",
+          "description": "Dönüş: the move may be turning (divergence, double top/bottom).",
+          "type": "string"
+        },
+        {
+          "const": "breakout",
+          "description": "Kırılım: a boundary was crossed (range, channel, support/resistance).",
+          "type": "string"
+        },
+        {
+          "const": "squeeze",
+          "description": "Sıkışma: the move is narrowing; direction unknown (band squeeze, low volatility).",
+          "type": "string"
+        },
+        {
+          "const": "extreme",
+          "description": "Aşırılık: unusual stretch (overbought/oversold, outside the band).",
+          "type": "string"
+        },
+        {
+          "const": "flow",
+          "description": "Akış: money in/out independent of price (volume, settlement, institutional flow).",
+          "type": "string"
+        }
+      ]
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Who produced an item, based on what, and when.",
+      "properties": {
+        "approved_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Author"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who approved it, when it entered the document through an accepted proposal\n(protocol: `accept_proposal`). Absent for direct writes."
+        },
+        "at": {
+          "description": "Production time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "author": {
+          "$ref": "#/$defs/Author",
+          "description": "Producer."
+        },
+        "based_on": {
+          "default": [],
+          "description": "Ids of the items this one is based on.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "author",
+        "at"
+      ],
+      "type": "object"
+    },
+    "Stage": {
+      "description": "Lifecycle stage of a capsule story (K28, K37):\n`candidate → born → strengthened | weakened → confirmed → realized | invalidated |\nexpired | retracted`.",
+      "oneOf": [
+        {
+          "const": "candidate",
+          "description": "Aday: seen on an open bar; only on the watching replica; never in the authority's\nlog or the ledger.",
+          "type": "string"
+        },
+        {
+          "const": "born",
+          "description": "Doğdu: finalized on bar close; the authority gave it an id.",
+          "type": "string"
+        },
+        {
+          "const": "strengthened",
+          "description": "Güçlendi: a new supporting fact of the same family.",
+          "type": "string"
+        },
+        {
+          "const": "weakened",
+          "description": "Zayıfladı: a fact against it, or its state weakened.",
+          "type": "string"
+        },
+        {
+          "const": "confirmed",
+          "description": "Teyit edildi: a second (or further) independent evidence family supports it.",
+          "type": "string"
+        },
+        {
+          "const": "realized",
+          "description": "Gerçekleşti: the outcome rule says it came true. Closes; ledger hit.",
+          "type": "string"
+        },
+        {
+          "const": "invalidated",
+          "description": "Geçersiz: its invalidation happened. Closes; ledger miss.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Süresi doldu: its natural life (in bars) ended without an outcome. Closes; ledger miss.",
+          "type": "string"
+        },
+        {
+          "const": "retracted",
+          "description": "Geri çekildi: the data it rested on proved wrong (K37). Closes; NOT in the ledger.",
+          "type": "string"
+        }
+      ]
+    },
+    "Watch": {
+      "additionalProperties": false,
+      "description": "(R5B, §25.5) A structured watch: whom it is for, what story transitions match, until\nwhen and how often.",
+      "properties": {
+        "expires_t": {
+          "description": "The watch expires when the clock reaches this time (epoch ms); never if absent.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "for": {
+          "description": "The person it is for (principal id).",
+          "type": "string"
+        },
+        "match": {
+          "$ref": "#/$defs/WatchMatch",
+          "description": "What matches."
+        },
+        "max_matches": {
+          "description": "The watch ends after this many matches; never if absent.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "for",
+        "match"
+      ],
+      "type": "object"
+    },
+    "WatchMatch": {
+      "additionalProperties": false,
+      "description": "(R5B, §25.5) What story transitions a watch matches. Every given field must hold.",
+      "properties": {
+        "direction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Direction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Only this direction."
+        },
+        "holdings": {
+          "description": "Only instruments the person holds (non-zero position in their audience).",
+          "type": "boolean"
+        },
+        "instrument": {
+          "description": "Only this instrument.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "meaning": {
+          "description": "Only these meaning kinds.",
+          "items": {
+            "$ref": "#/$defs/MeaningKind"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "negative": {
+          "description": "Only negative transitions (`weakened`, `invalidated`, `retracted`).",
+          "type": "boolean"
+        },
+        "stages": {
+          "description": "Only transitions to these stages.",
+          "items": {
+            "$ref": "#/$defs/Stage"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A persistent request left by the user, e.g. \"tell me if the uptrend breaks\".",
+  "properties": {
+    "active": {
+      "description": "Whether the intent is still active.",
+      "type": "boolean"
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "matches": {
+      "description": "(R5B, §25.5) How many times the watch matched.",
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "Who left it and when."
+    },
+    "state": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IntentState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "(R5B, §25.5) Lifecycle state of a watch (absent: an intent before R5B)."
+    },
+    "text": {
+      "description": "The request as the user said it.",
+      "type": "string"
+    },
+    "trigger": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Condition"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Machine-checkable trigger, if one could be derived."
+    },
+    "watch": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Watch"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "(R5B, §25.5) A structured watch on story transitions, matched by the engine."
+    }
+  },
+  "required": [
+    "id",
+    "text",
+    "active",
+    "provenance"
+  ],
+  "title": "Intent",
+  "type": "object"
+}

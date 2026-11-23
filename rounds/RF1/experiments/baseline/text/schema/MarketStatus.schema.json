@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "MarketSource": {
+      "description": "Where the market status came from.",
+      "oneOf": [
+        {
+          "const": "clock",
+          "description": "The exchange clock message (`mx/timestamp`, source `MX`): its open/holiday flags.",
+          "type": "string"
+        },
+        {
+          "const": "calendar",
+          "description": "No exchange clock: the exchange time is the price cards' update time and\nopen/holiday come from the exchange calendar (`qp-calendar`, XIST).",
+          "type": "string"
+        }
+      ]
+    },
+    "PhaseCode": {
+      "additionalProperties": false,
+      "description": "One instrument's session phase as the feed gives it (Matriks `stockStatus`).",
+      "properties": {
+        "code": {
+          "description": "The feed's code (`stockStatus`, e.g. 2). Never shown to the reader; the authority\ndoes not pass it to readers (0, not sent).",
+          "format": "int32",
+          "type": "integer"
+        },
+        "key": {
+          "description": "The phase's machine key (`continuous`, `closing_session`, …;\n`qp_matriks::status::SessionPhase::key`).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "(R6/T3, §24) What the host knows about the market now. An input of the authority\n(`Session::set_market_status`), next to — not instead of — the clock.",
+  "properties": {
+    "delayed": {
+      "description": "The feed is the delayed one (15 minutes).",
+      "type": "boolean"
+    },
+    "exchange_time": {
+      "description": "The exchange's time (UTC ms): the clock message's, else the newest price card's\nupdate time (15 minutes behind in delayed mode). While stale: the last data's.",
+      "format": "int64",
+      "type": "integer"
+    },
+    "holiday": {
+      "description": "Whether today is an exchange holiday (`None`: unknown).",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "open": {
+      "description": "Whether the equity market is open (`None`: unknown).",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "phases": {
+      "additionalProperties": {
+        "$ref": "#/$defs/PhaseCode"
+      },
+      "description": "Session phase by instrument symbol (as the price cards last gave it).",
+      "type": "object"
+    },
+    "source": {
+      "$ref": "#/$defs/MarketSource",
+      "description": "Where `open`/`holiday` came from."
+    },
+    "stale": {
+      "description": "The live connection is down (or stopped): the data is stale (`BindingState::Stale`).",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "exchange_time",
+    "source"
+  ],
+  "title": "MarketStatus",
+  "type": "object"
+}

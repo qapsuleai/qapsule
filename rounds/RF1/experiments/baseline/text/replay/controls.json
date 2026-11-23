@@ -1,0 +1,3 @@
+[{"at":5,"control":{"kind":"speed","steps_per_s":10}},
+ {"at":50,"control":{"kind":"seek","date":"2023-07-03"}},
+ {"at":120,"control":{"kind":"seek","step":30}}]

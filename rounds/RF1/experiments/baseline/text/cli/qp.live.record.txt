@@ -1,0 +1,14 @@
+Connect once (environment variables, `docs/DATA_ACCESS.md`), subscribe the clock and the price cards of `--symbols`, record every raw message under `fixtures/local/live/raw/` and print counts. Ends after `--seconds` or on halt
+
+Usage: qp live record [OPTIONS] --symbols <SYMBOLS>
+
+Options:
+      --symbols <SYMBOLS>  Comma-separated symbols (e.g. `THYAO,GARAN,ASELS`), or `@file` (one per line)
+      --seconds <SECONDS>  How long to stay connected [default: 60]
+      --out <OUT>          Output raw log; default `fixtures/local/live/raw/<UTC time>.qpraw`
+      --messenger          Also subscribe `mx/messenger` (broker notices)
+      --level <LEVEL>      Topic suffix: for the price card `@lvl2` (default) or empty for the bare topic; with `--trades` empty (default, level 1) or `@lvl0` — `@lvl2` is refused there
+      --trades             (RP4, K66) Connect to the trade endpoint (`/trade`, its own lock) instead of the market endpoint and subscribe `mx/trade/<SYM>` (level 1, no suffix). The raw log (`<UTC time>-trade.qpraw`) keeps no buyer / seller field
+      --tradeex            (RP4) With `--trades`: also the special (reported) trades `mx/tradeex/<SYM>`
+      --every <EVERY>      Print a status line every this many seconds [default: 10]
+  -h, --help               Print help

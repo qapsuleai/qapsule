@@ -1,0 +1,261 @@
+{
+  "$defs": {
+    "Author": {
+      "description": "Who produced an item.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A person.",
+          "properties": {
+            "kind": {
+              "const": "human",
+              "type": "string"
+            },
+            "name": {
+              "description": "Display name or user id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An AI agent.",
+          "properties": {
+            "kind": {
+              "const": "agent",
+              "type": "string"
+            },
+            "model": {
+              "description": "Model identifier, if known.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "description": "Agent name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The deterministic engine.",
+          "properties": {
+            "kind": {
+              "const": "engine",
+              "type": "string"
+            },
+            "name": {
+              "description": "Engine component name.",
+              "type": "string"
+            },
+            "version": {
+              "description": "Engine version.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name",
+            "version"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "CommentAbout": {
+      "additionalProperties": false,
+      "description": "(R5B, §25.4) What a comment is about: exactly one of a capsule (or its finding) and\nan instrument symbol.",
+      "properties": {
+        "capsule": {
+          "description": "Capsule id (or its finding's id).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrument": {
+          "description": "Instrument symbol.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "ExternalQuote": {
+      "additionalProperties": false,
+      "description": "A quotation from an external (named) source, e.g. a news item or a report.",
+      "properties": {
+        "quote": {
+          "description": "The quoted text.",
+          "type": "string"
+        },
+        "source": {
+          "description": "Who said it (e.g. `\"matriks:news/123\"`); must not be empty.",
+          "type": "string"
+        },
+        "values": {
+          "description": "The numbers taken from the quote; each must appear in `quote`.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "source",
+        "quote"
+      ],
+      "type": "object"
+    },
+    "Language": {
+      "description": "Language of capsule sentences (R3, §20).",
+      "oneOf": [
+        {
+          "const": "tr",
+          "description": "Turkish (default).",
+          "type": "string"
+        },
+        {
+          "const": "en",
+          "description": "English.",
+          "type": "string"
+        }
+      ]
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Who produced an item, based on what, and when.",
+      "properties": {
+        "approved_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Author"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who approved it, when it entered the document through an accepted proposal\n(protocol: `accept_proposal`). Absent for direct writes."
+        },
+        "at": {
+          "description": "Production time, epoch milliseconds UTC.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "author": {
+          "$ref": "#/$defs/Author",
+          "description": "Producer."
+        },
+        "based_on": {
+          "default": [],
+          "description": "Ids of the items this one is based on.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "author",
+        "at"
+      ],
+      "type": "object"
+    },
+    "Strictness": {
+      "description": "How strict the comment validator is (M30 a/b/c).",
+      "oneOf": [
+        {
+          "const": "cites",
+          "description": "(a) Citations exist and are visible; advice and licence checks.",
+          "type": "string"
+        },
+        {
+          "const": "cites_numbers",
+          "description": "(b) (a) + every number in the text is in the cited evidence or a named external\nsource.",
+          "type": "string"
+        },
+        {
+          "const": "per_sentence",
+          "description": "(c) (b) + every sentence that carries a number carries a citation marker `[n]`.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "(R5B, §25.4) A validated comment, as stored in the document.",
+  "properties": {
+    "about": {
+      "$ref": "#/$defs/CommentAbout",
+      "description": "What it is about (a capsule is stored by its capsule id)."
+    },
+    "cites": {
+      "description": "Ids it rests on.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "external": {
+      "description": "External quotes.",
+      "items": {
+        "$ref": "#/$defs/ExternalQuote"
+      },
+      "type": "array"
+    },
+    "id": {
+      "description": "Unique id within the document.",
+      "type": "string"
+    },
+    "lang": {
+      "$ref": "#/$defs/Language",
+      "description": "Language of the text."
+    },
+    "on_behalf": {
+      "description": "(R5B) The person the writing agent works for, if any.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance",
+      "description": "Who wrote it (an agent: `author.kind = \"agent\"`) and when."
+    },
+    "strictness": {
+      "$ref": "#/$defs/Strictness",
+      "description": "The strictness it was validated with."
+    },
+    "text": {
+      "description": "The text.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "about",
+    "lang",
+    "text",
+    "cites",
+    "strictness",
+    "provenance"
+  ],
+  "title": "Comment",
+  "type": "object"
+}

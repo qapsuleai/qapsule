@@ -1,0 +1,14 @@
+PASS c1-sentence
+PASS c2-capsule
+PASS c3-chart
+PASS c4-band
+PASS c5-points
+PASS d1-capsule
+PASS d2-chart
+PASS v0-r0
+PASS v1-three-panels
+PASS v2-bollinger-band
+PASS v3-fan
+PASS v4-log
+PASS v5-conditional
+13 transcript(s), 13 passed, 0 failed (inproc)

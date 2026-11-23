@@ -1,0 +1,14 @@
+(RP4/T2) Bars from the cached trades (M27 rules) as RP4 harness series (`fixtures/local/rp4/tradebars/full/<period>/<SYM>.bars`, `manifest.json`), with an optional check against the harness REST series (aggregate counts only)
+
+Usage: qp live export-trade-bars [OPTIONS]
+
+Options:
+      --symbols <SYMBOLS>              Symbols: comma-separated or `@file` [default: @fixtures/local/live/u100.txt]
+      --trades-dir <TRADES_DIR>        Trade cache [default: fixtures/local/trades]
+      --trades-ex-dir <TRADES_EX_DIR>  Special-trade cache (`trade_ex`) [default: fixtures/local/trades_ex]
+      --from <FROM>                    First local day [default: 2026-10-05]
+      --to <TO>                        Last local day [default: 2026-11-20]
+      --out <OUT>                      Output directory (`<out>/<period>/<SYM>.bars`, `<out>/manifest.json`) [default: fixtures/local/rp4/tradebars/full]
+      --check <CHECK>                  Harness series to check against (`<dir>/<period>/<SYM>.bars`, REST `full/`)
+      --check-from <CHECK_FROM>        First local day of the check (the test range) [default: 2026-10-19]
+  -h, --help                           Print help

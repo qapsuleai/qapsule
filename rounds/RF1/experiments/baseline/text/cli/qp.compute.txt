@@ -1,0 +1,17 @@
+Run a study (sma, ema, rsi, macd, bollinger) over a bar series and print the result as `StudyOutput` JSON: one value per bar, warmup `null` (K13)
+
+Usage: qp compute [OPTIONS] [INPUT]
+
+Arguments:
+  [INPUT]  Input: a bar series file (`Series` with embedded bars) or a `Document` (then pick the series with `--series`; default: the first series that has bars)
+
+Options:
+      --study <STUDY>       Study name
+      --param <NAME=VALUE>  Parameter `name=value` (repeatable); missing ones take their defaults
+      --field <FIELD>       Bar field the study reads [default: close]
+      --series <SERIES>     Series id inside a document input
+      --sweep <SWEEP>       Parameter sweep: a JSON file with an array of parameter objects; prints a JSON array with one `StudyOutput` per set (all bit-identical to single runs)
+  -o, --out <OUT>           Write the JSON here instead of stdout
+      --pretty              Pretty-print the JSON
+      --list                List the studies with their outputs and default parameters, then exit
+  -h, --help                Print help

@@ -248,3 +248,43 @@ tema maketleri ve kademe 2'de telefon profili de kısmen var). Bütçe yüzünde
 `blind.html` ile her ekran 5 saniye; "profesyonel araç mı" (E/H), "güvenir miyim" (1–5), üç açık soru;
 telefon görselleri (K5–K8, B3, B4) telefona. En az iki işlem yapan kullanıcı; kişi başı ≈ 10 dk;
 sonuçlar `human-test/RESULTS.md` (Arkin önce, kör değil, ayrı raporlanır).
+
+## 16. Doğrulama (VERIFY 1–15) — bağımsız denetimden (`AUDIT.md`, `5170305c`)
+
+| # | Sonuç |
+|---|---|
+| 1 | `verify.sh` 20/20 PASS (yeni `design` adımı dahil) |
+| 2 | arch-check 0 hata; qp-session 31.999 (değişmedi); qp-grammar 20.964 ≤ 21.000; taban çizgisi yalnız sıkılaştı |
+| 3 | var olan altın/döküm değişmedi; eklenen yalnız `fixtures/golden/demo/rd2-*` (9); kaldırılan döküm: RG1 tutanağındaki `mcp/adapter.jsonl` (üretilmiyor) |
+| 4 | `qp mcp` yalnız `serve`; `human_decision` 5/5 |
+| 5 | kabuk gzip 2.431.842 B ≤ 2.506.216 |
+| 6 | `recovered/*` 0; R3 deney derlemesi yok |
+| 7 | `design-check` `tavek`, `tavek-tel` iki temada PASS |
+| 8a | ADOPTED commit'i (`9e7c5bd4`) yön dallarından eski; kopya taraması temiz |
+| 8b | beceri var; taze ajan sınaması (Y22, `61323e9c`) PASS |
+| 8 | CONTRACT ↔ kayıt farkı 0 |
+| 9 | galeri: aynı veri, aynı boyut, DPR etiketli, başvuru yanda |
+| 10 | DECISION.md: ara karar ve son kabul Arkin'in sözleriyle, tarihli |
+| 11 | SURFACES Y01–Y37 eksiksiz |
+| 12 | kademe 1 tam, kademe 2 ana durum; renk taraması 0 |
+| 13 | E1 sayıları raporda; gri düzeltmesinden sonra eşikler tutuyor |
+| 14 | izlenen görsellerde başvuru ya da gerçek veri yok; `fixtures/local` izlenmiyor |
+| 15 | `git worktree list` yalnız ana ağaç; `target/` temizlendi (aşağıda); belgeler güncel |
+
+Denetim KOŞULLU KABUL; koşullar (P8/P9 ölçüm notu CONTRACT'ta, STATUS, rapor başlığı, A66 sayısı,
+A69 trafik bütçesi, kapanış temizliği) `8d73cb75` ve bu bölümle karşılandı.
+
+## 17. Disk (K56, K68)
+
+**Silinenler:** `target/` 50 GB → 0 (`clean.sh --deep`: `cargo clean` 25,4 GiB, `target/debug/incremental`
+18 GB, `target/wt/rd2-polish` 12 GB, flycheck, wasm-replica); round boyunca iş başına derleme klasörleri
+(`target/wt/audit-*`, `rd2-*`; her biri 12–14 GB, iş bitince silindi); `rounds/R3/experiments/harness/target/`
+140 MB; 24 `recovered/*` dalı; bütün RD2 worktree'leri (`.claude/worktrees/rd2-*`; Cursor/Finder açık olduğu
+için birkaçı ikinci denemede); oturum klasörü (gerçek veriyle üretilmiş galeri dahil); `scripts/archcheck/__pycache__`.
+**Bilerek bırakılanlar:** dallar (`rd2/*`; elenen yönler `rd2/y-a` `sakel`, `rd2/y-c` `ravek`; galeri dalı
+`rd2/gallery-all`); `shells/web/pkg/` ve `shells/web-spike/pkg/` (ignored, gösterim için); `node_modules`
+(ana ağaç); `rounds/RD2/experiments/E1/` (1,1 MB, kanıt; tek dosya ≤ 1 MB). **Sorulan:** depo dışında
+`$TMPDIR` altında üç Playwright klasörü (14 ve 16 Kasım, bu round'dan önce) — silinsin mi?
+**Kalan boyutlar:** `target/` 0 (sonraki `verify.sh` baştan derler); `.claude/worktrees/` boş;
+`fixtures/local/` 1,5 GB (bütçe içinde); depo toplamı 2,1 GB; depo dışı oturum klasörü boş.
+`git status --porcelain --ignored`: beklenmeyen artık yok.

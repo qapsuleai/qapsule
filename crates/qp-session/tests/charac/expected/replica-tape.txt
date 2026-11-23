@@ -1,0 +1,9 @@
+# charac/replica-tape: today's output (RF1/S1); a refactor keeps every line
+tape.lag0  c77f87505277bcc2  | steps=186 differing=0 final_claims=9 shown_final=9 shown=(973, 0, 58, 0) violations=[]
+tape.lag0.last  84d9132b74b940a6  | doc=832528870cf6c127 view=8a04abbca67e3bdd
+tape.lag3  d769070c3ca99bc5  | steps=189 differing=188 final_claims=9 shown_final=9 shown=(973, 0, 88, 0) violations=[]
+tape.lag3.last  84d9132b74b940a6  | doc=832528870cf6c127 view=8a04abbca67e3bdd
+tape.lag25  aaf5a80d90ab6b0b  | steps=211 differing=210 final_claims=9 shown_final=9 shown=(973, 0, 308, 0) violations=[]
+tape.lag25.last  84d9132b74b940a6  | doc=832528870cf6c127 view=8a04abbca67e3bdd
+viewer.lag0  -  | steps=186 differing=0 final_claims=4 shown_final=4 foreign=0 shown=(380, 0, 19, 0) violations=0
+viewer.lag25  -  | steps=211 differing=210 final_claims=4 shown_final=4 foreign=0 shown=(380, 0, 119, 0) violations=0

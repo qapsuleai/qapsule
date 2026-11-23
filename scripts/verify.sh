@@ -60,7 +60,12 @@
 #  19 arch       RG1 (docs/ENGINEERING.md): scripts/arch-check --self-test (known violations
 #                are caught, the ratchet works) and scripts/arch-check (layers, size budgets,
 #                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json)
-#  20 design     RD2/S1: scripts/design-check: P1–P13 (../refs/reports/VISUAL.md §5) and R5's
+#  20 config     RF1/A2 (K-9): scripts/arch-check --config-diff prints the diff of
+#                scripts/arch-config.json and scripts/arch-baseline.json against main (merge
+#                base; on main $QP_CONFIG_BASE or the round's baseline commit) and fails on a
+#                new exception, generated file or loosened budget/baseline value that cites
+#                no decision (K<n> / DECISION.md); skipped when git has no such base (shallow)
+#  21 design     RD2/S1: scripts/design-check: P1–P13 (../refs/reports/VISUAL.md §5) and R5's
 #                hard thresholds for every registered non-legacy look in both schemes (legacy
 #                looks are printed, never failing), and the value tables of
 #                docs/design/CONTRACT.md equal the look record (scripts/design-contract --check)
@@ -571,6 +576,15 @@ step_arch() {
   note "self-test passes; no error outside the debt baseline"
 }
 
+step_config() {
+  command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/arch-check needs it)"
+  local rc=0
+  scripts/arch-check --config-diff || rc=$?
+  [ "$rc" -ne 2 ] || skip "no base revision for the config diff (shallow clone?)"
+  [ "$rc" -eq 0 ] || fail "a loosening in arch-config.json / arch-baseline.json cites no decision"
+  note "config/baseline diff against main printed; only tightening or cited loosening"
+}
+
 step_design() {
   command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/design-contract needs it)"
   scripts/design-check || fail "design check failed (scripts/design-check)"
@@ -599,6 +613,7 @@ run_step replay step_replay
 run_step shell step_shell
 run_step demo step_demo
 run_step arch step_arch
+run_step config step_config
 run_step design step_design
 total=$((SECONDS - total_start))
 

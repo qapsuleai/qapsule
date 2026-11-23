@@ -1,9 +1,10 @@
 //! (RD2/S1) The design check: P1–P13 of `../refs/reports/VISUAL.md` §5 and R5's hard
 //! thresholds (H1–H3, `docs/DESIGN.md` §1.6) measured for a look, in both schemes, from
-//! the look record and the compiled design fixture (`fixtures/design/desk.json`).
+//! the look record and the compiled design fixtures (`fixtures/design/desk.json`; P8's
+//! drawn glyph: `desk-marks.json`), and P9 from the committed Ç1 mockup (`layout.rs`).
 //!
 //! `scripts/design-check [--look <name>] [--layout <file>]` runs this with
-//! `QP_DESIGN_LOOK` / `QP_DESIGN_LAYOUT`. Without a look: every registered non-legacy
+//! `QP_DESIGN_LOOK` / `QP_DESIGN_LAYOUT` (a gallery dump overriding P9's measurement). Without a look: every registered non-legacy
 //! look is checked, and `oltan` and `r4` are printed for comparison. The test fails only
 //! when a non-legacy look fails a rule. Thresholds: `thresholds.rs`.
 
@@ -18,7 +19,9 @@
 mod alphabet;
 mod color;
 mod grounds;
+mod layout;
 mod levels;
+mod marks;
 mod record;
 mod scene;
 mod thresholds;
@@ -76,10 +79,24 @@ impl Row {
     }
 }
 
-/// Every row for `look` (`layout`: the gallery rig's layout dump, for P9).
-fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Value>) -> Vec<Row> {
+/// The design fixtures: the desk (`desk.json`) and the marks (`desk-marks.json`).
+pub struct Fixtures {
+    pub desk: scene::Fixture,
+    pub marks: marks::Marks,
+}
+
+fn fixtures() -> Fixtures {
+    Fixtures {
+        desk: scene::fixture(),
+        marks: marks::fixture(),
+    }
+}
+
+/// Every row for `look` (`layout`: a gallery layout dump overriding P9's measurement).
+fn rows(look: &'static Look, fxs: &Fixtures, layout: Option<&serde_json::Value>) -> Vec<Row> {
+    let fx = &fxs.desk;
     let mut out = vec![
-        record::p9(layout),
+        layout::p9(look, fx, layout),
         record::p10(look),
         record::p11(look),
         record::p12(look),
@@ -89,6 +106,7 @@ fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Va
         let (dw, dh) = thresholds::DESK;
         let desk = fx.scene(look, s, dw, dh);
         let phone = fx.scene(look, s, thresholds::P5_WIDTH, thresholds::PHONE_H);
+        let marks = fxs.marks.scene(look, s);
         let plot = fx.price_only(look, s, thresholds::P5_WIDTH, thresholds::P4_PLOT_H);
         let lv_desk = fx.scene_of(&fx.levels, look, s, dw, dh);
         let lv_phone = fx.scene_of(
@@ -106,7 +124,7 @@ fn rows(look: &'static Look, fx: &scene::Fixture, layout: Option<&serde_json::Va
             scene::p5(&phone, look, s),
             scene::p6(&[&desk, &lv_desk], &[&phone, &lv_phone], s),
             scene::p7(&desk, look, s),
-            scene::p8(&desk, look, s),
+            scene::p8(&desk, &marks, look, s),
             record::p13(t),
             grounds::h1(look, t),
             grounds::h2(look, t),
@@ -174,7 +192,7 @@ fn design_check() {
             .chain(["oltan", "r4"].iter().filter_map(|n| by_name(Some(n)).ok()))
             .collect(),
     };
-    let fx = scene::fixture();
+    let fx = fixtures();
     let mut failed = Vec::new();
     for l in looks {
         let r = rows(l, &fx, layout.as_ref());
@@ -218,7 +236,12 @@ fn profiles_select_their_thresholds() {
     let mut round = TRIAL;
     round.surface.card_radius = 16.0;
     assert_eq!(record::p12(&round).res, Res::Fail);
-    assert_eq!(record::p9(None).res, Res::Na);
+    let fx = scene::fixture();
+    let tel = by_name(Some("tavek-tel")).unwrap();
+    assert_eq!(layout::p9(tel, &fx, None).res, Res::Na);
+    let dump = serde_json::json!({"regions": 3, "chart_panes": 3, "legend_numbers": 7});
+    let tavek = by_name(Some("tavek")).unwrap();
+    assert_eq!(layout::p9(tavek, &fx, Some(&dump)).res, Res::Fail);
 }
 
 /// A non-legacy look with deliberately bad values fails the check (and the same record as
@@ -238,8 +261,7 @@ fn a_bad_non_legacy_look_fails() {
     let mut bad = BAD;
     bad.dark.down = bad.dark.up;
     let bad: &'static Look = Box::leak(Box::new(bad));
-    let fx = scene::fixture();
-    let r = rows(bad, &fx, None);
+    let r = rows(bad, &fixtures(), None);
     let failed = |id: &str| r.iter().any(|x| x.id == id && x.res == Res::Fail);
     assert!(failed("P4") && failed("P8") && failed("H3"), "{r:#?}");
     assert!(fails(bad, &r));

@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 use qp_compute::Field;
 use qp_grammar::look::{font, Look, Profile, DEFAULT_FONT, FONTS};
 use qp_grammar::{compile, CompileOptions, Cursor, MemProvider};
-use qp_schema::grammar::{Mark, View};
+use qp_schema::grammar::View;
 use qp_schema::protocol::Language;
 use qp_schema::scene::{Align, PixelRect, Prim, SceneDesc};
 use serde_json::Value;
@@ -25,7 +25,7 @@ pub struct Fixture {
     provider: MemProvider,
 }
 
-fn read(rel: &str) -> Value {
+pub fn read(rel: &str) -> Value {
     let p = format!("{}/../../{rel}", env!("CARGO_MANIFEST_DIR"));
     let text = std::fs::read_to_string(&p).unwrap_or_else(|e| panic!("{p}: {e}"));
     serde_json::from_str(&text).unwrap_or_else(|e| panic!("{p}: {e}"))
@@ -139,6 +139,15 @@ impl Fixture {
             price: None,
         });
         compile(view, &self.provider, &o).expect("the design fixture compiles")
+    }
+
+    /// (RF1/Ö) The view as the gallery's P9 dump compiles it (`qp scene --look --roles`):
+    /// the look's default scheme, no pointer.
+    pub fn layout_scene(&self, look: &'static Look, w: u32, h: u32) -> SceneDesc {
+        let mut o = CompileOptions::new(w, h);
+        o.look_record = Some(look);
+        o.roles = true;
+        compile(&self.view, &self.provider, &o).expect("the design fixture compiles")
     }
 
     /// The view in `look` (dark) for an English reader.
@@ -494,23 +503,20 @@ fn crosshair(s: &SceneDesc) -> bool {
     dashes.values().any(|n| *n >= 3) && figures >= 2 && date
 }
 
-/// P8: on-plot semantic marks (the look's cap and any glyph drawn in the scene).
-pub fn p8(s: &SceneDesc, look: &Look, scheme: &'static str) -> Row {
-    let drawn = s
-        .panels
-        .iter()
-        .flat_map(|p| &p.layers)
-        .filter(|l| l.mark == Mark::Glyph)
-        .flat_map(|l| &l.items)
-        .map(|i| f64::from(i.hit.bottom - i.hit.top))
-        .fold(0.0, f64::max);
+/// P8: on-plot semantic marks: the look's cap, and the tallest glyph drawn in the desk
+/// scene and in the `desk-marks` scene (RF1/Ö: the desk draws none; the marks fixture
+/// must draw at least one, or the drawn half is not measured and the row fails).
+pub fn p8(desk: &SceneDesc, marks: &SceneDesc, look: &Look, scheme: &'static str) -> Row {
+    let (_, in_desk) = crate::marks::drawn(desk);
+    let (n, in_marks) = crate::marks::drawn(marks);
+    let drawn = in_desk.max(in_marks);
     let cap = look.chart.mark_max_px;
     Row::check(
         "P8",
         scheme,
-        "on-plot mark height px (record / drawn)",
-        format!("{cap} / {drawn}"),
-        format!("<= {}", th::P8_MARK_MAX),
-        cap <= th::P8_MARK_MAX && drawn <= th::P8_MARK_MAX,
+        "on-plot mark height px (record / drawn, desk + desk-marks)",
+        format!("{cap} / {drawn} ({n} glyph)"),
+        format!("<= {} / >= 1 glyph", th::P8_MARK_MAX),
+        cap <= th::P8_MARK_MAX && drawn <= th::P8_MARK_MAX && n >= 1,
     )
 }

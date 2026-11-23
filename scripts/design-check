@@ -5,11 +5,15 @@
 #   scripts/design-check                    every registered non-legacy look (oltan, r4
 #                                           printed for comparison, never failing)
 #   scripts/design-check --look <name>      one look
-#   scripts/design-check --layout <file>    desktop layout dump for P9 (gallery rig):
+#   scripts/design-check --layout <file>    P9 from a gallery layout dump instead of the
+#                                           browser-free measurement (scripts/design-gallery
+#                                           layout-<look>.json):
 #                                           {"regions": n, "chart_panes": n, "legend_numbers": n}
 #
 # Measures: crates/qp-grammar/tests/design_check (thresholds in thresholds.rs; the
-# fixture fixtures/design/desk.json, which must pass `qp conform`). Then
+# fixtures fixtures/design/desk.json and, for P8's drawn glyph, desk-marks.json, which
+# must pass `qp conform`; P9 from the committed Ç1 mockup's regions and the desk scene,
+# no browser; a touch look: n.a.). Then
 # scripts/design-contract --check: the tables in docs/design/CONTRACT.md equal the look
 # record. Exit 1 only if a non-legacy look fails
 # a rule or the contract tables differ.
@@ -24,7 +28,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --look) look="${2:?--look needs a name}"; shift 2 ;;
     --layout) layout="${2:?--layout needs a file}"; shift 2 ;;
-    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,19p' "$0"; exit 0 ;;
     *) echo "design-check: unknown argument $1" >&2; exit 2 ;;
   esac
 done
@@ -33,7 +37,7 @@ if [ -n "$layout" ]; then
 fi
 
 rc=0
-# The fixture is a protocol transcript: it must keep passing `qp conform`.
+# The fixtures are protocol transcripts: they must keep passing `qp conform`.
 cargo run -q --release -p qp-cli -- conform fixtures/design || rc=1
 out="$(QP_DESIGN_LOOK="$look" QP_DESIGN_LAYOUT="$layout" \
   cargo test -q -p qp-grammar --test design_check -- --nocapture --test-threads 1 2>&1)" || rc=1

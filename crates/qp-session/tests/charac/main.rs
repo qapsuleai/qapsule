@@ -21,6 +21,7 @@ mod opcase;
 mod ops_doc;
 mod ops_flow;
 mod order;
+mod replica;
 mod rig;
 mod snap;
 mod transcripts;

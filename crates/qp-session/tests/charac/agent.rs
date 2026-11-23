@@ -18,44 +18,146 @@ fn samples() -> Vec<(&'static str, Value)> {
         "layers":[{"mark":"candle","series":"px","panel":0}]});
     let cond = json!({"kind":"threshold","series":"px","op":"lt","value":100.0});
     vec![
-        ("put_series", json!({"op":"put_series","series":{"id":"e9","source":{"kind":"study","study":"ema","inputs":["px"]}}})),
-        ("add_study", json!({"op":"add_study","study":"ema","inputs":["px"]})),
-        ("add_study_existing", json!({"op":"add_study","id":"rsi14","study":"rsi","inputs":["px"]})),
-        ("set_params", json!({"op":"set_params","series":"rsi14","params":{"period":9}})),
+        (
+            "put_series",
+            json!({"op":"put_series","series":{"id":"e9","source":{"kind":"study","study":"ema","inputs":["px"]}}}),
+        ),
+        (
+            "add_study",
+            json!({"op":"add_study","study":"ema","inputs":["px"]}),
+        ),
+        (
+            "add_study_existing",
+            json!({"op":"add_study","id":"rsi14","study":"rsi","inputs":["px"]}),
+        ),
+        (
+            "set_params",
+            json!({"op":"set_params","series":"rsi14","params":{"period":9}}),
+        ),
         ("put_view", json!({"op":"put_view","view":view})),
-        ("add_layer", json!({"op":"add_layer","view":"main","layer":{"mark":"line","series":"px","panel":0}})),
-        ("remove_layer", json!({"op":"remove_layer","view":"main","index":4})),
-        ("set_view_range", json!({"op":"set_view_range","view":"main","from_bar":150,"to_bar":199})),
-        ("add_fact", json!({"op":"add_fact","kind":"note","series":"px","bar":3,"text":"t"})),
-        ("add_finding", json!({"op":"add_finding","claim":"c","facts":["fact-rsi-cross70"],"confidence":0.5,"invalidation":cond})),
-        ("update_finding", json!({"op":"update_finding","finding":"fnd-overbought","confidence":0.7})),
-        ("approve_finding", json!({"op":"approve_finding","finding":"fnd-overbought"})),
-        ("reject_finding", json!({"op":"reject_finding","finding":"fnd-overbought"})),
+        (
+            "add_layer",
+            json!({"op":"add_layer","view":"main","layer":{"mark":"line","series":"px","panel":0}}),
+        ),
+        (
+            "remove_layer",
+            json!({"op":"remove_layer","view":"main","index":4}),
+        ),
+        (
+            "set_view_range",
+            json!({"op":"set_view_range","view":"main","from_bar":150,"to_bar":199}),
+        ),
+        (
+            "add_fact",
+            json!({"op":"add_fact","kind":"note","series":"px","bar":3,"text":"t"}),
+        ),
+        (
+            "add_finding",
+            json!({"op":"add_finding","claim":"c","facts":["fact-rsi-cross70"],"confidence":0.5,"invalidation":cond}),
+        ),
+        (
+            "update_finding",
+            json!({"op":"update_finding","finding":"fnd-overbought","confidence":0.7}),
+        ),
+        (
+            "approve_finding",
+            json!({"op":"approve_finding","finding":"fnd-overbought"}),
+        ),
+        (
+            "reject_finding",
+            json!({"op":"reject_finding","finding":"fnd-overbought"}),
+        ),
         ("add_intent", json!({"op":"add_intent","text":"t"})),
-        ("set_intent_active", json!({"op":"set_intent_active","intent":"i1","active":false})),
-        ("add_watch", json!({"op":"add_watch","text":"t","match":{"instrument":"THYAO"}})),
-        ("add_comment", json!({"op":"add_comment","about":{"capsule":"cap-overbought"},"lang":"tr","text":"RSI yüksek","cites":["fnd-overbought"]})),
-        ("add_narrative", json!({"op":"add_narrative","about":"fnd-overbought","steps":[{"at_ms":0,"target":{"view":"main"},"say":"s"}]})),
-        ("show_finding", json!({"op":"show_finding","finding":"fnd-overbought"})),
-        ("insert_layer", json!({"op":"insert_layer","view":"main","layer":{"mark":"line","series":"px","panel":0,"encoding":{"y":"c"}}})),
-        ("delete_layer", json!({"op":"delete_layer","view":"main","layer":"l1"})),
-        ("split_layer", json!({"op":"split_layer","view":"main","layer":"l1"})),
-        ("move_layer", json!({"op":"move_layer","view":"main","layer":"l4","before":"l0"})),
-        ("set_encoding", json!({"op":"set_encoding","view":"main","layer":"l1","encoding":{"width":2}})),
-        ("insert_panel", json!({"op":"insert_panel","view":"main","panel":{"y":{"kind":"linear"}}})),
-        ("delete_panel", json!({"op":"delete_panel","view":"main","panel":2})),
-        ("move_panel", json!({"op":"move_panel","view":"main","panel":2,"before":0})),
-        ("set_panel", json!({"op":"set_panel","view":"main","panel":1,"weight":2})),
-        ("set_scale", json!({"op":"set_scale","view":"main","scale":"y0","kind":"log"})),
-        ("set_emphasis", json!({"op":"set_emphasis","view":"main","emphasis":[{"target":{"layer":"l2"},"kind":"focus"}]})),
+        (
+            "set_intent_active",
+            json!({"op":"set_intent_active","intent":"i1","active":false}),
+        ),
+        (
+            "add_watch",
+            json!({"op":"add_watch","text":"t","match":{"instrument":"THYAO"}}),
+        ),
+        (
+            "add_comment",
+            json!({"op":"add_comment","about":{"capsule":"cap-overbought"},"lang":"tr","text":"RSI yüksek","cites":["fnd-overbought"]}),
+        ),
+        (
+            "add_narrative",
+            json!({"op":"add_narrative","about":"fnd-overbought","steps":[{"at_ms":0,"target":{"view":"main"},"say":"s"}]}),
+        ),
+        (
+            "show_finding",
+            json!({"op":"show_finding","finding":"fnd-overbought"}),
+        ),
+        (
+            "insert_layer",
+            json!({"op":"insert_layer","view":"main","layer":{"mark":"line","series":"px","panel":0,"encoding":{"y":"c"}}}),
+        ),
+        (
+            "delete_layer",
+            json!({"op":"delete_layer","view":"main","layer":"l1"}),
+        ),
+        (
+            "split_layer",
+            json!({"op":"split_layer","view":"main","layer":"l1"}),
+        ),
+        (
+            "move_layer",
+            json!({"op":"move_layer","view":"main","layer":"l4","before":"l0"}),
+        ),
+        (
+            "set_encoding",
+            json!({"op":"set_encoding","view":"main","layer":"l1","encoding":{"width":2}}),
+        ),
+        (
+            "insert_panel",
+            json!({"op":"insert_panel","view":"main","panel":{"y":{"kind":"linear"}}}),
+        ),
+        (
+            "delete_panel",
+            json!({"op":"delete_panel","view":"main","panel":2}),
+        ),
+        (
+            "move_panel",
+            json!({"op":"move_panel","view":"main","panel":2,"before":0}),
+        ),
+        (
+            "set_panel",
+            json!({"op":"set_panel","view":"main","panel":1,"weight":2}),
+        ),
+        (
+            "set_scale",
+            json!({"op":"set_scale","view":"main","scale":"y0","kind":"log"}),
+        ),
+        (
+            "set_emphasis",
+            json!({"op":"set_emphasis","view":"main","emphasis":[{"target":{"layer":"l2"},"kind":"focus"}]}),
+        ),
         ("remove", json!({"op":"remove","id":"macd"})),
-        ("append_bars", json!({"op":"append_bars","series":"px","bars":[bar]})),
-        ("update_last_bar", json!({"op":"update_last_bar","series":"px","bar":{"t":LAST_T,"o":125.26,"h":127.0,"l":124.47,"c":126.5,"v":1.0}})),
+        (
+            "append_bars",
+            json!({"op":"append_bars","series":"px","bars":[bar]}),
+        ),
+        (
+            "update_last_bar",
+            json!({"op":"update_last_bar","series":"px","bar":{"t":LAST_T,"o":125.26,"h":127.0,"l":124.47,"c":126.5,"v":1.0}}),
+        ),
         ("undo", json!({"op":"undo"})),
-        ("accept_proposal", json!({"op":"accept_proposal","proposal":"prop-1"})),
-        ("reject_proposal", json!({"op":"reject_proposal","proposal":"prop-1"})),
-        ("set_audience", json!({"op":"set_audience","audience":{"group":"future"}})),
-        ("set_sensitivity", json!({"op":"set_sensitivity","sensitivity":"all"})),
+        (
+            "accept_proposal",
+            json!({"op":"accept_proposal","proposal":"prop-1"}),
+        ),
+        (
+            "reject_proposal",
+            json!({"op":"reject_proposal","proposal":"prop-1"}),
+        ),
+        (
+            "set_audience",
+            json!({"op":"set_audience","audience":{"group":"future"}}),
+        ),
+        (
+            "set_sensitivity",
+            json!({"op":"set_sensitivity","sensitivity":"all"}),
+        ),
     ]
 }
 
@@ -91,7 +193,10 @@ fn matrix(book: &mut Book, init: &Value, mark: bool, writers: &[(&str, &str)]) {
             for mode in ["auto", "direct", "propose"] {
                 let mut r = rig(init, mark);
                 let before = r.log_len();
-                let out = r.send(c, &json!({"type":"command","id":"c","mode":mode,"ops":[op.clone()]}));
+                let out = r.send(
+                    c,
+                    &json!({"type":"command","id":"c","mode":mode,"ops":[op.clone()]}),
+                );
                 record(book, &format!("{name}.{who}.{mode}"), &r, before, &out);
             }
         }
@@ -111,12 +216,21 @@ fn charac_session_agent_policy_r5b() {
     matrix(&mut book, &init, false, &WRITERS);
     // Mixed classes in one command; a direct op beside a proposal-only one.
     for (name, ops) in [
-        ("mixed.watch_view", json!([{"op":"add_watch","text":"t","match":{"instrument":"THYAO"}},
-            {"op":"set_view_range","view":"main","from_bar":150,"to_bar":199}])),
-        ("mixed.view_fact", json!([{"op":"set_view_range","view":"main","from_bar":150,"to_bar":199},
-            {"op":"add_fact","kind":"note","series":"px","bar":3,"text":"t"}])),
-        ("mixed.views", json!([{"op":"set_view_range","view":"main","from_bar":150,"to_bar":199},
-            {"op":"set_scale","view":"main","scale":"y0","kind":"log"}])),
+        (
+            "mixed.watch_view",
+            json!([{"op":"add_watch","text":"t","match":{"instrument":"THYAO"}},
+            {"op":"set_view_range","view":"main","from_bar":150,"to_bar":199}]),
+        ),
+        (
+            "mixed.view_fact",
+            json!([{"op":"set_view_range","view":"main","from_bar":150,"to_bar":199},
+            {"op":"add_fact","kind":"note","series":"px","bar":3,"text":"t"}]),
+        ),
+        (
+            "mixed.views",
+            json!([{"op":"set_view_range","view":"main","from_bar":150,"to_bar":199},
+            {"op":"set_scale","view":"main","scale":"y0","kind":"log"}]),
+        ),
     ] {
         let mut r = rig(&init, false);
         let before = r.log_len();
@@ -139,7 +253,11 @@ fn charac_session_agent_marked_connection() {
     let mut r = rig(&init, false);
     r.session_mut().mark_agent_connection("a");
     let before = r.log_len();
-    let out = r.cmd("a", "c", json!([{"op":"accept_proposal","proposal":"prop-1"}]));
+    let out = r.cmd(
+        "a",
+        "c",
+        json!([{"op":"accept_proposal","proposal":"prop-1"}]),
+    );
     record(&mut book, "owner_marked.accept", &r, before, &out);
     book.note(
         "marks",

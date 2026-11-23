@@ -42,7 +42,9 @@ impl Rig {
     /// The `thyao` example init (owner `arkin`, proposer agent `scout`, editor agent
     /// `editor`, `viewer`, `feed`, `host`).
     pub fn thyao() -> Self {
-        Self::with(qp_session::read_json(&root().join("fixtures/protocol/init/thyao.json")).unwrap())
+        Self::with(
+            qp_session::read_json(&root().join("fixtures/protocol/init/thyao.json")).unwrap(),
+        )
     }
 
     /// An init given as JSON.
@@ -102,8 +104,14 @@ impl Rig {
     /// A data event that may be refused: the lines, or the refusal's text.
     pub fn data_try(&mut self, ev: &DataEvent) -> Result<Vec<Value>, String> {
         match &mut self.t {
-            Target::S(s) => s.data_event(ev).map(|l| lines(&l)).map_err(|e| format!("{e}")),
-            Target::R(r) => r.data_event(ev).map(|l| lines(&l)).map_err(|e| format!("{e}")),
+            Target::S(s) => s
+                .data_event(ev)
+                .map(|l| lines(&l))
+                .map_err(|e| format!("{e}")),
+            Target::R(r) => r
+                .data_event(ev)
+                .map(|l| lines(&l))
+                .map_err(|e| format!("{e}")),
         }
     }
 
@@ -124,10 +132,6 @@ impl Rig {
 
     pub fn query(&mut self, conn: &str, id: &str, q: Value) -> Vec<Value> {
         self.send(conn, &json!({"type":"query","id":id,"query":q}))
-    }
-
-    pub fn clock(&mut self, conn: &str, now: i64) -> Vec<Value> {
-        self.send(conn, &json!({"type":"clock","now":now}))
     }
 
     pub fn log_len(&self) -> usize {
@@ -158,10 +162,4 @@ impl Rig {
         );
         (d, sum)
     }
-}
-
-/// A feed bar event on `bist/THYAO/1d`.
-pub fn bar_ev(seq: u64, bar: &Value) -> Value {
-    json!({"feed":{"symbol":"THYAO","interval":"1d","feed":"bist"},"seq":seq,
-        "change":{"kind":"bar","bar":bar}})
 }

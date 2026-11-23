@@ -91,7 +91,11 @@ fn charac_session_order_commands() {
         .push(json!({"id":"viewer","author":{"kind":"human","name":"viewer"},"role":"viewer"}));
     let mut r = Run::new(&mut book, "cmd", Rig::json(init));
     // Open: before hello, a bad hello, then four principals (and arkin twice).
-    r.send("before_hello", "x", json!({"type":"query","id":"q","query":{"kind":"describe"}}));
+    r.send(
+        "before_hello",
+        "x",
+        json!({"type":"query","id":"q","query":{"kind":"describe"}}),
+    );
     r.hello("a", "arkin", "desktop");
     r.hello("a2", "arkin", "phone");
     r.hello("v", "viewer", "phone");
@@ -101,7 +105,11 @@ fn charac_session_order_commands() {
     let cond = json!({"kind":"threshold","series":"px","op":"lt","value":100.0});
     for c in ["a", "a2", "v", "s", "e"] {
         r.sub(c, "ch", json!({"kind":"changes"}));
-        r.sub(c, "fi", json!({"kind":"finding","finding":"fnd-overbought"}));
+        r.sub(
+            c,
+            "fi",
+            json!({"kind":"finding","finding":"fnd-overbought"}),
+        );
         r.sub(c, "co", json!({"kind":"condition","condition":cond}));
         r.sub(c, "pr", json!({"kind":"proposals"}));
         r.sub(c, "in", json!({"kind":"intents"}));
@@ -112,43 +120,115 @@ fn charac_session_order_commands() {
     r.sub("v", "bad", json!({"kind":"finding","finding":"nope"}));
     r.sub("v", "ch", json!({"kind":"changes"}));
     // Commands.
-    r.cmd("intent", "a", json!([{"op":"add_intent","id":"i-low","text":"düşerse","trigger":cond}]));
-    r.cmd("inval", "a", json!([{"op":"update_finding","finding":"fnd-overbought","invalidation":cond}]));
-    r.cmd("params", "e", json!([{"op":"set_params","series":"rsi14","params":{"period":21}}]));
-    r.cmd("prop1", "s", json!([{"op":"set_params","series":"rsi14","params":{"period":9}}]));
+    r.cmd(
+        "intent",
+        "a",
+        json!([{"op":"add_intent","id":"i-low","text":"düşerse","trigger":cond}]),
+    );
+    r.cmd(
+        "inval",
+        "a",
+        json!([{"op":"update_finding","finding":"fnd-overbought","invalidation":cond}]),
+    );
+    r.cmd(
+        "params",
+        "e",
+        json!([{"op":"set_params","series":"rsi14","params":{"period":21}}]),
+    );
+    r.cmd(
+        "prop1",
+        "s",
+        json!([{"op":"set_params","series":"rsi14","params":{"period":9}}]),
+    );
     r.cmd("prop2", "s", json!([{"op":"add_intent","text":"öneri"}]));
-    r.cmd("accept", "a", json!([{"op":"accept_proposal","proposal":"prop-4"}]));
+    r.cmd(
+        "accept",
+        "a",
+        json!([{"op":"accept_proposal","proposal":"prop-4"}]),
+    );
     r.cmd("viewer_write", "v", json!([{"op":"add_intent","text":"x"}]));
     // The clock: nothing, then proposal expiry.
     r.send("clock_30s", "h", json!({"type":"clock","now":T0 + 30_000}));
-    r.cmd("prop3", "s", json!([{"op":"add_intent","text":"süresi dolacak"}]));
+    r.cmd(
+        "prop3",
+        "s",
+        json!([{"op":"add_intent","text":"süresi dolacak"}]),
+    );
     r.send("clock_61s", "h", json!({"type":"clock","now":T0 + 61_000}));
-    r.send("clock_200s", "h", json!({"type":"clock","now":T0 + 200_000}));
+    r.send(
+        "clock_200s",
+        "h",
+        json!({"type":"clock","now":T0 + 200_000}),
+    );
     r.send("clock_back", "h", json!({"type":"clock","now":T0}));
-    r.send("clock_by_owner", "a", json!({"type":"clock","now":T0 + 300_000}));
+    r.send(
+        "clock_by_owner",
+        "a",
+        json!({"type":"clock","now":T0 + 300_000}),
+    );
     // The live path: an appended bar under 100 invalidates the capsule, meets the
     // condition and triggers the intent.
-    r.cmd("bar_low", "a", json!([{"op":"append_bars","series":"px","bars":[
-        {"t":1_759_968_000_000_i64,"o":124.0,"h":124.5,"l":98.0,"c":99.0,"v":3_000_000.0}]}]));
-    r.cmd("bar_last", "a", json!([{"op":"update_last_bar","series":"px","bar":
-        {"t":1_759_968_000_000_i64,"o":124.0,"h":124.5,"l":97.0,"c":98.0,"v":3_100_000.0}}]));
+    r.cmd(
+        "bar_low",
+        "a",
+        json!([{"op":"append_bars","series":"px","bars":[
+        {"t":1_759_968_000_000_i64,"o":124.0,"h":124.5,"l":98.0,"c":99.0,"v":3_000_000.0}]}]),
+    );
+    r.cmd(
+        "bar_last",
+        "a",
+        json!([{"op":"update_last_bar","series":"px","bar":
+        {"t":1_759_968_000_000_i64,"o":124.0,"h":124.5,"l":97.0,"c":98.0,"v":3_100_000.0}}]),
+    );
     r.cmd("undo_bar", "a", json!([{"op":"undo"}]));
     // Presence: input, attend.
     r.send("look", "a", json!({"type":"input","id":"g1","gesture":{"kind":"look","view":"main","from_bar":100,"to_bar":199}}));
-    r.send("zoom", "a2", json!({"type":"input","id":"g2","gesture":{"kind":"zoom","view":"main","factor":2.0}}));
+    r.send(
+        "zoom",
+        "a2",
+        json!({"type":"input","id":"g2","gesture":{"kind":"zoom","view":"main","factor":2.0}}),
+    );
     r.send("tap", "a", json!({"type":"input","id":"g3","gesture":{"kind":"tap","view":"main","panel":1,"bar":150}}));
     r.send("attend", "s", json!({"type":"attend","id":"at1","directive":{"to":"arkin","steps":[
         {"target":{"view":"main","panel":1,"series":"rsi14","from_bar":150,"to_bar":150},"say":"burada"}]}}));
-    r.send("attend_bad", "s", json!({"type":"attend","id":"at2","directive":{"to":"nobody","steps":[]}}));
+    r.send(
+        "attend_bad",
+        "s",
+        json!({"type":"attend","id":"at2","directive":{"to":"nobody","steps":[]}}),
+    );
     // Unsubscribe: the next change skips that subscription.
-    r.send("unsub", "v", json!({"type":"unsubscribe","id":"u","sub":"ch"}));
-    r.send("unsub_again", "v", json!({"type":"unsubscribe","id":"u","sub":"ch"}));
-    r.cmd("after_unsub", "a", json!([{"op":"set_params","series":"rsi14","params":{"period":14}}]));
+    r.send(
+        "unsub",
+        "v",
+        json!({"type":"unsubscribe","id":"u","sub":"ch"}),
+    );
+    r.send(
+        "unsub_again",
+        "v",
+        json!({"type":"unsubscribe","id":"u","sub":"ch"}),
+    );
+    r.cmd(
+        "after_unsub",
+        "a",
+        json!([{"op":"set_params","series":"rsi14","params":{"period":14}}]),
+    );
     // Queries and reads.
     r.query("q_log", "e", json!({"kind":"log","after_seq":3}));
-    r.query("q_list", "v", json!({"kind":"list","collection":"proposals"}));
-    r.query("q_attention", "s", json!({"kind":"attention","principal":"arkin"}));
-    r.query("q_screen", "v", json!({"kind":"screen","principal":"arkin"}));
+    r.query(
+        "q_list",
+        "v",
+        json!({"kind":"list","collection":"proposals"}),
+    );
+    r.query(
+        "q_attention",
+        "s",
+        json!({"kind":"attention","principal":"arkin"}),
+    );
+    r.query(
+        "q_screen",
+        "v",
+        json!({"kind":"screen","principal":"arkin"}),
+    );
     r.query("q_bad", "v", json!({"kind":"get","id":"nope"}));
     r.send("raw_bad", "v", json!({"type":"nope"}));
     r.finish();
@@ -176,9 +256,21 @@ fn charac_session_order_data() {
         r.sub(c, "cm", json!({"kind":"comments","instrument":"THYAO"}));
         r.sub(c, "pr", json!({"kind":"proposals"}));
     }
-    r.cmd("w_bot", "b", json!([{"op":"add_watch","text":"her şey","match":{"instrument":"THYAO"},"max_matches":3}]));
-    r.cmd("w_neg", "b", json!([{"op":"add_watch","text":"olumsuz","match":{"instrument":"THYAO","negative":true}}]));
-    r.cmd("w_eve", "e", json!([{"op":"add_watch","text":"eve","match":{"instrument":"THYAO"}}]));
+    r.cmd(
+        "w_bot",
+        "b",
+        json!([{"op":"add_watch","text":"her şey","match":{"instrument":"THYAO"},"max_matches":3}]),
+    );
+    r.cmd(
+        "w_neg",
+        "b",
+        json!([{"op":"add_watch","text":"olumsuz","match":{"instrument":"THYAO","negative":true}}]),
+    );
+    r.cmd(
+        "w_eve",
+        "e",
+        json!([{"op":"add_watch","text":"eve","match":{"instrument":"THYAO"}}]),
+    );
     r.cmd("w_exp", "a", json!([{"op":"add_watch","text":"süreli","match":{"instrument":"THYAO"},"expires_t":T0 + 1}]));
     let evs = data_steps("69-watch");
     assert!(evs.len() >= 20, "{}", evs.len());
@@ -188,11 +280,23 @@ fn charac_session_order_data() {
             r.send("clock", "h", json!({"type":"clock","now":T0 + 10}));
         }
         if i == 6 {
-            r.send("unsub_cl", "a", json!({"type":"unsubscribe","id":"u","sub":"cl"}));
+            r.send(
+                "unsub_cl",
+                "a",
+                json!({"type":"unsubscribe","id":"u","sub":"cl"}),
+            );
         }
     }
-    r.query("q_intents", "a", json!({"kind":"list","collection":"intents"}));
-    r.query("q_intents_eve", "e", json!({"kind":"list","collection":"intents"}));
+    r.query(
+        "q_intents",
+        "a",
+        json!({"kind":"list","collection":"intents"}),
+    );
+    r.query(
+        "q_intents_eve",
+        "e",
+        json!({"kind":"list","collection":"intents"}),
+    );
     r.query("q_log", "b", json!({"kind":"log","after_seq":2}));
     r.finish();
     book.check();
@@ -227,9 +331,10 @@ fn charac_session_order_live_path() {
         }
     }
     // A data event the host refuses (seq gap / unknown feed): its text.
-    let bad: qp_schema::data::DataEvent = serde_json::from_value(json!({"feed":{"symbol":"NOPE","interval":"1d"},
+    let bad: qp_schema::data::DataEvent =
+        serde_json::from_value(json!({"feed":{"symbol":"NOPE","interval":"1d"},
         "seq":1,"change":{"kind":"patch","t":1,"fields":{"c":1.0}}}))
-    .unwrap();
+        .unwrap();
     let got = match r.rig.data_try(&bad) {
         Ok(v) => format!("accepted, {} line(s)", v.len()),
         Err(e) => format!("refused: {e}"),

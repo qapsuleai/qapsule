@@ -50,39 +50,87 @@ fn charac_session_worlds_flow() {
     }
     // Writers in both worlds.
     let aud = json!({"group":"future","sensitivity":"important","watchlist":["THYAO"]});
-    r.cmd("owner_intent", "o", json!([{"op":"add_intent","id":"io","text":"sahip"}]));
-    r.cmd("bora_aud", "b", json!([{"op":"set_audience","audience":aud}]));
-    r.cmd("can_sens", "c", json!([{"op":"set_sensitivity","sensitivity":"all"}]));
-    r.cmd("ana_watch", "a", json!([{"op":"add_watch","text":"ana","match":{"instrument":"THYAO"}}]));
-    r.cmd("can_watch", "c", json!([{"op":"add_watch","text":"can","match":{"instrument":"THYAO"}}]));
+    r.cmd(
+        "owner_intent",
+        "o",
+        json!([{"op":"add_intent","id":"io","text":"sahip"}]),
+    );
+    r.cmd(
+        "bora_aud",
+        "b",
+        json!([{"op":"set_audience","audience":aud}]),
+    );
+    r.cmd(
+        "can_sens",
+        "c",
+        json!([{"op":"set_sensitivity","sensitivity":"all"}]),
+    );
+    r.cmd(
+        "ana_watch",
+        "a",
+        json!([{"op":"add_watch","text":"ana","match":{"instrument":"THYAO"}}]),
+    );
+    r.cmd(
+        "can_watch",
+        "c",
+        json!([{"op":"add_watch","text":"can","match":{"instrument":"THYAO"}}]),
+    );
     for (i, ev) in data_steps("39-capsule-entitlement").iter().enumerate() {
         r.data(&format!("bar{i}"), ev);
     }
     // Comments: an entitled agent, an unentitled one, a licensed number.
-    let cm = |text: &str| {
-        json!([{"op":"add_comment","about":{"capsule":CAP},"cites":[CAP],"lang":"tr","text":text}])
-    };
-    r.cmd("aa_comment", "A", cm("THYAO kısa ortalamanın altında kalıyor [1]."));
+    let cm = |text: &str| json!([{"op":"add_comment","about":{"capsule":CAP},"cites":[CAP],"lang":"tr","text":text}]);
+    r.cmd(
+        "aa_comment",
+        "A",
+        cm("THYAO kısa ortalamanın altında kalıyor [1]."),
+    );
     r.cmd("cc_comment", "C", cm("THYAO'da düşüş eğilimi sürüyor [1]."));
-    r.cmd("cc_number", "C", cm("THYAO kısa ortalamanın (5,23) altında [1]."));
-    r.cmd("aa_advice", "A", cm("THYAO'yu şimdi almak için fırsat [1]."));
-    r.cmd("owner_after", "o", json!([{"op":"add_intent","id":"io2","text":"sonra"}]));
+    r.cmd(
+        "cc_number",
+        "C",
+        cm("THYAO kısa ortalamanın (5,23) altında [1]."),
+    );
+    r.cmd(
+        "aa_advice",
+        "A",
+        cm("THYAO'yu şimdi almak için fırsat [1]."),
+    );
+    r.cmd(
+        "owner_after",
+        "o",
+        json!([{"op":"add_intent","id":"io2","text":"sonra"}]),
+    );
     r.cmd("bora_undo", "b", json!([{"op":"undo"}]));
     r.cmd("owner_undo", "o", json!([{"op":"undo"}]));
     // Agent allow-list under r5b.
     r.cmd("aa_fact", "A", json!([{"op":"add_intent","text":"x"}]));
-    r.cmd("aa_view", "A", json!([{"op":"put_view","view":{"id":"va","x":{"kind":"time"},
-        "y":[{"kind":"linear"}],"layers":[{"mark":"candle","series":"px","panel":0}]}}]));
-    r.cmd("aa_view_direct_ok", "o", json!([{"op":"put_view","view":{"id":"vo","x":{"kind":"time"},
-        "y":[{"kind":"linear"}],"layers":[{"mark":"candle","series":"px","panel":0}]}}]));
+    r.cmd(
+        "aa_view",
+        "A",
+        json!([{"op":"put_view","view":{"id":"va","x":{"kind":"time"},
+        "y":[{"kind":"linear"}],"layers":[{"mark":"candle","series":"px","panel":0}]}}]),
+    );
+    r.cmd(
+        "aa_view_direct_ok",
+        "o",
+        json!([{"op":"put_view","view":{"id":"vo","x":{"kind":"time"},
+        "y":[{"kind":"linear"}],"layers":[{"mark":"candle","series":"px","panel":0}]}}]),
+    );
     // The same reads by every reader.
     let qs = [
         ("q_log", json!({"kind":"log"})),
         ("q_caps", json!({"kind":"capsules","since_bar":80})),
         ("q_cap", json!({"kind":"capsule","capsule":CAP})),
-        ("q_flow", json!({"kind":"capsule","capsule":"cap.THYAO.flow.up.90"})),
+        (
+            "q_flow",
+            json!({"kind":"capsule","capsule":"cap.THYAO.flow.up.90"}),
+        ),
         ("q_ledger", json!({"kind":"ledger","by_kind":true})),
-        ("q_stories", json!({"kind":"stories","instrument":"THYAO","range":{"last":10}})),
+        (
+            "q_stories",
+            json!({"kind":"stories","instrument":"THYAO","range":{"last":10}}),
+        ),
         ("q_intents", json!({"kind":"list","collection":"intents"})),
         ("q_comments", json!({"kind":"list","collection":"comments"})),
         ("q_doc", json!({"kind":"document"})),
@@ -111,14 +159,26 @@ fn charac_session_worlds_single() {
         r.sub(c, "ka", json!({"kind":"capsules","all":true}));
         r.sub(c, "cl", json!({"kind":"claims"}));
     }
-    r.cmd("owner_intent", "o", json!([{"op":"add_intent","id":"io","text":"sahip"}]));
-    r.cmd("bora_aud", "b", json!([{"op":"set_audience","audience":{"group":"future","watchlist":["THYAO"]}}]));
+    r.cmd(
+        "owner_intent",
+        "o",
+        json!([{"op":"add_intent","id":"io","text":"sahip"}]),
+    );
+    r.cmd(
+        "bora_aud",
+        "b",
+        json!([{"op":"set_audience","audience":{"group":"future","watchlist":["THYAO"]}}]),
+    );
     for (i, ev) in data_steps("39-capsule-entitlement").iter().enumerate() {
         r.data(&format!("bar{i}"), ev);
     }
     for (c, _) in READERS {
         r.query(&format!("q_log_{c}"), c, json!({"kind":"log"}));
-        r.query(&format!("q_caps_{c}"), c, json!({"kind":"capsules","since_bar":80}));
+        r.query(
+            &format!("q_caps_{c}"),
+            c,
+            json!({"kind":"capsules","since_bar":80}),
+        );
     }
     r.finish();
     book.check();

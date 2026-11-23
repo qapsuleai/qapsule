@@ -16,9 +16,12 @@
     clippy::cognitive_complexity
 )]
 
+mod agent;
 mod opcase;
 mod ops_doc;
 mod ops_flow;
+mod order;
 mod rig;
 mod snap;
 mod transcripts;
+mod worlds;

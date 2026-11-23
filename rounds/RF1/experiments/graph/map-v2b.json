@@ -1,0 +1,7 @@
+{"qp-ops":["authority/apply","authority/error","authority/suggest","authority/values","ops/","ops.rs","data/plane","read/present","macros"],
+ "qp-watch":["capsule/watch"],
+ "qp-read":["read/","read.rs","data/bindq","capsule/queries"],
+ "qp-viewer":["replica/viewer"],
+ "qp-replica":["replica"],
+ "qp-replayhost":["host"],
+ "qp-authority":["authority/","authority.rs","capsule","data/","data.rs","lib.rs"]}

@@ -1,0 +1,24 @@
+# Session method calls between top-level groups (scripts/refactor/graph.py JSON; names defined once)
+authority/agent      -> authority/session      2  build principal
+authority/error      -> authority/session      1  build
+authority/session    -> capsule               35  apply_atomic as_reader check_comments claim_asserted claim_events claims_after_bars comment_events comment_public_ok commit_public dispute entry_events_pub eval_intents_public in_world invalidate_in_public lang_of note_closed note_pub_len ops_to_pub proj_for project_entry proposal_to_pub pub_len pub_of public_entry public_view reader_proj reverse_changes run_capsules runs_capsule seq_to serve_test_source start_capsules stories_check stories_start withheld_for
+authority/session    -> replica                6  has_pushers viewer_check viewer_flush viewer_start viewer_unsubscribed visible_msg
+authority/session    -> data                   4  bar_command bars_only settle_live view_events
+authority/session    -> read                   2  input query
+authority/session    -> authority/agent        1  agent_check
+capsule              -> authority/session     17  build clock cond_blocked data_changed engine_entry_with entry_events entry_events_in handle_raw market_item note_writers principal responsible seq set_market_status settle settle_data stamp_anchors
+capsule              -> replica                1  viewer_claim_sub
+data                 -> authority/session     10  base_check build committed entry_events intent_lines invalidate_these principal responsible seq settle
+data                 -> capsule               10  claim_events eval_intents_public invalidate_in_public pub_len pub_of public_view reader_parts reader_voice run_capsules seq_to
+host                 -> authority/session     15  binding_state build clock data_event document handle_frame handle_raw host_clock host_data_event initial_document limits log refresh_bindings seq set_market_status
+host                 -> capsule                4  clear_principal_coin_flip_rule seq_to set_headline_calendar set_principal_coin_flip_rule
+host                 -> read                   2  frame query
+host                 -> replica                2  set_viewer_batch viewer_flush
+host                 -> authority/agent        1  agent_origin
+ops                  -> authority/session      3  build build_with document
+read                 -> capsule                9  as_reader capsule_query capsules_query lang_of ledger_query project_entry row_stamp stories_query story_rows
+read                 -> authority/session      5  accept_expand build principal seq viewport_events
+read                 -> data                   3  bindings gate_read verify_evidence
+replica              -> authority/session     10  binding_state build clock committed data_changed data_event document handle_raw market_for seq
+replica              -> capsule                8  as_reader has_stories item_headline_parts lang_of row_stamp seq_to set_headline_calendar stories_flush
+replica              -> read                   3  provider query scene

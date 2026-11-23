@@ -117,6 +117,7 @@ def main():  # noqa: C901
     ap.add_argument("--type", default="Session")
     ap.add_argument("--json")
     ap.add_argument("--group", type=int, default=2)
+    ap.add_argument("--map", help="JSON {target: [path prefixes]}: crate-level sizes, edges and cycles of a proposed split")
     a = ap.parse_args()
     src_dir = os.path.join(a.crate, "src")
     files = rel_files(src_dir)
@@ -232,6 +233,8 @@ def main():  # noqa: C901
             if field_use[f][fld]:
                 users[group(f)] += field_use[f][fld]
         out.append(f"{fld:22s} {len(users):2d}  " + " ".join(f"{g}:{n}" for g, n in users.most_common()))
+    if a.map:
+        out.append(map_report(json.load(open(a.map)), files, lines, calls, mods))
     print("\n".join(out))
     if a.json:
         json.dump({
@@ -242,6 +245,33 @@ def main():  # noqa: C901
             "modules": [[x, y, n] for (x, y), n in sorted(mods.items())],
             "fields": tfields, "shared_fields": shared_fields,
         }, open(a.json, "w"), indent=1, ensure_ascii=False)
+
+
+def map_report(plan, files, lines, calls, mods):
+    """Sizes, edges and strongly connected components of `files` grouped by `plan`
+    (first matching prefix wins; a prefix matches a file path or its start)."""
+    def target(f):
+        for k, pre in plan.items():
+            if any(f == p or f.startswith(p) for p in pre):
+                return k
+        return "?"
+    size = collections.Counter()
+    for f in files:
+        size[target(f)] += lines[f]
+    edges = collections.defaultdict(collections.Counter)
+    for (x, y), n in list(calls.items()) + list(mods.items()):
+        tx, ty = target(x), target(y)
+        if tx != ty:
+            edges[tx][ty] += n
+    out = ["\n## proposed split (--map)"]
+    for k in sorted(size, key=lambda k: -size[k]):
+        out.append(f"{k:18s} {size[k]:6d}  -> " + ", ".join(f"{t}:{n}" for t, n in edges[k].most_common()))
+    cyc = [sorted(c) for c in tarjan(list(size), {k: set(v) for k, v in edges.items()}) if len(c) > 1]
+    out.append("cycles: " + ("; ".join(" ".join(c) for c in cyc) if cyc else "none"))
+    unmapped = [f for f in files if target(f) == "?"]
+    if unmapped:
+        out.append("unmapped: " + " ".join(unmapped))
+    return "\n".join(out)
 
 
 def tarjan(nodes, edges):

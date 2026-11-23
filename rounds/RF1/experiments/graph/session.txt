@@ -1,0 +1,93 @@
+# graph crates/qp-session type Session: 84 files, 31999 lines (arch-check count)
+fields of Session: 57 (26 also named in other structs, not counted: doc, initial, log, principals, clock, cache, intent_state, plane, rd, view_reads, claims, live_index, series_writer, invalidation_writer, intent_epoch, proj, fact_ix, cap_ix, sentences, projs, views, head_state, headlines, headline_cal, coin_flip, market)
+methods of Session: 295 names (280 counted as call edges)
+
+## groups (lines, methods, fields touched, out-edges)
+authority                         9  m=  0  fields= 0  -> 
+authority/agent                 222  m=  8  fields= 2  -> authority/error, authority/session
+authority/apply                 526  m=  0  fields= 0  -> 
+authority/error                 102  m=  0  fields= 0  -> authority/suggest
+authority/session              3783  m= 77  fields=20  -> authority/agent, authority/apply, authority/error, authority/values, capsule, capsule/capidx, capsule/claims, capsule/comments, capsule/dispute, capsule/project, capsule/public, capsule/queries, capsule/reader, capsule/run, capsule/settled, capsule/story, capsule/watch, data/live, data/plane, ops/canon, ops/expand, ops/locate, ops/select, ops/summary, read/present, read/query, replica/viewer
+authority/suggest                47  m=  0  fields= 0  -> 
+authority/values                642  m=  0  fields= 0  -> 
+capsule                         658  m=  4  fields= 2  -> authority/error, authority/session, authority/values, capsule/public, capsule/story
+capsule/capidx                  701  m=  0  fields= 0  -> capsule
+capsule/claims                  632  m=  3  fields= 1  -> authority/session, authority/values, capsule/public, data/plane, replica/viewer
+capsule/comments                672  m= 13  fields= 3  -> authority/apply, authority/error, authority/session, capsule, capsule/project, capsule/public, capsule/queries, capsule/reader
+capsule/dispute                 748  m= 12  fields= 3  -> authority/error, authority/session, authority/values, capsule/claims, capsule/public, capsule/settled, data/live, data/plane
+capsule/headparts               249  m=  0  fields= 0  -> capsule
+capsule/project                 562  m=  7  fields= 5  -> authority/session, capsule, capsule/capidx, capsule/comments, capsule/public, capsule/reader, capsule/run, capsule/settled, capsule/watch
+capsule/public                  837  m= 17  fields= 9  -> authority/apply, authority/session, authority/values, capsule, capsule/capidx, capsule/claims, capsule/reader, data/live, data/plane
+capsule/queries                 447  m=  7  fields= 4  -> authority/session, capsule, capsule/capidx, capsule/comments, capsule/reader, capsule/run, capsule/story
+capsule/reader                  639  m= 29  fields= 5  -> authority/session, capsule/capidx, capsule/headparts
+capsule/run                     515  m= 11  fields= 3  -> authority/session, authority/values, capsule, capsule/project, capsule/public, capsule/reader, capsule/settled, capsule/story, capsule/watch, data/plane
+capsule/sentences               144  m=  0  fields= 0  -> capsule/capidx
+capsule/settled                 515  m= 12  fields= 4  -> authority/session, capsule/capidx, capsule/claims, capsule/dispute, capsule/project, capsule/public, capsule/reader, capsule/run
+capsule/story                   559  m= 19  fields= 2  -> authority/error, authority/session, authority/values, capsule, capsule/project, capsule/public, capsule/reader, capsule/run, read/query, replica
+capsule/watch                   363  m=  3  fields= 2  -> authority/apply, authority/error, authority/session, capsule/public, capsule/reader, data/plane, ops/expand
+data                              7  m=  0  fields= 0  -> 
+data/bindq                      252  m=  4  fields= 1  -> authority/error, authority/session, authority/values, data/plane, ops/expand
+data/live                      1045  m=  9  fields= 5  -> authority/apply, authority/error, authority/session, authority/values, capsule/claims, capsule/public, capsule/run, data/plane, ops/expand
+data/plane                      763  m=  0  fields= 0  -> authority/error, authority/values
+data/provider                   279  m=  0  fields= 0  -> authority/values, capsule, capsule/reader, data/plane, ops/canon, ops/summary
+host                              4  m=  0  fields= 0  -> 
+host/conform                    612  m=  0  fields= 0  -> authority/apply, authority/error, authority/session, host/replayhost
+host/replayhost                1274  m=  0  fields= 2  -> authority/agent, authority/error, authority/session, capsule/headparts, capsule/public, replica/viewer
+lib                              66  m=  0  fields= 0  -> 
+macros                            9  m=  0  fields= 0  -> 
+ops                               9  m=  0  fields= 0  -> 
+ops/canon                      1507  m=  0  fields= 0  -> authority/apply, authority/error, authority/values, data/plane, ops/expand
+ops/expand                     2323  m=  0  fields= 0  -> authority/apply, authority/error, authority/session, authority/values, capsule/watch, data/live, data/plane, ops/canon, ops/gops, read/present
+ops/gops                        723  m=  0  fields= 0  -> authority/error, ops/canon, ops/expand, ops/summary
+ops/locate                      429  m=  0  fields= 0  -> authority/error
+ops/select                     1943  m=  0  fields= 0  -> authority/error, authority/suggest, ops/canon, ops/expand, ops/locate, ops/summary
+ops/summary                     787  m=  0  fields= 0  -> authority/error, authority/values, ops/canon, ops/select
+read                              9  m=  0  fields= 0  -> 
+read/explain                    208  m=  1  fields= 0  -> authority/error, authority/session, ops/canon, ops/expand, read/reading
+read/interact                  1321  m= 20  fields= 3  -> authority/error, authority/session, capsule/queries, capsule/reader, capsule/story, data/bindq, data/provider, ops/expand, read/present, read/query, read/reading, replica/viewer
+read/present                    166  m=  0  fields= 0  -> authority/values, data/plane, data/provider
+read/preview                    194  m=  4  fields= 1  -> authority/error, authority/session, authority/values, capsule/project, capsule/reader, data/plane, data/provider, ops/expand, read/reading
+read/query                     1047  m= 11  fields= 4  -> authority/apply, authority/error, authority/session, authority/values, capsule/claims, capsule/project, capsule/queries, capsule/reader, capsule/story, data/bindq, data/provider, ops/canon, ops/expand, ops/select, read/interact, read/present, read/preview, read/reading
+read/reading                    427  m= 10  fields= 1  -> authority/error, authority/session, data/provider, ops/expand, ops/select, read/query
+replica                         415  m=  0  fields= 3  -> authority/session, authority/values, capsule, capsule/claims, data/plane, read/reading
+replica/follow                  299  m=  0  fields= 2  -> authority/session, data/live
+replica/judge                   250  m=  0  fields= 0  -> authority/values, data/plane
+replica/tape                    695  m=  0  fields= 0  -> authority/session, replica, replica/viewer
+replica/viewer                 1364  m= 14  fields= 3  -> authority/error, authority/session, authority/values, capsule, capsule/claims, capsule/project, capsule/public, capsule/reader, capsule/story, read/reading, replica
+
+## strongly connected components (groups)
+ 25895  authority/agent authority/session capsule capsule/capidx capsule/claims capsule/comments capsule/dispute capsule/headparts capsule/project capsule/public capsule/queries capsule/reader capsule/run capsule/settled capsule/story capsule/watch data/bindq data/live data/provider ops/canon ops/expand ops/gops ops/select ops/summary read/interact read/present read/preview read/query read/reading replica replica/viewer
+outside: 6104 lines in 20 groups: authority authority/apply authority/error authority/suggest authority/values capsule/sentences data data/plane host host/conform host/replayhost lib macros ops ops/locate read read/explain replica/follow replica/judge replica/tape
+
+## field -> groups touching it (uses)
+epoch                   2  authority/session:2 host/replayhost:2
+ttl                     1  authority/session:1
+limits                  2  authority/session:18 replica:1
+conns                  20  read/interact:61 authority/session:45 capsule/story:17 read/query:15 replica/viewer:13 data/live:9 capsule/comments:7 capsule/queries:6 read/reading:5 capsule/dispute:4 read/preview:4 authority/agent:3 host/replayhost:3 capsule/project:2 capsule/settled:2 capsule/claims:1 capsule/public:1 capsule/reader:1 capsule/watch:1 data/bindq:1
+directives              2  authority/session:1 read/query:1
+focus                   2  read/query:2 read/interact:1
+att_counter             1  authority/session:2
+input_counter           2  read/query:4 read/interact:2
+schema                  1  authority/session:4
+pending_stamps          4  authority/session:5 capsule/dispute:1 replica:1 replica/follow:1
+incremental             2  authority/session:8 data/live:1
+pending_views           4  authority/session:3 replica/follow:3 data/live:2 replica:1
+struct_gen              3  capsule/run:2 data/live:2 authority/session:1
+settle                  3  capsule/dispute:20 capsule/settled:5 authority/session:1
+runner                  8  capsule/settled:10 capsule/run:6 capsule/reader:4 capsule:2 capsule/public:2 authority/session:1 capsule/project:1 capsule/queries:1
+trust_keys              1  capsule:2
+item_memo               2  capsule/queries:3 capsule/reader:2
+real_facts              2  capsule/project:2 capsule/reader:1
+audience_seen           2  authority/session:4 capsule/reader:1
+other                   6  authority/session:12 capsule/public:9 capsule/project:3 capsule/comments:2 capsule/watch:1 data/live:1
+in_public               4  capsule/public:7 authority/session:2 capsule/project:2 capsule/queries:1
+pending_pub             4  authority/session:4 capsule/run:2 capsule/settled:2 capsule/public:1
+pub_caps                1  capsule/public:6
+full_to_pub             2  capsule/public:2 authority/session:1
+pub_at                  1  capsule/public:5
+prop_map                2  authority/session:1 capsule/public:1
+viewers                 1  replica/viewer:15
+viewer_batch            2  authority/session:1 replica/viewer:1
+coin_flip_for           1  capsule/story:3
+agent                   1  authority/agent:7
+comment_audit           1  capsule/comments:2

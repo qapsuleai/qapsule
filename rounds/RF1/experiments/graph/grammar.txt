@@ -1,0 +1,34 @@
+# graph crates/qp-grammar type CompileOptions: 83 files, 20964 lines (arch-check count)
+fields of CompileOptions: 14 (7 also named in other structs, not counted: width, height, theme, outcome, alphabet, look, roles)
+methods of CompileOptions: 1 names (0 counted as call edges)
+
+## groups (lines, methods, fields touched, out-edges)
+advances                          0  m=  0  fields= 0  -> look
+compile                        5715  m=  1  fields= 7  -> detmath, error, faces, glyph, look, open, present, provider, theme
+detmath                         170  m=  0  fields= 0  -> 
+error                            76  m=  0  fields= 0  -> 
+faces                          1472  m=  0  fields= 0  -> error, look, present, provider
+feeds                           700  m=  0  fields= 0  -> present
+glyph                          1981  m=  0  fields= 0  -> error, theme
+lib                              38  m=  0  fields= 0  -> 
+look                           2176  m=  0  fields= 0  -> advances, error, theme
+open                           2079  m=  0  fields= 0  -> compile, error, look, present, provider
+present                        1767  m=  0  fields= 1  -> compile, detmath, error, faces, look, provider, theme, transitions
+provider                        474  m=  0  fields= 0  -> open, present
+stories                        2243  m=  0  fields= 2  -> compile, error, look, provider, theme
+theme                           373  m=  0  fields= 0  -> error
+transitions                    1700  m=  0  fields= 0  -> detmath, look, present, theme
+
+## strongly connected components (groups)
+ 13207  compile faces open present provider transitions
+  2176  advances look
+outside: 5581 lines in 7 groups: detmath error feeds glyph lib stories theme
+
+## field -> groups touching it (uses)
+range                   2  compile:2 stories:2
+emphasis                1  compile:2
+lod                     1  compile:1
+max_points              2  present:2 compile:1
+face                    2  stories:5 compile:1
+cursor                  1  compile:1
+look_record             1  compile:1

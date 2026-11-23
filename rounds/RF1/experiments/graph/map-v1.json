@@ -1,0 +1,10 @@
+{"qp-ops":["authority/apply","authority/error","authority/suggest","authority/values","ops/","ops.rs","data/plane","read/present","macros"],
+ "qp-authority":["authority/","authority.rs","capsule/public","lib.rs"],
+ "qp-watch":["capsule/watch"],
+ "qp-claims":["capsule/claims","capsule/dispute","capsule/comments"],
+ "qp-capsule-life":["capsule"],
+ "qp-livepath":["data/"],
+ "qp-read":["read/"],
+ "qp-viewer":["replica/viewer"],
+ "qp-replica":["replica"],
+ "qp-replayhost":["host"]}

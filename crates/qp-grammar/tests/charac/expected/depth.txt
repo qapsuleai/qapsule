@@ -1,0 +1,416 @@
+# charac/depth: today's output (RF1/G1); a refactor keeps every line
+effective.desktop.Sentence  -  | Sentence
+effective.desktop.Capsule  -  | Capsule
+effective.desktop.Chart  -  | Chart
+effective.desktop.Workspace  -  | Chart
+effective.phone.Sentence  -  | Sentence
+effective.phone.Capsule  -  | Capsule
+effective.phone.Chart  -  | Capsule
+effective.phone.Workspace  -  | Capsule
+effective.nodata.Sentence  -  | Sentence
+effective.nodata.Capsule  -  | Capsule
+effective.nodata.Chart  -  | Chart
+effective.nodata.Workspace  -  | Chart
+effective.voice.Sentence  -  | Sentence
+effective.voice.Capsule  -  | Sentence
+effective.voice.Chart  -  | Sentence
+effective.voice.Workspace  -  | Sentence
+sentence.fnd-brk  -  | SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.desktop.Sentence  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.desktop.Capsule  e3094c1761d4268d  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.desktop.Chart  55bda5a34ace618a  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.desktop.Workspace  55bda5a34ace618a  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.phone.Sentence  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.phone.Capsule  a3a09987033ed534  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.phone.Chart  a3a09987033ed534  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.phone.Workspace  a3a09987033ed534  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.nodata.Sentence  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.nodata.Capsule  c64a75860b3236fd  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.nodata.Chart  55bda5a34ace618a  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.nodata.Workspace  55bda5a34ace618a  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.voice.Sentence  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.voice.Capsule  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.voice.Chart  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+present.fnd-brk.voice.Workspace  ae570d263455611c  | Sentence conf=None view=0 text=SAMPLE Breakout Confirmed (fnd-brk).
+sentence.fnd-parts  -  | SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.desktop.Sentence  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.desktop.Capsule  de8258122e22d8b9  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.desktop.Chart  49a7915294405cc1  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.desktop.Workspace  49a7915294405cc1  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.phone.Sentence  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.phone.Capsule  923600e7dbdf2500  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.phone.Chart  923600e7dbdf2500  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.phone.Workspace  923600e7dbdf2500  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.nodata.Sentence  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.nodata.Capsule  ed0e0fde1a0805af  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.nodata.Chart  49a7915294405cc1  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.nodata.Workspace  49a7915294405cc1  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.voice.Sentence  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.voice.Capsule  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.voice.Chart  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+present.fnd-parts.voice.Workspace  acb4057ec302f68c  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-parts).
+sentence.fnd-sq  -  | SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.desktop.Sentence  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.desktop.Capsule  b4f266b741c76d7c  | Capsule conf=Some(0.5) view=5 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.desktop.Chart  55452ac5d3b41a0d  | Chart conf=Some(0.5) view=3 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.desktop.Workspace  55452ac5d3b41a0d  | Chart conf=Some(0.5) view=3 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.phone.Sentence  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.phone.Capsule  2fee7c064e1817e9  | Capsule conf=Some(0.5) view=5 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.phone.Chart  2fee7c064e1817e9  | Capsule conf=Some(0.5) view=5 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.phone.Workspace  2fee7c064e1817e9  | Capsule conf=Some(0.5) view=5 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.nodata.Sentence  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.nodata.Capsule  38f6950479be03bd  | Capsule conf=Some(0.5) view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.nodata.Chart  55452ac5d3b41a0d  | Chart conf=Some(0.5) view=3 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.nodata.Workspace  55452ac5d3b41a0d  | Chart conf=Some(0.5) view=3 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.voice.Sentence  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.voice.Capsule  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.voice.Chart  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+present.fnd-sq.voice.Workspace  df1bbeeee51dbf7d  | Sentence conf=None view=0 text=SAMPLE Squeeze Strengthened (fnd-sq).
+sentence.fnd-div  -  | SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.desktop.Sentence  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.desktop.Capsule  02baec003118e89a  | Capsule conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.desktop.Chart  cfb28ae80a82fd83  | Chart conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.desktop.Workspace  cfb28ae80a82fd83  | Chart conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.phone.Sentence  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.phone.Capsule  9994e7ee07f62bc4  | Capsule conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.phone.Chart  9994e7ee07f62bc4  | Capsule conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.phone.Workspace  9994e7ee07f62bc4  | Capsule conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.nodata.Sentence  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.nodata.Capsule  4047e8bd49a76ba0  | Capsule conf=Some(0.5) view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.nodata.Chart  cfb28ae80a82fd83  | Chart conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.nodata.Workspace  cfb28ae80a82fd83  | Chart conf=Some(0.5) view=5 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.voice.Sentence  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.voice.Capsule  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.voice.Chart  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+present.fnd-div.voice.Workspace  f6880f1314a4c21f  | Sentence conf=None view=0 text=SAMPLE Reversal Weakened (fnd-div).
+sentence.fnd-lock  -  | SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.desktop.Sentence  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.desktop.Capsule  872da32407eff4b5  | Capsule conf=Some(0.5) view=5 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.desktop.Chart  c0c0bb283ead7a7c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.desktop.Workspace  c0c0bb283ead7a7c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.phone.Sentence  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.phone.Capsule  906279c6359d6df3  | Capsule conf=Some(0.5) view=5 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.phone.Chart  906279c6359d6df3  | Capsule conf=Some(0.5) view=5 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.phone.Workspace  906279c6359d6df3  | Capsule conf=Some(0.5) view=5 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.nodata.Sentence  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.nodata.Capsule  255aa4671e0e3e04  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.nodata.Chart  c0c0bb283ead7a7c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.nodata.Workspace  c0c0bb283ead7a7c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.voice.Sentence  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.voice.Capsule  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.voice.Chart  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+present.fnd-lock.voice.Workspace  a7baaadf9d8a4e1e  | Sentence conf=None view=0 text=SAMPLE Breakout Born (fnd-lock).
+sentence.fnd-real  -  | SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.desktop.Sentence  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.desktop.Capsule  ed35364a9d2d3cd4  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.desktop.Chart  088865714f0cdc5c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.desktop.Workspace  088865714f0cdc5c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.phone.Sentence  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.phone.Capsule  6567b1a3f52ea250  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.phone.Chart  6567b1a3f52ea250  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.phone.Workspace  6567b1a3f52ea250  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.nodata.Sentence  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.nodata.Capsule  cba6720d1186e892  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.nodata.Chart  088865714f0cdc5c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.nodata.Workspace  088865714f0cdc5c  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.voice.Sentence  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.voice.Capsule  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.voice.Chart  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+present.fnd-real.voice.Workspace  793d6fb4ffd2fb60  | Sentence conf=None view=0 text=SAMPLE Breakout Realized (fnd-real).
+sentence.fnd-inv  -  | SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.desktop.Sentence  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.desktop.Capsule  533e3963fa7b770a  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.desktop.Chart  24bb71373ab86e5f  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.desktop.Workspace  24bb71373ab86e5f  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.phone.Sentence  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.phone.Capsule  171ee8c2c7ebc9ee  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.phone.Chart  171ee8c2c7ebc9ee  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.phone.Workspace  171ee8c2c7ebc9ee  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.nodata.Sentence  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.nodata.Capsule  8ce11c93bc1d251c  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.nodata.Chart  24bb71373ab86e5f  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.nodata.Workspace  24bb71373ab86e5f  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.voice.Sentence  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.voice.Capsule  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.voice.Chart  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+present.fnd-inv.voice.Workspace  c00843be0ad0dc3b  | Sentence conf=None view=0 text=SAMPLE Breakout Invalidated (fnd-inv).
+sentence.fnd-exp  -  | SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.desktop.Sentence  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.desktop.Capsule  adf56764209cea27  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.desktop.Chart  f7644937dbf4e517  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.desktop.Workspace  f7644937dbf4e517  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.phone.Sentence  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.phone.Capsule  9cfd44c69c0108f5  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.phone.Chart  9cfd44c69c0108f5  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.phone.Workspace  9cfd44c69c0108f5  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.nodata.Sentence  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.nodata.Capsule  a1d1cecced71bd57  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.nodata.Chart  f7644937dbf4e517  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.nodata.Workspace  f7644937dbf4e517  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.voice.Sentence  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.voice.Capsule  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.voice.Chart  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+present.fnd-exp.voice.Workspace  cfdc7507ba4188b2  | Sentence conf=None view=0 text=SAMPLE Breakout Expired (fnd-exp).
+sentence.fnd-ret  -  | SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.desktop.Sentence  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.desktop.Capsule  a4849471708a11d6  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.desktop.Chart  9e2f246cb66275cb  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.desktop.Workspace  9e2f246cb66275cb  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.phone.Sentence  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.phone.Capsule  ebe6969bf9aca0d7  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.phone.Chart  ebe6969bf9aca0d7  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.phone.Workspace  ebe6969bf9aca0d7  | Capsule conf=Some(0.5) view=6 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.nodata.Sentence  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.nodata.Capsule  fca07c284c3527ee  | Capsule conf=Some(0.5) view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.nodata.Chart  9e2f246cb66275cb  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.nodata.Workspace  9e2f246cb66275cb  | Chart conf=Some(0.5) view=3 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.voice.Sentence  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.voice.Capsule  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.voice.Chart  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+present.fnd-ret.voice.Workspace  101cc900f1d9e081  | Sentence conf=None view=0 text=SAMPLE Breakout Retracted (fnd-ret).
+sentence.fnd-rsi  -  | RSI(14) crossed 70.
+present.fnd-rsi.desktop.Sentence  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.desktop.Capsule  5bd4ad91955151c9  | Capsule conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.desktop.Chart  ca415b3207aa461f  | Chart conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.desktop.Workspace  ca415b3207aa461f  | Chart conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.phone.Sentence  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.phone.Capsule  ff7804839d9f7b12  | Capsule conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.phone.Chart  ff7804839d9f7b12  | Capsule conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.phone.Workspace  ff7804839d9f7b12  | Capsule conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.nodata.Sentence  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.nodata.Capsule  0c44c769de2d1941  | Capsule conf=Some(0.5) view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.nodata.Chart  ca415b3207aa461f  | Chart conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.nodata.Workspace  ca415b3207aa461f  | Chart conf=Some(0.5) view=3 text=RSI(14) crossed 70.
+present.fnd-rsi.voice.Sentence  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.voice.Capsule  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.voice.Chart  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+present.fnd-rsi.voice.Workspace  9791ac1aa7cdd504  | Sentence conf=None view=0 text=RSI(14) crossed 70.
+sentence.fnd-two  -  | claim of fnd-two
+present.fnd-two.desktop.Sentence  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+present.fnd-two.desktop.Capsule  65fe491f675f9e1a  | Capsule conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.desktop.Chart  3a55a2828f2bf52f  | Chart conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.desktop.Workspace  3a55a2828f2bf52f  | Chart conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.phone.Sentence  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+present.fnd-two.phone.Capsule  824031af4587bca4  | Capsule conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.phone.Chart  824031af4587bca4  | Capsule conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.phone.Workspace  824031af4587bca4  | Capsule conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.nodata.Sentence  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+present.fnd-two.nodata.Capsule  a9ccaea4a952f8c1  | Capsule conf=Some(0.5) view=0 text=claim of fnd-two
+present.fnd-two.nodata.Chart  3a55a2828f2bf52f  | Chart conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.nodata.Workspace  3a55a2828f2bf52f  | Chart conf=Some(0.5) view=3 text=claim of fnd-two
+present.fnd-two.voice.Sentence  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+present.fnd-two.voice.Capsule  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+present.fnd-two.voice.Chart  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+present.fnd-two.voice.Workspace  43c7dc8a4078604b  | Sentence conf=None view=0 text=claim of fnd-two
+sentence.fnd-missing  -  | claim of fnd-missing
+present.fnd-missing.desktop.Sentence  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+present.fnd-missing.desktop.Capsule  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.desktop.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.desktop.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.phone.Sentence  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+present.fnd-missing.phone.Capsule  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.phone.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.phone.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.nodata.Sentence  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+present.fnd-missing.nodata.Capsule  d963b2036d96e91a  | Capsule conf=Some(0.5) view=0 text=claim of fnd-missing
+present.fnd-missing.nodata.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.nodata.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+present.fnd-missing.voice.Sentence  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+present.fnd-missing.voice.Capsule  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+present.fnd-missing.voice.Chart  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+present.fnd-missing.voice.Workspace  2a3a9f40ada7a07c  | Sentence conf=None view=0 text=claim of fnd-missing
+sentence.nope  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.desktop.Sentence  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.desktop.Capsule  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.desktop.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.desktop.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.phone.Sentence  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.phone.Capsule  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.phone.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.phone.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.nodata.Sentence  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.nodata.Capsule  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.nodata.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.nodata.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.voice.Sentence  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.voice.Capsule  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.voice.Chart  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+present.nope.voice.Workspace  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+capsule.r4.fnd-brk  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+chart.r4.fnd-brk  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+card_view.r4.fnd-brk  8ad1fbb3eeb945eb  | 6 layers
+capsule.r4.fnd-parts  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms=
+chart.r4.fnd-parts  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+card_view.r4.fnd-parts  fa593a75d386372b  | 6 layers
+capsule.r4.fnd-sq  b55f644569753bb3  | 390x240 p2 l5 prims10 items124 over4 terms=
+chart.r4.fnd-sq  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+card_view.r4.fnd-sq  b0efcddc609edda0  | 5 layers
+capsule.r4.fnd-div  ea6bfc7384ee33aa  | 390x240 p2 l5 prims8 items124 over4 terms=
+chart.r4.fnd-div  61001d06d189182c  | 900x520 p1 l5 prims91 items46 over4 terms=
+card_view.r4.fnd-div  f75d60e325cfb2a1  | 5 layers
+capsule.r4.fnd-lock  dce964dbc917fb42  | 390x240 p2 l5 prims11 items124 over4 terms=
+chart.r4.fnd-lock  816b0d842f028d6a  | 900x520 p1 l3 prims108 items52 over4 terms=
+card_view.r4.fnd-lock  4243794afface428  | 5 layers
+capsule.r4.fnd-real  6579955ecc74f2e6  | 390x240 p2 l6 prims13 items125 over4 terms=
+chart.r4.fnd-real  db915f62919dd513  | 900x520 p1 l3 prims109 items52 over4 terms=
+card_view.r4.fnd-real  f709013afc47277e  | 6 layers
+capsule.r4.fnd-inv  878b191a48cd3b5b  | 390x240 p2 l6 prims15 items125 over4 terms=
+chart.r4.fnd-inv  6967c91a7da321ab  | 900x520 p1 l3 prims110 items52 over4 terms=
+card_view.r4.fnd-inv  c0e536322aeba5c8  | 6 layers
+capsule.r4.fnd-exp  88c615ace687f556  | 390x240 p2 l6 prims14 items125 over4 terms=
+chart.r4.fnd-exp  1c3a49bcab561d58  | 900x520 p1 l3 prims110 items52 over4 terms=
+card_view.r4.fnd-exp  fd6580eae4bfbb33  | 6 layers
+capsule.r4.fnd-ret  49aa751f1412fafe  | 390x240 p2 l6 prims12 items125 over4 terms=
+chart.r4.fnd-ret  06330c0f780f6725  | 900x520 p1 l3 prims108 items52 over4 terms=
+card_view.r4.fnd-ret  f75a4ab964dbac0b  | 6 layers
+capsule.r4.fnd-rsi  3799d2393c39547f  | 390x240 p1 l3 prims3 items122 over4 terms=
+chart.r4.fnd-rsi  e834d117982a584f  | 900x520 p2 l3 prims162 items161 over7 terms=
+card_view.r4.fnd-rsi  0bbe1cd7312293cf  | 4 layers
+capsule.r4.fnd-two  59e5e89ac529f210  | 390x240 p1 l3 prims3 items122 over4 terms=
+chart.r4.fnd-two  8edeeea123f8c4be  | 900x520 p2 l3 prims162 items161 over7 terms=
+card_view.r4.fnd-two  847c8306c1a48a53  | 4 layers
+capsule.r4.fnd-missing  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+chart.r4.fnd-missing  -  | ERR NotFound layer=- path=/finding :: /finding: fact `nope` does not exist
+capsule.r4.nope  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+chart.r4.nope  -  | ERR NotFound layer=- path=/finding :: /finding: finding `nope` does not exist
+capsule.ornek.fnd-brk  670d93df5f87bf42  | 390x240 p2 l6 prims15 items125 over4 terms=kapanış
+chart.ornek.fnd-brk  9327438d23fd28b3  | 900x520 p1 l3 prims107 items52 over4 terms=
+card_view.ornek.fnd-brk  8554e7bf27e11725  | 6 layers
+capsule.ornek.fnd-sq  055d09c5425600b6  | 390x240 p2 l5 prims10 items124 over4 terms=
+chart.ornek.fnd-sq  54d4df4c2e17b0a4  | 900x520 p1 l3 prims98 items62 over4 terms=
+card_view.ornek.fnd-sq  9db3af753b6df9bb  | 5 layers
+capsule.ornek.fnd-div  4914bc63e4424a0d  | 390x240 p2 l5 prims9 items124 over4 terms=
+chart.ornek.fnd-div  8929b1c66fa9acb6  | 900x520 p1 l5 prims91 items46 over4 terms=
+card_view.ornek.fnd-div  fafe8ee2254288f8  | 5 layers
+capsule.ornek.fnd-lock  6d0cd7d5453f6b9a  | 390x240 p2 l5 prims12 items124 over4 terms=
+chart.ornek.fnd-lock  b75250af317350dd  | 900x520 p1 l3 prims108 items52 over4 terms=
+card_view.ornek.fnd-lock  143078c68320533b  | 5 layers
+capsule.ornek.fnd-rsi  7309aa4b9b2be91f  | 390x240 p1 l3 prims3 items122 over4 terms=
+chart.ornek.fnd-rsi  b1b308b13392e0c4  | 900x520 p2 l3 prims162 items161 over7 terms=
+card_view.ornek.fnd-rsi  64adbecdc7cf30f1  | 4 layers
+capsule.oltan.fnd-brk  6528a50e2fd9448d  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+chart.oltan.fnd-brk  277538c096227772  | 900x520 p1 l3 prims107 items52 over4 terms=
+card_view.oltan.fnd-brk  4c1bff9b84be27ac  | 6 layers
+capsule.oltan.fnd-sq  771841ed7539d0c4  | 390x240 p2 l5 prims10 items124 over4 terms=
+chart.oltan.fnd-sq  84da6afbeda73614  | 900x520 p1 l3 prims98 items62 over4 terms=
+card_view.oltan.fnd-sq  87219217d2ff1213  | 5 layers
+capsule.oltan.fnd-div  604f06504379b4b4  | 390x240 p2 l5 prims9 items124 over4 terms=
+chart.oltan.fnd-div  0e15f70a3cd9d9e8  | 900x520 p1 l5 prims91 items46 over4 terms=
+card_view.oltan.fnd-div  10d15fd66fca42ec  | 5 layers
+capsule.oltan.fnd-lock  932280cbff20fbed  | 390x240 p2 l5 prims12 items124 over4 terms=
+chart.oltan.fnd-lock  ab716deea4be82df  | 900x520 p1 l3 prims108 items52 over4 terms=
+card_view.oltan.fnd-lock  91567efd6fc89501  | 5 layers
+capsule.oltan.fnd-rsi  4f650277bf7affec  | 390x240 p1 l3 prims3 items122 over4 terms=
+chart.oltan.fnd-rsi  a47da42cbdd5ca1e  | 900x520 p2 l3 prims162 items161 over7 terms=
+card_view.oltan.fnd-rsi  0c7afd122d167cc6  | 4 layers
+capsule.zemre.fnd-brk  102f95693f731653  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+chart.zemre.fnd-brk  d4c5cf44a544db56  | 900x520 p1 l3 prims107 items52 over4 terms=
+card_view.zemre.fnd-brk  fcc3edef99584b74  | 6 layers
+capsule.zemre.fnd-sq  9a49a0b110803d7e  | 390x240 p2 l5 prims10 items124 over4 terms=
+chart.zemre.fnd-sq  1faf89e1973c17a3  | 900x520 p1 l3 prims98 items62 over4 terms=
+card_view.zemre.fnd-sq  1b7ad610dbf6b7ed  | 5 layers
+capsule.zemre.fnd-div  1cda9ff01258c428  | 390x240 p2 l5 prims9 items124 over4 terms=
+chart.zemre.fnd-div  4f9672fc76d4900e  | 900x520 p1 l5 prims91 items46 over4 terms=
+card_view.zemre.fnd-div  a177e111d3bf0f51  | 5 layers
+capsule.zemre.fnd-lock  101753912073461c  | 390x240 p2 l5 prims11 items124 over4 terms=
+chart.zemre.fnd-lock  b74b73d6c37ee475  | 900x520 p1 l3 prims108 items52 over4 terms=
+card_view.zemre.fnd-lock  da13e24c0c587c22  | 5 layers
+capsule.zemre.fnd-rsi  1060b15cf01bb860  | 390x240 p1 l3 prims3 items122 over4 terms=
+chart.zemre.fnd-rsi  e678b83d4f0c19eb  | 900x520 p2 l3 prims162 items161 over7 terms=
+card_view.zemre.fnd-rsi  80316ed3ff4f4132  | 4 layers
+capsule.tavek.fnd-brk  d9343d58ffe12ebf  | 390x240 p2 l6 prims92 items125 over4 terms=kapanış
+chart.tavek.fnd-brk  a6189ab3d8f6d1c7  | 900x520 p1 l3 prims107 items52 over13 terms=
+card_view.tavek.fnd-brk  5bbde9fe49523bc2  | 6 layers
+capsule.tavek.fnd-sq  c7f4945b6d9dada7  | 390x240 p2 l5 prims9 items124 over4 terms=
+chart.tavek.fnd-sq  8f9f1f0ac75d3bec  | 900x520 p1 l3 prims98 items62 over13 terms=
+card_view.tavek.fnd-sq  66061e1c186e4039  | 5 layers
+capsule.tavek.fnd-div  390f0dcfd57f2994  | 390x240 p2 l5 prims8 items124 over4 terms=
+chart.tavek.fnd-div  961e5150819d4670  | 900x520 p1 l5 prims91 items46 over13 terms=
+card_view.tavek.fnd-div  6254eca5d1fbff87  | 5 layers
+capsule.tavek.fnd-lock  56b56b562d99a78a  | 390x240 p2 l5 prims11 items124 over4 terms=
+chart.tavek.fnd-lock  ed36b6da43ad1ca3  | 900x520 p1 l3 prims108 items52 over13 terms=
+card_view.tavek.fnd-lock  0f33d61f0a75ee8d  | 5 layers
+capsule.tavek.fnd-rsi  73ee10f026915098  | 390x240 p1 l3 prims82 items122 over6 terms=
+chart.tavek.fnd-rsi  01ea767451eaccd5  | 900x520 p2 l3 prims368 items161 over18 terms=
+card_view.tavek.fnd-rsi  63edcffcf235d12e  | 4 layers
+capsule.tavek-tel.fnd-brk  400520b3c1c4068a  | 390x240 p2 l6 prims95 items125 over4 terms=kapanış
+chart.tavek-tel.fnd-brk  e43b0f8fbec964db  | 900x520 p1 l3 prims107 items52 over6 terms=
+card_view.tavek-tel.fnd-brk  f443efc9cf3f3314  | 6 layers
+capsule.tavek-tel.fnd-sq  4dbaf35bcfd9a089  | 390x240 p2 l5 prims10 items124 over4 terms=
+chart.tavek-tel.fnd-sq  c069686c50548d26  | 900x520 p1 l3 prims98 items62 over6 terms=
+card_view.tavek-tel.fnd-sq  223748f333b1b4c6  | 5 layers
+capsule.tavek-tel.fnd-div  8f9cc4ddcafb5dfe  | 390x240 p2 l5 prims8 items124 over4 terms=
+chart.tavek-tel.fnd-div  cf49e7fe71366d5c  | 900x520 p1 l5 prims91 items46 over6 terms=
+card_view.tavek-tel.fnd-div  f431c73143e6ed0f  | 5 layers
+capsule.tavek-tel.fnd-lock  361744f3ceda0fac  | 390x240 p2 l5 prims11 items124 over4 terms=
+chart.tavek-tel.fnd-lock  81c8e1dd02a9864d  | 900x520 p1 l3 prims108 items52 over6 terms=
+card_view.tavek-tel.fnd-lock  a07519f2c9a78f59  | 5 layers
+capsule.tavek-tel.fnd-rsi  1787edbc3adcaa33  | 390x240 p1 l3 prims84 items122 over6 terms=
+chart.tavek-tel.fnd-rsi  d49822c11871f542  | 900x520 p2 l3 prims370 items161 over11 terms=
+card_view.tavek-tel.fnd-rsi  34cfeb15213809f0  | 4 layers
+face.r3.fnd-brk.sentence  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.r3.fnd-brk.capsule  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.r3.fnd-brk.chart  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+face.r3.fnd-parts.sentence  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms=
+face.r3.fnd-parts.capsule  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms=
+face.r3.fnd-parts.chart  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+face.r3.fnd-sq.sentence  b55f644569753bb3  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.r3.fnd-sq.capsule  b55f644569753bb3  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.r3.fnd-sq.chart  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+face.vadrel.fnd-brk.sentence  376d99f8bec461c1  | 390x259 p1 l3 prims12 items3 over1 terms=
+face.vadrel.fnd-brk.capsule  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.vadrel.fnd-brk.chart  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+face.vadrel.fnd-parts.sentence  f3d91181e7cde527  | 390x188 p1 l2 prims8 items2 over1 terms=
+face.vadrel.fnd-parts.capsule  a0bded7d509525fb  | 390x240 p2 l6 prims11 items125 over4 terms=
+face.vadrel.fnd-parts.chart  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+face.vadrel.fnd-sq.sentence  476d503e3f9b3f53  | 390x188 p1 l2 prims8 items2 over1 terms=
+face.vadrel.fnd-sq.capsule  71e4a021714789e3  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.vadrel.fnd-sq.chart  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+face.fotolay.fnd-brk.sentence  f72ddaeac249322e  | 390x228 p3 l6 prims92 items85 over1 terms=
+face.fotolay.fnd-brk.capsule  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.fotolay.fnd-brk.chart  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+face.fotolay.fnd-parts.sentence  6bb73c34c32d500d  | 390x228 p3 l6 prims90 items85 over1 terms=
+face.fotolay.fnd-parts.capsule  048da57d3857b9be  | 390x240 p2 l6 prims11 items125 over4 terms=
+face.fotolay.fnd-parts.chart  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+face.fotolay.fnd-sq.sentence  927d33ac221da3c1  | 390x228 p3 l6 prims92 items100 over1 terms=
+face.fotolay.fnd-sq.capsule  2ecad056e3332e6e  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.fotolay.fnd-sq.chart  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+face.tavrik.fnd-brk.sentence  7683d3955e63e4ef  | 390x156 p1 l2 prims11 items2 over1 terms=kapanış
+face.tavrik.fnd-brk.capsule  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.tavrik.fnd-brk.chart  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+face.tavrik.fnd-parts.sentence  587ae7ddef0c1359  | 390x156 p1 l2 prims8 items2 over1 terms=
+face.tavrik.fnd-parts.capsule  bab509dd6958176c  | 390x240 p2 l6 prims11 items125 over4 terms=
+face.tavrik.fnd-parts.chart  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+face.tavrik.fnd-sq.sentence  5a08e30a438ecfdb  | 390x156 p1 l2 prims8 items2 over1 terms=
+face.tavrik.fnd-sq.capsule  2d19cb43145ed07c  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.tavrik.fnd-sq.chart  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+face.oltan.fnd-brk.sentence  5fee1e8f9ad4219b  | 390x228 p1 l3 prims11 items3 over1 terms=
+face.oltan.fnd-brk.capsule  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.oltan.fnd-brk.chart  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+face.oltan.fnd-parts.sentence  d155b6b709d72164  | 390x228 p1 l3 prims9 items3 over1 terms=
+face.oltan.fnd-parts.capsule  a0bded7d509525fb  | 390x240 p2 l6 prims11 items125 over4 terms=
+face.oltan.fnd-parts.chart  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+face.oltan.fnd-sq.sentence  d7ee05671f165cc0  | 390x228 p1 l3 prims9 items3 over1 terms=
+face.oltan.fnd-sq.capsule  71e4a021714789e3  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.oltan.fnd-sq.chart  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+face.zemre.fnd-brk.sentence  d54027098df55913  | 390x264 p2 l5 prims13 items30 over4 terms=
+face.zemre.fnd-brk.capsule  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış
+face.zemre.fnd-brk.chart  faae69215f1da715  | 900x520 p1 l3 prims107 items52 over4 terms=
+face.zemre.fnd-parts.sentence  8bc35d492d75c778  | 390x264 p2 l5 prims11 items30 over4 terms=
+face.zemre.fnd-parts.capsule  e9c85cbf27b26a1f  | 390x240 p2 l6 prims11 items125 over4 terms=
+face.zemre.fnd-parts.chart  cc7c0a6dbd6ed3bc  | 900x520 p1 l3 prims106 items52 over4 terms=
+face.zemre.fnd-sq.sentence  3773ce582f4ecb8d  | 390x264 p2 l5 prims11 items30 over4 terms=
+face.zemre.fnd-sq.capsule  c6fa47f7b55cc5ba  | 390x240 p2 l5 prims10 items124 over4 terms=
+face.zemre.fnd-sq.chart  a3100320f9fa3313  | 900x520 p1 l3 prims98 items62 over4 terms=
+open.Sentence  -  | deeper=Some(Capsule) shallower=None presenter=Sentence tap=Some(Capsule)
+open.Capsule  -  | deeper=Some(Chart) shallower=Some(Sentence) presenter=Capsule tap=Some(Chart)
+open.Chart  -  | deeper=Some(Evidence) shallower=Some(Capsule) presenter=Chart tap=None
+open.Evidence  -  | deeper=None shallower=Some(Chart) presenter=Chart tap=None
+anchors.sentence  48f81f0f14875cd9  | glyph,headline,ledger
+anchors.capsule  d3a1fd89bf4d1623  | bar:180,evidence:f-brk,fact:f-brk,glyph,ledger,price
+anchors.chart  bc1472c28db860b8  | bar:180,evidence:f-brk,glyph,price
+shared.01  82ba9fd7f3efb247  | 2 elements
+shared.12  e1b238b5f37d986a  | 4 elements
+shared.21  694a097c2cbf10a6  | 4 elements
+shared.02  24e350448c2902c9  | 1 elements
+shared.none1  c81ecad736cd2bbe  | 1 elements

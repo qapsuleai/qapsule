@@ -1,0 +1,317 @@
+# charac/motion: today's output (RF1/G1); a refactor keeps every line
+design.r4  -  | transition=zumlak marks=false live=false
+design.surek  -  | transition=surek marks=true live=false
+design.nabiz  -  | transition=nabiz marks=false live=true
+change.born.before  fa437364dd51c750  | -
+change.born.before.p0  05e2ae36305a30d9  | 1 els
+change.born.before.p0.5  a990be77d9de0a36  | 1 els
+change.born.before.p1  6b811be607aaa1c1  | 1 els
+change.born.none  fa437364dd51c750  | -
+change.born.none.p0  05e2ae36305a30d9  | 1 els
+change.born.none.p0.5  a990be77d9de0a36  | 1 els
+change.born.none.p1  6b811be607aaa1c1  | 1 els
+stamp.born.r4  97c41cb63ffa6adb  | just appeared
+stamp.born.ornek  8e1fd47a08c0d030  | just appeared
+stamp.born.oltan  54e80036bdc2df2e  | just appeared
+stamp.born.zemre  204b7870ea495caa  | just appeared
+stamp.born.tavek  b57509b48812f85e  | just appeared
+stamp.born.tavek-tel  8ff1a528f636e922  | just appeared
+change.strengthened.before  26da711889f5a967  | -
+change.strengthened.before.p0  5068a4628958510f  | 14 els
+change.strengthened.before.p0.5  5e407c8f9e2a05d4  | 14 els
+change.strengthened.before.p1  bb519d8c67eba4ca  | 14 els
+change.strengthened.none  705772974de624fd  | -
+change.strengthened.none.p0  edc730008302059b  | 2 els
+change.strengthened.none.p0.5  662f413df6377b7a  | 2 els
+change.strengthened.none.p1  7e62eb451c6a30ff  | 2 els
+stamp.strengthened.r4  318e43c57acc8954  | just strengthened
+stamp.strengthened.ornek  a5f5475193dfb83f  | just strengthened
+stamp.strengthened.oltan  b1a982bb65b21a52  | just strengthened
+stamp.strengthened.zemre  370b4e7ce7308c74  | just strengthened
+stamp.strengthened.tavek  f99a45a0669f863f  | just strengthened
+stamp.strengthened.tavek-tel  60238b52845192ba  | just strengthened
+change.weakened.before  2ea42ce8252b2d89  | -
+change.weakened.before.p0  b59d3fd6b8f838da  | 13 els
+change.weakened.before.p0.5  684a1648c4baa19d  | 13 els
+change.weakened.before.p1  2ea49cfcfa997c16  | 13 els
+change.weakened.none  f161165791e13625  | -
+change.weakened.none.p0  cf5f5e7c4d2ce863  | 1 els
+change.weakened.none.p0.5  5a8087abcaad3dc6  | 1 els
+change.weakened.none.p1  b568e306aa500b2e  | 1 els
+stamp.weakened.r4  04067be424934e6b  | just weakened
+stamp.weakened.ornek  db52ed6b847b032e  | just weakened
+stamp.weakened.oltan  b078ba2bb858c0b4  | just weakened
+stamp.weakened.zemre  2c5d71849029415b  | just weakened
+stamp.weakened.tavek  7757618a68710d76  | just weakened
+stamp.weakened.tavek-tel  82332742bb453268  | just weakened
+change.no_longer.before  8be8148890334f8a  | -
+change.no_longer.before.p0  b59d3fd6b8f838da  | 13 els
+change.no_longer.before.p0.5  9a1d09dd4c367616  | 13 els
+change.no_longer.before.p1  4baacb814f82cff0  | 13 els
+change.no_longer.none  d9d1391c481d664d  | -
+change.no_longer.none.p0  cf5f5e7c4d2ce863  | 1 els
+change.no_longer.none.p0.5  2524910e5554c6d9  | 1 els
+change.no_longer.none.p1  53bc792b5a8dc714  | 1 els
+stamp.no_longer.r4  6c01811071dfa408  | just stopped holding
+stamp.no_longer.ornek  3d29e579232fee58  | just stopped holding
+stamp.no_longer.oltan  8ff9d57890ef816e  | just stopped holding
+stamp.no_longer.zemre  7fc0228a5a4fb3c0  | just stopped holding
+stamp.no_longer.tavek  2e09b7ee376d0a7c  | just stopped holding
+stamp.no_longer.tavek-tel  cfe7efb1950f219c  | just stopped holding
+change.invalidated.before  a7af1df86d211407  | -
+change.invalidated.before.p0  3b23c096c0aea33d  | 14 els
+change.invalidated.before.p0.5  5bba57bf48361768  | 14 els
+change.invalidated.before.p1  0a68c008071c79b6  | 14 els
+change.invalidated.none  95547dd4566b26fc  | -
+change.invalidated.none.p0  e532fa1a6ab71c0f  | 2 els
+change.invalidated.none.p0.5  38e64377f941df6b  | 2 els
+change.invalidated.none.p1  e23a5207f4881d27  | 2 els
+stamp.invalidated.r4  43d6dc9bf0897063  | just failed
+stamp.invalidated.ornek  3b1fef057c454aa3  | just failed
+stamp.invalidated.oltan  4a3ac5cc43162688  | just failed
+stamp.invalidated.zemre  b6a206acc325e97f  | just failed
+stamp.invalidated.tavek  42c3c052b34ff562  | just failed
+stamp.invalidated.tavek-tel  3cd50199770b94b4  | just failed
+change.realized.before  c48b3643e1b15549  | -
+change.realized.before.p0  5475eaa2c24d07f7  | 14 els
+change.realized.before.p0.5  701ce2a60c705bfc  | 14 els
+change.realized.before.p1  0375d755b8b9277f  | 14 els
+change.realized.none  ac0ca16f2dac838f  | -
+change.realized.none.p0  ac13037da2b7afba  | 2 els
+change.realized.none.p0.5  0d594a0c22145ade  | 2 els
+change.realized.none.p1  9904f60d36db2955  | 2 els
+stamp.realized.r4  10880c3ff20fbab8  | just came true
+stamp.realized.ornek  769f9be5eb63cf32  | just came true
+stamp.realized.oltan  77e5a91f4b507871  | just came true
+stamp.realized.zemre  26d058ca0ddba88b  | just came true
+stamp.realized.tavek  c909afcf96ae1efc  | just came true
+stamp.realized.tavek-tel  2ace1bfa27d4f238  | just came true
+change.expired.before  6eaa88c6e8ca2b63  | -
+change.expired.before.p0  b59d3fd6b8f838da  | 13 els
+change.expired.before.p0.5  defa486f51670d8b  | 13 els
+change.expired.before.p1  f17d59dc89c8ba64  | 13 els
+change.expired.none  d06adbfad48c1832  | -
+change.expired.none.p0  cf5f5e7c4d2ce863  | 1 els
+change.expired.none.p0.5  2a6aba92be255355  | 1 els
+change.expired.none.p1  d3164c7ece7eccc3  | 1 els
+stamp.expired.r4  cecec092c6969166  | just expired
+stamp.expired.ornek  684724b26527cf3f  | just expired
+stamp.expired.oltan  f9956c937bc46b69  | just expired
+stamp.expired.zemre  b1cc9105c5db8300  | just expired
+stamp.expired.tavek  7a158fc6aa745814  | just expired
+stamp.expired.tavek-tel  66a972d961a67b21  | just expired
+change.retracted.before  6328685b17ac6290  | -
+change.retracted.before.p0  b59d3fd6b8f838da  | 13 els
+change.retracted.before.p0.5  defa486f51670d8b  | 13 els
+change.retracted.before.p1  f17d59dc89c8ba64  | 13 els
+change.retracted.none  d92f5fa4b677f50f  | -
+change.retracted.none.p0  cf5f5e7c4d2ce863  | 1 els
+change.retracted.none.p0.5  2a6aba92be255355  | 1 els
+change.retracted.none.p1  d3164c7ece7eccc3  | 1 els
+stamp.retracted.r4  49c5649711d73685  | just withdrawn
+stamp.retracted.ornek  ad80a6dd96ffb38f  | just withdrawn
+stamp.retracted.oltan  5d163ce6070de4ff  | just withdrawn
+stamp.retracted.zemre  977328a081fdb1ee  | just withdrawn
+stamp.retracted.tavek  3c63156faa624ec2  | just withdrawn
+stamp.retracted.tavek-tel  c8cbde269508d0fb  | just withdrawn
+change.value.before  d65ef3f966ae7d6e  | -
+change.value.before.p0  dd222ee4670df9c0  | 12 els
+change.value.before.p0.5  1c86b371f829f9cf  | 12 els
+change.value.before.p1  e0d08286d3bcb752  | 12 els
+change.value.none  85dd5ff3270aa2ef  | -
+change.value.none.p0  816d23a9f7be787b  | 0 els
+change.value.none.p0.5  816d23a9f7be787b  | 0 els
+change.value.none.p1  816d23a9f7be787b  | 0 els
+stamp.value.r4  204d15948783f224  | just updated
+stamp.value.ornek  e6b25c28fd5e9577  | just updated
+stamp.value.oltan  89aafcf0e04a3932  | just updated
+stamp.value.zemre  7c0e08c3b407b2bc  | just updated
+stamp.value.tavek  a986693f0cc4c37c  | just updated
+stamp.value.tavek-tel  ba0c14e869815f92  | just updated
+timing.r4  -  | dur=360 p(100)=0.2777777777777778
+timing.ornek  -  | dur=450 p(100)=0.5517290559385155
+timing.oltan  -  | dur=306 p(100)=0.7238139479326804
+timing.zemre  -  | dur=360 p(100)=0.6547020143947493
+timing.tavek  -  | dur=216 p(100)=0.8532304082147886
+timing.tavek-tel  -  | dur=216 p(100)=0.8532304082147886
+classify.fnd-brk.fnd-brk  -  | None
+classify.fnd-brk.fnd-parts  -  | None
+classify.fnd-brk.fnd-sq  -  | Some(Strengthened)
+classify.fnd-brk.fnd-div  -  | Some(Weakened)
+classify.fnd-brk.fnd-lock  -  | None
+classify.fnd-brk.fnd-real  -  | Some(Realized)
+classify.fnd-brk.fnd-inv  -  | Some(Invalidated)
+classify.fnd-brk.fnd-exp  -  | Some(Expired)
+classify.fnd-brk.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-brk  -  | None
+classify.fnd-parts.fnd-brk  -  | Some(Strengthened)
+classify.fnd-parts.fnd-sq  -  | Some(Strengthened)
+classify.fnd-parts.fnd-div  -  | Some(Weakened)
+classify.fnd-parts.fnd-lock  -  | Some(Value)
+classify.fnd-parts.fnd-real  -  | Some(Realized)
+classify.fnd-parts.fnd-inv  -  | Some(Invalidated)
+classify.fnd-parts.fnd-exp  -  | Some(Expired)
+classify.fnd-parts.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-parts  -  | Some(Born)
+classify.fnd-sq.fnd-brk  -  | Some(Strengthened)
+classify.fnd-sq.fnd-div  -  | Some(Weakened)
+classify.fnd-sq.fnd-real  -  | Some(Realized)
+classify.fnd-sq.fnd-inv  -  | Some(Invalidated)
+classify.fnd-sq.fnd-exp  -  | Some(Expired)
+classify.fnd-sq.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-sq  -  | None
+classify.fnd-div.fnd-brk  -  | Some(Strengthened)
+classify.fnd-div.fnd-sq  -  | Some(Strengthened)
+classify.fnd-div.fnd-real  -  | Some(Realized)
+classify.fnd-div.fnd-inv  -  | Some(Invalidated)
+classify.fnd-div.fnd-exp  -  | Some(Expired)
+classify.fnd-div.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-div  -  | None
+classify.fnd-lock.fnd-brk  -  | Some(Strengthened)
+classify.fnd-lock.fnd-parts  -  | Some(Value)
+classify.fnd-lock.fnd-sq  -  | Some(Strengthened)
+classify.fnd-lock.fnd-div  -  | Some(Weakened)
+classify.fnd-lock.fnd-real  -  | Some(Realized)
+classify.fnd-lock.fnd-inv  -  | Some(Invalidated)
+classify.fnd-lock.fnd-exp  -  | Some(Expired)
+classify.fnd-lock.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-lock  -  | Some(Born)
+classify.fnd-real.fnd-brk  -  | Some(Strengthened)
+classify.fnd-real.fnd-sq  -  | Some(Strengthened)
+classify.fnd-real.fnd-div  -  | Some(Weakened)
+classify.fnd-real.fnd-inv  -  | Some(Invalidated)
+classify.fnd-real.fnd-exp  -  | Some(Expired)
+classify.fnd-real.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-real  -  | None
+classify.fnd-inv.fnd-brk  -  | Some(Strengthened)
+classify.fnd-inv.fnd-sq  -  | Some(Strengthened)
+classify.fnd-inv.fnd-div  -  | Some(Weakened)
+classify.fnd-inv.fnd-real  -  | Some(Realized)
+classify.fnd-inv.fnd-exp  -  | Some(Expired)
+classify.fnd-inv.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-inv  -  | None
+classify.fnd-exp.fnd-brk  -  | Some(Strengthened)
+classify.fnd-exp.fnd-sq  -  | Some(Strengthened)
+classify.fnd-exp.fnd-div  -  | Some(Weakened)
+classify.fnd-exp.fnd-real  -  | Some(Realized)
+classify.fnd-exp.fnd-inv  -  | Some(Invalidated)
+classify.fnd-exp.fnd-ret  -  | Some(Retracted)
+classify.none.fnd-exp  -  | None
+classify.fnd-ret.fnd-brk  -  | Some(Strengthened)
+classify.fnd-ret.fnd-sq  -  | Some(Strengthened)
+classify.fnd-ret.fnd-div  -  | Some(Weakened)
+classify.fnd-ret.fnd-real  -  | Some(Realized)
+classify.fnd-ret.fnd-inv  -  | Some(Invalidated)
+classify.fnd-ret.fnd-exp  -  | Some(Expired)
+classify.none.fnd-ret  -  | None
+nabiz.places.r4  09700a45261a34f2  | true
+nabiz.face.r4.None.true.None  d6133c7aa5355a65  | over2
+nabiz.face.r4.None.true.Some("canlı")  e254ad0f54b426db  | over3
+nabiz.face.r4.None.false.None  5fee1e8f9ad4219b  | over1
+nabiz.overlay.r4.None.0  de6cc42e3378b215  | 1 boxes
+nabiz.overlay.r4.None.400  7b2626ac1cb66abb  | 1 boxes
+nabiz.overlay.r4.None.1500  be9581ca6c01cad6  | 1 boxes
+nabiz.face.r4.Some(Born).true.None  01aa4525422ae5a6  | over3
+nabiz.face.r4.Some(Born).true.Some("canlı")  b89a512315b329ef  | over3
+nabiz.face.r4.Some(Born).false.None  03b89b4e6adac1f3  | over2
+nabiz.overlay.r4.Some(Born).0  87d2d5e59e219d26  | 2 boxes
+nabiz.overlay.r4.Some(Born).400  9e2b8a1e0dc7b78a  | 2 boxes
+nabiz.overlay.r4.Some(Born).1500  52eddf1508fd269c  | 2 boxes
+nabiz.face.r4.Some(Strengthened).true.None  01aa4525422ae5a6  | over3
+nabiz.face.r4.Some(Strengthened).true.Some("canlı")  b89a512315b329ef  | over3
+nabiz.face.r4.Some(Strengthened).false.None  03b89b4e6adac1f3  | over2
+nabiz.overlay.r4.Some(Strengthened).0  7f6cff4827c3a5c5  | 3 boxes
+nabiz.overlay.r4.Some(Strengthened).400  cb305e922e760e54  | 3 boxes
+nabiz.overlay.r4.Some(Strengthened).1500  fd77c7495e20d541  | 3 boxes
+nabiz.face.r4.Some(Weakened).true.None  60118ae138276270  | over3
+nabiz.face.r4.Some(Weakened).true.Some("canlı")  97511d5bdedd6d8b  | over3
+nabiz.face.r4.Some(Weakened).false.None  ffd31eb0c156d32d  | over2
+nabiz.overlay.r4.Some(Weakened).0  1eb1c54c39dd660e  | 2 boxes
+nabiz.overlay.r4.Some(Weakened).400  037affc605ed5009  | 2 boxes
+nabiz.overlay.r4.Some(Weakened).1500  800a0634658f3d29  | 2 boxes
+nabiz.face.r4.Some(Invalid).true.None  60118ae138276270  | over3
+nabiz.face.r4.Some(Invalid).true.Some("canlı")  97511d5bdedd6d8b  | over3
+nabiz.face.r4.Some(Invalid).false.None  ffd31eb0c156d32d  | over2
+nabiz.overlay.r4.Some(Invalid).0  ac0698661b68c1e6  | 2 boxes
+nabiz.overlay.r4.Some(Invalid).400  585e89e0e8fa6087  | 2 boxes
+nabiz.overlay.r4.Some(Invalid).1500  5b0638618bb98fcf  | 2 boxes
+nabiz.face.r4.Some(Closed).true.None  60118ae138276270  | over3
+nabiz.face.r4.Some(Closed).true.Some("canlı")  97511d5bdedd6d8b  | over3
+nabiz.face.r4.Some(Closed).false.None  ffd31eb0c156d32d  | over2
+nabiz.overlay.r4.Some(Closed).0  9a40a127c213a5fb  | 2 boxes
+nabiz.overlay.r4.Some(Closed).400  c5f8527a4fb57118  | 2 boxes
+nabiz.overlay.r4.Some(Closed).1500  7c0fc31e526c085e  | 2 boxes
+nabiz.places.tavek  84419b4f30b8e14d  | true
+nabiz.face.tavek.None.true.None  f41e449af17c89bb  | over2
+nabiz.face.tavek.None.true.Some("canlı")  8ae1960da8c2ffa5  | over3
+nabiz.face.tavek.None.false.None  5735742f85872511  | over1
+nabiz.overlay.tavek.None.0  0ad17438fb6b4d0f  | 1 boxes
+nabiz.overlay.tavek.None.400  5f4478885d4119d4  | 1 boxes
+nabiz.overlay.tavek.None.1500  bb9c437cc48b858d  | 1 boxes
+nabiz.face.tavek.Some(Born).true.None  8b6ecb316f69d462  | over3
+nabiz.face.tavek.Some(Born).true.Some("canlı")  892f5254347736f5  | over3
+nabiz.face.tavek.Some(Born).false.None  4c9bf71a02d59dc3  | over2
+nabiz.overlay.tavek.Some(Born).0  67377ae27a44c46c  | 2 boxes
+nabiz.overlay.tavek.Some(Born).400  b0fe69b4faf8a040  | 2 boxes
+nabiz.overlay.tavek.Some(Born).1500  5504964a93c1dad7  | 2 boxes
+nabiz.face.tavek.Some(Strengthened).true.None  8b6ecb316f69d462  | over3
+nabiz.face.tavek.Some(Strengthened).true.Some("canlı")  892f5254347736f5  | over3
+nabiz.face.tavek.Some(Strengthened).false.None  4c9bf71a02d59dc3  | over2
+nabiz.overlay.tavek.Some(Strengthened).0  739729e8f6353b1c  | 3 boxes
+nabiz.overlay.tavek.Some(Strengthened).400  67a637bb6aa2a4fe  | 3 boxes
+nabiz.overlay.tavek.Some(Strengthened).1500  85f536ed6bdaf616  | 3 boxes
+nabiz.face.tavek.Some(Weakened).true.None  23fdc653a48d26bb  | over3
+nabiz.face.tavek.Some(Weakened).true.Some("canlı")  d7628fac34585466  | over3
+nabiz.face.tavek.Some(Weakened).false.None  2c40ce4819ad7058  | over2
+nabiz.overlay.tavek.Some(Weakened).0  4f9f13e7d8288261  | 2 boxes
+nabiz.overlay.tavek.Some(Weakened).400  5455802314fadbdd  | 2 boxes
+nabiz.overlay.tavek.Some(Weakened).1500  7d97b615beada916  | 2 boxes
+nabiz.face.tavek.Some(Invalid).true.None  23fdc653a48d26bb  | over3
+nabiz.face.tavek.Some(Invalid).true.Some("canlı")  d7628fac34585466  | over3
+nabiz.face.tavek.Some(Invalid).false.None  2c40ce4819ad7058  | over2
+nabiz.overlay.tavek.Some(Invalid).0  2530895e160c1452  | 2 boxes
+nabiz.overlay.tavek.Some(Invalid).400  2ffff0dade47f31a  | 2 boxes
+nabiz.overlay.tavek.Some(Invalid).1500  66f7557157680e95  | 2 boxes
+nabiz.face.tavek.Some(Closed).true.None  2819ce7564c13617  | over3
+nabiz.face.tavek.Some(Closed).true.Some("canlı")  6fe343386f0e7e70  | over3
+nabiz.face.tavek.Some(Closed).false.None  1e6e2d7ce39c7994  | over2
+nabiz.overlay.tavek.Some(Closed).0  6236a3099b9aa8db  | 2 boxes
+nabiz.overlay.tavek.Some(Closed).400  f34a46db6831c198  | 2 boxes
+nabiz.overlay.tavek.Some(Closed).1500  74e1fb73691b1b08  | 2 boxes
+nabiz.places.oltan  ab2dcf37dc7f3b9f  | true
+nabiz.face.oltan.None.true.None  be74a6ff5a415a94  | over2
+nabiz.face.oltan.None.true.Some("canlı")  ee32168d0472d351  | over3
+nabiz.face.oltan.None.false.None  8ef3c15e55f3967d  | over1
+nabiz.overlay.oltan.None.0  be293ace08e110a5  | 1 boxes
+nabiz.overlay.oltan.None.400  0b02d750525ac333  | 1 boxes
+nabiz.overlay.oltan.None.1500  684dfda2ac6c3195  | 1 boxes
+nabiz.face.oltan.Some(Born).true.None  ada5417390f32b18  | over3
+nabiz.face.oltan.Some(Born).true.Some("canlı")  555eec1e067e559d  | over3
+nabiz.face.oltan.Some(Born).false.None  69f24f9ba5b2ccf9  | over2
+nabiz.overlay.oltan.Some(Born).0  cff0ff1760c1d8ba  | 2 boxes
+nabiz.overlay.oltan.Some(Born).400  11fe3586da0ef017  | 2 boxes
+nabiz.overlay.oltan.Some(Born).1500  86b462ace966ee54  | 2 boxes
+nabiz.face.oltan.Some(Strengthened).true.None  ada5417390f32b18  | over3
+nabiz.face.oltan.Some(Strengthened).true.Some("canlı")  555eec1e067e559d  | over3
+nabiz.face.oltan.Some(Strengthened).false.None  69f24f9ba5b2ccf9  | over2
+nabiz.overlay.oltan.Some(Strengthened).0  4f42edbf627cc458  | 3 boxes
+nabiz.overlay.oltan.Some(Strengthened).400  e7bc225beb7958e8  | 3 boxes
+nabiz.overlay.oltan.Some(Strengthened).1500  2d832bc5a7d3a910  | 3 boxes
+nabiz.face.oltan.Some(Weakened).true.None  cd431837c363e60b  | over3
+nabiz.face.oltan.Some(Weakened).true.Some("canlı")  086c6d6c77514735  | over3
+nabiz.face.oltan.Some(Weakened).false.None  c0c174d1f99e8c2b  | over2
+nabiz.overlay.oltan.Some(Weakened).0  ca906e897fc18c3b  | 2 boxes
+nabiz.overlay.oltan.Some(Weakened).400  1fd58175895fa922  | 2 boxes
+nabiz.overlay.oltan.Some(Weakened).1500  3560ac33f96e11ac  | 2 boxes
+nabiz.face.oltan.Some(Invalid).true.None  cd431837c363e60b  | over3
+nabiz.face.oltan.Some(Invalid).true.Some("canlı")  086c6d6c77514735  | over3
+nabiz.face.oltan.Some(Invalid).false.None  c0c174d1f99e8c2b  | over2
+nabiz.overlay.oltan.Some(Invalid).0  f6ac5cc88c59270f  | 2 boxes
+nabiz.overlay.oltan.Some(Invalid).400  35647b0618ee4a33  | 2 boxes
+nabiz.overlay.oltan.Some(Invalid).1500  67f681962015fc47  | 2 boxes
+nabiz.face.oltan.Some(Closed).true.None  27aa48c6f397d50c  | over3
+nabiz.face.oltan.Some(Closed).true.Some("canlı")  33c737003fcad1e4  | over3
+nabiz.face.oltan.Some(Closed).false.None  8b68d8a4ae8ec64f  | over2
+nabiz.overlay.oltan.Some(Closed).0  c0c3add6f9e15877  | 2 boxes
+nabiz.overlay.oltan.Some(Closed).400  75208d93b8a9b700  | 2 boxes
+nabiz.overlay.oltan.Some(Closed).1500  c1b6716daf9c604a  | 2 boxes

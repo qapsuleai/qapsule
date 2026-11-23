@@ -1,0 +1,32 @@
+# charac/compile-options: today's output (RF1/G1); a refactor keeps every line
+default  4a3f39ea1ad4fd77  | 900x520 p3 l7 prims572 items917 over11 terms=
+range  60ba515e02b3b96d  | 900x520 p3 l7 prims157 items256 over11 terms=
+range.clamped  63512b4823807df6  | 900x520 p3 l7 prims155 items252 over11 terms=
+max_points  b2c07413d0c38586  | 900x520 p3 l7 prims147 items233 over11 terms=
+small.no_lod  8b9e37fbdf4b497f  | 200x120 p3 l7 prims572 items917 over9 terms=
+small.lod  3e75c61576a20cd8  | 200x120 p3 l7 prims289 items461 over9 terms=
+roles  bd67f905a45ccef0  | 900x520 p3 l7 prims572 items917 over11 terms=
+light  3abeb27db8f7c4a5  | 900x520 p3 l7 prims572 items917 over11 terms=
+emphasis  260218790d2fc786  | 900x520 p3 l7 prims572 items917 over18 terms=
+r4.cursor  4a3f39ea1ad4fd77  | 900x520 p3 l7 prims572 items917 over11 terms=
+r4.cursor.price  4a3f39ea1ad4fd77  | 900x520 p3 l7 prims572 items917 over11 terms=
+r4.nocursor  4a3f39ea1ad4fd77  | 900x520 p3 l7 prims572 items917 over11 terms=
+ornek.cursor  a655ea0b7b480554  | 900x520 p3 l7 prims572 items917 over11 terms=
+ornek.cursor.price  a655ea0b7b480554  | 900x520 p3 l7 prims572 items917 over11 terms=
+ornek.nocursor  a655ea0b7b480554  | 900x520 p3 l7 prims572 items917 over11 terms=
+oltan.cursor  3550a1c508948697  | 900x520 p3 l7 prims572 items917 over11 terms=
+oltan.cursor.price  3550a1c508948697  | 900x520 p3 l7 prims572 items917 over11 terms=
+oltan.nocursor  3550a1c508948697  | 900x520 p3 l7 prims572 items917 over11 terms=
+zemre.cursor  0714a117b8e5e76a  | 900x520 p3 l7 prims572 items917 over11 terms=
+zemre.cursor.price  0714a117b8e5e76a  | 900x520 p3 l7 prims572 items917 over11 terms=
+zemre.nocursor  0714a117b8e5e76a  | 900x520 p3 l7 prims572 items917 over11 terms=
+tavek.cursor  10b779200d73a89b  | 900x520 p3 l7 prims778 items917 over207 terms=
+tavek.cursor.price  2cf2d33177486d12  | 900x520 p3 l7 prims778 items917 over207 terms=
+tavek.nocursor  3a663cba2bacf45d  | 900x520 p3 l7 prims778 items917 over20 terms=
+tavek-tel.cursor  c4be9fd6691c9f41  | 900x520 p3 l7 prims780 items917 over199 terms=
+tavek-tel.cursor.price  ce084179a3d40815  | 900x520 p3 l7 prims780 items917 over199 terms=
+tavek-tel.nocursor  e2791822b38bc674  | 900x520 p3 l7 prims780 items917 over13 terms=
+bad.look  -  | ERR Invalid layer=- path=/look :: /look: unknown look `nope` (known: r4, ornek, oltan, zemre, tavek, tavek-tel)
+bad.face  -  | ERR Invalid layer=- path=/face :: /face: unknown face `nope` (known: r3, vadrel, fotolay, tavrik, oltan, zemre)
+bad.theme  -  | ERR Invalid layer=- path=/theme :: /theme: unknown theme `nope` (themes: dark, light)
+bad.size  -  | ERR Invalid layer=- path=- :: size 100x50 out of range (200x120 ..= 16384x16384)

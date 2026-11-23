@@ -16,7 +16,7 @@ mod support;
 use std::collections::BTreeSet;
 use std::time::Instant;
 
-use qp_grammar::{compile, depth, CompileOptions};
+use qp_grammar::{compile, depth};
 use qp_schema::grammar::View;
 use qp_schema::protocol::SurfaceKind;
 use qp_schema::Depth;
@@ -81,10 +81,10 @@ fn three_surfaces_three_depths() {
     let cv: View = serde_json::from_value(p["capsule_view"].clone()).unwrap();
     let chart: View = serde_json::from_value(d["view"].clone()).unwrap();
     let prov = h.s.provider();
-    let s = compile(&cv, &prov, &CompileOptions::new(390, 300)).unwrap();
+    let s = compile(&cv, &prov, &qp_designs::options(390, 300)).unwrap();
     assert_eq!(s.x.to_bar - s.x.from_bar + 1, 60);
     assert_eq!(s.panels[0].layers[2].items[0].bar, Some(150));
-    let s = compile(&chart, &prov, &CompileOptions::new(1200, 600)).unwrap();
+    let s = compile(&chart, &prov, &qp_designs::options(1200, 600)).unwrap();
     assert_eq!((s.x.from_bar, s.x.to_bar), (120, 199));
     assert_eq!(s.emphasis[0].from_bar, Some(150));
 }

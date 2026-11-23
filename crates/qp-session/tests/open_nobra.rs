@@ -1,4 +1,4 @@
-//! R5/M20 `nobra` (question cards, `qp_grammar::open::nobra`): the open capsule design a
+//! R5/M20 `nobra` (question cards, `qp_designs::open::nobra`): the open capsule design a
 //! connection chooses with `style {open}`.
 //!
 //! - `style {open}`: `r4` (the default, today's card) and `nobra`; an unknown name is
@@ -23,7 +23,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use qp_grammar::open::Check;
+use qp_designs::open::Check;
 use qp_schema::protocol::{
     CapsuleItem, Language, Opening, OutboundLine, ReplayInit, ReplaySourceKind, ViewState,
 };
@@ -241,7 +241,7 @@ fn question_cards_answer_and_open_on_touch() {
     // The design states its height (560 px in `r4`); the width is the surface's.
     assert_eq!(
         o.frame,
-        Some([W, qp_grammar::open::nobra::height(&qp_grammar::look::R4)])
+        Some([W, qp_designs::open::nobra::height(&qp_look::look::R4)])
     );
     assert_eq!(o.frame, Some([W, 560]));
     let reader = OpenReader::default();
@@ -378,7 +378,7 @@ fn a_withheld_reader_is_told_why_and_sees_no_digit_in_the_questions() {
             // This reader has no data of the instrument: no scene; the page lists the
             // design's question cards as text (A32).
             assert!(o.frame.is_none(), "a scene for the visitor");
-            let rows = qp_grammar::open::text_rows(Some("nobra"), o.to, it, l);
+            let rows = qp_designs::open::text_rows(Some("nobra"), o.to, it, l);
             let keys: Vec<&str> = rows.iter().map(|r| r.key).collect();
             assert_eq!(keys, ["what", "who", "before", "why", "basis"]);
             assert_eq!(rows[3].q, why_q);
@@ -391,7 +391,7 @@ fn a_withheld_reader_is_told_why_and_sees_no_digit_in_the_questions() {
                 }
             }
             // The reference design lists none.
-            assert!(qp_grammar::open::text_rows(None, o.to, it, l).is_empty());
+            assert!(qp_designs::open::text_rows(None, o.to, it, l).is_empty());
             texted += 1;
             input(&mut h, "v", json!({"kind":"close","to":"sentence"}));
         }

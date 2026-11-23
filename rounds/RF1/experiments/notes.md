@@ -6,3 +6,4 @@
 - Ö (Playwright): `$TMPDIR` altında yalnız üç klasör vardı, tarihleri doğrulandı ve silindi:
   `playwright_chromiumdev_profile-nYVsik` (14 Kasım, 6,7 MB), `playwright_chromiumdev_profile-FpDzx7`
   (16 Kasım, 144 KB), `playwright-artifacts-Kmn72H` (16 Kasım, boş). Başka depo dışı klasöre dokunulmadı.
+- S1: d2 kolu (project_changes SetCapsuleState gizli) bugün ulaşılamaz savunma kolu (audit-s1 yeniden denetim); S3.2'de as_reader taşınırken yanına gerekçe yorumu.

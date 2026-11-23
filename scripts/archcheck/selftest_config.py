@@ -11,8 +11,10 @@ import tempfile
 from . import configdiff
 from .citation import Citer
 
-ROWS = {"K85", "K93", "K94"}            # decision rows that "exist"
-FILES = {"rounds/RX/DECISION.md"}         # DECISION.md files that "exist"
+ROWS = {"K1", "K85", "K93", "K94"}       # decision rows in the working tree
+BASE_ROWS = {"K1", "K85"}                 # … and at the base: K93, K94 are new decisions
+CHANGED = {"rounds/RX/DECISION.md": "İstisna crates/qp-b/src/x.rs kabul.",  # names the item
+           "rounds/RZ/DECISION.md": "Başka bir konu."}                       # does not
 
 
 def run(CFG, check):
@@ -24,7 +26,7 @@ def run(CFG, check):
                       "lint.allow": {"count": 1, "items": {"qp-b": 5}}}}
 
     def fails(new_cfg, new_b=base, old_cfg=base_cfg, old_b=base):
-        citer = Citer(ROWS, FILES.__contains__, json.dumps(old_cfg) + json.dumps(old_b))
+        citer = Citer(ROWS, BASE_ROWS, CHANGED, json.dumps(old_cfg) + json.dumps(old_b))
         return configdiff.judge(old_cfg, new_cfg, old_b, new_b, citer).fails
 
     def with_ex(e):
@@ -34,10 +36,14 @@ def run(CFG, check):
         ("new exception without a decision fails", fails(with_ex(ex)) == 1),
         ("new exception citing a new decision row (K93) passes",
          fails(with_ex(dict(ex, status="onaylandı (K93)"))) == 0),
-        ("new exception citing rounds/RX/DECISION.md (exists) passes",
+        ("new exception citing a changed DECISION.md that names it passes",
          fails(with_ex(dict(ex, reason="rounds/RX/DECISION.md"))) == 0),
-        ("new exception citing a missing rounds/RY/DECISION.md fails",
-         fails(with_ex(dict(ex, reason="rounds/RY/DECISION.md"))) == 1),
+        ("R1: a changed DECISION.md that does not name the item fails",
+         fails(with_ex(dict(ex, reason="rounds/RZ/DECISION.md"))) == 1),
+        ("R1: an old round's unchanged rounds/RD2/DECISION.md fails",
+         fails(with_ex(dict(ex, reason="rounds/RD2/DECISION.md"))) == 1),
+        ("R1: an old decision row K1 (not cited in the base config) fails",
+         fails(with_ex(dict(ex, status="onaylandı (K1)"))) == 1),
         ("O2: new exception citing K85 copied from another entry fails",
          fails(with_ex(dict(ex, status="onaylandı (K85)"))) == 1),
         ("O2: new exception citing a non-existent K999 fails",
@@ -53,6 +59,8 @@ def run(CFG, check):
     cases.append(("a raised budget without rule_changes fails", fails(loose) == 1))
     cases.append(("a raised budget with rule_changes citing K93 passes", fails(dict(
         loose, rule_changes=[{"key": "budgets.fn_lines", "reason": "K93"}])) == 0))
+    cases.append(("R1: a raised budget with rule_changes citing old K1 fails", fails(dict(
+        loose, rule_changes=[{"key": "budgets.fn_lines", "reason": "K1"}])) == 1))
     cases.append(("new generated file without a decision fails",
                   fails(dict(base_cfg, generated_files=["crates/qp-b/src/t.rs"])) == 1))
     swap = copy.deepcopy(base_cfg)

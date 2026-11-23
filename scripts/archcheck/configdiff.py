@@ -1,8 +1,8 @@
 """`arch-check --config-diff` (K-9; RG1 denetim B5; RF1/A denetimi O1–O4, D1, D5): prints
 the diff of scripts/arch-config.json and scripts/arch-baseline.json against a base revision
 and judges it. Tightening and removals pass. A loosening passes only with a real, new
-decision citation (citation.py: a `K<n>` row under docs/decisions/ or an existing
-`rounds/<R>/DECISION.md`, not cited anywhere in the base configuration):
+decision citation (citation.py: a `K<n>` row under docs/decisions/ added since the base,
+or a `rounds/<R>/DECISION.md` new or changed since the base that names the entry):
 
 - a new exception / layer override, a raised or dropped `max`, a changed override layer:
   in the entry's `status` / `reason` / `max_note`;
@@ -17,6 +17,12 @@ decision citation (citation.py: a `K<n>` row under docs/decisions/ or an existin
   order (in any layer, whatever its name) is reversed; a layer added, removed or renamed;
   `shell_layer` changed; any key this check does not know — needs a new top-level
   `rule_changes` entry `{"key": "<key>", "reason": "K<n> …"}` (keys are printed).
+
+Known limits: decision rows are read from the working tree, so a change could add its own
+row; every row added since the base is printed (R2). A "moved" baseline item is paired by
+name and crate, not by content: inside one crate an unrelated same-named function can take
+over a vanished item's allowance, and a crate newly declared in this change is free ground
+for moved items and `lint.allow` (R3); the `moved` lines are printed for the reviewer.
 """
 
 import json
@@ -69,13 +75,13 @@ class Verdict:
         self.fails += 1
         self.lines.append(f"FAIL      {text}: {why}")
 
-    def loosen(self, text, *cite_texts):
-        good, bad = self.citer.fresh(*cite_texts)
+    def loosen(self, name, text, *cite_texts):
+        good, bad = self.citer.fresh(name, *cite_texts)
         if good:
             self.lines.append(f"LOOSER    {text} (cites {', '.join(sorted(good))})")
             return True
         why = "; ".join(bad) if bad else "no decision cited"
-        self.fail(text, f"a loosening needs a new decision citation (K<n> row / rounds/<R>/DECISION.md) — {why}")
+        self.fail(text, f"a loosening needs a new decision (K<n> row added since the base / changed rounds/<R>/DECISION.md naming `{name}`) — {why}")
         return False
 
     def rule_change(self, key, text):
@@ -93,7 +99,7 @@ def _cover(old, new, v):
     """`rule_changes` keys that are new and carry a real, new citation."""
     seen = {(r.get("key"), r.get("reason")) for r in old.get("rule_changes", [])}
     for r in new.get("rule_changes", []):
-        if (r.get("key"), r.get("reason")) not in seen and v.citer.fresh(r.get("reason", ""))[0]:
+        if (r.get("key"), r.get("reason")) not in seen and v.citer.fresh(r.get("key", ""), r.get("reason", ""))[0]:
             v.covered.add(r.get("key"))
 
 
@@ -103,7 +109,7 @@ def judge_config(old, new, v):
     og = {g if isinstance(g, str) else g.get("path") for g in old.get("generated_files", [])}
     ng = {g if isinstance(g, str) else g.get("path"): g for g in new.get("generated_files", [])}
     for path in sorted(ng.keys() - og):
-        v.loosen(f"new generated file {path}", *_entry_text(ng[path]))
+        v.loosen(path, f"new generated file {path}", *_entry_text(ng[path]))
     for path in sorted(og - ng.keys()):
         v.ok("removed", f"generated file {path}")
     ob, nb = old.get("budgets", {}), new.get("budgets", {})
@@ -133,21 +139,21 @@ def _judge_exceptions(old, new, v):
     for k in sorted(oe.keys() - ne.keys()):
         v.ok("removed", f"exception {oe[k].get('id', '')} [{k[0]}] {k[1]}")
     for k in sorted(ne.keys() - oe.keys()):
-        v.loosen(f"new exception {ne[k].get('id', '')} [{k[0]}] {k[1]}", *_entry_text(ne[k]))
+        v.loosen(k[1], f"new exception {ne[k].get('id', '')} [{k[0]}] {k[1]}", *_entry_text(ne[k]))
     for k in sorted(ne.keys() & oe.keys()):
         a, b = oe[k], ne[k]
         if "max" in a and ("max" not in b or b["max"] > a["max"]):
-            v.loosen(f"exception [{k[0]}] {k[1]}: max {a['max']} -> {b.get('max', 'none')}", *_entry_text(b))
+            v.loosen(k[1], f"exception [{k[0]}] {k[1]}: max {a['max']} -> {b.get('max', 'none')}", *_entry_text(b))
         elif "max" in b and ("max" not in a or b["max"] < a["max"]):
             v.ok("tighter", f"exception [{k[0]}] {k[1]}: max {a.get('max', 'none')} -> {b['max']}")
     oo, no = old.get("layer_overrides", {}), new.get("layer_overrides", {})
     for c in sorted(oo.keys() - no.keys()):
         v.ok("removed", f"layer override {c}")
     for c in sorted(no.keys() - oo.keys()):
-        v.loosen(f"new layer override {c} -> {no[c].get('layer')}", *_entry_text(no[c]))
+        v.loosen(c, f"new layer override {c} -> {no[c].get('layer')}", *_entry_text(no[c]))
     for c in sorted(no.keys() & oo.keys()):
         if no[c].get("layer") != oo[c].get("layer"):
-            v.loosen(f"layer override {c}: {oo[c].get('layer')} -> {no[c].get('layer')}", *_entry_text(no[c]))
+            v.loosen(c, f"layer override {c}: {oo[c].get('layer')} -> {no[c].get('layer')}", *_entry_text(no[c]))
 
 
 def crates_of(cfg):
@@ -206,7 +212,7 @@ def judge_baseline(old, new, v, new_crates=frozenset()):
         for k in sorted(ni.keys() & oi.keys()):
             a, b = _val(oi[k]), _val(ni[k])
             if b > a:
-                v.loosen(f"baseline {rule} {k}: {a} -> {b}", *_entry_text(ni[k]))
+                v.loosen(k, f"baseline {rule} {k}: {a} -> {b}", *_entry_text(ni[k]))
             elif b < a:
                 v.ok("tighter", f"baseline {rule} {k}: {a} -> {b}")
         accepted = 0
@@ -222,7 +228,7 @@ def judge_baseline(old, new, v, new_crates=frozenset()):
                 v.ok("spread", f"baseline {rule} {k} ({b}; new crate; the rule's total does not grow)")
                 accepted += 1
             else:
-                accepted += v.loosen(f"new baseline item {rule} {k} ({b})", *_entry_text(ni[k]))
+                accepted += v.loosen(k, f"new baseline item {rule} {k} ({b})", *_entry_text(ni[k]))
         for k in sorted(gone):
             v.ok("removed", f"baseline {rule} {k}")
         a, b = orules.get(rule, {}).get("count", 0), nrules[rule].get("count", 0)
@@ -271,7 +277,12 @@ def main(root, rev=None):
         with open(os.path.join(root, f), encoding="utf-8") as fh:
             cur.append(json.load(fh))
     old = [json.loads(t) if t else {} for t in old_text]
-    v = judge(old[0], cur[0], old[1], cur[1], Citer.from_repo(root, "\n".join(old_text)))
+    citer = Citer.from_repo(root, base, "\n".join(old_text))
+    for k in sorted(citer.new_rows, key=lambda x: int(x[1:])):
+        print(f"decision row added since the base (R2: check who wrote it): {k}")
+    for p in sorted(citer.changed):
+        print(f"DECISION.md new or changed since the base: {p}")
+    v = judge(old[0], cur[0], old[1], cur[1], citer)
     for line in v.lines:
         print(line)
     print(f"config-diff: {len(v.lines)} change(s), {v.fails} uncited loosening(s)")

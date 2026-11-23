@@ -1,15 +1,23 @@
-"""Decision citations for `--config-diff` (K-9; RF1/A denetimi O2). A citation counts only
-if it is real and new:
+"""Decision citations for `--config-diff` (K-9; RF1/A denetimi O2, R1). A loosening must
+cite a **new** decision taken for it:
 
-- `K<n>`: a row `| K<n> | …` exists in a Markdown file under docs/decisions/ (working tree);
-- `rounds/<R>/DECISION.md`: that file exists (working tree);
+- `K<n>`: a row `| K<n> | …` under docs/decisions/ in the working tree that is **not** in the
+  base revision's docs/decisions/ (the decision was added after the base);
+- `rounds/<R>/DECISION.md`: the file is new or changed against the base **and** names the
+  entry (exception item, baseline item, override crate, generated path or rule_changes key).
 
-and the same citation appears nowhere in the base revision's arch-config.json /
-arch-baseline.json (so a decision already used for another entry cannot be copied over)."""
+Old decisions, old rounds' DECISION.md files and citations already present anywhere in
+the base configuration do not count.
+
+Known limit (R2): the decision files are read from the working tree, so a change can add
+its own decision row; `--config-diff` prints every row added since the base so the
+reviewer sees it (decision rows are written by the main-line session only).
+"""
 
 import glob
 import os
 import re
+import subprocess
 
 CITE = re.compile(r"\bK\d+\b|\brounds/[A-Za-z0-9_-]+/DECISION\.md\b")
 ROW = re.compile(r"^\|\s*(K\d+)\s*\|", re.M)
@@ -20,30 +28,46 @@ def found(*texts):
 
 
 class Citer:
-    def __init__(self, rows, exists, base_text):
-        self.rows = set(rows)          # K numbers with a decision row
-        self.exists = exists           # path -> bool
-        self.used = found(base_text)   # citations already in the base configuration
+    def __init__(self, rows, base_rows, changed_files, base_text):
+        self.new_rows = set(rows) - set(base_rows)  # decision rows added since the base
+        self.changed = dict(changed_files)          # DECISION.md path -> text, new/changed
+        self.used = found(base_text)                # citations already in the base config
 
     @classmethod
-    def from_repo(cls, root, base_text):
+    def from_repo(cls, root, base, base_text):
+        def git(*a):
+            r = subprocess.run(["git", *a], cwd=root, capture_output=True, text=True)
+            return r.stdout if r.returncode == 0 else ""
+
         rows = set()
         for f in glob.glob(os.path.join(root, "docs", "decisions", "**", "*.md"), recursive=True):
             with open(f, encoding="utf-8") as fh:
                 rows |= set(ROW.findall(fh.read()))
-        return cls(rows, lambda p: os.path.isfile(os.path.join(root, p)), base_text)
+        base_rows = set()
+        for f in git("ls-tree", "-r", "--name-only", base, "docs/decisions").split():
+            if f.endswith(".md"):
+                base_rows |= set(ROW.findall(git("show", f"{base}:{f}")))
+        names = set(git("diff", "--name-only", base, "--", "rounds").split())
+        names |= set(git("ls-files", "--others", "--exclude-standard", "--", "rounds").split())
+        changed = {}
+        for p in sorted(n for n in names if re.fullmatch(r"rounds/[A-Za-z0-9_-]+/DECISION\.md", n)):
+            if os.path.isfile(os.path.join(root, p)):
+                with open(os.path.join(root, p), encoding="utf-8") as fh:
+                    changed[p] = fh.read()
+        return cls(rows, base_rows, changed, base_text)
 
-    def real(self, c):
-        return c in self.rows if c.startswith("K") else self.exists(c)
-
-    def fresh(self, *texts):
-        """(valid new citations, rejected ones with the reason)."""
+    def fresh(self, name, *texts):
+        """(valid new citations for the entry `name`, rejected ones with the reason)."""
         ok, bad = set(), []
         for c in sorted(found(*texts)):
-            if not self.real(c):
-                bad.append(f"{c}: no such decision row / file")
-            elif c in self.used:
-                bad.append(f"{c}: already cited in the base configuration (not a new decision)")
+            if c in self.used:
+                bad.append(f"{c}: already cited in the base configuration")
+            elif c.startswith("K") and c not in self.new_rows:
+                bad.append(f"{c}: not a decision row added since the base")
+            elif not c.startswith("K") and c not in self.changed:
+                bad.append(f"{c}: not new or changed since the base")
+            elif not c.startswith("K") and name not in self.changed[c]:
+                bad.append(f"{c}: does not name `{name}`")
             else:
                 ok.add(c)
         return ok, bad

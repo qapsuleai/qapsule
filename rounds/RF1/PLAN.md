@@ -1,257 +1,332 @@
-# RF1 — Bölme planı (v1)
+# RF1 — Bölme planı (v2)
 
-Durum: **taslak v1, karar noktasından önce.** Kod değişmedi. Ölçümler `05430e06` kodunda,
-`scripts/refactor/graph.py` ile (dökümler `experiments/graph/`). Satır sayıları `arch-check`
-sayımıdır (test dışı; üretilmiş dosya sayılmaz).
+Durum: **v2, karar noktasında.** v1 (`eb86a055`) iki bağımsız eleştiriden geçti
+(`experiments/critique-1.md` uygulanabilirlik, `critique-2.md` sonraki round'ların yükü); cevaplar
+§9'da. Kod değişmedi. Ölçümler `05430e06` kodunda, `scripts/refactor/graph.py` ile (dökümler ve
+eşlemeler `experiments/graph/`). Satırlar `arch-check` sayımıdır.
+
+**v1'den en önemli fark:** v1 kapsül yaşamını, iddiaları ve izlemeyi otoriteden ayırmayı öneriyordu.
+Eleştiri ve ölçüm bunun bu round'da davranışı bayt eşit tutarak yapılamayacağını gösterdi. Nedenleri
+§9'da (B1–B5): döngüler, `as_reader` takası, iki dünya, yeniden giriş, olay sırası. v2'de bu
+üçlü **otorite çekirdeğinde birlikte kalır**, bugünkü olay sırası aynen korunur. Dışarı çıkanlar
+şunlar: saf işlemler, okuma, görüntüleyici, izleme (ilk gerçek alt sistem), yansı, barındırma. Yeni
+round'lar için **alt sistem sözleşmesi** ve sabit adlı **fazlar** kurulur.
 
 ## 0. Değişmez ve yöntem
 
-- Davranış değişmez: `scripts/refactor/compare.sh` her birleştirmeden önce dalda, sonra `main`'de
-  bayt eşit. Protokol, şema, komut satırı, MCP yüzeyi aynı. Rust dışa açık yolları değişebilir;
-  her değişen yol `experiments/paths.md`'ye yazılır.
-- **Taşı, sonra yeniden yaz.** Bir öğe ya taşınır (öğe parmak izi "değişmedi",
-  `scripts/refactor/moved.py`) ya da yeniden yazılır (sayılır, listelenir). Gövdesi değişecek
-  her yerde önce karakterizasyon sınaması yazılır ve **ayrı commit** olarak değişiklikten önce girer;
-  sınamalar `experiments/new-tests.txt`'e adıyla yazılır (tutanakta test adları bu listeyle süzülür).
-- Her iş kendi dalında ve worktree'sinde; yazan ajan ≠ denetçi ajan; kesin hüküm
-  `target/wt/<iş>` klasöründe, iş bitince silinir. Aynı crate'e aynı anda tek ajan.
+- Davranış değişmez. `scripts/refactor/compare.sh` (270 kalem) her birleştirmeden önce dalda,
+  sonra `main`'de bayt eşit çıkmalı. Protokol, şema, komut satırı ve MCP yüzeyi aynı kalır.
+  `qp-schema` belge yorumlarına (eskimiş olsalar bile) dokunulmaz: şema dışa aktarımına giriyorlar.
+- **Taşı, sonra yeniden yaz.** Taşınan öğe `scripts/refactor/moved.py` ile "değişmedi" çıkar.
+  Yeniden yazılan her öğe sayılır ve listelenir (`experiments/rewritten.md`).
+- Gövdesi değişecek her yer için önce karakterizasyon sınaması yazılır, ayrı commit olarak
+  değişiklikten önce girer. Sınamaların adı `experiments/new-tests.txt`'e yazılır.
+- Her iş kendi dalında ve worktree'sinde yapılır. Yazan ajan ile denetçi ajan ayrıdır. Kesin
+  hüküm `target/wt/<iş>` altında verilir. Aynı crate'e aynı anda tek ajan yazar.
+- Dışa açık Rust yolu değişiklikleri `experiments/paths.md`'ye yazılır.
 
-## 1. Bugünkü grafik (ölçülmüş)
+## 1. Bugünkü grafik (ölçülmüş; v1'den aynen)
 
-### 1.1 `qp-session` (31.999 satır, 84 dosya)
+### 1.1 `qp-session` (31.999 satır)
 
-`Session`'ın 57 alanı, 295 yöntemi var; yöntemler 35 dosyadaki `impl Session` bloklarına dağılmış.
+- **Bileşen.** 84 dosya; `Session`'ın 57 alanı ve 295 yöntemi var. **Güçlü bağlı bileşen 25.895
+  satır** (31 grup).
+- **Bileşeni bağlayanlar:**
+  - `impl Session`'ın 35 dosyaya dağılması;
+  - iki dünya takası (`public.rs:58-192`, 16 alan);
+  - `as_reader` takası (`project.rs:452-540`);
+  - `conns` (20 grup okuyor);
+  - yeniden giriş zinciri (`run_capsules → engine_entry_with → committed → …`, `accept.rs:151-231`).
+- **Yöntem arayüzü.** Otorite → kapsül tarafı 35 yöntem; okuma → (kapsül, otorite, veri) 9/5/3;
+  görüntüleyici ← otorite 6.
+- **İşlemler (`ops/*`).** Test dışı kodda `Session`'ı çağırmıyor. v1'deki "3 yöntem" ölçüm
+  artığıydı: `E::build` ve bir trait yöntemi. Dışarı bağları yalnız birkaç serbest öğe:
+  - `watch::{intent_visible, visible_ids, expand_watch, WATCH_PREFIX}`
+  - `live::closure_of`
+  - `session::ENGINE_PRINCIPAL`
+  - `present`'in `DocProvider` tipi
 
-**Güçlü bağlı bileşen: 25.895 satır, 31 grup** (yöntem çağrısı + `crate::` yolu kenarları; ayrıntı
-`experiments/graph/session.txt`). Bileşen dışında 6.104 satır: `apply`, `error`, `suggest`,
-`values`, `plane`, `locate`, `explain`, `host/*`, `replica/{follow,judge,tape}`.
+### 1.2 `qp-grammar` (20.964)
 
-Gruplar arası yöntem arayüzü (`experiments/graph/session-interface.txt`; farklı yöntem adı sayısı):
-
-| Çağıran → çağrılan | Yöntem | Ne |
-|---|---|---|
-| otorite → kapsül | **35** | iki dünya (kamu dünyası, `in_world`, `pub_*`, `seq_to`, `commit_public` …) 17; okuyucu izdüşümü (`as_reader`, `proj_for`, `project_entry`, `withheld_for`, `lang_of`) 7; kapsül koşusu (`run_capsules`, `start_capsules`, `stories_*`) 5; iddia/itiraz/yorum denetimi ve olayları 6 |
-| kapsül → otorite | 17 | `build`, `seq`, `clock`, `principal`, `responsible`, `engine_entry_with`, `entry_events*`, `handle_raw`, `note_writers`, `cond_blocked`, `data_changed`, `market_item` |
-| veri (canlı yol) → otorite / kapsül | 10 / 10 | |
-| okuma → kapsül / otorite / veri | 9 / 5 / 3 | |
-| yansı → otorite / kapsül / okuma | 10 / 8 / 3 | yansı bir `Session` tutar (istemci aynası) |
-| barındırma → otorite / kapsül | 15 / 4 | dışa açık API |
-| **işlemler → otorite** | **3** | `build`, `build_with`, `document` |
-| otorite → görüntüleyici / veri / okuma / ajan | 6 / 4 / 2 / 1 | |
-
-Alanların dağılımı (en geniş): `conns` 20 grup; `runner` 8; `other` (kamu dünyası) 6;
-`pending_stamps`, `pending_views`, `in_public`, `pending_pub` 4. Öbür 26 alan otoritenin kendi
-alanı ya da başka bir yapıda aynı adla geçtiği için ayrı sayılmadı (`doc`, `log`, `clock` …).
-
-**Okuma:** bileşeni bir arada tutan üç şey var: (1) `impl Session`'ın dosyalara dağılması
-(Rust'ta başka crate'te yazılamaz); (2) **iki dünya** düzeneği — lisanslı akış varken
-otorite alanlarının (doküman, günlük, önbellekler) kamu dünyasıyla takas edilmesi
-(`public.rs`, `worlds.rs`); (3) `conns` (bağlantı başına bakış durumu) her yerden okunuyor.
-İşlemler (`ops/*`, 8,3 bin) bileşende yalnız birkaç serbest fonksiyonla tutunuyor:
-`watch::{intent_visible, visible_ids, expand_watch, WATCH_PREFIX}`, `live::closure_of`,
-`present::presenter_view`, `session::ENGINE_PRINCIPAL`.
-
-### 1.2 `qp-grammar` (20.964 satır)
-
-| Bileşen | Satır | Gruplar |
-|---|---|---|
-| Döngü A | 13.207 | `compile`, `present` (depth, gesture, motion), `provider`, `faces`, `open`, `transitions` |
-| Döngü B | 2.176 | `look` ↔ `advances` (üretilmiş, sayılmaz) |
-| Dışarıda | 5.581 | `glyph` 1.981, `stories` 2.243, `feeds` 700, `theme` 373, `detmath` 170, `error` 76 |
-
-Çekirdek → tasarım kenarları (kesilecek olanlar; ayrıntı `experiments/graph/grammar.txt`):
-`compile/{scene,frame,layer/prepare}` → `faces` (başlık şablonu, `HeadlineFn`);
-`compile/{terms,layer/prepare}`, `provider` → `open` (`layer_term`, `field_text`, `text`,
-`DeviceCheck`); `present/depth` → `faces` (`is_face`, `face_view*`), `stories` (`by_name`);
-`present/motion` → `transitions` (`TRANSITIONS`, `nabiz::*`, `surek::ramp`). Çekirdek →
-`look`, `glyph`, `theme` kenarları aşağı doğrudur (onlar çekirdeği tanımaz).
+- **Döngü A (13.207):** `compile`, `present`, `provider`, `faces`, `open`, `transitions`.
+- **Döngü B:** `look` ↔ `advances`.
+- **Dışarıda (5.581):** `glyph`, `stories`, `feeds`, `theme`, `detmath`, `error`.
+- **Derleyiciden tasarıma gerçek çağrı noktası 5:**
+  - `scene.rs:46` başlık şablonu
+  - `prepare.rs:100,117` açılmış kapsül metni
+  - `terms.rs:149,182` katman terimi
+- **`present/depth` ve `present/motion`:** tasarımlara bakan ince sarmalayıcılar; tasarımla
+  birlikte yukarı gidebilirler.
 
 ### 1.3 `qp-capsule` (13.230)
 
-`voice/` 4,75 bin; çekirdek `voice`'u çağırmıyor (döngü yok). `qp-voice → qp-capsule, qp-facts`.
+`voice/` 4,75 bin; iki yönde de kenar yok, kullandığı her öğe `pub` (eleştiri 1 doğruladı).
 
-## 2. Katman içi sıra (K-2, `arch-check`)
+## 2. Katman içi sıra (A2; `rf1/a-tools` dalında, denetimde)
 
-`arch-config.json`'a her katman için **bildirilmiş sıra** gelir: `"order": ["qp-facts",
-"qp-capsule", …]`. Aynı katmanda `a → b` ancak `b` sırada `a`'dan önceyse geçer; sıra dışı ya
-da bildirilmemiş yan kenar kesin hata. Sıra listesi döngü içeremez (liste olduğu için doğal
-olarak). İ2'nin 5 kalemi bu sırayla kapanır, istisna listesinden silinir. Ayrıca: fonksiyon boyu
-istisnalarına tavan (`fn.lines` mandalı istisna kalemlerinde de), `verify.sh`'a `main`'e göre
-`arch-config.json` / `arch-baseline.json` farkını basan adım (`config-diff`; yeni istisna
-satırı karar numarası taşımıyorsa kırmızı), öz-sınamaya sıra ihlali ve sahte sıra örnekleri.
+- `arch-config.json`'da her katmanın bir `order` listesi var. Aynı katmanda `a → b` kenarı yalnız
+  `b` sırada `a`'dan önceyse geçer. Yapılandırmanın kendisi `layer.order` kuralıyla denetlenir.
+- İ2'nin 5 kalemi kapandı.
+- `fn.lines` ve `file.hard` istisnaları tavanlı.
+- `verify.sh`'ta `config` adımı var: `main`'e göre yapılandırma ve taban çizgisi farkı. Karar
+  numarası anmayan gevşetme kırmızıya düşer.
 
 ## 3. Hedef crate'ler
 
-### 3.1 Gramer (alan katmanı; sıra aşağıdan yukarı)
+### 3.1 Gramer (alan; sıra: `qp-source < qp-facts < qp-look < qp-glyph < qp-grammar < qp-designs < qp-capsule < qp-voice`)
 
 | Crate | İçerik | Tahmini satır | Bağımlı |
 |---|---|---|---|
-| `qp-look` | görünüş kaydı ve tipleri (`look/*`, `advances` üretilmiş), tema (`theme`), gramer hatası (`error`), `detmath` | ≈ 2,8 bin | qp-schema |
+| `qp-look` | görünüş kaydı ve tipleri (`look/*`, `advances` üretilmiş), `theme`, gramer hatası (`error`), `detmath` | ≈ 2,8 bin | qp-schema |
 | `qp-glyph` | anlam işareti çizimi (`glyph/*`) | ≈ 2,0 bin | qp-look |
-| `qp-grammar` | derleyici: `compile/*` (alfabe dahil), `present/{depth,gesture,motion}` çekirdeği, `provider`; **tasarım kaydı arayüzü** (`Designs`) ve tasarım tiplerinin sözlüğü (`FaceDesign`, `HeadlineFn`, `DeviceCheck`, `StoryDesign`, `MotionDesign`, `Frame`, `LiveMarks`) | **≈ 8,4 bin → R7'ye ≈ 3,6 bin pay** | qp-look, qp-glyph, qp-calendar |
-| `qp-designs` | adlı tasarımlar: yüzler (`faces`), açılmış kapsül (`open`), hikâye çizelgeleri (`stories`), akış düzenleri (`feeds`), geçişler (`transitions`), hareket tasarımları; `Designs`'ın varsayılan kaydı `qp_designs::REGISTRY` | ≈ 8,5 bin | qp-grammar |
+| `qp-grammar` | **derleyici:** `compile/*` (alfabe dahil), `present/{depth,gesture}` çekirdeği, `provider`; tasarım kaydının arayüzü (`Designs`: 5 çağrı noktasının fonksiyonları) ve o noktaların tipleri (`HeadlineFn`, `DeviceCheck`) | **≈ 7,5 bin → R7'ye ≈ 4,5 bin pay** | qp-look, qp-glyph, qp-calendar |
+| `qp-designs` | **adlı tasarımlar:** yüzler, açılmış kapsül, hikâye çizelgeleri, akış düzenleri, geçişler, hareket tasarımları (`present/motion`), `depth`'in tasarım sarmalayıcıları; varsayılan kayıt | ≈ 9,4 bin | qp-grammar |
 
-**Enjeksiyon:** derleyici adla tasarım bulacağı her yerde `&dyn Designs` alır (`CompileOptions`
-içinde ya da derinlik fonksiyonlarına parametre; derleyicinin kendi varsayılanı yok — tasarım
-tarafını tanımaz). `Designs` yöntemleri bugünkü serbest fonksiyonların birebir karşılığı:
-`headline_template`, `headline_text`, `is_face`, `face_view`, `face_view_in`, `layer_term`,
-`voice_terms_in`, `field_text`, `open_text`, `story`, `transition`, `motion`. Çağıranlar
-(`qp-session`, `qp-shellcore`, `qp-cli`, `qp-render` testleri) `&qp_designs::REGISTRY` verir.
-`DeviceCheck`, `HeadlineFn` gibi tipler çekirdeğe iner (sözlük); örnekleri yukarıda kalır.
-`cargo tree -p qp-grammar` tasarım crate'ini göstermez (VERIFY 10).
+**Enjeksiyon dar tutulur:** yalnız 5 çağrı noktası enjekte edilir.
 
-**R7 işaretleri** (seviye etiketi, kırılım çentiği, kanıt bandı, niyet etiketi) çekirdeğin
-alfabesine (`qp-grammar/src/compile/alphabet/`) girer: ≈ 3,6 bin pay. Görünüş değerleri
-`qp-look`'ta (2,8 bin; 9 bin pay).
+- **Biçim:** `Designs` bir fonksiyon göstergesi tablosudur (`dyn` yok).
+- **Kim verir:** `CompileOptions`'ın derleyici dışından gelen tek alanıdır. Bugünkü ≈ 70
+  `CompileOptions::new` çağrısı aynı kalır. Bunun için `qp-designs` bir kurucu sunar; çağıranların
+  yolu `qp_designs::options(…)` olur. Bu yol değişiklikleri listelenir.
+- **Türetmeler:** `Debug`/`PartialEq` türetmeleri korunur. Eşitlik için tablo kimliği (adı)
+  karşılaştırılır.
+- **WASM:** varsayılan paket bugün hikâye, geçiş ve hareket kodu taşımıyor. Tablo yalnız 5
+  fonksiyonu gösterdiği için bunlar pakete girmez. G2b'de ölçülür; ±%2 dışına çıkarsa durulur.
+- **Doğrulama:** `cargo tree -p qp-grammar` tasarım crate'ini göstermez.
+- **Kopya kayıt yok:** `FACES`, `TRANSITIONS`, `PRESENTED_*` tasarımla birlikte yukarı gider.
+  Derleyicinin bunlara başvurusu 5 noktadan ibarettir.
 
-**`prepare` (885 satır, İ6):** sırayla şu adlandırılmış adımlara: `layer_source`
-(veri kaynağı ve satırlar), `capsule_texts` (ses/başlık/açılmış kapsül metinleri),
-`check_encoding` (opaklık, genişlik, x/x2 kuralları), `mark_rows` (işarete göre `match`; her
-kol kendi fonksiyonu), `finish` (çapa, etiket, `Prepared`). Aradaki değişken yığını bir
-`PrepState` yapısında. Karakterizasyon: katman türü (8 işaret) × veri kaynağı (seri, olgu,
-bulgu, sabit) × görünüş başına `Prepared` dökümü (`Debug` çıktısının özeti, `tests/prepare_*`).
+**R7 işaretleri** (seviye etiketi, kırılım çentiği, kanıt bandı, niyet etiketi, tutamaç)
+derleyicinin alfabesine girer. Alfabe bugün 926 satır; pay ≈ 4,5 bin. Çizim türlerinin
+geometrisi gramerin altında bir alan crate'inde doğar (§5).
 
-### 3.2 Ses (alan)
+**`prepare` (885, İ6).** Adlandırılmış adımlara bölünür:
 
-`qp-voice` = `qp-capsule/src/voice/*` saf taşıma (≈ 4,75 bin). Sıra: `qp-facts < qp-capsule <
-qp-voice`. `qp-capsule` ≈ 8,5 bin. Çağıranlar (`qp-session` `voices` yeniden dışa aktarımı,
-`qp-shellcore`) yol düzeltmesiyle. Onaydan önce yapılabilir (GOAL §2).
+- `layer_source`
+- `capsule_texts`
+- `check_encoding`
+- `mark_rows` (işaret başına kol fonksiyonu)
+- `finish`
+
+Aradaki değişkenler `PrepState`'te toplanır. Karakterizasyon, katman işareti (8) × veri kaynağı ×
+görünüş başına `Prepared` dökümüdür.
+
+### 3.2 Ses
+
+`qp-voice`, `voice/*`'ın saf taşımasıdır (4,75 bin). Sonrasında `qp-capsule` ≈ 8,5 bin.
 
 ### 3.3 Oturum (oturum katmanı; sıra aşağıdan yukarı)
 
-| # | Crate | İçerik | Tahmini | Durum / sahibi |
+| # | Crate | İçerik | Tahmini | Tür |
 |---|---|---|---|---|
-| 1 | `qp-ops` | **işlemler:** işlem açılımı (`expand`, `gops`), seçiciler ve anlamla başvuru (`select`, `locate`), kanonik biçim (`canon`), özet (`summary`), değişim uygulama ve yeniden oynatma (`apply`), protokol hatası kurucusu (`error`, `suggest`), değer önbelleği (`values`), veri düzlemi (`plane`), sunucu (`present`) | ≈ 10,0 bin | saf fonksiyonlar; durum yok. Kendi dışından tek ihtiyaç bugün `watch` ve `live`'dan 5 serbest fonksiyon: işlem açılımı kaydına (aşağıda) dönüşür |
-| 2 | `qp-subsystem` | **alt sistem sözleşmesi:** `Subsystem` trait'i, `Host` arayüzü (otoritenin alt sisteme verdiği dar görünüm), kayıt tipi (`Registry`), olay ve kanca tipleri, işlem açılımı kaydı (`OpExpander`) | ≈ 0,6 bin | yeni |
-| 3a | `qp-watch` | izleme niyeti: `watch` + işlem açılımı kolları (`AddWatch`, `RemoveWatch`) kayıtla | ≈ 0,5 bin | alt sistem; R7 burada büyür |
-| 3b | `qp-claims` | iddia, itiraz, yorum: `claims`, `dispute`, `comments` (kendi durumu: `claims`, `settle`, `comment_audit`) | ≈ 2,1 bin | alt sistem |
-| 3c | `qp-capsule-life` | kapsül yaşamı: motor bağlama (`run`, `capsule`), okuyucu izdüşümü (`reader`, `project`, `capidx`), hikâye (`story`), karne sorguları (`queries`, `settled`), başlık parçaları (`headparts`, `sentences`); kendi durumu: `runner`, önbellekler (`fact_ix`, `cap_ix`, `sentences`, `item_memo`, `projs`, `views`, `head_state`, `headlines`, `real_facts`), `coin_flip*`, `trust_keys`, `audience_seen` | ≈ 5,0 bin | alt sistem; **en riskli** |
-| 3d | `qp-livepath` | canlı yol: koşulların ve kapsüllerin artımlı değerlendirmesi (`data/live`), bağ sorguları (`bindq`), doküman veri sağlayıcısı (`provider`) | ≈ 1,6 bin | alt sistem (veri olayı ve saat kancası) |
-| 3e | `qp-read` | okuma ve sunum: `query`, `interact`, `reading`, `preview`, `explain` | ≈ 3,2 bin | alt sistem (sorgu ve girdi kancası) |
-| 3f | `qp-viewer` | görüntüleyici bağlantıları (otorite tarafı: `replica/viewer*`) | ≈ 1,4 bin | alt sistem (abonelik kancası) |
-| 4 | `qp-authority` | **otorite:** `Session` çekirdeği — oluşturma, alım (`intake`), dağıtım, komut yolu, kabul, uzlaşma, saat, varlık durumu, olaylar; günlük; bağlantılar; ajan politikası (`agent`); **iki dünya** (kamu dünyası: `public`, `public/commit`, `worlds`) — günlüğün kime hangi sırayla gittiği otoritenin işidir; kayıt üstünden alt sistem çağrıları | ≈ 5,6 bin | otorite |
-| 5 | `qp-session` | **bileşim:** `Session` = otorite + standart alt sistemlerin kaydı (yalnız kayıt satırları ve dışa açık yolların yeniden dışa aktarımı) | ≈ 0,2 bin | bileşim kökü |
-| 6 | `qp-replica` | istemci yansısı (`Replica`, `follow`, `judge`, `tape`) — bir `Session` tutar | ≈ 1,6 bin | otoritenin istemcisi |
-| 7 | `qp-replayhost` | yeniden oynatma barındırıcısı (`ReplayHost`) ve uygunluk koşucusu (`conform`) | ≈ 1,9 bin | otoritenin istemcisi |
+| 1 | `qp-ops` | **işlemler:** açılım (`expand`, `gops`), seçiciler (`select`, `locate`), kanonik biçim, özet, değişim uygulama ve `replay`, hata kurucusu (`error`, `suggest`), değer önbelleği, veri düzlemi (`plane`), sunucu (`present`), veri sağlayıcının tipi; ayrıca izleme ve canlı yolun saf yardımcıları (§1.1) ve `ENGINE_PRINCIPAL` | ≈ 10,2 bin | saf fonksiyonlar |
+| 2 | `qp-subsystem` | **alt sistem sözleşmesi** (§4): `Subsystem`, `SessionView`/`SessionCtx`, fazlar, tipli durum yuvaları (`Slots`, `PerWorld<T>`), işlem kaydı (`OpHandler`: açılım + politika), sorgu, girdi ve konu kaydı | ≈ 0,8 bin | yeni |
+| 3 | `qp-watch` | **izleme niyeti** (`watch.rs`): ilk gerçek alt sistem, açılımı ve politikasıyla kayıt üstünden | ≈ 0,4 bin | alt sistem |
+| 4 | `qp-read` | **okuma ve sunum:** `query`, `interact`, `reading`, `preview`, `explain`, bağ sorguları (`bindq`), kapsül sorguları (`capsule/queries`) | ≈ 3,9 bin | alt sistem (sorgu ve girdi) |
+| 5 | `qp-authority` | **otorite çekirdeği:** alım, dağıtım, komut yolu, kabul, uzlaşma, saat, varlık durumu, olaylar, günlük, bağlantılar, ajan politikası; iki dünya ve `as_reader`; kapsül yaşamı (`capsule/*`), iddia/itiraz/yorum, canlı yol (`data/live`), veri sağlayıcı; kayıt üstünden alt sistem çağrıları (fazlar) | **≈ 11,5 bin** (saf kapsül dizinleri `capidx`, `headparts`, `sentences` ≈ 1,3 bin aşağı iner; inmezse ≈ 12,8 bin) | otorite |
+| 6 | `qp-replica` | istemci yansısı (`Replica`, `follow`, `judge`, `tape`); kendi otoritesini `qp-read` + `qp-watch` kaydıyla kurar | ≈ 1,7 bin | istemci (yeniden yazma: iç alanlara erişim → `#[doc(hidden)] pub` yöntem) |
+| 7 | `qp-viewer` | görüntüleyici bağlantıları (`replica/viewer*`; açık dilim `Replica` tutar) | ≈ 1,4 bin | alt sistem (konu, bağlantı, veri fazı) |
+| 8 | `qp-session` | **bileşim:** `pub struct Session(Authority)` + `Deref`/`DerefMut`; kurucular standart kaydı yapar (izleme, okuma, görüntüleyici); `sub::<T>()`/`sub_mut::<T>()` | ≈ 0,3 bin | bileşim |
+| 9 | `qp-replayhost` | `ReplayHost`, `conform` | ≈ 1,9 bin | istemci |
 
-Toplam ≈ 33 bin (bugün 32,0 bin; sözleşme ve kayıt ≈ +1 bin). **12 bin üstü crate kalmaz.**
-Çağıranlar (`qp-host`, `qp-mcp`, `qp-shellcore`, `qp-cli`, `qp-wasm`, `qp-render` testleri)
-`qp_session::Session`'ı aynı yoldan kullanmaya devam eder; `Replica`, `ReplayHost`, `conform`,
-`tape`, `viewer` yeni crate yollarına taşınır (liste `experiments/paths.md`).
+**Saf kapsül dizinleri nereye iner:** `capidx`, `headparts` ve `sentences` önbellek ve dizin
+tipleridir. Otoriteyi tanımıyorlar; `capidx → capsule` tek kenar. Bunlar `qp-capsule`'a (alan;
+sonrasında ≈ 9,8 bin) ya da `qp-ops`'a iner. Seçim S2'de bağımlılık ölçümüyle yapılır.
 
-**`qp-session` bileşimi nasıl:** `qp_session::Session` bir yeni tip: `pub struct Session(qp_authority::Authority)`,
-`Deref`/`DerefMut` ile otoritenin yöntemlerini açar; kurucuları (`new`, `new_with_trust_keys`,
-`with_provider_and_trust_keys`, …) otoriteyi standart kayıtla kurar. Böylece `Session::new(…)`
-ve `session.handle_raw(…)` çağrıları değişmez, otorite hiçbir alt sistemi tanımaz.
+**12 bin hedefi.** Ölçülmüş eşleme (`map-v2b.json`): çekirdek 12.842 satır, okuma, görüntüleyici
+ve izleme dışarıda. Saf dizinler inince ≈ 11,5 bin.
 
-## 4. Otorite arayüzü
+**Çekirdek yine 12 bini aşarsa:** **tek adlı istisna** (`qp-authority`) olur. Tavan ölçülen değer
+alınır ve 13.000'i geçemez. Bunu karar noktasında soruyorum (§10, soru 1).
 
-```text
-trait Subsystem {                        // qp-subsystem
-    fn name(&self) -> &'static str;
-    fn expanders(&self) -> &[&dyn OpExpander] { &[] }          // komut: işlem açılımı
-    fn check(&mut self, host: &dyn Host, cmd: &CommandView) -> PResult<()> { Ok(()) }
-    fn after_commit(&mut self, host: &mut dyn HostMut, entry: &LogEntry) -> Vec<Notice> { … }
-    fn on_clock(&mut self, host: &mut dyn HostMut, at: i64) -> Vec<Notice> { … }
-    fn on_data(&mut self, host: &mut dyn HostMut, ev: &DataEvent) -> Vec<Notice> { … }
-    fn query(&self, host: &dyn Host, q: &Query) -> Option<PResult<Value>> { None }
-    fn project(&self, host: &dyn Host, reader: &Reader, out: &mut Outgoing) { }   // yerleşim
-    fn as_any(&self) -> &dyn Any;  fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-trait Host {          // otoritenin verdiği dar görünüm (okuma)
-    fn document(&self) -> &Document;  fn log(&self) -> &[LogEntry];  fn clock(&self) -> i64;
-    fn principal(&self, conn: &str) -> Option<&Principal>;  fn conn_view(&self, conn: &str) -> Option<&ViewState>;
-    fn plane(&self) -> &DataPlane;  fn market(&self) -> Option<&MarketStatus>; …
-}
-trait HostMut: Host { // yazma yalnız komut yolundan
-    fn engine_entry(&mut self, changes: Vec<ChangeOp>, reason: &str) -> PResult<Seq>;
-    fn notify(&mut self, to: Audience, msg: Notify);
-    fn in_world<R>(…)  // kamu dünyası: otoritenin
-}
-```
+**Bileşim.** `Session::new(…)` ve `session.handle_raw(…)` çağrıları değişmez. Otorite hiçbir alt
+sistemi tanımaz. Kayıtlı olmayan alt sistemin kancası çağrılmaz; yansı kendi otoritesini kendi
+kaydıyla kurar.
 
-- **Komut:** otorite `Op`'u açarken kayıttaki `OpExpander`'lara sorar (op türüne göre); açılım
-  ve denetim alt sistemin, değişimin günlüğe yazılması otoritenin. Protokol değişmez: `Op`
-  şemada kapalı bir enum; bugün hangi kol nerede açılıyorsa yalnız yeri değişir.
-- **Sorgu:** `query` adını tanıyan alt sistem cevaplar; tanıyan yoksa bugünkü hata.
-- **Olay:** `after_commit` (günlük girdisinden sonra; iddia/yorum/kapsül olayları), `on_data`
-  (veri olayı; canlı yol), `on_clock` (saat adımı; kapsül koşusu, uzlaşma).
-- **Yerleşim:** `project` okuyucuya giden mesajın alt sisteme ait parçasını kurar (okuyucu
-  izdüşümü, gizli kalanlar).
-- **Kayıt sırası belirlenimcidir** (bileşimdeki satır sırası); alt sistem çağrı sırası bugünkü
-  kod sırasıyla aynı kurulur — karakterizasyon sınaması bunu kilitler.
-- Alt sistemler birbirini **katman içi sırayla** tanıyabilir (ör. `qp-read → qp-capsule-life`),
-  otoriteyi tanımaz; birbirinin durumuna `Registry::get::<T>()` ile erişir (bileşim çalışma
-  zamanında verir).
+## 4. Alt sistem sözleşmesi (`qp-subsystem`)
 
-Arayüzün kesin yöntem listesi S3'te her alt sistem taşındıkça ölçümle kurulur; yukarıdaki
-iskelet en dar başlangıçtır. Her yeni `Host` yöntemi `experiments/host-api.md`'de gerekçeli.
+Eleştirilere göre yeniden kuruldu (B3–B5, Y1–Y5). Kurallar:
 
-## 5. Sonraki round'lar nereye oturur
+1. **Davranış durumsuz, durum otoritede.** Alt sistem nesnesi `&'static dyn Subsystem`'dir. Her
+   alt sistemin durumu otoritenin sahip olduğu tipli yuvada durur (`Slots`; `TypeId` → kutu).
+   Dünya başına durum `PerWorld<T>` tipindedir ve iki dünya takasında otorite onu da takas eder.
+   Bunun için `swap_world`'e tek satır eklenir. Böylece kayıttan alt sistem çekip almak ya da
+   `RefCell` gerekmez. Yeniden giriş güvenlidir, çünkü yuva her çağrıda bölünmüş ödünçle verilir.
+2. **Bağlam bölünmüş ödünçtür:** `SessionCtx<'a> { view: &'a dyn SessionView, slots: &'a mut Slots, out: &'a mut Outbox }`.
+   - `SessionView` okuma yöntemleridir: doküman, günlük, saat, kimlik, bağlantı bakışı, veri
+     düzlemi, piyasa durumu, `param` (K78), `entitled`, `run_kind`, yeniden oynatma konumu.
+   - Yazma yalnız `Outbox` üstündendir: motor girdisi isteği, bildirim, uyandırma.
+   - Otorite, fazın yazma adımında `Outbox`'ı bugünkü sırayla uygular.
+   - Hiçbir yöntem jenerik değildir (`dyn` uyumlu). Kamu dünyasında koşmak bir bayraktır:
+     otorite fazı iki dünya için ayrı çağırır.
+   - `Host` adı kullanılmaz; barındırma kavramıyla çakışıyor.
+3. **Fazlar adlıdır ve sabittir;** her fazın toplama ve yazma adımı ayrıdır (B5). Fazlar:
+   - `Check` (komut denetimi)
+   - `Expand` (`OpHandler`)
+   - `AfterCommit`
+   - `AfterData` (toplama: koşul ve kapsül değerlendirmesinden önce; yazma: bugünkü sırada)
+   - `Proposals` (saat: öneri süresi)
+   - `Subscribe`/`Unsubscribe`, `Connect`/`Close`
+   - `Adjust` (K88 kurumsal işlem planı; RS1'de kullanılır)
 
-| Round | Crate | Otoriteye ne eklenir |
-|---|---|---|
-| RL1 | `qp-lang` (alan: hesap dili, ara gösterim, maliyet) + `qp-program` (oturum alt sistemi: `add_program` / `check_program` açılımı, maliyet bütçesi denetimi `check`, canlı değerlendirme `on_data`) | `qp-session` bileşimine 1 kayıt satırı; şemaya `Op` kolları (şema round'un işi) |
-| R7 | `qp-drawing` (çizim nesneleri, çizim → koşul → olay), `qp-watch` büyür (izleme görevleri, yaşam döngüsü, niyet ve netleştirme), "kur ve göster" `qp-read`'de ya da `qp-drawing`'de; işaretler `qp-grammar` alfabesine (3,6 bin pay), görünüş değerleri `qp-look`'a | 1–2 kayıt satırı |
-| RS1 | `qp-record` (sicil: iddia + sonuç, yeniden oynatma kaydı, tutma yüzdesi; `after_commit` ve `on_clock`), kurumsal işlem taşıması `on_data` kancasıyla `qp-record`'da | 1 kayıt satırı |
-| RA1 | `qp-prep` (hazırlık görevi), `qp-shared` (ortak analiz ve üyelik), zaman aralığı okuması `qp-read`'e (3,2 bin; ≈ 8 bin pay) | 1–2 kayıt satırı |
+   Kayıt sırası belirlenimcidir. Her faz, otorite kodunda **bugün o işin yapıldığı satırda**
+   çağrılır. Çekirdekte kalan iş, yani kapsül, iddia ve canlı yol, bugünkü sırayla aynen koşar.
+4. **İşlem kaydı açılım ve politikadır** (Y1). `OpHandler` üç şey verir:
+   - açılım;
+   - yetki sınıfı (`allowed`), önerilebilirlik (`proposable`), ajan sınıfı (`agent_op`);
+   - kamu dünyası eşlemesi ve okuyucu gizliliği.
+
+   Otoritedeki her `match op` kayda düşen bir varsayılan kol alır. Kayıtta karşılığı yoksa
+   bugünkü hata döner.
+5. **Kapalı enum'lar.** Yayılım ölçüldü (eleştiri 2): `ChangeOp` 23 dosya, `Op` 14, `Event` 13,
+   `QueryResult` 14, `Topic` 11, `Condition` 10. Bu round'da otorite tarafında `Op`, `Query`,
+   `Topic` ve `Condition` (canlı yol değerlendiricisi; RL1'in `qp-program`'ı buradan bağlanır)
+   dağıtıcıları kayda düşen varsayılan kol alır. `ChangeOp` uygulaması `qp-ops`'ta kalır. Şema
+   değişikliği yok.
+6. **Barındırıcı yüzü.** Bugünkü ayarlayıcılar (`set_coin_flip_rule` …) çekirdekte kalır. Yeni
+   round'ların ayarlayıcıları kendi crate'lerinde `impl` edilir; bileşim üstünden
+   `session.sub_mut::<T>()` ile erişilir. `Session`'a yöntem eklenmez.
+7. **Uygulanan ve taslak kancalar.**
+   - Uygulanan kancalar: alt sistemlerin (izleme, okuma, görüntüleyici) ve ek noktası sınamasının
+     kullandıkları. Hepsi gerçek kodla sınanır.
+   - Taslak kancalar: `Adjust` ve `Condition` kaydı. Tipleri ve çağrı noktaları kurulur, birer
+     sınamayla davranışı kilitlenir. Kullanım sonraki round'da.
+
+## 5. Sonraki round'lar nereye oturur (eleştiri 2'ye göre güncellendi)
+
+| Round | Alan katmanı | Oturum alt sistemi | Kayıt satırı |
+|---|---|---|---|
+| RL1 | `qp-lang`: hesap dili, ara gösterim, maliyet (K79; ENGINEERING §2 "hesap dili" alanda) | `qp-program`: `add_program` / `check_program` için `OpHandler` (politika dahil); maliyet bütçesi `Check` fazında `param`/`entitled` ile; canlı değerlendirme, canlı yolun `Condition` kaydına bağlanarak (paralel bir yol değil) | 1 |
+| R7 | `qp-drawing`: çizim geometrisi ve türleri; gramerin altında, böylece gramer çizebilir ve K88 taşıyabilir | `qp-watch` büyür: izleme görevleri, yaşam döngüsü, niyet ve netleştirme. `qp-drawings`: çizim nesneleri, çizim → koşul → olay. "Kur ve göster" `qp-read`'de. İşaretler `qp-grammar` alfabesine (≈ 4,5 bin pay) | 1–2 |
+| RS1 | `qp-ledger`: sicil hesabı, iddia + sonuç, tutma yüzdesi (ENGINEERING §2'de sicil alandadır; ad `Ledger` kavramından) | `qp-ledger`'ın oturum alt sistemi: `AfterCommit`, `AfterData`. K88 için `Adjust` fazı: her alt sistem bir taşıma planı verir, otorite tek motor girdisi ve tek bildirim yazar | 1 |
+| RA1 | — | `qp-prep` (hazırlık görevi). Ortak analizin üretimi ve tekilleştirme belgeler arası olduğu için barındırma katmanında (`qp-host` ya da yeni bir uyarlayıcı); oturumda yalnız üyelik ve kişisel katman (`qp-membership`). Zaman aralığı okuması `qp-read`'e (≈ 8 bin pay) | 1–2 |
+
+Ölçüt: yeni bir `Op` kolu eklenirken dokunulan otorite dosyası 0 olmalı. Şemaya kol eklemek
+round'un kendi işidir. Ek noktası sınaması bunu var olan bir `Op` türüyle gösterir (§7).
 
 ## 6. Sıra, risk, geri dönüş
 
-| Adım | İş | Tür | Risk | Geri dönüş |
-|---|---|---|---|---|
-| Ö | P8 çizilen (ayrı fikstür), P9 `design-check`'te; Playwright klasörleri | araç | düşük | dal |
-| A1 | `scripts/refactor/` kalıcı (yapıldı: snapshot, compare, perf, moved, graph); `moved.py`'a `use`, `impl` başlığı, öğe düzeyi makro, `cfg` | araç | düşük | dal |
-| A2 | `arch-check` sıra kuralı, `config-diff`, `fn.lines` istisna tavanı, öz-sınama | araç | düşük | dal |
-| V | `qp-voice` | saf taşıma | düşük | dal |
-| **K** | **karar noktası** | | | |
-| G1 | gramer karakterizasyonu (katman türü × kaynak × görünüş; yüz, açılmış kapsül, hikâye, geçiş kareleri) | test | — | — |
-| G2a | `qp-look`, `qp-glyph` aşağı (saf taşıma; döngüsüz) | taşıma | düşük | dal |
-| G2b | `Designs` arayüzü + çağrı yerleri (≈ 25 yer yeniden yazılır) | yeniden yazma | **orta**: derleme sırasını değiştirmeden aynı fonksiyonu çağırmalı | dal; tutanak |
-| G2c | `qp-designs` yukarı (taşıma) | taşıma | düşük | dal |
-| G3 | `prepare` adımlara | yeniden yazma | orta | karakterizasyon |
-| S1 | oturum karakterizasyonu: işlem türü başına `expand_op` (26 kol × başarı/hata), alt sistem başına olay sırası (komut → günlük → bildirim dizisi), iki dünyalı dökümler | test | — | — |
-| S2a | `qp-ops` aşağı: 5 serbest fonksiyon `qp-ops`'a ya da açılım kaydına; `ENGINE_PRINCIPAL` sabiti `qp-ops`'a | taşıma + küçük yeniden yazma | düşük | dal |
-| S2b | `qp-replica`, `qp-replayhost` yukarı (dışa açık API kullanırlar) | taşıma | düşük | dal |
-| S4 | `expand_op` 26 kol → kol başına fonksiyon; dağıtıcı `match` | yeniden yazma (gövdeler aynen) | düşük | karakterizasyon |
-| S3.0 | `qp-subsystem` + otoritede kayıt; alt sistem yok, davranış aynı | yeni kod | orta | dal |
-| S3.1 | `qp-viewer` (arayüz 6 yöntem) | yeniden yazma (`self.x` → `host.x()`/kendi durumu) | orta | tutanak |
-| S3.2 | `qp-livepath`, `qp-read` | yeniden yazma | orta | tutanak |
-| S3.3 | `qp-watch`, `qp-claims` | yeniden yazma | orta | tutanak |
-| S3.4 | `qp-capsule-life`; iki dünya otoritede kalır | yeniden yazma | **yüksek** | **geri dönüş: bu dalga tutmazsa kapsül yaşamı otoriteyle aynı crate'te kalır** (`qp-authority` ≈ 10,6 bin + kalanlar; gerekirse tek adlı istisna, tavan ≈ 13 bin < 32 bin, ölçümle Arkin'e) |
-| E | ek noktası belgesi + örnek alt sistem sınaması | belge + test | düşük | — |
-| Q | `qp-source` dosya okuma (kesilebilir), geçici yeniden dışa aktarmalar (kesilebilir), eskimiş yorumlar | | | |
-| A3 | `unimplemented`/`unreachable` lint (kesilebilir); sözdizimi ağacı (kesilebilir, ilk kesilen) | | | |
+| Adım | İş | Tür | Risk |
+|---|---|---|---|
+| Ö | P8/P9 (`rf1/o-design`, denetimde) → **tutanak v2** (yalnız `design/check.txt` ve yeni fikstürün özeti; kod değişmeden) | araç | düşük |
+| A1/A2 | `rf1/a-tools` (denetimde) | araç | düşük |
+| V | `qp-voice` | saf taşıma | düşük |
+| **K** | **karar noktası** | | |
+| G1 | gramer karakterizasyonu: işaret × kaynak × görünüş; yüz, açılmış kapsül, hikâye, geçiş kareleri | test | — |
+| G2a | `qp-look`, `qp-glyph` aşağı | taşıma | düşük |
+| G2b | `Designs` tablosu + 5 nokta + `qp_designs::options` | yeniden yazma (küçük) | orta: WASM, çağıran yolları |
+| G2c | `qp-designs` yukarı (tasarımlar + `motion` + `depth` sarmalayıcıları) | taşıma | düşük |
+| G3 | `prepare` adımlara | yeniden yazma | orta |
+| S1 | oturum karakterizasyonu: `expand_op` kol başına (başarı/hata); faz başına bildirim dizisi (komut → günlük → bildirim; iki dünyalı ve okuyuculu dökümler) | test | — |
+| S4 | `expand_op` → kol başına fonksiyon | yeniden yazma (gövdeler aynen) | düşük |
+| S2 | `qp-ops` aşağı (+ saf yardımcılar, `ENGINE_PRINCIPAL`, sağlayıcı tipi); saf kapsül dizinleri aşağı | taşıma + küçük yeniden yazma | düşük |
+| S3.0 | `qp-subsystem` + çekirdekte fazlar, yuvalar, `swap_world` satırı; henüz alt sistem yok, davranış aynı | yeni kod | **orta** |
+| S3.1 | `qp-watch` (ilk alt sistem) | yeniden yazma | orta |
+| S3.2 | `qp-read` | yeniden yazma (≈ 99 `rd!` kullanımı bölünmüş ödünçle) | **orta-yüksek** |
+| S3.3 | `qp-replica`, `qp-viewer`, `qp-session` bileşimi, `qp-replayhost` | yeniden yazma | **orta-yüksek** |
+| E | ek noktası belgesi + sınama | belge + test | düşük |
+| Q, A3 | kesilebilirler (GOAL kesme sırası) | | |
 
-**En riskli üç adım:** (1) S3.4 kapsül yaşamının otoriteden ayrılması (35 yöntemlik arayüz,
-iki dünya takası, `RefCell` önbellekleri; olay sırası tek bir yerde kayarsa yanıt akışı değişir);
-(2) G2b tasarım kaydının enjeksiyonu (çok çağrı yeri; derleyicinin varsayılan tasarım seçimi
-yerinden oynamamalı); (3) S3.0–S3.1 kayıt düzeneğinin ilk kurulumu (olay ve bildirim sırasının
-bugünküyle bire bir kalması; WASM boyutunda `dyn` kaynaklı büyüme).
+**En riskli üç adım:**
 
-Ölçüt kapısı: her dalga sonunda `compare.sh` bayt eşit, `verify.sh` yeşil, `arch-check` yeşil;
-WASM ±%2 her dalgada bir kez (`perf.sh`'ın WASM kısmı) — kayma görülürse dalga durur.
+1. **S3.3, yansı ve görüntüleyici.** Yansı oturumun iç alanlarına yazıyor (`replica.rs:229-241`).
+   Görüntüleyici `Replica` tutuyor. Yansının kendi kaydıyla kurulması, görüntüleyicisiz otoritenin
+   bugünküyle aynı davranmasını ister.
+2. **S3.2, okuma.** 50 kenar çekirdeğe gidiyor; `rd!` ve `&mut cache` bölünmüş ödünç gerektiriyor.
+3. **S3.0, faz düzeneğinin ilk kurulumu.** Bildirim sırası bugünküyle bire bir kalmalı. Bunu S1
+   karakterizasyonu kilitler.
 
-## 7. Yeni alt sistem nasıl eklenir (taslak; `docs/ARCHITECTURE.md`'ye girecek)
+**Geri dönüş:** her adım kendi dalında. Bir alt sistem dalgası tutanağı bayt eşit tutamazsa o
+alt sistem çekirdekte kalır. Çekirdek 12 bini aşarsa §10 soru 1 devreye girer. Kesin sınır: tek
+istisna, tavan 13.000.
 
-1. Oturum katmanında yeni crate (`qp-<ad>`), `arch-config.json` sırasına eklenir; bağımlılık:
-   `qp-subsystem`, `qp-ops`, gerekiyorsa sıradaki alt sistemler.
-2. Durumunu taşıyan tip `impl Subsystem`: işlem açılımı (`OpExpander`), denetim, olay
-   (`after_commit`, `on_data`, `on_clock`), sorgu, yerleşim.
-3. Günlüğe yazmak yalnız `HostMut::engine_entry` (ya da komutun açılımı) ile; yeniden oynatma
-   değişimden çalışır, alt sistem kodu istemez (`apply::replay`).
-4. Yansı: alt sistemin istemciye gidenleri `project` ile; yansı yalnız protokol mesajı görür.
-5. `qp-session` bileşimine **bir kayıt satırı**. Otorite crate'i değişmez.
+**Kapı:** her dalga sonunda `compare.sh` bayt eşit, `verify.sh` yeşil, `arch-check` yeşil.
+Ayrıca her dalgada WASM boyutu bir kez ölçülür (`perf.sh`'ın WASM kısmı) ve ±%2 içinde kalmalı.
 
-Sınama (E): yalnız `qp-session/tests/`'te yaşayan `Tally` alt sistemi — bir `Op` türünü sayar
-(açılım kaydı üstünden komut alır), sayıyı motor girdisiyle günlüğe yazar, `replay` aynı
-dokümanı verir; `git diff --stat` otorite crate'inin `src/`'sinde değişiklik göstermez.
+## 7. Yeni alt sistem nasıl eklenir (`docs/ARCHITECTURE.md`'ye girecek)
+
+1. Oturum katmanında yeni bir crate açılır ve `arch-config.json` sırasına eklenir. Bağımlılıkları
+   `qp-subsystem`, `qp-ops` ve gerekiyorsa sırada kendinden önceki alt sistemlerdir. Otoriteye
+   bağımlı olmaz.
+2. Durum tipi bir yuvaya girer (`PerWorld<T>` ise iki dünyada ayrı tutulur). Davranış
+   `impl Subsystem` ile yazılır: işlem kaydı (`OpHandler`), fazlar, sorgu, girdi ve konu.
+3. Günlüğe yazma yalnız açılım ya da `Outbox` motor girdisiyle olur. Yeniden oynatma
+   değişimlerden çalışır, alt sistem kodu istemez (`qp_ops::replay`).
+4. Yansıya giden kısım protokol mesajıdır; yansı kendi otoritesini aynı kayıtla kurar.
+5. `qp-session` bileşimine **bir kayıt satırı** eklenir. Otorite crate'i değişmez.
+
+**Sınama (E), iki parça:**
+
+- **(a) Gerçek alt sistem.** `qp-watch`'ın kayıt satırı bileşimden çıkarılınca `add_watch`
+  "bilinmeyen işlem" hatası verir. Satır geri gelince bugünkü döküm bayt eşit çıkar. Otoritenin
+  `src/`'si iki durumda da aynıdır.
+- **(b) Yalnız testte yaşayan `Tally`.** Kayıt üstünden bir `Op` türü alır, sayısını motor
+  girdisiyle günlüğe yazar ve `replay` aynı dokümanı verir. Kendi konusuyla bildirim gönderir.
+  `git diff --stat` otorite crate'inde değişiklik göstermez.
 
 ## 8. Ölçüt eşlemesi
 
-GOAL 7 → §3.1; 8 → §3.2; 9 → §3.3 (12 bin üstü yok; geri dönüşte tek istisna); 10 → G3, S4;
-11 → İ2 (§2 sırası), İ3–İ6 (§3), İ1 (Q, kesilebilir); 12 → §7.
+| GOAL ölçütü | Planda |
+|---|---|
+| 7 | §3.1 |
+| 8 | §3.2 |
+| 9 | §3.3; istisna olursa §10 soru 1 |
+| 10 | G3, S4 |
+| 11 | İ2 → §2; İ3–İ6 → §3; İ1 → Q (kesilebilir) |
+| 12 | §7 |
 
 ## 9. Eleştiriler ve cevaplar
 
-(eleştiriler `experiments/critique-1.md`, `critique-2.md`; cevaplar aşağıda)
+Eleştiri 1: uygulanabilirlik (`critique-1.md`, 19 bulgu). Eleştiri 2: sonraki round'ların yükü
+(`critique-2.md`, 19 bulgu). Kısaltmalar: B = birinci, Y = ikinci.
+
+| Bulgu | Ağırlık | Cevap |
+|---|---|---|
+| B1 önerilen sınırlar döngülü (izleme ↔ kapsül, iddia ↔ kapsül, görüntüleyici ↔ yansı) | yüksek | **Kabul.** `graph.py --map` eklendi. v1 eşlemesi tek döngü çıktı (`map-v1.json`). v2'de iddia ve kapsül çekirdekte birlikte. İzleme ↔ kapsül kenarı fazla çevrildi: `run.rs`'in `match_watches` çağrısı `AfterData` fazına, izlemenin `reader_proj` çağrısı `SessionView`'e. Görüntüleyici yansının üstüne alındı (`map-v2b.json`: kalan kenarlar yalnız S2/S3'te kesilecek olanlar). |
+| B2 `as_reader` yerleşim kancası değil, doküman takası | yüksek | **Kabul.** Takas otoritede kalır. Kapsül yaşamı da çekirdekte. |
+| B3 iki dünya, alt sistem durumunu da takas ediyor; `in_world<R>` dyn değil | yüksek | **Kabul.** `PerWorld<T>` yuvası, otorite takası; jenerik yöntem yok (§4.1–4.2). |
+| B4 yeniden giriş zinciri | yüksek | **Kabul.** Durumsuz alt sistem + otoritedeki yuvalar + bölünmüş ödünç (§4.1). Zincirin kendisi çekirdekte kalıyor. |
+| B5 olay sırası kayıt döngüsüyle korunamaz; `on_clock` yanlış tarif | yüksek | **Kabul.** Adlı fazlar, toplama/yazma ayrı, her faz bugünkü satırında. Saat fazı yalnız öneri süresi (`Proposals`). |
+| B6 işlemler → otorite "3 yöntem" ölçüm artığı | orta | Kabul; §1.1 düzeltildi (gerçekte 0). |
+| B7 `present` `DocProvider` (`&Session`) kullanıyor | orta | Kabul. Sağlayıcının tipi ve trait'i `qp-ops`'a iner, `&Session` tutan uygulaması çekirdekte kalır (S2). |
+| B8 S2b yansı ve barındırıcı düşük riskli taşıma değil | orta | Kabul. S3.3'e alındı, "yeniden yazma, orta-yüksek". |
+| B9 `rd!` ve `&mut cache` bölünmüş ödünç | orta | Kabul. S3.2 riski yükseltildi. |
+| B10 `Conn`/`Sub` alt sistem tipi taşıyor | orta | Kabul. Bağlantı başına alt sistem durumu yuvaya (`Slots`, bağlantı anahtarlı) gider. Bugünkü alanlar (`Sub.memo/watch/stories`) çekirdeğin alt sistemleri için yerinde kalır. |
+| B11 gramer enjeksiyonu ≈ 70 `CompileOptions::new`; türetmeler; WASM | orta | **Kabul.** Enjeksiyon 5 noktaya daraltıldı; fonksiyon göstergesi tablosu; `depth` sarmalayıcıları ve `motion` taşınıyor (§3.1). |
+| B12 WASM tek yönlü küçülme de ±%2 dışı | orta | Kabul. Kapı iki yönlü; kayma olursa durup sorarım. |
+| B13 şema belge yorumu tuzağı | orta | Kabul. `qp-schema` belge yorumlarına dokunulmaz; eskimişler "Fark edilenler"e (§0). |
+| B14 geri dönüşün tetiği yok | orta | **Kabul.** Tetik: dalga tutanağı bayt eşit tutamazsa o alt sistem çekirdekte kalır. Çekirdek > 12 bin → tek istisna; şimdiden soruyorum (§10). |
+| B15–B19 (`src` içi testler, `pub(crate)` → `pub`, `Host` adı, `advances` taşıması `config-diff`, dinamik çağrı maliyeti) | düşük | Kabul. Testler kodla birlikte taşınır ya da üst crate'in `tests/`'ine gider. `pub` yapılanlar `paths.md`'ye. `Host` → `SessionView`. `advances` taşıması `rule_changes` gerekçesiyle `DECISION.md`'yi anar. Faz çağrısı K17/K52 ölçümüyle denetlenir. |
+| Y1 işlem politikası otoritede | yüksek | **Kabul.** `OpHandler` = açılım + politika (§4.4). |
+| Y2 niyet/izleme değerlendirmesi otoritede | yüksek | **Kısmen.** `eval_watchers`/`eval_intents` canlı yolun parçası ve çekirdekte kalır. Bu round'da `qp-watch`'a yalnız `watch.rs` (izleme kaydı ve işlemleri) gider. R7'nin izleme görevleri `qp-watch`'ta doğar ve değerlendirmeye `Condition` kaydı + `AfterData` fazıyla bağlanır. Otoriteye dokunmaz. |
+| Y3 iki dünya ↔ alt sistem durumu | yüksek | B3 ile aynı. |
+| Y4 kapalı enum yayılımı ölçülmemiş | yüksek | **Kabul.** Ölçüldü (§4.5). Otorite tarafındaki dağıtıcılara kayıt kolu. Ölçüt: yeni kol için otorite dosyası 0. |
+| Y5 abonelik ve bağlantı kancası yok | yüksek | **Kabul.** `Subscribe`/`Unsubscribe`/`Connect`/`Close` fazları, konu kaydı. Görüntüleyici bunları gerçekten kullanacak. |
+| Y6 `in_world<R>` jenerik; ödünç | orta | B3/B4 ile aynı. |
+| Y7 K88 tek alt sistemin işi değil | orta | **Kabul.** `Adjust` fazı: alt sistem başına plan, tek motor girdisi, tek bildirim (taslak kanca). |
+| Y8 barındırıcı yüzü (ayarlayıcılar) | orta | **Kabul.** `sub::<T>()`/`sub_mut::<T>()` bileşimde (§4.6). |
+| Y9 kurulum ve bağlam (`build(init)`, `limits`, `param`, `entitled`, `run_kind`, yeniden oynatma konumu, uyandırma) | orta | **Kabul.** `Subsystem::init` ve `SessionView` yöntemleri (§4.2). |
+| Y10 adlar: `Host` çakışması, `qp-record` → `qp-ledger`, `qp-shared` belirsiz; kavramlar sözlükte yok | orta | **Kabul.** `SessionView`, `qp-ledger`, `qp-membership`. `docs/CONCEPTS.md`'ye kod yazılmadan önce eklenecekler: alt sistem, alt sistem sözleşmesi, faz, bileşim, işlem kaydı, tasarım kaydı (`Designs`), canlı yol (çekirdekte kalıyor ama adı var). "Kapsül yaşamı" crate'i yok, girmez. |
+| Y11 katmanlar: sicil ve hesap dili alanda; çizim geometrisi gramerin altında | orta | **Kabul.** §5 güncellendi. |
+| Y12 R7 gramer payı ≈ 3,3–4,2 bin gerekebilir, 4,5 bin hedef | orta | **Kabul.** `depth`/`motion` yukarı çıkınca ≈ 4,5 bin (§3.1). Ölçümle teyit G2c sonunda. |
+| Y13 RL1 canlı değerlendirme canlı yola bağlanmalı | orta | **Kabul.** `Condition` kaydı (§4.5, §5). |
+| Y14 RA1 ortak analiz belgeler arası | orta | **Kabul.** Barındırma katmanına (§5). |
+| Y15 yansı ve barındırıcı iç alanlara uzanıyor | orta | B8 ile aynı. |
+| Y16 olay sırası, fazlar | orta | B5 ile aynı. |
+| Y17 `query` `QueryResult` dönmeli | düşük | Kabul. |
+| Y18 `&dyn Designs` `CompileOptions`'a girmesin | düşük | Kabul (§3.1: fonksiyon göstergesi tablosu, kimlikle eşitlik). |
+| Y19 `Tally` en kolay yolu sınıyor | düşük | **Kabul.** E'ye gerçek alt sistemin (`qp-watch`) kaydını çıkarma/geri koyma sınaması eklendi (§7a). |
+
+## 10. Arkin'e sorular (karar noktası)
+
+1. **Çekirdek istisnası.** Plan çekirdeği ≈ 11,5 bine indirmeyi hedefliyor. Saf kapsül dizinleri
+   inemezse ya da okuma/görüntüleyici dalgası çekirdekte kalırsa çekirdek 12,8–14 bin olur.
+   Bu durumda `qp-authority` için **tek adlı istisna** kabul ediliyor mu? Tavan ölçülen değer
+   olur, 13.000'i geçemez; aşarsa yeniden sorarım.
+2. **Kapsül yaşamı çekirdekte kalıyor.** GOAL "işler kendi durumunu taşıyan alt sistemlere
+   ayrılır" diyor. v2'de kapsül yaşamı, iddia/itiraz/yorum ve canlı yol bu round'da alt sisteme
+   çevrilmiyor: bayt eşitliği tutmanın güvenli yolu bu. Bu ayrımı ileri bir RF'ye bırakmak kabul
+   mü? Yeni round'lar sözleşme üstünden doğar; çekirdeğe kayıt satırı dışında dokunmaz.
+3. **Crate adları:** `qp-ops`, `qp-subsystem`, `qp-authority`, `qp-watch`, `qp-read`,
+   `qp-viewer`, `qp-replica`, `qp-replayhost`, `qp-look`, `qp-glyph`, `qp-designs`, `qp-voice`.
+   Uygun mu?

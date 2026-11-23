@@ -29,3 +29,11 @@ yeniden alındı (manifest v1 ↔ v2 farkı tam bu iki satır):
 
 Ö'nün eklediği test `numeric_tokens_match_the_gallery` `new-tests.txt`'te. Öbür 268 kalem v1 ile
 aynı.
+
+## Araç düzeltmesi: galeri font yolları (kod değişmeden)
+
+`gallery/vars/fonts-*.css` fontları mutlak dosya adresiyle anıyordu (`file:///…/qapsule/…`).
+Bu yüzden worktree'de alınan tutanak hep farklı çıkıyordu; G1 ajanı fark etti. Depo yolu
+davranış değildir. `snapshot.sh` artık onu `<root>` diye yazıyor ve tutanağın bu dört satırı aynı
+normalleştirmeyle yeniden hesaplandı (dosyaların geri kalanı bayt eşit). Öbür 266 kalem
+değişmedi.

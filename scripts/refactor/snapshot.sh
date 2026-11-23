@@ -207,6 +207,11 @@ if [ "$want_gallery" = 1 ]; then
   CARGO_TARGET_DIR="$priv/gt" node scripts/design-gallery --no-build --looks tavek,oltan,r4 \
     --out "$priv/gallery" >/dev/null
   (cd "$priv/gallery" && cp -R charts vars "$out/gallery/" && cp layout-*.json manifest.json "$out/gallery/")
+  # The font variables name the fonts by absolute file URL: the checkout path is not
+  # behaviour (a worktree would differ), so it is written as `<root>`.
+  for f in "$out"/gallery/vars/fonts-*.css; do
+    sed "s|$root|<root>|g" "$f" >"$f.tmp" && mv "$f.tmp" "$f"
+  done
 fi
 
 # --- test count -------------------------------------------------------------------

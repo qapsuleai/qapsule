@@ -17,7 +17,6 @@ use std::collections::BTreeMap;
 use qp_grammar::scale::{pixel_span, slot_x, value_y};
 use qp_schema::grammar::Mark;
 use qp_schema::scene::{DataSource, SceneDesc, ScenePanel};
-use qp_session::CompileOptions;
 use serde_json::{json, Value};
 use support::H;
 
@@ -334,7 +333,7 @@ fn hit_examples_item_and_empty() {
     let mut h = H::new();
     h.hello("a", "arkin", "desktop");
     // The asker's viewport: bars 80..=199 (120 slots over the 1120-pixel plot).
-    let mut opts = CompileOptions::new(1200, 600);
+    let mut opts = qp_designs::options(1200, 600);
     opts.range = None;
     let scene = h.s.scene_for("a", Some("main"), &opts).unwrap();
     assert_eq!((scene.x.from_bar, scene.x.to_bar), (80, 199));
@@ -412,7 +411,7 @@ fn hit_property_values_equal_data_and_empty_areas_have_no_item() {
     for conn in ["a", "s"] {
         for view in &views {
             let scene =
-                h.s.scene_for(conn, Some(view), &CompileOptions::new(1200, 600))
+                h.s.scene_for(conn, Some(view), &qp_designs::options(1200, 600))
                     .unwrap();
             for _ in 0..250 {
                 let x = rng.below(1200.0).floor() + 0.5;
@@ -471,7 +470,7 @@ fn hit_far_from_data_is_empty() {
     let mut asserted = 0;
     for view in &views {
         let scene =
-            h.s.scene_for("s", Some(view), &CompileOptions::new(1200, 600))
+            h.s.scene_for("s", Some(view), &qp_designs::options(1200, 600))
                 .unwrap();
         let mut per_view = 0;
         let mut tries = 0;
@@ -519,7 +518,7 @@ fn round_trip_data_pixel_data_through_hit() {
     let (mut trips, mut same_layer) = (0, 0);
     for view in &views {
         let scene =
-            h.s.scene_for("s", Some(view), &CompileOptions::new(1200, 600))
+            h.s.scene_for("s", Some(view), &qp_designs::options(1200, 600))
                 .unwrap();
         let span = scene.x.to_bar.min(scene.bars - 1) - scene.x.from_bar + 1;
         for _ in 0..25 {

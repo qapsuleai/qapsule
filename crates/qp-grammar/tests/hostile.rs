@@ -13,8 +13,8 @@ mod support;
 
 use std::time::{Duration, Instant};
 
-use qp_grammar::detmath::nice_step;
 use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_look::detmath::nice_step;
 use qp_schema::grammar::View;
 
 fn view(domain: Option<[f64; 2]>, series: &str) -> View {
@@ -61,7 +61,7 @@ fn nice_step_rejects_hostile_input() {
 #[test]
 fn extreme_fixed_domains() {
     let p = support::provider();
-    let o = CompileOptions::new(1200, 600);
+    let o = CompileOptions::without_designs(1200, 600);
     let s = timed(|| compile(&view(Some([0.0, 1e308]), "sma20"), &p, &o)).unwrap();
     assert_eq!(s.panels[0].y.max, 1e308);
     // Span overflows: rejected with a clear error.
@@ -85,7 +85,7 @@ fn extreme_fixed_domains() {
 
 #[test]
 fn extreme_and_non_finite_values() {
-    let o = CompileOptions::new(1200, 600);
+    let o = CompileOptions::without_designs(1200, 600);
     let cases: Vec<Vec<Option<f64>>> = vec![
         (0..200)
             .map(|i| Some(1e300 + f64::from(i) * 1e285))
@@ -114,7 +114,7 @@ fn extreme_and_non_finite_values() {
 #[test]
 fn huge_and_tiny_panel_weights() {
     let p = support::provider();
-    let o = CompileOptions::new(1200, 600);
+    let o = CompileOptions::without_designs(1200, 600);
     let mk = |w: [f64; 3]| {
         let mut v = support::view(
             r#"{"id":"w","x":{"kind":"time"},

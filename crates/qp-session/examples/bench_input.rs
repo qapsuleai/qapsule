@@ -20,7 +20,7 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use qp_schema::protocol::SessionInit;
-use qp_session::{CompileOptions, Session};
+use qp_session::Session;
 use serde_json::{json, Value};
 
 const SAMPLES: usize = 2000;
@@ -56,7 +56,7 @@ fn run(
     gesture: impl Fn(usize) -> Value,
     view: Option<&str>,
 ) -> (Vec<f64>, Vec<f64>) {
-    let opts = CompileOptions::new(390, 300);
+    let opts = qp_designs::options(390, 300);
     let (mut only, mut full) = (Vec::new(), Vec::new());
     for i in 0..SAMPLES {
         let msg = json!({"type":"input","id":"g","gesture":gesture(i)}).to_string();

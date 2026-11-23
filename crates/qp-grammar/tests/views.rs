@@ -20,7 +20,7 @@ use qp_schema::scene::{Prim, SceneDesc, SceneLayer};
 use qp_schema::{Author, Fact, Finding, Point, Provenance};
 
 fn opts() -> CompileOptions {
-    CompileOptions::new(1200, 600)
+    CompileOptions::without_designs(1200, 600)
 }
 
 fn layer<'a>(s: &'a SceneDesc, id: &str) -> &'a SceneLayer {
@@ -748,7 +748,7 @@ fn title_row_close_legends_and_tag_labels() {
           "x":{"kind":"time"},"panels":[{"id":0,"y":{"kind":"linear"}}],
           "layers":[{"id":"rsi","mark":"line","series":"rsi14","panel":0}]}"#,
     );
-    let s = compile(&v, &p, &CompileOptions::new(390, 300)).unwrap();
+    let s = compile(&v, &p, &CompileOptions::without_designs(390, 300)).unwrap();
     let t = texts(&s);
     assert!(!t.iter().any(|(x, _, _)| x.starts_with("C ")), "{t:?}");
     let title = &t.iter().find(|(_, _, b)| *b == 23).unwrap().0;

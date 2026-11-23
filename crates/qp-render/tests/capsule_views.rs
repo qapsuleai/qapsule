@@ -22,7 +22,7 @@ mod golden_check;
 
 use golden_check::root;
 use qp_session::conform::{load_init, read_transcript};
-use qp_session::{CompileOptions, Session};
+use qp_session::Session;
 use serde_json::{json, Value};
 
 #[test]
@@ -91,7 +91,7 @@ fn depth_views_match_goldens_and_explain() {
             &p["view"]
         };
         let view: qp_schema::grammar::View = serde_json::from_value(v.clone()).unwrap();
-        let opts = CompileOptions::new(*w, *h);
+        let opts = qp_designs::options(*w, *h);
         let scene = qp_grammar::compile(&view, &s.provider(), &opts).unwrap();
         let a = qp_render::render_scene_png(&scene).unwrap();
         let b =

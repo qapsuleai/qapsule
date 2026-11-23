@@ -29,12 +29,18 @@
         "qp-capsule",
         "qp-voice",
         "qp-grammar",
-        "qp-facts"
+        "qp-facts",
+        "qp-look",
+        "qp-glyph",
+        "qp-designs"
       ],
       "order": [
         "qp-source",
         "qp-facts",
+        "qp-look",
+        "qp-glyph",
         "qp-grammar",
+        "qp-designs",
         "qp-capsule",
         "qp-voice"
       ]
@@ -129,7 +135,10 @@
     "lint.flags"
   ],
   "generated_files": [
-    "crates/qp-grammar/src/advances.rs"
+    {
+      "path": "crates/qp-look/src/advances.rs",
+      "reason": "RF1/G2a: crates/qp-grammar/src/advances.rs saf taşımayla qp-look'a indi (aynı üretici: qp-render tests/fonts.rs); rounds/RF1/DECISION.md \"Uygulama notları\", PLAN §3.1 ve §9 B15–B19"
+    }
   ],
   "exceptions": [
     {
@@ -140,15 +149,6 @@
       "max_note": "RG1 sonu değeri (K89: net satır eklenmez)",
       "status": "onaylandı (K85, 2026-11-22)",
       "reason": "23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4)."
-    },
-    {
-      "id": "İ4",
-      "rule": "crate.lines",
-      "item": "qp-grammar",
-      "max": 21000,
-      "max_note": "RD2 tavanı (K89)",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Çekirdek ↔ tasarım klasörleri (faces, open, stories, glyph) adla kayıt üstünden döngüsel; döngüsüz kesimlerle bile ≈14,7 bin kalır. Gerçek bölme kaydın enjeksiyona çevrilmesini ister (M4a ölçümü)."
     },
     {
       "id": "İ6",

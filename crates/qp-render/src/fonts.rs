@@ -1,11 +1,11 @@
-//! (R5/T3) The embedded font files, by asset id (`qp_grammar::look::FONTS` names the same
+//! (R5/T3) The embedded font files, by asset id (`qp_look::look::FONTS` names the same
 //! ids, with each file's family, weight and licence). A scene's text names its asset in
 //! `Prim::Text::font` (absent: the default, index 0); the reference renderer, the canvas
 //! paint path (`FontFace` from these bytes) and the GPU path all draw with these files,
 //! so no output depends on a system font and the page asks the network for none.
 //!
 //! **Adding a file:** put it and its licence in `assets/fonts/`, add one line below and
-//! one [`qp_grammar::look::FontAsset`] line (`look::FONTS`); `tests/fonts.rs` checks the
+//! one [`qp_look::look::FontAsset`] line (`look::FONTS`); `tests/fonts.rs` checks the
 //! two lists agree.
 
 use std::sync::OnceLock;

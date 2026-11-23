@@ -74,7 +74,7 @@ fn feed_order_is_a_presentation_setting() {
     });
     // Not a protocol value: the connection's layout stays the presentation's.
     let look = core.look_json();
-    assert_eq!(look["feed"], qp_grammar::feeds::PRESENTED_FEED, "{look}");
+    assert_eq!(look["feed"], qp_designs::feeds::PRESENTED_FEED, "{look}");
     assert_eq!(look["feed_order"], "grouped", "{look}");
     assert_eq!(look["feed_rule"], "none", "{look}");
     // Grouped: an instrument's capsules stand together.
@@ -112,9 +112,9 @@ fn the_presentation_opens_live_and_new_first() {
     let mut core = page(&mut host, |_| {});
     assert_eq!(
         core.look_json()["feed_order"],
-        qp_grammar::feeds::PRESENTED_FEED_ORDER
+        qp_designs::feeds::PRESENTED_FEED_ORDER
     );
-    assert_eq!(qp_grammar::feeds::PRESENTED_FEED_ORDER, "live_new");
+    assert_eq!(qp_designs::feeds::PRESENTED_FEED_ORDER, "live_new");
     let r = rows(&mut core);
     let items = core.feed().to_vec();
     let key = |id: &str| {

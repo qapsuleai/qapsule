@@ -1,21 +1,21 @@
 //! (R5/M21) The shell core's motion state: the reader's motion design (`?motion=`, a
 //! presentation setting like the feed order), the reduced-motion flag the page forwards
 //! (`prefers-reduced-motion` or the settings page), and the face changes the feed brought
-//! (`qp_grammar::motion`).
+//! (`qp_designs::motion`).
 //!
 //! When the feed is replaced the core compares each capsule with its previous row
-//! ([`qp_grammar::motion::classify`]). Every change is recorded as the capsule's latest
+//! ([`qp_designs::motion::classify`]). Every change is recorded as the capsule's latest
 //! change (`recent`, both modes: the same facts). With motion, the change's geometry
 //! (glyph boxes before and after, the texts that differ) is kept for the page's animation
 //! ([`ShellCore::take_face_motion`], [`ShellCore::face_change_frame`]); under reduced
 //! motion nothing moves and the face carries the change's lasting label instead
-//! ([`qp_grammar::motion::stamp`], applied in [`ShellCore::face`]). A label stays until the
+//! ([`qp_designs::motion::stamp`], applied in [`ShellCore::face`]). A label stays until the
 //! reader opens that capsule or marks "I looked now", or a newer change replaces it.
 
 use std::collections::BTreeMap;
 
-use qp_grammar::motion::{self, ChangeKind, FaceChange};
-use qp_grammar::transitions::Source;
+use qp_designs::motion::{self, ChangeKind, FaceChange};
+use qp_designs::transitions::Source;
 use qp_schema::protocol::CapsuleItem;
 use qp_schema::scene::SceneDesc;
 use serde_json::{json, Value};

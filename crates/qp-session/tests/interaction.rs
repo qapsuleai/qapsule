@@ -75,7 +75,7 @@ fn drag_and_pinch_equal_pan_and_zoom() {
     let mut s = session();
     hello(&mut s, "px", "arkin");
     hello(&mut s, "bar", "ana");
-    let opts = qp_session::CompileOptions::new(390, 300);
+    let opts = qp_designs::options(390, 300);
     for (i, dx) in [37.0, -120.0, 5.0, 400.0, -3.0, -1000.0]
         .into_iter()
         .enumerate()

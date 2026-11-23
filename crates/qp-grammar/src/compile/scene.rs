@@ -24,28 +24,25 @@ pub fn compile(
             format!("size {width}x{height} out of range ({MIN_WIDTH}x{MIN_HEIGHT} ..= {MAX_DIM}x{MAX_DIM})"),
         ));
     }
-    let look =
-        (opts.look_record.map(Ok)).unwrap_or_else(|| crate::look::by_name(opts.look.as_deref()))?;
+    let look = (opts.look_record.map(Ok))
+        .unwrap_or_else(|| qp_look::look::by_name(opts.look.as_deref()))?;
     let theme = look.theme(opts.theme.as_deref().or(view.theme.as_deref()))?;
     let outcome = match opts.outcome.as_deref() {
-        Some(n) => crate::glyph::outcome::by_name(n)?,
-        None => crate::glyph::outcome::default_style(),
+        Some(n) => qp_glyph::outcome::by_name(n)?,
+        None => qp_glyph::outcome::default_style(),
     };
-    let alphabet = crate::glyph::alphabet_named(opts.alphabet.as_deref()).ok_or_else(|| {
+    let alphabet = qp_glyph::alphabet_named(opts.alphabet.as_deref()).ok_or_else(|| {
         GrammarError::new(
             ErrorKind::Invalid,
             "",
             format!(
                 "unknown glyph alphabet `{}` (known: {})",
                 opts.alphabet.as_deref().unwrap_or_default(),
-                crate::glyph::ALPHABETS.join(", ")
+                qp_glyph::ALPHABETS.join(", ")
             ),
         )
     })?;
-    let headline = match opts.face.as_deref() {
-        Some(n) => crate::faces::headline_template(Some(n))?,
-        None => None,
-    };
+    let headline = (opts.designs.headline_template)(opts.face.as_deref())?;
     if view.x.kind != ScaleKind::Time {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -121,6 +118,7 @@ pub fn compile(
     let mut fr = Frame {
         p: provider,
         headline,
+        designs: opts.designs,
         look,
         theme,
         bar_series: bar_series.clone(),
@@ -542,7 +540,7 @@ pub fn compile(
     }
 
     // (R5/m17-int, K49) Glossary terms of a capsule scene under a voice.
-    let terms = crate::terms::mark(&mut scene_panels, provider, look);
+    let terms = crate::terms::mark(&mut scene_panels, provider, look, opts.designs);
 
     // (R5/T3) Type roles: each text's font from its role (marks: by size, glyph texts:
     // `glyph`); the role itself stays in the scene only when asked for.

@@ -11,8 +11,9 @@
 mod scenes;
 mod style;
 
+use qp_designs::{depth::story_design, stories::StoryCompile};
 use qp_grammar::compile::{MAX_DIM, MIN_HEIGHT, MIN_WIDTH};
-use qp_grammar::{compile, depth, gesture, CompileOptions};
+use qp_grammar::{compile, depth, gesture};
 use qp_schema::protocol::{
     ErrorCode, Gesture, Interaction, OpenDepth, Opening, OutboundLine, Presentation, QueryResult,
     SurfaceKind, SurfaceTarget, Target, Viewport,
@@ -65,11 +66,7 @@ struct StyleReq<'a> {
 }
 
 /// (R5/S) A story design's whole-scene compile, the reader's story rows and the focus.
-type StoryCompiled<'a> = (
-    qp_grammar::stories::StoryCompile,
-    &'a [qp_schema::protocol::StoryRow],
-    &'a str,
-);
+type StoryCompiled<'a> = (StoryCompile, &'a [qp_schema::protocol::StoryRow], &'a str);
 
 /// The frame key of a target (`ViewState::frames`).
 fn frame_key(on: &On) -> String {
@@ -461,7 +458,7 @@ impl Session {
                 }
                 // (R5/M18) The story chart's own taps come first (focus, cluster, K54).
                 let story = if d >= OpenDepth::Chart {
-                    depth::story_design(self.conns[ci].look.story.as_deref()).and_then(|sd| {
+                    story_design(self.conns[ci].look.story.as_deref()).and_then(|sd| {
                         (sd.tap)(
                             hit.as_ref().and_then(|h| h.item.as_ref()),
                             Some(finding.as_str()),
@@ -477,19 +474,19 @@ impl Session {
                     return Ok((out, events));
                 }
                 // (R5/M20) The open capsule design's tap rule (the reference: `tap_opens`).
-                let rule = qp_grammar::open::tap(
+                let rule = qp_designs::open::tap(
                     self.conns[ci].look.open.as_deref(),
                     d,
                     scene.as_ref().map(|(v, _, _)| v),
                     hit.as_ref(),
                     self.conns[ci].look.ask.as_deref(),
                 );
-                if let qp_grammar::open::OpenTap::Ask(a) = rule {
+                if let qp_designs::open::OpenTap::Ask(a) = rule {
                     self.conns[ci].look.ask = a;
                     out.hit = hit;
                     return Ok((out, Vec::new()));
                 }
-                if let qp_grammar::open::OpenTap::Open(to) = rule {
+                if let qp_designs::open::OpenTap::Open(to) = rule {
                     out.opening = Some(self.transition(ci, &cap, &finding, d, to)?);
                 } else if let (Some((view, _, times)), Some(h)) = (&scene, &hit) {
                     if let (Some(panel), Some(bar)) = (h.panel, h.bar) {
@@ -529,11 +526,11 @@ impl Session {
     fn story_tap(
         &mut self,
         ci: usize,
-        t: qp_grammar::stories::StoryTap,
+        t: qp_designs::stories::StoryTap,
         view: Option<&View>,
         out: &mut Out,
     ) -> PResult<Vec<OutboundLine>> {
-        use qp_grammar::stories::StoryTap;
+        use qp_designs::stories::StoryTap;
         match t {
             StoryTap::ToggleClosed => {
                 let l = &mut self.conns[ci].look;

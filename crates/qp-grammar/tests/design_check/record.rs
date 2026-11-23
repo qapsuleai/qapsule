@@ -1,8 +1,8 @@
 //! Checks measured from the look record alone: P1, P3, P10–P13 and R5's H3 (H1, H2:
 //! `grounds.rs`; P9: `layout.rs`).
 
-use qp_grammar::look::{Look, Profile, ROLES};
-use qp_grammar::theme::Theme;
+use qp_look::look::{Look, Profile, ROLES};
+use qp_look::theme::Theme;
 use qp_schema::scene::Rgba;
 
 use crate::color::{contrast, de, hsl_sl, oklch_c, Vision};

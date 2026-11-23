@@ -54,21 +54,18 @@ fn sent_kind<'a>(core: &'a ShellCore, op: &str) -> Vec<&'a Value> {
 fn the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them() {
     let core = page(&mut parity_host(), |_| {});
     let look = serde_json::to_value(core.look()).unwrap();
-    assert_eq!(look["feed"], qp_grammar::feeds::PRESENTED_FEED, "{look}");
+    assert_eq!(look["feed"], qp_designs::feeds::PRESENTED_FEED, "{look}");
     assert_eq!(
         look["transition"],
         // (R5/S) The presented motion design's opening (`surek`).
-        qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition
+        qp_designs::motion::by_name(Some(qp_designs::motion::PRESENTED_MOTION)).transition
     );
-    assert_eq!(
-        look["outcome"],
-        qp_grammar::glyph::outcome::PRESENTED_OUTCOME
-    );
+    assert_eq!(look["outcome"], qp_glyph::outcome::PRESENTED_OUTCOME);
     // (R4/S2) the face is M8's pick; (RD2, K2) the presented look's companion face when it
     // has one (`tavek-tel` → `zemre`).
-    let presented = qp_grammar::look::phone_profile(qp_grammar::look::PRESENTED_LOOK);
+    let presented = qp_look::look::phone_profile(qp_look::look::PRESENTED_LOOK);
     let face =
-        qp_grammar::look::companion_face(presented).unwrap_or(qp_grammar::faces::PRESENTED_FACE);
+        qp_look::look::companion_face(presented).unwrap_or(qp_designs::faces::PRESENTED_FACE);
     assert_eq!(look["face"], face, "{look}");
     // The page's own choice (URL) is sent after the defaults and wins; `r3` is the
     // protocol default, so the fields are absent again.

@@ -3,7 +3,7 @@
 
 use super::format::{pill_date, NumFmt};
 use super::*;
-use crate::look::ValueLine;
+use qp_look::look::ValueLine;
 
 /// Crosshair dash and gap (px).
 pub(super) const DASH: (i32, i32) = (4, 3);

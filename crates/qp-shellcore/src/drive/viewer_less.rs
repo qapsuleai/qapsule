@@ -217,7 +217,7 @@ impl ViewerAgent {
         let fresh = vec![false; items.len()];
         // (R5/fix47) The presentation's feed order, as the shell core orders its feed.
         crate::shell::feed_rows(
-            Some(qp_grammar::feeds::PRESENTED_FEED_ORDER),
+            Some(qp_designs::feeds::PRESENTED_FEED_ORDER),
             self.look.feed.as_deref(),
             &items,
             lang,
@@ -227,8 +227,8 @@ impl ViewerAgent {
         )
         .into_iter()
         .filter_map(|r| match r {
-            qp_grammar::feeds::FeedRow::Capsule { id, .. } => Some(id),
-            qp_grammar::feeds::FeedRow::Header { .. } => None,
+            qp_designs::feeds::FeedRow::Capsule { id, .. } => Some(id),
+            qp_designs::feeds::FeedRow::Header { .. } => None,
         })
         .collect()
     }
@@ -367,7 +367,7 @@ pub fn viewer_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &
         } else if let Some(t) = step.get("tap_face") {
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.face_ids(lang)[i].clone();
-            let fh = qp_grammar::faces::height_for(
+            let fh = qp_designs::faces::height_for(
                 qp_session::viewer::look_of(&a.look),
                 a.look.face.as_deref(),
                 a.look.voice.is_some(),

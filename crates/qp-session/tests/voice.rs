@@ -222,7 +222,7 @@ fn voiced_face(
         voice: Some(voice.into()),
         ..ViewState::default()
     };
-    let fh = qp_grammar::faces::height_for(&qp_grammar::look::R4, Some("vadrel"), true);
+    let fh = qp_designs::faces::height_for(&qp_look::look::R4, Some("vadrel"), true);
     for it in items {
         let s = qp_session::viewer::face_scene(h.session_mut(), it, &look, 60, 390, fh)?;
         if !s.terms.is_empty() {
@@ -320,8 +320,8 @@ fn under_r4_scenes_carry_no_terms() {
         face: Some("vadrel".into()),
         ..ViewState::default()
     };
-    let fh = qp_grammar::faces::height_for(&qp_grammar::look::R4, Some("vadrel"), false);
-    assert_eq!(fh, qp_grammar::faces::height(Some("vadrel")));
+    let fh = qp_designs::faces::height_for(&qp_look::look::R4, Some("vadrel"), false);
+    assert_eq!(fh, qp_designs::faces::height(Some("vadrel")));
     let mut seen = 0;
     for it in &items {
         if let Some(s) = qp_session::viewer::face_scene(h.session_mut(), it, &look, 60, 390, fh) {

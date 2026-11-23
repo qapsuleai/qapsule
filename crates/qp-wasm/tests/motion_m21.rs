@@ -150,7 +150,7 @@ fn todays_motion_marks_nothing() {
     assert!(core.look_json().get("motion").is_none());
     assert_eq!(
         core.look_json()["transition"],
-        qp_grammar::transitions::PRESENTED_TRANSITION
+        qp_designs::transitions::PRESENTED_TRANSITION
     );
     for _ in 0..STEPS {
         step(&mut core, &mut w);

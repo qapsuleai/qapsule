@@ -138,7 +138,7 @@ fn nabiz_selects_its_transition_and_adds_only_still_marks() {
             .find(|i| &i.id == id)
             .expect("item")
             .clone();
-        let live = qp_grammar::transitions::nabiz::is_live(it.stage, it.validity);
+        let live = qp_designs::transitions::nabiz::is_live(it.stage, it.validity);
         assert_eq!(
             extra.iter().any(|p| matches!(p, Prim::Circle { .. })),
             live,
@@ -191,7 +191,7 @@ fn reduce_motion_loses_no_fact_and_paints_no_overlay() {
         .find(|i| i.id == id)
         .expect("item")
         .clone();
-    let word = qp_grammar::transitions::nabiz::label(
+    let word = qp_designs::transitions::nabiz::label(
         it.stage,
         it.validity,
         qp_schema::protocol::Language::Tr,
@@ -207,7 +207,7 @@ fn reduce_motion_loses_no_fact_and_paints_no_overlay() {
     core.set_reduced_motion(true);
     assert_eq!(core.motion_marks(1_400.0), Some(json!({"marks": []})));
     assert_eq!(core.motion_marks(1_500.0), None);
-    let live = qp_grammar::transitions::nabiz::live_word(qp_schema::protocol::Language::Tr);
+    let live = qp_designs::transitions::nabiz::live_word(qp_schema::protocol::Language::Tr);
     let mut worded = 0;
     for i in ids(&core) {
         core.set_reduced_motion(false);
@@ -246,16 +246,16 @@ fn reduce_motion_loses_no_fact_and_paints_no_overlay() {
 
 #[test]
 fn the_marks_find_room_in_every_look() {
-    for look in qp_grammar::look::names() {
+    for look in qp_look::look::names() {
         let mut core = page(
             &mut parity_host(),
             &json!({"feed_order": "live_new", "look": look}),
         );
-        let l = qp_grammar::look::or_default(Some(look));
+        let l = qp_look::look::or_default(Some(look));
         let mut n = 0;
         for id in ids(&core).iter().take(8) {
             let Some(s) = core.face(id) else { continue };
-            let Some(p) = qp_grammar::transitions::nabiz::places(&s, l) else {
+            let Some(p) = qp_designs::transitions::nabiz::places(&s, l) else {
                 continue;
             };
             n += 1;
@@ -270,7 +270,7 @@ fn the_marks_find_room_in_every_look() {
                 i32::try_from(s.height).unwrap(),
             );
             assert!(p.row.0 >= 0 && p.row.1 <= h, "{look} {id}: {p:?}");
-            let lw = qp_grammar::transitions::nabiz::label_width("artık tutmuyor", l);
+            let lw = qp_designs::transitions::nabiz::label_width("artık tutmuyor", l);
             assert!(p.label_at.0 + lw <= w, "{look} {id}");
         }
         assert!(n > 0, "{look}: some face has a glyph");

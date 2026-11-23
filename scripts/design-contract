@@ -5,7 +5,7 @@
   scripts/design-contract --check    exit 1 if a committed block differs from the record
 
 A block is the text between `<!-- generated:look=<name> -->` and `<!-- /generated -->`;
-its values come from `qp look show <name>` (crates/qp-grammar/src/look*), never by hand.
+its values come from `qp look show <name>` (crates/qp-look/src/look*), never by hand.
 """
 
 import difflib

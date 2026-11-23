@@ -107,7 +107,7 @@ impl ShellCore {
                         }
                         // (R4/H-M8910) The face design states its height (R5/T3: in the
                         // connection's look).
-                        let fh = qp_grammar::faces::height_for(
+                        let fh = qp_designs::faces::height_for(
                             qp_session::viewer::look_of(&self.look),
                             self.look.face.as_deref(),
                             self.look.voice.is_some(),

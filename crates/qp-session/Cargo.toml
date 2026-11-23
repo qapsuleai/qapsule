@@ -8,6 +8,9 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+qp-designs = { version = "0.0.0", path = "../qp-designs" }
+qp-glyph = { version = "0.0.0", path = "../qp-glyph" }
+qp-look = { version = "0.0.0", path = "../qp-look" }
 qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
 qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }

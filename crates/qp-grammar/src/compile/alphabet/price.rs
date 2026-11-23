@@ -65,7 +65,7 @@ pub(in crate::compile) fn price_axis(ch: &Chart<'_>, under: &mut Vec<Prim>) {
 }
 
 /// Tick values of a panel `h` px high and the step between them (log: none).
-fn ticks_at(y: &YMap, h: f64, chart: crate::look::ChartLook) -> (Vec<f64>, Option<f64>) {
+fn ticks_at(y: &YMap, h: f64, chart: qp_look::look::ChartLook) -> (Vec<f64>, Option<f64>) {
     let divs = h / chart.price_label_px;
     if y.kind == ScaleKind::Log {
         return (ticks(y, divs.round().max(1.0)), None);

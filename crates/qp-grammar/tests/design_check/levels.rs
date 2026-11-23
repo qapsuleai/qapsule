@@ -3,7 +3,7 @@
 //! (human), dashed (agent, the look's `agent_dash`) or dotted (engine); a value label under
 //! a tag is left out (P6 counts the levels scenes too). A legacy look draws neither.
 
-use qp_grammar::look::{by_name, Look, Profile, LOOKS};
+use qp_look::look::{by_name, Look, Profile, LOOKS};
 use qp_schema::scene::{Prim, Rgba, SceneDesc};
 
 use crate::scene::{fixture, overlap_count};

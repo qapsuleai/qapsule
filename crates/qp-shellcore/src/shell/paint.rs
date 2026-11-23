@@ -25,7 +25,7 @@ pub const PAINT_FONT_FAMILY: &str = "QpMono";
 pub fn text_font(id: Option<&str>) -> Option<(usize, &'static fontdue::Font, &'static str)> {
     let i = qp_render::fonts::index(id);
     let font = qp_render::fonts::by_index(i).ok()?;
-    let family = qp_grammar::look::font(qp_render::fonts::FILES[i].0)
+    let family = qp_look::look::font(qp_render::fonts::FILES[i].0)
         .map_or(PAINT_FONT_FAMILY, |f| f.css_family);
     Some((i, font, family))
 }

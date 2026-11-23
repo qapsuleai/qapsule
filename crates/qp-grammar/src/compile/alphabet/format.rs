@@ -5,7 +5,7 @@
 
 use qp_schema::protocol::Language;
 
-use crate::detmath::pow10_int;
+use qp_look::detmath::pow10_int;
 
 /// Magnitudes from here on are written compact (a volume axis, not a price).
 pub(super) const COMPACT_FROM: f64 = 100_000.0;

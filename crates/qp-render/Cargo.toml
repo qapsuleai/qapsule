@@ -27,6 +27,11 @@ vello = { version = "0.12.0", optional = true }
 pollster = { version = "0.4", optional = true }
 
 [dev-dependencies]
+# (RF1/G2c) The named designs and their registry, split out of qp-grammar (tests only).
+qp-designs = { path = "../qp-designs" }
+# (RF1/G2a) The looks and the glyphs, split out of qp-grammar (tests only).
+qp-glyph = { path = "../qp-glyph" }
+qp-look = { path = "../qp-look" }
 # Tests and examples only: the golden test and the 100k-bar example build their scenes
 # with the grammar compiler, fed with study values from the compute core. The renderer
 # itself never computes (no qp-compute in [dependencies]).

@@ -1,4 +1,4 @@
-//! (RD2/C2a) The chart's familiar alphabet from the look's [`crate::look::ChartLook`]
+//! (RD2/C2a) The chart's familiar alphabet from the look's [`qp_look::look::ChartLook`]
 //! (VISUAL §5 P4–P8; ADOPTED OV-5…OV-10, OV-12; `docs/GRAMMAR.md` §9a). A legacy look
 //! ([`Look::familiar`] false) takes R0's paths, moved here unchanged (goldens byte-equal).
 //! Texts are built here in the reader's language; collision avoidance is deterministic: a
@@ -7,8 +7,8 @@
 use qp_schema::protocol::Language;
 
 use super::*;
-use crate::look::Look;
-use crate::theme::Theme;
+use qp_look::look::Look;
+use qp_look::theme::Theme;
 
 mod format;
 mod legend;

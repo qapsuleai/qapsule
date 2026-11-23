@@ -92,12 +92,12 @@ pub struct OpenExtra {
 impl TrustState {
     /// The grammar's form of it (an open capsule design's trust row).
     #[must_use]
-    pub fn device_check(self) -> qp_grammar::open::DeviceCheck {
+    pub fn device_check(self) -> qp_grammar::designs::DeviceCheck {
         match self {
-            TrustState::Server => qp_grammar::open::DeviceCheck::Server,
-            TrustState::Checking => qp_grammar::open::DeviceCheck::Checking,
-            TrustState::Device => qp_grammar::open::DeviceCheck::Device,
-            TrustState::Differs => qp_grammar::open::DeviceCheck::Differs,
+            TrustState::Server => qp_grammar::designs::DeviceCheck::Server,
+            TrustState::Checking => qp_grammar::designs::DeviceCheck::Checking,
+            TrustState::Device => qp_grammar::designs::DeviceCheck::Device,
+            TrustState::Differs => qp_grammar::designs::DeviceCheck::Differs,
         }
     }
 }
@@ -172,7 +172,7 @@ impl DataProvider for Reader<'_> {
     fn reader_lang(&self) -> Option<qp_schema::protocol::Language> {
         self.extra.lang.or_else(|| self.inner.reader_lang())
     }
-    fn device_check(&self, finding: &str) -> Option<qp_grammar::open::DeviceCheck> {
+    fn device_check(&self, finding: &str) -> Option<qp_grammar::designs::DeviceCheck> {
         let _ = finding;
         self.extra.check.map(TrustState::device_check)
     }
@@ -189,7 +189,7 @@ fn item_lang(item: &CapsuleItem) -> Language {
 }
 
 fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> CompileOptions {
-    let mut o = CompileOptions::new(w, h);
+    let mut o = qp_designs::options(w, h);
     o.range = range;
     o.theme.clone_from(&look.theme);
     o.alphabet.clone_from(&look.alphabet);
@@ -200,8 +200,8 @@ fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> Compi
 
 /// (R5/T3) The connection's look (`ViewState.look`; absent or unknown: `r4`).
 #[must_use]
-pub fn look_of(look: &ViewState) -> &'static qp_grammar::look::Look {
-    qp_grammar::look::or_default(look.look.as_deref())
+pub fn look_of(look: &ViewState) -> &'static qp_look::look::Look {
+    qp_look::look::or_default(look.look.as_deref())
 }
 
 // ---------------------------------------------------------------------------

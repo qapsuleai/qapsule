@@ -137,7 +137,7 @@ proptest! {
     ) {
         let bars = bars_from(&steps, start);
         let p = provider(&bars);
-        let mut o = CompileOptions::new(w, h);
+        let mut o = CompileOptions::without_designs(w, h);
         if span < 380 {
             o.range = Some((from, from + span));
         }
@@ -154,7 +154,7 @@ proptest! {
     ) {
         let bars = bars_from(&steps, 100.0);
         let p = provider(&bars);
-        let s = compile(&view(log), &p, &CompileOptions::new(1200, 600)).unwrap();
+        let s = compile(&view(log), &p, &CompileOptions::without_designs(1200, 600)).unwrap();
         let lod = s.lod.expect("aggregated");
         prop_assert!(lod.bars_per_bucket >= 2);
         let n = check_round_trip(&s);

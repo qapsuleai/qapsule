@@ -95,7 +95,7 @@ fn compile_source(
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
 > {
     let (mut session, principal) = scene_session(src).map_err(Err)?;
-    let mut opts = qp_session::CompileOptions::new(width, height);
+    let mut opts = qp_designs::options(width, height);
     opts.look = look.map(str::to_owned);
     opts.roles = roles;
     opts.theme = theme.map(str::to_owned);
@@ -160,7 +160,7 @@ pub(crate) fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, Stri
 
 /// (R5/T3) `qp look`.
 pub(crate) fn look_cmd(c: &LookCommand) -> Result<Outcome, String> {
-    use qp_grammar::look;
+    use qp_look::look;
     match c {
         LookCommand::List => {
             for l in look::LOOKS {

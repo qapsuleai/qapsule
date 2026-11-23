@@ -71,7 +71,7 @@ fn main() {
     )
     .expect("view");
     for (name, lod) in [("LOD", true), ("full (no LOD)", false)] {
-        let mut o = CompileOptions::new(1200, 600);
+        let mut o = CompileOptions::without_designs(1200, 600);
         o.lod = lod;
         let s = compile(&view, &p, &o).expect("compile");
         let prims = s.prims().count();

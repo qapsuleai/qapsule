@@ -251,7 +251,7 @@ fn an_unknown_story_design_is_refused() {
     // (R5/S) Unchanged: the presentation's story chart (R6/T0, K57: `korda`).
     assert_eq!(
         r.core.look().story.as_deref(),
-        Some(qp_grammar::stories::PRESENTED_STORY)
+        Some(qp_designs::stories::PRESENTED_STORY)
     );
 }
 

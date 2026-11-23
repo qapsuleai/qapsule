@@ -178,7 +178,7 @@ fn shell_feed_rows_show_it_in_every_layout() {
     seek(&mut core, &mut w, 771);
     let want = "cap.SYN12.breakout.up.203";
     assert!(core.feed().iter().any(|i| i.id == want));
-    for name in qp_grammar::feeds::LAYOUTS.iter().map(|l| l.name) {
+    for name in qp_designs::feeds::LAYOUTS.iter().map(|l| l.name) {
         core.set_look(&json!({"feed": name}));
         pump(&mut core, &mut w);
         let rows = core.feed_json();

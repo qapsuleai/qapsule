@@ -23,7 +23,7 @@ mod r0;
 
 use std::time::Instant;
 
-use qp_grammar::{compile, CompileOptions};
+use qp_grammar::compile;
 
 const N: usize = 100_000;
 const W: u32 = 1200;
@@ -58,7 +58,7 @@ fn main() {
     );
     println!("|---|---|---|---|---|---|");
     for (name, lod) in [("LOD", true), ("full", false)] {
-        let mut o = CompileOptions::new(W, H);
+        let mut o = qp_designs::options(W, H);
         o.lod = lod;
         // Warm-up (font parse, glyph cache, allocator).
         let scene = compile(&view, &provider, &o).expect("compile");

@@ -1,5 +1,5 @@
 //! (R5/T3) The embedded font files (`qp_render::fonts::FILES`) and the looks' font assets
-//! (`qp_grammar::look::FONTS`) name the same assets, every file parses, its licence file is
+//! (`qp_look::look::FONTS`) name the same assets, every file parses, its licence file is
 //! in the repository, and every look's roles name an embedded asset.
 
 #![allow(
@@ -16,13 +16,13 @@ use std::path::Path;
 fn font_registry_matches_the_looks() {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/fonts");
     let files: Vec<&str> = qp_render::fonts::FILES.iter().map(|(id, _)| *id).collect();
-    let assets: Vec<&str> = qp_grammar::look::FONTS.iter().map(|f| f.id).collect();
+    let assets: Vec<&str> = qp_look::look::FONTS.iter().map(|f| f.id).collect();
     assert_eq!(
         files, assets,
         "fonts::FILES and look::FONTS must list the same ids"
     );
-    assert_eq!(files[0], qp_grammar::look::DEFAULT_FONT);
-    for (i, a) in qp_grammar::look::FONTS.iter().enumerate() {
+    assert_eq!(files[0], qp_look::look::DEFAULT_FONT);
+    for (i, a) in qp_look::look::FONTS.iter().enumerate() {
         let bytes = std::fs::read(dir.join(a.file)).expect("font file in assets/fonts");
         assert_eq!(
             bytes,
@@ -42,7 +42,7 @@ fn font_registry_matches_the_looks() {
             assert!(f.lookup_glyph_index(ch) != 0, "{}: no glyph for {ch}", a.id);
         }
     }
-    for l in qp_grammar::look::LOOKS {
+    for l in qp_look::look::LOOKS {
         for f in l.fonts() {
             assert!(files.contains(&f.id), "{}: font {}", l.name, f.id);
         }
@@ -85,7 +85,7 @@ fn advance_runs(i: usize) -> (u16, u16, Vec<(u32, u32, u16)>) {
     (upem, units(0), runs)
 }
 
-/// The text of `qp-grammar/src/advances.rs` for the embedded files.
+/// The text of `qp-look/src/advances.rs` for the embedded files.
 fn advances_source() -> String {
     use std::fmt::Write as _;
     let mut s = String::from(
@@ -118,7 +118,7 @@ fn advances_source() -> String {
 
 #[test]
 fn advance_tables_match_the_files() {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../qp-grammar/src/advances.rs");
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../qp-look/src/advances.rs");
     let want = advances_source();
     if std::env::var_os("QP_BLESS").is_some() {
         std::fs::write(&path, &want).expect("write advances.rs");
@@ -126,9 +126,9 @@ fn advance_tables_match_the_files() {
     let have = std::fs::read_to_string(&path).expect("advances.rs");
     assert!(
         have == want,
-        "qp-grammar/src/advances.rs is stale: QP_BLESS=1 cargo test -p qp-render --test fonts"
+        "qp-look/src/advances.rs is stale: QP_BLESS=1 cargo test -p qp-render --test fonts"
     );
-    for (i, a) in qp_grammar::look::FONTS.iter().enumerate() {
+    for (i, a) in qp_look::look::FONTS.iter().enumerate() {
         let (upem, notdef, runs) = advance_runs(i);
         assert_eq!(a.advances.upem, upem, "{}", a.id);
         assert_eq!(a.advances.notdef, notdef, "{}", a.id);

@@ -15,9 +15,9 @@ pub const GLYPH_MIN_LEDGER_N: u32 = qp_schema::params::system::GLYPH_MIN_LEDGER_
 pub const FRESHNESS_HALF_BARS: f64 = qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS_DEFAULT;
 
 /// Glyph size in the capsule card (the `r4` look's `glyph.card_px`).
-pub const CARD_GLYPH_PX: f64 = crate::look::R4.glyph.card_px;
+pub const CARD_GLYPH_PX: f64 = qp_look::look::R4.glyph.card_px;
 /// Glyph size over the chart at `chart` depth (the `r4` look's `glyph.chart_px`).
-pub const CHART_GLYPH_PX: f64 = crate::look::R4.glyph.chart_px;
+pub const CHART_GLYPH_PX: f64 = qp_look::look::R4.glyph.chart_px;
 
 /// The glyph parameters of a story at bar `now_bar` (K30 channels). The same rule as the
 /// engine's `qp_capsule::glyph_spec(story, now_bar, GLYPH_MIN_LEDGER_N)` (cross-checked in
@@ -111,15 +111,15 @@ pub fn evidence_note(fact: &Fact) -> Option<String> {
 }
 
 /// Whether an R3 capsule with a story presents `finding`.
-pub(crate) fn has_story(finding: &str, p: &dyn DataProvider) -> bool {
+pub fn has_story(finding: &str, p: &dyn DataProvider) -> bool {
     p.capsule(finding).is_some_and(|c| c.story.is_some())
 }
 
-pub(crate) fn panel_at(panel: f64, px: f64) -> Position {
+pub fn panel_at(panel: f64, px: f64) -> Position {
     Position::Panel(PanelPos { panel, px })
 }
 
-pub(crate) fn named_panel(id: u32, name: &str, weight: f64) -> Panel {
+pub fn named_panel(id: u32, name: &str, weight: f64) -> Panel {
     let mut p = linear_panel(id);
     p.name = Some(name.to_owned());
     p.weight = Some(weight);
@@ -148,7 +148,7 @@ pub fn capsule_card_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
-    capsule_card_view_in(&crate::look::R4, finding, max_points, p, id)
+    capsule_card_view_in(&qp_look::look::R4, finding, max_points, p, id)
 }
 
 /// (R5/T3) [`capsule_card_view`] with the sizes of `look`: glyph `glyph.card_px`, the
@@ -246,7 +246,7 @@ impl FactExt for Fact {
 }
 
 /// Unique layer ids: `base`, then `base-2`, `base-3`… (K25: the presenter's own names).
-pub(crate) fn uniq(taken: &mut Vec<String>, base: &str) -> String {
+pub fn uniq(taken: &mut Vec<String>, base: &str) -> String {
     let mut id = base.to_owned();
     let mut k = 2;
     while taken.contains(&id) {

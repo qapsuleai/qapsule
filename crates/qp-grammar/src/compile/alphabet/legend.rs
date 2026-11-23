@@ -5,7 +5,7 @@
 
 use super::format::{signed, NumFmt};
 use super::*;
-use crate::look::Profile;
+use qp_look::look::Profile;
 
 /// Field letters (open, high, low, close).
 const LETTERS: [&str; 4] = ["O", "H", "L", "C"];

@@ -9,10 +9,10 @@ use qp_schema::grammar::{
 };
 use qp_schema::scene::{DataSource, ResolvedConstant, Rgba};
 
-use crate::error::{ErrorKind, GrammarError};
 use crate::frame::{Column, Frame, Row};
 use crate::provider::SeriesKind;
-use crate::theme::with_opacity;
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::theme::with_opacity;
 
 mod prepare;
 mod resolve;
@@ -281,7 +281,7 @@ impl<'f> Ctx<'f, '_> {
                 ptr,
                 format!(
                     "constant {} has no origin (bind it to a fact or a named threshold via the layer's `origin`)",
-                    written.map_or_else(String::new, crate::detmath::num)
+                    written.map_or_else(String::new, qp_look::detmath::num)
                 ),
             )),
         }
@@ -451,7 +451,7 @@ impl<'f> Ctx<'f, '_> {
             self.err(
                 ErrorKind::Invalid,
                 ptr,
-                format!("{} is not a bar of the view", crate::detmath::num(v)),
+                format!("{} is not a bar of the view", qp_look::detmath::num(v)),
             )
         })
     }

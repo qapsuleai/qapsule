@@ -3,7 +3,7 @@
 use super::*;
 
 /// The scene of a capsule's face in the feed (open depth `sentence`): the connection's
-/// face design (`look.face`, `qp_grammar::depth::face_view`) over the session's data,
+/// face design (`look.face`, `qp_designs::depth::face_view`) over the session's data,
 /// at `w` × `h`, with the reader's sentence. `None` when the reader gets no face scene
 /// (no data for the finding's series: the shell then shows the sentence as text).
 #[must_use]
@@ -17,7 +17,7 @@ pub fn face_scene(
 ) -> Option<SceneDesc> {
     let heads = BTreeMap::from([(item.finding.clone(), item.sentence.text.clone())]);
     // (R4/H-FP) The headline pieces only for a design with a headline template.
-    let parts = qp_grammar::faces::headline_template(look.face.as_deref())
+    let parts = qp_designs::faces::headline_template(look.face.as_deref())
         .ok()
         .flatten()
         .and_then(|_| s.item_headline_parts(item, item_lang(item)))
@@ -32,7 +32,7 @@ pub fn face_scene(
         extra: OpenExtra::default(),
     };
     let id = format!("capsule-{}", item.finding);
-    let view = depth::face_view_in(
+    let view = qp_designs::depth::face_view_in(
         look_of(look),
         look.face.as_deref(),
         &item.finding,
@@ -64,15 +64,15 @@ fn open_view(
             let id = o.presentation.capsule_view.as_ref()?.id.clone();
             // (R5/M20) The connection's open capsule design (`r4`: today's card).
             let [w, h] = o.frame?;
-            let ctx = qp_grammar::open::OpenCtx {
+            let ctx = qp_designs::open::OpenCtx {
                 ask: look.ask.as_deref(),
                 lang: extra.lang.unwrap_or(Language::Tr),
                 check: extra
                     .check
-                    .and_then(|c| qp_grammar::open::Check::of(c.device_check())),
+                    .and_then(|c| qp_designs::open::Check::of(c.device_check())),
                 frame: [w, h],
             };
-            qp_grammar::open::capsule_view(
+            qp_designs::open::capsule_view(
                 look.open.as_deref(),
                 look_of(look),
                 &o.finding,
@@ -174,7 +174,7 @@ pub fn open_scene_with(
     // (R5/M18) A story chart design: the chart at its price height, then the stories
     // (the authority's `tap_at` builds the same scene, `interact.rs`).
     let sd = if o.to >= OpenDepth::Chart {
-        depth::story_design(look.story.as_deref())
+        qp_designs::depth::story_design(look.story.as_deref())
     } else {
         None
     };
@@ -182,10 +182,10 @@ pub fn open_scene_with(
         return compile(&view, &p, &options(look, w, h, range)).ok();
     };
     let stamp = |r: &qp_schema::protocol::StoryRow| stamps.get(&r.id).cloned();
-    let stamp_of: Option<&qp_grammar::stories::StampFn<'_>> = look.clock.then_some(&stamp);
+    let stamp_of: Option<&qp_designs::stories::StampFn<'_>> = look.clock.then_some(&stamp);
     // (R5/S) A design that compiles the whole scene (`korda`; it reads no first facts).
     if let Some(c) = sd.compile {
-        let input = qp_grammar::stories::StoryInput {
+        let input = qp_designs::stories::StoryInput {
             rows: stories.0,
             focus: Some(&o.finding),
             hide_closed: look.hide_closed,
@@ -212,7 +212,7 @@ pub fn open_scene_with(
         look.theme.as_deref().or(view.theme.as_deref()),
         scene,
         h,
-        &qp_grammar::stories::StoryInput {
+        &qp_designs::stories::StoryInput {
             rows,
             focus: Some(&o.finding),
             hide_closed: look.hide_closed,

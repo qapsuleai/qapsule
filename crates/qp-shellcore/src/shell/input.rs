@@ -89,14 +89,14 @@ impl ShellCore {
 
     /// (R5/M20) The scene frame at open depth `d`: the surface's scene frame, except at
     /// the capsule depth under an open capsule design that states its own height
-    /// (`qp_grammar::open::height_in`; the page scrolls the layer).
+    /// (`qp_designs::open::height_in`; the page scrolls the layer).
     fn frame_at(&self, d: OpenDepth) -> (u32, u32) {
         let (w, h) = self.frames["scene"];
         if d != OpenDepth::Capsule {
             return (w, h);
         }
         let look = qp_session::viewer::look_of(&self.look);
-        qp_grammar::open::height_in(look, self.look.open.as_deref()).map_or((w, h), |oh| (w, oh))
+        qp_designs::open::height_in(look, self.look.open.as_deref()).map_or((w, h), |oh| (w, oh))
     }
 
     fn tap(&mut self, target: &str, x: f64, y: f64) {
@@ -332,7 +332,7 @@ impl ShellCore {
         if self.mo.reduced {
             return 1.0;
         }
-        qp_grammar::transitions::progress_in(
+        qp_designs::transitions::progress_in(
             qp_session::viewer::look_of(&self.look),
             self.look.transition.as_deref(),
             t0,
@@ -341,7 +341,7 @@ impl ShellCore {
     }
 
     /// (R4/H-M8910) The last transition's frame at progress `p` by the connection's
-    /// transition design (`qp_grammar::transitions`): `{done, scene_opacity, elements:
+    /// transition design (`qp_designs::transitions`): `{done, scene_opacity, elements:
     /// [{id, source: "before"|"after", src:[x,y,w,h], style:{left,top,width,height,
     /// opacity}}]}` — `src` in backing px of the source canvas (device scale), `style` as
     /// CSS values; the old scene at page (`from_left`, `from_top`), the new at (`to_left`,
@@ -355,7 +355,7 @@ impl ShellCore {
         to_left: f64,
         to_top: f64,
     ) -> Value {
-        let d = qp_grammar::transitions::by_name(self.look.transition.as_deref());
+        let d = qp_designs::transitions::by_name(self.look.transition.as_deref());
         let p = if p.is_finite() {
             p.clamp(0.0, 1.0)
         } else {
@@ -370,8 +370,8 @@ impl ShellCore {
                 let r = e.src;
                 json!({"id": e.id,
                     "source": match e.source {
-                        qp_grammar::transitions::Source::Before => "before",
-                        qp_grammar::transitions::Source::After => "after",
+                        qp_designs::transitions::Source::Before => "before",
+                        qp_designs::transitions::Source::After => "after",
                     },
                     "src": [r.left * k, r.top * k, (r.right - r.left).max(1) * k,
                             (r.bottom - r.top).max(1) * k],

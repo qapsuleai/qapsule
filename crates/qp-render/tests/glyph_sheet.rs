@@ -1,5 +1,5 @@
 //! Golden glyph alphabet sheets (R3 criterion 7): the product alphabet
-//! (`qp_grammar::glyph::alphabet`, `siluet`) for the six meaning kinds × three directions
+//! (`qp_glyph::alphabet`, `siluet`) for the six meaning kinds × three directions
 //! (rows) × five phases (columns: candidate, final, realized, failed, retracted) at 32 px,
 //! in the light and the dark theme: `fixtures/golden/views/g1-glyphs-light.png`,
 //! `g1-glyphs-dark.png`. Other channels fixed: strength 0.6, confidence 0.6 (fill),
@@ -21,8 +21,8 @@
 #[path = "support/golden_check.rs"]
 mod golden_check;
 
-use qp_grammar::glyph::{alphabet, GlyphBox};
-use qp_grammar::Theme;
+use qp_glyph::{alphabet, GlyphBox};
+use qp_look::Theme;
 use qp_render::render_scene_png;
 use qp_render::scene::scene_of;
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};

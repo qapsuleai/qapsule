@@ -83,7 +83,7 @@ pub fn view_digest(
     width: u32,
     height: u32,
 ) -> Result<String, ProtocolError> {
-    let scene = session.scene(view, &qp_grammar::CompileOptions::new(width, height))?;
+    let scene = session.scene(view, &qp_designs::options(width, height))?;
     let bytes = serde_json::to_vec(&scene).unwrap_or_default();
     Ok(format!("{:016x}", fnv1a64(&bytes)))
 }

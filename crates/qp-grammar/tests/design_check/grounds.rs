@@ -5,8 +5,8 @@
 //! and `down` against its own volume bar on the strip, while H2 measured bg and surface).
 
 use qp_grammar::compile::ALPHABET_FIXED;
-use qp_grammar::look::Look;
-use qp_grammar::theme::Theme;
+use qp_look::look::Look;
+use qp_look::theme::Theme;
 use qp_schema::scene::Rgba;
 
 use crate::color::{contrast, over};

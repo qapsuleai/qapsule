@@ -13,7 +13,6 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 |---|---|---|---|---|
 | İ1 | katman | `qp-source` → `alan` | §2 qp-source'u uyarlayıcıya koyar; içeriği veri düzlemidir (FeedStore §18.4, SourceProvider, MemoryProvider, sentetik piyasa, yeniden oynatma takvimi, canlı bar kurma) ve oturum onu otoritenin parçası olarak kullanır. Dış dünyaya bakan kısım yerel dosya okuma (local.rs, file.rs). Saf taşımayla ayrılamaz: Session::new_inner gövdesi MemoryProvider::from_init'i çağırır (RG1/PLAN §3.1). | onaylandı (K85, 2026-11-22) |
 | İ3 | `crate.lines` | `qp-session` | 23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4). | onaylandı (K85, 2026-11-22); tavan 31999 |
-| İ4 | `crate.lines` | `qp-grammar` | Çekirdek ↔ tasarım klasörleri (faces, open, stories, glyph) adla kayıt üstünden döngüsel; döngüsüz kesimlerle bile ≈14,7 bin kalır. Gerçek bölme kaydın enjeksiyona çevrilmesini ister (M4a ölçümü). | onaylandı (K85, 2026-11-22); tavan 21000 |
 | İ6 | `file.hard` | `crates/qp-session/src/ops/expand/op.rs` | Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 910 |
 | İ6 | `file.hard` | `crates/qp-grammar/src/compile/layer/prepare.rs` | Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 891 |
 
@@ -25,7 +24,7 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 | `doc.size` | Belge 1.500 satır ya da 60 KB'ı aşıyor | konuya göre böl, dizin bırak | 2 |
 | `file.soft` | Dosya 600 satırı aşıyor (kesin sınır 800 değil) | konuya göre alt modül; ≤ 600 | 36 |
 | `fn.lines` | Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi) | adlandırılmış adımlara böl; ≤ 80 | 177 |
-| `lint.allow` | Mevcut lint ihlali öğe başına `#[allow]` ile susturuldu (RG1/L) | ihlali düzelt, izni kaldır | 14 |
+| `lint.allow` | Mevcut lint ihlali öğe başına `#[allow]` ile susturuldu (RG1/L) | ihlali düzelt, izni kaldır | 16 |
 | `test.file` | Test dosyası 800 satırı aşıyor (M5 kesildi) | konuya göre böl; ≤ 800 | 6 |
 
 ## `dir.files` — Klasörde 15'ten çok kaynak dosya
@@ -61,7 +60,7 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-session/src/ops/gops.rs` | 723 |
 | `crates/qp-schema/src/protocol/ops.rs` | 712 |
 | `crates/qp-shellcore/src/shell/bench.rs` | 708 |
-| `crates/qp-session/src/read/interact.rs` | 706 |
+| `crates/qp-session/src/read/interact.rs` | 703 |
 | `crates/qp-session/src/replica/tape.rs` | 695 |
 | `crates/qp-shellcore/src/shell/paint_gpu.rs` | 688 |
 | `crates/qp-session/src/replica/viewer.rs` | 673 |
@@ -88,7 +87,7 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-shellcore/src/shell/inbound.rs` | 611 |
 | `crates/qp-shellcore/src/shell.rs` | 610 |
 | `crates/qp-compute/src/sweep/share.rs` | 605 |
-| `crates/qp-grammar/src/glyph/rozet.rs` | 604 |
+| `crates/qp-glyph/src/rozet.rs` | 604 |
 
 ## `fn.lines` — Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi)
 
@@ -98,9 +97,9 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 |---|---|
 | `crates/qp-session/src/ops/expand/op.rs::expand_op` | 903 |
 | `crates/qp-grammar/src/compile/layer/prepare.rs::prepare` | 883 |
-| `crates/qp-grammar/src/stories/pavka/extend.rs::extend` | 592 |
+| `crates/qp-designs/src/stories/pavka/extend.rs::extend` | 592 |
 | `crates/qp-session/src/ops/gops.rs::expand_grammar` | 571 |
-| `crates/qp-grammar/src/compile/scene.rs::compile` | 564 |
+| `crates/qp-grammar/src/compile/scene.rs::compile` | 562 |
 | `crates/qp-session/src/read/query.rs::query` | 372 |
 | `crates/qp-session/src/authority/session/command.rs::command` | 300 |
 | `crates/qp-host/src/live_trades/compare.rs::compare_trades` | 294 |
@@ -108,15 +107,15 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-host/src/demo.rs::demo` | 277 |
 | `crates/qp-live/src/conn/session.rs::session` | 272 |
 | `crates/qp-voice/src/marla/head.rs::core` | 260 |
-| `crates/qp-grammar/src/glyph/siluet.rs::draw` | 251 |
+| `crates/qp-glyph/src/siluet.rs::draw` | 251 |
 | `crates/qp-shellcore/src/shell/inbound.rs::on_message` | 245 |
 | `crates/qp-capsule/src/engine/run.rs::run_bar` | 240 |
 | `crates/qp-capsule/src/comment/check.rs::validate` | 239 |
-| `crates/qp-grammar/src/open/tesir/view.rs::view` | 230 |
-| `crates/qp-grammar/src/open/nobra.rs::view` | 217 |
+| `crates/qp-designs/src/open/tesir/view.rs::view` | 230 |
+| `crates/qp-designs/src/open/nobra.rs::view` | 217 |
 | `crates/qp-live/src/mock/serve.rs::serve_connection` | 210 |
 | `crates/qp-cli/src/cmd/replay.rs::replay_cmd` | 199 |
-| `crates/qp-grammar/src/glyph/rozet.rs::draw` | 198 |
+| `crates/qp-glyph/src/rozet.rs::draw` | 198 |
 | `crates/qp-shellcore/src/shell/bench.rs::bench_tick` | 198 |
 | `crates/qp-session/src/authority/session/dispatch.rs::handle_resolved` | 196 |
 | `crates/qp-voice/src/selvi/clause.rs::clause` | 196 |
@@ -125,7 +124,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-mcp/src/surfaces/query/act.rs::act` | 185 |
 | `crates/qp-host/src/demo/setup.rs::live_setup` | 182 |
 | `crates/qp-session/src/replica/tape.rs::run_viewer` | 178 |
-| `crates/qp-grammar/src/stories/korda/scene.rs::scene` | 177 |
+| `crates/qp-designs/src/stories/korda/scene.rs::scene` | 177 |
 | `crates/qp-session/src/ops/canon.rs::canon_view` | 176 |
 | `crates/qp-session/src/authority/session/create.rs::build_with_keys` | 175 |
 | `crates/qp-voice/src/marla/since.rs::latest_clause` | 175 |
@@ -136,7 +135,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-host/src/live/compare.rs::compare` | 165 |
 | `crates/qp-session/src/capsule/dispute.rs::dispute` | 162 |
 | `crates/qp-session/src/capsule/queries.rs::capsules_query` | 160 |
-| `crates/qp-grammar/src/stories/korda/draw.rs::lane` | 159 |
+| `crates/qp-designs/src/stories/korda/draw.rs::lane` | 159 |
 | `crates/qp-source/src/livebar/push.rs::push` | 159 |
 | `crates/qp-session/src/authority/session/worlds.rs::propose_two_worlds` | 157 |
 | `crates/qp-session/src/replica/tape.rs::run_with` | 157 |
@@ -150,7 +149,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-session/src/ops/canon/origin.rs::resolve_origins` | 142 |
 | `crates/qp-voice/src/selvi/ledger.rs::ledger` | 142 |
 | `crates/qp-host/src/live/inspect.rs::inspect` | 141 |
-| `crates/qp-grammar/src/present/motion/frame.rs::change_frame` | 136 |
+| `crates/qp-designs/src/motion/frame.rs::change_frame` | 136 |
 | `crates/qp-session/src/replica/judge.rs::judge` | 134 |
 | `crates/qp-host/src/live/record.rs::record` | 131 |
 | `crates/qp-mcp/src/surfaces/task.rs::whats_new` | 131 |
@@ -165,19 +164,18 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-session/src/capsule/run.rs::capsule_changes` | 124 |
 | `crates/qp-mcp/src/surfaces/mixed.rs::overview` | 122 |
 | `crates/qp-capsule/src/realize/tr.rs::event_clause` | 121 |
-| `crates/qp-grammar/src/stories/korda/draw.rs::histogram` | 121 |
+| `crates/qp-designs/src/stories/korda/draw.rs::histogram` | 121 |
 | `crates/qp-host/src/live/compare.rs::load_rest_with` | 121 |
 | `crates/qp-session/src/data/bindq.rs::check_fact` | 121 |
 | `crates/qp-session/src/data/live/eval.rs::bar_command` | 121 |
 | `crates/qp-shellcore/src/drive.rs::shell_less` | 121 |
-| `crates/qp-grammar/src/transitions/nabiz/overlay.rs::overlay` | 120 |
+| `crates/qp-designs/src/transitions/nabiz/overlay.rs::overlay` | 120 |
 | `crates/qp-session/src/capsule/public.rs::translate` | 119 |
 | `crates/qp-session/src/read/interact.rs::tap_at` | 119 |
 | `crates/qp-host/src/livehost/runtime.rs::apply` | 118 |
 | `crates/qp-host/src/mcp_serve/host.rs::post` | 117 |
 | `crates/qp-mcp/src/surfaces/query.rs::shape` | 117 |
 | `crates/qp-session/src/read/interact/scenes.rs::transition` | 117 |
-| `crates/qp-grammar/src/compile/terms.rs::mark` | 116 |
 | `crates/qp-session/src/capsule/watch.rs::expand_watch` | 116 |
 | `crates/qp-session/src/read/interact/style.rs::set_style` | 116 |
 | `crates/qp-shellcore/src/gallery/build_impl.rs::shots` | 116 |
@@ -188,7 +186,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-session/src/ops/canon/layer.rs::check_channels` | 108 |
 | `crates/qp-session/src/ops/select/resolve.rs::resolve_kind` | 108 |
 | `crates/qp-session/src/read/interact/scenes.rs::depth_view` | 108 |
-| `crates/qp-grammar/src/faces/zemre.rs::view` | 106 |
+| `crates/qp-designs/src/faces/zemre.rs::view` | 106 |
 | `crates/qp-matriks/src/feed/ingest.rs::on_symbol` | 106 |
 | `crates/qp-shellcore/src/shell/input.rs::pointer` | 106 |
 | `crates/qp-shellcore/src/shell/paint_canvas.rs::prim` | 106 |
@@ -203,7 +201,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-session/src/ops/canon/layer.rs::check_layer` | 102 |
 | `crates/qp-session/src/ops/locate.rs::walk` | 102 |
 | `crates/qp-mcp/src/surfaces/query/capsule.rs::detail_parts` | 101 |
-| `crates/qp-grammar/src/transitions/zumlak.rs::frame` | 100 |
+| `crates/qp-designs/src/transitions/zumlak.rs::frame` | 100 |
 | `crates/qp-host/src/mcp_serve/http.rs::handle` | 100 |
 | `crates/qp-session/src/capsule/story.rs::stories_query` | 100 |
 | `crates/qp-session/src/ops/expand/undo.rs::expand_remove` | 100 |
@@ -217,7 +215,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-mcp/src/tools.rs::generate` | 96 |
 | `crates/qp-session/src/capsule/project.rs::as_reader` | 96 |
 | `crates/qp-session/src/ops/expand.rs::check_bind` | 96 |
-| `crates/qp-grammar/src/faces/fotolay.rs::view` | 95 |
+| `crates/qp-designs/src/faces/fotolay.rs::view` | 95 |
 | `crates/qp-session/src/capsule/project.rs::project_changes` | 95 |
 | `crates/qp-session/src/capsule/queries.rs::capsule_query_with` | 95 |
 | `crates/qp-session/src/ops/locate.rs::walk_branches` | 95 |
@@ -226,6 +224,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-session/src/ops/expand/describe.rs::summarize` | 94 |
 | `crates/qp-capsule/src/realize/plan.rs::new` | 93 |
 | `crates/qp-grammar/src/compile/emphasis.rs::resolve_emphasis` | 93 |
+| `crates/qp-grammar/src/compile/terms.rs::mark` | 93 |
 | `crates/qp-host/src/live/rest.rs::trades` | 93 |
 | `crates/qp-session/src/host/replayhost/control.rs::host_control` | 93 |
 | `crates/qp-session/src/read/query/view.rs::screen_info` | 93 |
@@ -281,16 +280,18 @@ Hedef: ihlali düzelt, izni kaldır.
 | Kalem | Değer |
 |---|---|
 | `qp-session` | 71 |
-| `qp-grammar` | 30 |
 | `qp-compute` | 27 |
 | `qp-live` | 23 |
 | `qp-host` | 21 |
 | `qp-mcp` | 17 |
 | `qp-shellcore` | 17 |
 | `qp-capsule` | 14 |
+| `qp-designs` | 14 |
+| `qp-grammar` | 13 |
 | `qp-voice` | 12 |
 | `qp-facts` | 9 |
 | `qp-source` | 5 |
+| `qp-glyph` | 3 |
 | `qp-matriks` | 3 |
 | `qp-cli` | 2 |
 | `qp-render` | 1 |
@@ -305,6 +306,6 @@ Hedef: konuya göre böl; ≤ 800.
 | `crates/qp-session/tests/grammar.rs` | 1076 |
 | `crates/qp-capsule/tests/comment.rs` | 981 |
 | `crates/qp-session/tests/non_interference.rs` | 954 |
-| `crates/qp-grammar/tests/capsule_depth.rs` | 845 |
-| `crates/qp-grammar/tests/pavka_ref/mod.rs` | 827 |
+| `crates/qp-designs/tests/capsule_depth.rs` | 845 |
+| `crates/qp-designs/tests/pavka_ref/mod.rs` | 827 |
 

@@ -12,6 +12,8 @@ name = "qp"
 path = "src/main.rs"
 
 [dependencies]
+qp-designs = { version = "0.0.0", path = "../qp-designs" }
+qp-look = { version = "0.0.0", path = "../qp-look" }
 clap = { version = "4.6.7", features = ["derive"] }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-grammar = { version = "0.0.0", path = "../qp-grammar" }

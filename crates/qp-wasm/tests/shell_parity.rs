@@ -127,7 +127,7 @@ fn sizes_scale_and_frames_come_from_the_core() {
     let data = h.init().data.clone().unwrap();
     let mut core = ShellCore::new("arkin", "tr", &data, &[]).unwrap();
     let fs = core.face_size_json();
-    assert_eq!(fs["css"], json!([390, qp_grammar::faces::height(None)]));
+    assert_eq!(fs["css"], json!([390, qp_designs::faces::height(None)]));
     assert_eq!(fs["px"], fs["css"]);
     assert_eq!(fs["style"]["height"], "240px");
     assert!(core.set_dpr(2.0));

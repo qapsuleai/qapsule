@@ -5,8 +5,8 @@
 //! capsules with their stories) and its `put_view` view `marks`, and compiles the view.
 //! The glyph's spec comes from the capsule's story, as in the authority's provider.
 
-use qp_grammar::look::Look;
 use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_look::look::Look;
 use qp_schema::grammar::{Mark, View};
 use qp_schema::scene::{Prim, SceneDesc};
 
@@ -57,7 +57,7 @@ impl Marks {
     /// The view compiled in `look` and `scheme` at the desktop chart size.
     pub fn scene(&self, look: &'static Look, scheme: &str) -> SceneDesc {
         let (w, h) = th::DESK;
-        let mut o = CompileOptions::new(w, h);
+        let mut o = CompileOptions::without_designs(w, h);
         o.look_record = Some(look);
         o.theme = Some(scheme.to_owned());
         compile(&self.view, &self.provider, &o).expect("the marks fixture compiles")

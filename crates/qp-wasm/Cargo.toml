@@ -24,6 +24,7 @@ spike-vello-cpu = ["qp-render/spike-vello-cpu"]
 spike-vello-gpu = ["qp-render/spike-vello-gpu", "dep:wasm-bindgen-futures"]
 
 [dependencies]
+qp-designs = { path = "../qp-designs" }
 qp-compute = { path = "../qp-compute" }
 qp-grammar = { path = "../qp-grammar" }
 qp-capsule = { path = "../qp-capsule", optional = true }
@@ -41,6 +42,8 @@ wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = { version = "0.4", optional = true }
 
 [dev-dependencies]
+qp-glyph = { path = "../qp-glyph" }
+qp-look = { path = "../qp-look" }
 # RG1/M1b: the `replica` tests ran in `cargo test --workspace` only because qp-cli enabled
 # the feature; this self-dependency keeps them running (as qp-schema does with `validate`).
 qp-wasm = { path = ".", features = ["replica"] }

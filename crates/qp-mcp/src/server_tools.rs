@@ -184,7 +184,7 @@ fn render(ctx: &mut Ctx<'_>, args: &Value) -> Result<Value, RpcError> {
             ));
         }
     }
-    let mut opts = qp_session::CompileOptions::new(width, height);
+    let mut opts = qp_designs::options(width, height);
     opts.look.clone_from(&a.look);
     let scene = {
         let conn = ctx.conn.to_owned();

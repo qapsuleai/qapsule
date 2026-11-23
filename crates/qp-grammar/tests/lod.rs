@@ -58,7 +58,12 @@ fn layer<'a>(s: &'a qp_schema::scene::SceneDesc, id: &str) -> &'a SceneLayer {
 fn buckets_aggregate_ohlc_lines_and_bars() {
     let bars = big(10_000);
     let p = provider(&bars);
-    let s = compile(&support::view(VIEW), &p, &CompileOptions::new(1200, 600)).unwrap();
+    let s = compile(
+        &support::view(VIEW),
+        &p,
+        &CompileOptions::without_designs(1200, 600),
+    )
+    .unwrap();
     let lod = s.lod.unwrap();
     assert_eq!(lod.bars_per_bucket, 9); // ceil(10000 / 1120)
     assert_eq!(lod.buckets, 1111); // remainder joins the last bucket
@@ -110,13 +115,13 @@ fn buckets_aggregate_ohlc_lines_and_bars() {
 fn lod_can_be_disabled_and_max_points_forces_it() {
     let bars = big(3000);
     let p = provider(&bars);
-    let mut o = CompileOptions::new(1200, 600);
+    let mut o = CompileOptions::without_designs(1200, 600);
     o.lod = false;
     let s = compile(&support::view(VIEW), &p, &o).unwrap();
     assert_eq!(s.lod, None);
     assert_eq!(layer(&s, "c").items.len(), 3000);
     assert!(layer(&s, "c").items.iter().all(|i| i.bars.is_none()));
-    let mut o = CompileOptions::new(1200, 600);
+    let mut o = CompileOptions::without_designs(1200, 600);
     o.range = Some((0, 199));
     o.max_points = Some(60);
     let s = compile(&support::view(VIEW), &p, &o).unwrap();
@@ -128,7 +133,7 @@ fn lod_can_be_disabled_and_max_points_forces_it() {
 fn viewport_in_a_large_series() {
     let bars = big(100_000);
     let p = provider(&bars);
-    let mut o = CompileOptions::new(1200, 600);
+    let mut o = CompileOptions::without_designs(1200, 600);
     o.range = Some((50_000, 50_199));
     let s = compile(&support::view(VIEW), &p, &o).unwrap();
     assert_eq!(s.lod, None);

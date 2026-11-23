@@ -7,7 +7,7 @@ pub const VOICES: [&str; 3] = ["r4", "marla", "selvi"];
 pub const DEFAULT_VOICE: &str = "r4";
 
 /// The voice the presentation shell asks for when the reader chose none (M17's pick,
-/// `rounds/R5/experiments/M17/RESULTS.md` §6). Like `qp_grammar::faces::PRESENTED_FACE`
+/// `rounds/R5/experiments/M17/RESULTS.md` §6). Like `qp_designs::faces::PRESENTED_FACE`
 /// it is sent by the shell core with the `style` gesture; the protocol default
 /// ([`DEFAULT_VOICE`]) does not change.
 pub const PRESENTED_VOICE: &str = "marla";

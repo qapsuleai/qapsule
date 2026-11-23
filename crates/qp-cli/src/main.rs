@@ -324,7 +324,7 @@ struct ComputeArgs {
     list: bool,
 }
 
-/// (R5/T3) `qp look`: the design records (`qp_grammar::look`).
+/// (R5/T3) `qp look`: the design records (`qp_look::look`).
 #[derive(Debug, Subcommand)]
 enum LookCommand {
     /// The registered looks, one per line: name, default scheme, note (default first).
@@ -484,10 +484,6 @@ fn r0_scene(
         .with_values("sma20", "px", vec![("sma", line)], "sma", &["sma"])
         .with_label("sma20", "SMA20");
     let view = serde_json::from_str(R0_VIEW).map_err(|e| e.to_string())?;
-    qp_grammar::compile(
-        &view,
-        &provider,
-        &qp_grammar::CompileOptions::new(width, height),
-    )
-    .map_err(|e| e.to_string())
+    qp_grammar::compile(&view, &provider, &qp_designs::options(width, height))
+        .map_err(|e| e.to_string())
 }

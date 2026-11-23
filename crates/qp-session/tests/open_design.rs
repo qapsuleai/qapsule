@@ -119,7 +119,7 @@ fn the_column_is_one_scene_on_both_sides_and_its_trust_block_explains() {
         .find(|i| i.voice.is_some() && !i.redacted)
         .expect("a voiced capsule")
         .clone();
-    let fh = qp_grammar::open::height_in(&qp_grammar::look::R4, Some("tesir")).unwrap();
+    let fh = qp_designs::open::height_in(&qp_look::look::R4, Some("tesir")).unwrap();
     let m = input(
         &mut h,
         json!({"kind":"open","capsule":it.id,"to":"capsule","width":390,"height":fh}),

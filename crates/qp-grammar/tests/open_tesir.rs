@@ -170,7 +170,7 @@ fn provider(evidence: bool, licensed: bool, lang: Language) -> MemProvider {
 }
 
 fn scene_of(p: &MemProvider, look: &str) -> SceneDesc {
-    let l = qp_grammar::look::or_default(Some(look));
+    let l = qp_look::look::or_default(Some(look));
     let v = (open::by_name(Some("tesir")).view)(l, "fnd-brk", 120, p, "capsule-fnd-brk").unwrap();
     let h = open::height_in(l, Some("tesir")).unwrap();
     let mut o = CompileOptions::new(W, h);
@@ -203,7 +203,7 @@ fn first_top(s: &SceneDesc, id: &str) -> i32 {
 
 #[test]
 fn blocks_read_top_to_bottom_in_every_look() {
-    for look in qp_grammar::look::names() {
+    for look in qp_look::look::names() {
         let s = scene_of(&provider(true, false, Language::Tr), look);
         let order = [
             "headline",
@@ -224,7 +224,7 @@ fn blocks_read_top_to_bottom_in_every_look() {
             assert!(!t.ends_with('…'), "{look}: `{id}` clipped: {t}");
         }
         // The column fits its frame.
-        let h = open::height_in(qp_grammar::look::or_default(Some(look)), Some("tesir")).unwrap();
+        let h = open::height_in(qp_look::look::or_default(Some(look)), Some("tesir")).unwrap();
         assert_eq!(s.height, h);
         // The evidence in small: the level geometry is drawn.
         assert!(s
@@ -348,7 +348,7 @@ fn the_text_column_says_the_same_without_a_scene() {
 #[test]
 fn the_reference_is_untouched() {
     let p = provider(true, false, Language::Tr);
-    let l = &qp_grammar::look::R4;
+    let l = &qp_look::look::R4;
     let a = (open::by_name(None).view)(l, "fnd-brk", 120, &p, "v").unwrap();
     let b = qp_grammar::depth::capsule_view_in(l, "fnd-brk", 120, &p, "v").unwrap();
     assert_eq!(a, b);

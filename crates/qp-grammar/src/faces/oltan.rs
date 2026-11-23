@@ -40,9 +40,9 @@ use qp_schema::grammar::{
 };
 
 use crate::depth;
-use crate::error::GrammarError;
-use crate::look::Look;
 use crate::provider::DataProvider;
+use qp_look::error::GrammarError;
+use qp_look::look::Look;
 
 /// The phone width every face is laid out at (CSS px; protocol `hello`).
 const FACE_W: f64 = 390.0;
@@ -182,7 +182,7 @@ pub fn view(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::look::{OLTAN, R4};
+    use qp_look::look::{OLTAN, R4};
 
     #[test]
     fn oltan_geometry() {

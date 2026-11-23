@@ -9,9 +9,9 @@ use qp_schema::scene::SceneDesc;
 use qp_schema::grammar::View;
 
 use crate::compile::CompileOptions;
-use crate::error::GrammarError;
-use crate::look::Look;
 use crate::provider::DataProvider;
+use qp_look::error::GrammarError;
+use qp_look::look::Look;
 
 /// (RP4/T7) A story row's time stamp, if it has one ([`StoryInput::stamp_of`]).
 pub type StampFn<'a> = dyn Fn(&StoryRow) -> Option<String> + 'a;

@@ -3,7 +3,7 @@
 //! (`docs/GRAMMAR.md` §18) and the M1 measurement harness both go through
 //! [`Alphabet::draw`], so every alternative is rendered and measured by the same code path.
 //!
-//! Rules: deterministic; IEEE basic operations only (`crate::detmath` for anything else);
+//! Rules: deterministic; IEEE basic operations only (`qp_look::detmath` for anything else);
 //! all colours from the [`Theme`] (no hard-coded colours, so light/dark and colour-blind
 //! simulation apply uniformly); every primitive inside the box.
 //!
@@ -14,14 +14,12 @@
 //! [`outcome::OutcomeStyle`] wrapping the alphabet; the default `r3` is the alphabet's own
 //! drawing.
 
-pub mod outcome;
-pub mod rozet;
-pub mod siluet;
-
 use qp_schema::capsule::GlyphSpec;
 use qp_schema::scene::Prim;
 
-use crate::theme::Theme;
+use qp_look::theme::Theme;
+
+use crate::{rozet, siluet};
 
 /// A square box in pixels: top-left corner and side length.
 #[derive(Debug, Clone, Copy, PartialEq)]

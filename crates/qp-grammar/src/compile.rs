@@ -11,14 +11,14 @@ use qp_schema::scene::{
     Align, DataSource, Lod, PixelRect, Prim, Rgba, SceneDesc, SceneEmphasis, ScenePanel, XMap, YMap,
 };
 
-use crate::detmath::{self, nice_step, px, year_month};
 use crate::draw::{draw, est_width, rect, Geo};
-use crate::error::{ErrorKind, GrammarError};
 use crate::frame::Frame;
 use crate::layer::{prepare, Geom, Prepared};
 use crate::provider::{DataProvider, SeriesKind};
 use crate::scale::value_y;
-use crate::theme::with_opacity;
+use qp_look::detmath::{self, nice_step, px, year_month};
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::theme::with_opacity;
 
 mod alphabet;
 mod axis;
@@ -48,7 +48,7 @@ pub const MIN_HEIGHT: u32 = 120;
 pub const MAX_DIM: u32 = 16_384;
 
 // (R5/T3) Plot margins, panel gap, the title and label sizes and the strip and veil alphas
-// are the look's (`crate::look`, `r4`: R0's values).
+// are the look's (`qp_look::look`, `r4`: R0's values).
 /// Smallest panel height.
 const MIN_PANEL_H: i32 = 10;
 /// Hard cap on grid lines per panel, and the largest tick index that is still exact.
@@ -78,7 +78,7 @@ pub struct CompileOptions {
     /// Surface reduction: aggregate when more than this many slots are visible
     /// (`docs/GRAMMAR.md` §13, `profile.max_points`).
     pub max_points: Option<u64>,
-    /// (R4/T5) Glyph alphabet by name (`crate::glyph::ALPHABETS`); the product's if
+    /// (R4/T5) Glyph alphabet by name (`qp_glyph::ALPHABETS`); the product's if
     /// `None`.
     pub alphabet: Option<String>,
     /// (R4/H-FP) The face design (`crate::faces`) whose feed face this scene is, set only
@@ -87,7 +87,7 @@ pub struct CompileOptions {
     /// the template's output; `None` (every other scene) or a design without one: the
     /// capsule's sentence. An unknown name is `invalid`.
     pub face: Option<String>,
-    /// (R5/T3) The look (`crate::look::LOOKS`) the scene is drawn in; `None`: `r4`. An
+    /// (R5/T3) The look (`qp_look::look::LOOKS`) the scene is drawn in; `None`: `r4`. An
     /// unknown name is `invalid`.
     pub look: Option<String>,
     /// (R5/T3) Write each text's type role into the scene (`Prim::Text::role`; the
@@ -98,7 +98,7 @@ pub struct CompileOptions {
     pub cursor: Option<Cursor>,
     /// (RD2/C2a) A look record that is not registered (design trials, tests); overrides
     /// `look`.
-    pub look_record: Option<&'static crate::look::Look>,
+    pub look_record: Option<&'static qp_look::look::Look>,
 }
 
 /// (RD2/C2a) The pointer's place in data terms: a slot and, optionally, a price on the
@@ -144,7 +144,7 @@ struct Resolved {
 /// (R5/T3) A text primitive's font and role: the role it was made with (compiler texts),
 /// else for a text mark the look's role of that size, for a glyph's text `glyph`; the
 /// font is the role's asset (`None` for the default); the role is kept only if `keep`.
-fn settle_text(p: &mut Prim, look: &crate::look::Look, mark: Option<Mark>, keep: bool) {
+fn settle_text(p: &mut Prim, look: &qp_look::look::Look, mark: Option<Mark>, keep: bool) {
     let Prim::Text { px, font, role, .. } = p else {
         return;
     };
@@ -165,7 +165,7 @@ fn settle_text(p: &mut Prim, look: &crate::look::Look, mark: Option<Mark>, keep:
 
 /// `text` cut to fit `room` pixels at `size` in font `adv` ([`est_width`]), ending in
 /// "…" when cut.
-fn fit_text(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> String {
+fn fit_text(text: &str, room: i32, size: f64, adv: &qp_look::look::FontAsset) -> String {
     if est_width(text, size, adv) <= room {
         return text.to_owned();
     }

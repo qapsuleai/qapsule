@@ -37,8 +37,8 @@ use qp_schema::capsule::{GlyphPhase, GlyphSpec};
 use qp_schema::scene::Prim;
 
 use super::{Alphabet, GlyphBox};
-use crate::error::{ErrorKind, GrammarError};
-use crate::theme::Theme;
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::theme::Theme;
 
 /// The default outcome style (the R3 drawing; `ViewState.outcome` and
 /// `CompileOptions::outcome` absent).
@@ -170,7 +170,7 @@ pub fn open_look(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::glyph::siluet::Siluet;
+    use crate::siluet::Siluet;
     use qp_schema::capsule::{Direction, MeaningKind};
 
     #[test]

@@ -48,9 +48,9 @@ use qp_schema::scene::{
 
 use super::{StoryDesign, StoryInput, StoryTap};
 use crate::compile::MIN_HEIGHT;
-use crate::look::Look;
 use crate::scale::slot_x;
-use crate::theme::Theme;
+use qp_look::look::Look;
+use qp_look::theme::Theme;
 
 mod extend;
 
@@ -73,39 +73,39 @@ pub const DESIGN: StoryDesign = StoryDesign {
 // (`look::StoryLook`, `look::R4.story`); the design reads the look's.
 
 /// Share of the frame height the price context strip takes.
-pub const PRICE_SHARE: f64 = crate::look::R4.story.price_share;
+pub const PRICE_SHARE: f64 = qp_look::look::R4.story.price_share;
 /// Smallest price strip (px).
-pub const PRICE_MIN_H: u32 = crate::look::R4.story.price_min_h;
+pub const PRICE_MIN_H: u32 = qp_look::look::R4.story.price_min_h;
 /// Smallest story part (px).
-pub const STORY_MIN_H: u32 = crate::look::R4.story.story_min_h;
+pub const STORY_MIN_H: u32 = qp_look::look::R4.story.story_min_h;
 /// Height of one lane (px; `r4` `space.scale[5]` − 4).
-pub const LANE_H: i32 = crate::look::R4.story.lane_h;
+pub const LANE_H: i32 = qp_look::look::R4.story.lane_h;
 /// Smallest lane height before stories are clustered (px).
-pub const LANE_MIN: i32 = crate::look::R4.story.lane_min;
+pub const LANE_MIN: i32 = qp_look::look::R4.story.lane_min;
 /// Largest lane height, when few lanes leave room (px; a larger touch target).
-pub const LANE_MAX: i32 = crate::look::R4.story.lane_max;
+pub const LANE_MAX: i32 = qp_look::look::R4.story.lane_max;
 /// Width of a cluster's time bucket (px).
-pub const CLUSTER_W: i32 = crate::look::R4.story.cluster_w;
+pub const CLUSTER_W: i32 = qp_look::look::R4.story.cluster_w;
 /// Height of the cluster row (px).
-pub const CLUSTER_H: i32 = crate::look::R4.story.cluster_h;
+pub const CLUSTER_H: i32 = qp_look::look::R4.story.cluster_h;
 /// Smallest width of a story's hit box (px), centred on its span.
-pub const HIT_MIN: i32 = crate::look::R4.story.hit_min;
+pub const HIT_MIN: i32 = qp_look::look::R4.story.hit_min;
 /// Alpha of the selected story's row tint (`focus` role).
-pub const FOCUS_ROW_ALPHA: u8 = crate::look::R4.story.focus_row_alpha;
+pub const FOCUS_ROW_ALPHA: u8 = qp_look::look::R4.story.focus_row_alpha;
 /// Alpha of the selected story's guide through the price strip (`focus` role).
-pub const GUIDE_ALPHA: u8 = crate::look::R4.story.guide_alpha;
+pub const GUIDE_ALPHA: u8 = qp_look::look::R4.story.guide_alpha;
 /// Lane thickness of the selected story (px).
-pub const BAR_FOCUS: i32 = crate::look::R4.story.bar_focus;
+pub const BAR_FOCUS: i32 = qp_look::look::R4.story.bar_focus;
 /// Lane thickness of a live story (px).
-pub const BAR_LIVE: i32 = crate::look::R4.story.bar_live;
+pub const BAR_LIVE: i32 = qp_look::look::R4.story.bar_live;
 /// Lane thickness of a closed story, or a live one that no longer holds (px).
-pub const BAR_CLOSED: i32 = crate::look::R4.story.bar_closed;
+pub const BAR_CLOSED: i32 = qp_look::look::R4.story.bar_closed;
 /// Half size of a birth or outcome marker (px).
-pub const MARK: f32 = crate::look::R4.story.mark;
+pub const MARK: f32 = qp_look::look::R4.story.mark;
 /// Dash and gap of a coin-flip lane (px).
-pub const DASH: (i32, i32) = crate::look::R4.story.dash;
+pub const DASH: (i32, i32) = qp_look::look::R4.story.dash;
 /// Most dashes in one coin-flip lane (a longer lane gets longer dashes).
-pub const DASH_MAX: i32 = crate::look::R4.story.dash_max;
+pub const DASH_MAX: i32 = qp_look::look::R4.story.dash_max;
 
 /// Layer id prefix of a story's lane (followed by the capsule id).
 pub const STORY_LAYER: &str = "story:";

@@ -5,8 +5,8 @@
 //! capsules with their stories) and its `put_view` view `marks`, and compiles the view.
 //! The glyph's spec comes from the capsule's story, as in the authority's provider.
 
-use qp_grammar::look::Look;
 use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_look::look::Look;
 use qp_schema::grammar::{Mark, View};
 use qp_schema::scene::{Prim, SceneDesc};
 

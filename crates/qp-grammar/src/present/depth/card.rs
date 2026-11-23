@@ -15,9 +15,9 @@ pub const GLYPH_MIN_LEDGER_N: u32 = qp_schema::params::system::GLYPH_MIN_LEDGER_
 pub const FRESHNESS_HALF_BARS: f64 = qp_schema::params::system::GLYPH_FRESHNESS_HALF_BARS_DEFAULT;
 
 /// Glyph size in the capsule card (the `r4` look's `glyph.card_px`).
-pub const CARD_GLYPH_PX: f64 = crate::look::R4.glyph.card_px;
+pub const CARD_GLYPH_PX: f64 = qp_look::look::R4.glyph.card_px;
 /// Glyph size over the chart at `chart` depth (the `r4` look's `glyph.chart_px`).
-pub const CHART_GLYPH_PX: f64 = crate::look::R4.glyph.chart_px;
+pub const CHART_GLYPH_PX: f64 = qp_look::look::R4.glyph.chart_px;
 
 /// The glyph parameters of a story at bar `now_bar` (K30 channels). The same rule as the
 /// engine's `qp_capsule::glyph_spec(story, now_bar, GLYPH_MIN_LEDGER_N)` (cross-checked in
@@ -148,7 +148,7 @@ pub fn capsule_card_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
-    capsule_card_view_in(&crate::look::R4, finding, max_points, p, id)
+    capsule_card_view_in(&qp_look::look::R4, finding, max_points, p, id)
 }
 
 /// (R5/T3) [`capsule_card_view`] with the sizes of `look`: glyph `glyph.card_px`, the

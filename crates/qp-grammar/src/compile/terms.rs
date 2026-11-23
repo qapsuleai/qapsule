@@ -34,8 +34,8 @@ use qp_schema::protocol::GlossEntry;
 use qp_schema::scene::{Align, PixelRect, Prim, ScenePanel, TermMark};
 
 use crate::draw::{est_width, text_metrics};
-use crate::look::Look;
 use crate::provider::DataProvider;
+use qp_look::look::Look;
 
 /// Lower-cases one letter so that both sides of a comparison keep their lengths.
 fn low(c: char) -> char {

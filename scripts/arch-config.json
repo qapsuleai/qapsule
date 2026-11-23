@@ -29,11 +29,15 @@
         "qp-capsule",
         "qp-voice",
         "qp-grammar",
-        "qp-facts"
+        "qp-facts",
+        "qp-look",
+        "qp-glyph"
       ],
       "order": [
         "qp-source",
         "qp-facts",
+        "qp-look",
+        "qp-glyph",
         "qp-grammar",
         "qp-capsule",
         "qp-voice"
@@ -129,7 +133,10 @@
     "lint.flags"
   ],
   "generated_files": [
-    "crates/qp-grammar/src/advances.rs"
+    {
+      "path": "crates/qp-look/src/advances.rs",
+      "reason": "RF1/G2a: crates/qp-grammar/src/advances.rs saf taşımayla qp-look'a indi (aynı üretici: qp-render tests/fonts.rs); rounds/RF1/DECISION.md \"Uygulama notları\", PLAN §3.1 ve §9 B15–B19"
+    }
   ],
   "exceptions": [
     {

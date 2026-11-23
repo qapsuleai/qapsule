@@ -9,9 +9,12 @@ publish.workspace = true
 
 [dependencies]
 qp-schema = { path = "../qp-schema" }
+# (RF1/G2a) Looks, themes, the error type and detmath; the meaning glyphs.
+qp-look = { path = "../qp-look" }
+qp-glyph = { path = "../qp-glyph" }
 # (RD2/C2a-fix) Display zone of the time labels (K14).
 qp-calendar = { path = "../qp-calendar" }
-# (R5/T3) `look::Look::to_json` (`qp look show`).
+# (R5/T3) Was `look::Look::to_json`; now only the feed and motion record tests use it.
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
 [dev-dependencies]

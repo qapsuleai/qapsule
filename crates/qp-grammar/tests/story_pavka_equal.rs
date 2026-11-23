@@ -17,8 +17,8 @@
 
 mod pavka_ref;
 
-use qp_grammar::look::{self, Look, R4};
 use qp_grammar::stories::{pavka, StoryInput};
+use qp_look::look::{self, Look, R4};
 use qp_schema::capsule::{Direction, MeaningKind, Stage, Validity};
 use qp_schema::grammar::ScaleKind;
 use qp_schema::protocol::{Language, StoryFace, StoryOutcome, StoryRow};

@@ -15,10 +15,10 @@ use qp_schema::scene::{
     ScenePanel, YMap,
 };
 
-use qp_grammar::look::Look;
 use qp_grammar::scale::slot_x;
 use qp_grammar::stories::StoryInput;
-use qp_grammar::theme::Theme;
+use qp_look::look::Look;
+use qp_look::theme::Theme;
 
 /// Share of the frame height the price context strip takes.
 pub const PRICE_SHARE: f64 = 0.38;

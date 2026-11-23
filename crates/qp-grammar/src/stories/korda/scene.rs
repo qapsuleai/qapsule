@@ -13,7 +13,7 @@ pub fn scene(
     opts: &CompileOptions,
     inp: &StoryInput<'_>,
 ) -> Result<SceneDesc, GrammarError> {
-    let look = crate::look::by_name(opts.look.as_deref())?;
+    let look = qp_look::look::by_name(opts.look.as_deref())?;
     let theme = look.theme(opts.theme.as_deref().or(view.theme.as_deref()))?;
     let Some(bs) = first_bar_series(view, p) else {
         return compile(view, p, opts);

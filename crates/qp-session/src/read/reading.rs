@@ -6,7 +6,7 @@
 use std::collections::BTreeMap;
 
 use qp_grammar::scale::{slot_at, value_at};
-use qp_grammar::{compile, CompileOptions, ErrorKind, GrammarError};
+use qp_grammar::{compile, CompileOptions};
 use qp_schema::protocol::{
     ErrorCode, HitInfo, HitItem, LayerInfo, ProtocolError, ScaleInfo, SurfaceKind, Viewport,
 };
@@ -41,11 +41,11 @@ pub fn screen_frame(kind: SurfaceKind) -> (u32, u32) {
 }
 
 /// A compile error as a protocol error at `path`.
-fn grammar_error(e: &GrammarError, path: &str) -> ProtocolError {
+fn grammar_error(e: &qp_look::GrammarError, path: &str) -> ProtocolError {
     let code = match e.kind {
-        ErrorKind::NotFound => ErrorCode::NotFound,
-        ErrorKind::Invalid => ErrorCode::Invalid,
-        ErrorKind::NoOrigin => ErrorCode::NoOrigin,
+        qp_look::ErrorKind::NotFound => ErrorCode::NotFound,
+        qp_look::ErrorKind::Invalid => ErrorCode::Invalid,
+        qp_look::ErrorKind::NoOrigin => ErrorCode::NoOrigin,
     };
     E::new(code, e.to_string()).at(path).build()
 }

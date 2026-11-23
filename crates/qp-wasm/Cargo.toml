@@ -41,6 +41,8 @@ wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = { version = "0.4", optional = true }
 
 [dev-dependencies]
+qp-glyph = { path = "../qp-glyph" }
+qp-look = { path = "../qp-look" }
 # RG1/M1b: the `replica` tests ran in `cargo test --workspace` only because qp-cli enabled
 # the feature; this self-dependency keeps them running (as qp-schema does with `validate`).
 qp-wasm = { path = ".", features = ["replica"] }

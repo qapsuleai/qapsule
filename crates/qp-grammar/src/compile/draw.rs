@@ -6,11 +6,11 @@ use qp_schema::scene::{Item, PixelRect, Prim, Rgba, SceneLayer, XMap, YMap};
 
 use qp_schema::grammar::PanelPos;
 
-use crate::detmath::px;
-use crate::glyph::GlyphBox;
 use crate::layer::{step_index, Geom, PRow, Prepared, Split};
 use crate::scale::value_y;
-use crate::theme::Theme;
+use qp_glyph::GlyphBox;
+use qp_look::detmath::px;
+use qp_look::theme::Theme;
 
 mod marks;
 mod series;
@@ -30,9 +30,9 @@ pub(crate) fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
 }
 
 /// Advance width of `text` at `size` px in `font`, rounded up (the font's generated
-/// advance table, [`crate::look::FontAsset::width`]; a monospaced file: R3's `characters ·
+/// advance table, [`qp_look::look::FontAsset::width`]; a monospaced file: R3's `characters ·
 /// size · advance`). Used to wrap and fit text, place legends and size text hit boxes.
-pub(crate) fn est_width(text: &str, size: f64, font: &crate::look::FontAsset) -> i32 {
+pub(crate) fn est_width(text: &str, size: f64, font: &qp_look::look::FontAsset) -> i32 {
     font.width(text, size)
 }
 
@@ -59,11 +59,11 @@ pub(crate) struct Geo<'a> {
     /// Theme (glyph colours).
     pub theme: &'a Theme,
     /// (R5/T3) The look (type roles: width estimate, line height, ascent).
-    pub look: &'static crate::look::Look,
+    pub look: &'static qp_look::look::Look,
     /// (R4/M11) Outcome style of glyphs (`CompileOptions::outcome`).
-    pub outcome: &'a dyn crate::glyph::outcome::OutcomeStyle,
+    pub outcome: &'a dyn qp_glyph::outcome::OutcomeStyle,
     /// (R4/T5) Glyph alphabet (`CompileOptions::alphabet`).
-    pub alphabet: &'static dyn crate::glyph::Alphabet,
+    pub alphabet: &'static dyn qp_glyph::Alphabet,
 }
 
 impl Geo<'_> {
@@ -75,7 +75,7 @@ impl Geo<'_> {
     }
 
     fn y(&self, v: Option<f64>) -> Option<f64> {
-        let lim = crate::detmath::PX_LIMIT;
+        let lim = qp_look::detmath::PX_LIMIT;
         value_y(self.y, v?)
             .filter(|y| !y.is_nan())
             .map(|y| y.clamp(-lim, lim))
@@ -172,11 +172,11 @@ pub(crate) fn draw(pl: &Prepared, g: &Geo<'_>) -> SceneLayer {
 /// (`TypeScale::mark_role`; the default font at line 1.3 when no role has it):
 /// `(font asset, line height, ascent em)`. `r4`: `(plex-mono, 1.3, 0.8)`, R3's constants.
 pub(crate) fn text_metrics(
-    look: &crate::look::Look,
+    look: &qp_look::look::Look,
     size: f64,
-) -> (&'static crate::look::FontAsset, f64, f64) {
+) -> (&'static qp_look::look::FontAsset, f64, f64) {
     let role = look.types.mark_role(size);
-    let f = role.map_or(&crate::look::FONTS[0], |r| look.role_font(r));
+    let f = role.map_or(&qp_look::look::FONTS[0], |r| look.role_font(r));
     let line = role
         .and_then(|r| look.types.role(r))
         .map_or(1.3, |r| r.line);
@@ -190,7 +190,12 @@ fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
 
 /// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
 /// [`est_width`]); a word longer than a line stands alone.
-pub(crate) fn wrap(text: &str, room: i32, size: f64, adv: &crate::look::FontAsset) -> Vec<String> {
+pub(crate) fn wrap(
+    text: &str,
+    room: i32,
+    size: f64,
+    adv: &qp_look::look::FontAsset,
+) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
     let mut cur = String::new();
     for w in text.split_whitespace() {

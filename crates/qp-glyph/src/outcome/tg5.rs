@@ -20,8 +20,8 @@ use qp_schema::capsule::{GlyphPhase, GlyphSpec};
 use qp_schema::scene::{Prim, Rgba};
 
 use super::{open_look, OutcomeStyle};
-use crate::glyph::{Alphabet, GlyphBox};
-use crate::theme::{at_least, with_opacity, Theme};
+use crate::{Alphabet, GlyphBox};
+use qp_look::theme::{at_least, with_opacity, Theme};
 
 /// The `tg5` outcome style.
 #[derive(Debug, Clone, Copy, Default)]
@@ -274,7 +274,7 @@ impl OutcomeStyle for Tg5 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::glyph::siluet::Siluet;
+    use crate::siluet::Siluet;
     use qp_schema::capsule::{Direction, MeaningKind};
 
     fn spec(phase: GlyphPhase) -> GlyphSpec {
@@ -383,7 +383,7 @@ mod tests {
     /// rozet: `up`/`down`/`text`).
     #[test]
     fn ornek_signs_keep_3_to_1_at_freshness_zero() {
-        use crate::look::{ORNEK, R4};
+        use qp_look::look::{ORNEK, R4};
         assert_eq!(signs_keep_3_to_1(&ORNEK), 2 * 2 * 6 * 3 * 5);
         // r4 keeps freshness alone (its glyphs stay byte-identical).
         for t in [R4.dark, R4.light] {
@@ -394,19 +394,19 @@ mod tests {
     /// (R5/M16) The same for `oltan` (its 120 px face glyph and the card glyphs).
     #[test]
     fn oltan_signs_keep_3_to_1_at_freshness_zero() {
-        assert_eq!(signs_keep_3_to_1(&crate::look::OLTAN), 2 * 2 * 6 * 3 * 5);
+        assert_eq!(signs_keep_3_to_1(&qp_look::look::OLTAN), 2 * 2 * 6 * 3 * 5);
     }
 
     /// (R5/M16) The same for `zemre` (its floors: `closed_alpha` 255, `fresh_alpha_min`).
     #[test]
     fn zemre_signs_keep_3_to_1_at_freshness_zero() {
-        assert_eq!(signs_keep_3_to_1(&crate::look::ZEMRE), 2 * 2 * 6 * 3 * 5);
+        assert_eq!(signs_keep_3_to_1(&qp_look::look::ZEMRE), 2 * 2 * 6 * 3 * 5);
     }
 
     /// Asserts every sign of `look`'s two schemes at freshness 0 (see above); returns how
     /// many signs it checked.
-    fn signs_keep_3_to_1(look: &crate::look::Look) -> usize {
-        use crate::glyph::rozet::Rozet;
+    fn signs_keep_3_to_1(look: &qp_look::look::Look) -> usize {
+        use crate::rozet::Rozet;
         let alphabets: [&dyn Alphabet; 2] = [&Siluet, &Rozet];
         let bx = GlyphBox {
             x: 0.0,

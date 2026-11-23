@@ -37,17 +37,13 @@ use qp_schema::Fact;
 
 use super::{DeviceCheck, OpenDesign, TextInput};
 use crate::depth::{self, layer, named_panel, panel_at, uniq};
-use crate::error::GrammarError;
-use crate::look::{Look, TypeRole};
 use crate::provider::{DataProvider, SeriesKind};
+use qp_look::error::GrammarError;
+use qp_look::look::{Look, TypeRole, NO_LONGER_HEADLINE};
 
 mod view;
 
 pub use view::view;
-
-/// (R5/fix47, A46) The colour role of the claim's headline when it no longer holds: a text
-/// role (4.5:1 on the ground in every look, `look::tests`), as on the face `oltan`.
-pub const NO_LONGER_HEADLINE: &str = "muted";
 
 /// The design.
 pub const DESIGN: OpenDesign = OpenDesign {

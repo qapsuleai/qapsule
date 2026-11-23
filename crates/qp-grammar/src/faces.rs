@@ -27,9 +27,9 @@
 use qp_schema::View;
 
 use crate::depth;
-use crate::error::{ErrorKind, GrammarError};
-use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts};
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::look::Look;
 
 /// Builds a face's view: `(look, finding, max_points, provider, view id) -> View`.
 /// `max_points` is the connection profile's point budget; the view id is
@@ -191,7 +191,7 @@ pub fn by_name(name: Option<&str>) -> Result<&'static FaceDesign, GrammarError> 
 /// The face height of design `name` (`None` or unknown: the default's) in the `r4` look.
 #[must_use]
 pub fn height(name: Option<&str>) -> u32 {
-    height_in(&crate::look::R4, name)
+    height_in(&qp_look::look::R4, name)
 }
 
 /// (R5/T3) The face height of design `name` in `look` (what the shell lays faces out at).
@@ -245,7 +245,7 @@ pub fn face_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
-    face_view_in(&crate::look::R4, face, finding, max_points, p, id)
+    face_view_in(&qp_look::look::R4, face, finding, max_points, p, id)
 }
 
 /// (R5/T3) [`face_view`] in `look`.
@@ -443,7 +443,7 @@ mod tests {
                 .name
                 .chars()
                 .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-'));
-            for l in crate::look::LOOKS {
+            for l in qp_look::look::LOOKS {
                 let h = (f.height)(l);
                 assert!((120..=844).contains(&h), "{} height in {}", f.name, l.name);
             }

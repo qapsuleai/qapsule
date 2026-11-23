@@ -10,7 +10,8 @@
 
 mod support;
 
-use qp_grammar::{compile, CompileOptions, ErrorKind, GrammarError};
+use qp_grammar::{compile, CompileOptions};
+use qp_look::{ErrorKind, GrammarError};
 
 fn err(json: &str) -> GrammarError {
     let p = support::provider();

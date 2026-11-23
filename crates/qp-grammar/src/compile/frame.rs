@@ -6,9 +6,9 @@ use std::collections::BTreeMap;
 
 use qp_schema::{Bar, Fact};
 
-use crate::error::{ErrorKind, GrammarError};
 use crate::provider::{DataProvider, SeriesKind};
-use crate::theme::Theme;
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::theme::Theme;
 
 /// Bar fields of a bar series, in the order of [`Column::Bars`]' index.
 pub(crate) const BAR_FIELDS: [&str; 5] = ["o", "h", "l", "c", "v"];
@@ -80,7 +80,7 @@ pub(crate) struct Frame<'a> {
     /// (R4/H-FP) The face design's headline template (`CompileOptions::face`).
     pub headline: Option<crate::faces::HeadlineFn>,
     /// (R5/T3) The look (`CompileOptions::look`).
-    pub look: &'static crate::look::Look,
+    pub look: &'static qp_look::look::Look,
     pub theme: Theme,
     pub bar_series: String,
     pub bars: Cow<'a, [Bar]>,

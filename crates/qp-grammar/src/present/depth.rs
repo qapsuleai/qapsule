@@ -19,10 +19,10 @@ use qp_schema::protocol::{HitItem, OpenDepth, Profile, SharedElement, Target};
 use qp_schema::scene::{DataSource, PixelRect, SceneDesc};
 use qp_schema::{Bar, Depth, Fact, Finding};
 
-use crate::detmath::num;
-use crate::error::{ErrorKind, GrammarError};
-use crate::look::Look;
 use crate::provider::{DataProvider, SeriesKind};
+use qp_look::detmath::num;
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::look::Look;
 
 mod card;
 mod opening;
@@ -197,7 +197,7 @@ pub fn capsule_view(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError> {
-    capsule_view_in(&crate::look::R4, finding, max_points, p, id)
+    capsule_view_in(&qp_look::look::R4, finding, max_points, p, id)
 }
 
 /// (R5/T3) [`capsule_view`] with the sizes of `look` (the card's glyph, sentence and
@@ -261,7 +261,7 @@ pub fn capsule_view_in(
 /// # Errors
 /// Unknown finding/fact, a finding without facts, or a series without bars.
 pub fn chart_view(finding: &str, p: &dyn DataProvider, id: &str) -> Result<View, GrammarError> {
-    chart_view_in(&crate::look::R4, finding, p, id)
+    chart_view_in(&qp_look::look::R4, finding, p, id)
 }
 
 /// (R5/T3) [`chart_view`] with the sizes of `look` (the glyph over the chart, the note;

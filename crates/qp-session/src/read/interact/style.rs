@@ -20,20 +20,20 @@ impl Session {
             }
         }
         if let Some(a) = r.alphabet {
-            if qp_grammar::glyph::alphabet_named(Some(a)).is_none() {
+            if qp_glyph::alphabet_named(Some(a)).is_none() {
                 return Err(
                     E::new(ErrorCode::Invalid, format!("unknown alphabet `{a}`"))
                         .at(ptr(GP, "alphabet"))
-                        .expected(qp_grammar::glyph::ALPHABETS)
+                        .expected(qp_glyph::ALPHABETS)
                         .build(),
                 );
             }
         }
         if let Some(t) = r.theme {
-            if t != "view" && !qp_grammar::theme::THEMES.contains(&t) {
+            if t != "view" && !qp_look::theme::THEMES.contains(&t) {
                 return Err(E::new(ErrorCode::Invalid, format!("unknown theme `{t}`"))
                     .at(ptr(GP, "theme"))
-                    .expected(qp_grammar::theme::THEMES.into_iter().chain(["view"]))
+                    .expected(qp_look::theme::THEMES.into_iter().chain(["view"]))
                     .build());
             }
         }
@@ -48,13 +48,13 @@ impl Session {
             }
         }
         if let Some(o) = r.outcome {
-            if qp_grammar::glyph::outcome::by_name(o).is_err() {
-                return Err(unknown("outcome", o, qp_grammar::glyph::outcome::names()));
+            if qp_glyph::outcome::by_name(o).is_err() {
+                return Err(unknown("outcome", o, qp_glyph::outcome::names()));
             }
         }
         if let Some(l) = r.look {
-            if !qp_grammar::look::is_look(l) {
-                return Err(unknown("look", l, qp_grammar::look::names()));
+            if !qp_look::look::is_look(l) {
+                return Err(unknown("look", l, qp_look::look::names()));
             }
         }
         if let Some(v) = r.voice {
@@ -96,14 +96,14 @@ impl Session {
             look.clock = c;
         }
         if let Some(l) = r.look {
-            look.look = (l != qp_grammar::look::DEFAULT_LOOK).then(|| l.to_owned());
+            look.look = (l != qp_look::look::DEFAULT_LOOK).then(|| l.to_owned());
         }
         if let Some(f) = r.face {
             let c = qp_grammar::faces::canonical(f).unwrap_or(qp_grammar::faces::DEFAULT_FACE);
             look.face = (c != qp_grammar::faces::DEFAULT_FACE).then(|| c.to_owned());
         }
         if let Some(a) = r.alphabet {
-            look.alphabet = (a != qp_grammar::glyph::ALPHABETS[0]).then(|| a.to_owned());
+            look.alphabet = (a != qp_glyph::ALPHABETS[0]).then(|| a.to_owned());
         }
         if let Some(t) = r.theme {
             look.theme = (t != "view").then(|| t.to_owned());
@@ -116,7 +116,7 @@ impl Session {
                 (t != qp_grammar::transitions::DEFAULT_TRANSITION).then(|| t.to_owned());
         }
         if let Some(o) = r.outcome {
-            look.outcome = (o != qp_grammar::glyph::outcome::DEFAULT_OUTCOME).then(|| o.to_owned());
+            look.outcome = (o != qp_glyph::outcome::DEFAULT_OUTCOME).then(|| o.to_owned());
         }
         if let Some(t) = r.seen {
             look.seen = (t != 0).then_some(t);

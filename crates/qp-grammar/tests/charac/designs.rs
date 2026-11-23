@@ -5,8 +5,9 @@
 use qp_grammar::open::nobra::ASKS;
 use qp_grammar::open::{self, Check, DeviceCheck, OpenCtx, OpenTap, TextInput};
 use qp_grammar::stories::{self, StoryInput};
-use qp_grammar::{depth, faces, DataProvider as _, GrammarError};
+use qp_grammar::{depth, faces, DataProvider as _};
 use qp_grammar::{CompileOptions, MemProvider};
+use qp_look::GrammarError;
 use qp_schema::capsule::{LedgerStat, Trust, Validity};
 use qp_schema::protocol::{Language, OpenDepth, StoryRow};
 use qp_schema::scene::SceneDesc;

@@ -25,7 +25,7 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 | `doc.size` | Belge 1.500 satır ya da 60 KB'ı aşıyor | konuya göre böl, dizin bırak | 2 |
 | `file.soft` | Dosya 600 satırı aşıyor (kesin sınır 800 değil) | konuya göre alt modül; ≤ 600 | 36 |
 | `fn.lines` | Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi) | adlandırılmış adımlara böl; ≤ 80 | 177 |
-| `lint.allow` | Mevcut lint ihlali öğe başına `#[allow]` ile susturuldu (RG1/L) | ihlali düzelt, izni kaldır | 14 |
+| `lint.allow` | Mevcut lint ihlali öğe başına `#[allow]` ile susturuldu (RG1/L) | ihlali düzelt, izni kaldır | 15 |
 | `test.file` | Test dosyası 800 satırı aşıyor (M5 kesildi) | konuya göre böl; ≤ 800 | 6 |
 
 ## `dir.files` — Klasörde 15'ten çok kaynak dosya
@@ -88,7 +88,7 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-shellcore/src/shell/inbound.rs` | 611 |
 | `crates/qp-shellcore/src/shell.rs` | 610 |
 | `crates/qp-compute/src/sweep/share.rs` | 605 |
-| `crates/qp-grammar/src/glyph/rozet.rs` | 604 |
+| `crates/qp-glyph/src/rozet.rs` | 604 |
 
 ## `fn.lines` — Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi)
 
@@ -108,7 +108,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-host/src/demo.rs::demo` | 277 |
 | `crates/qp-live/src/conn/session.rs::session` | 272 |
 | `crates/qp-voice/src/marla/head.rs::core` | 260 |
-| `crates/qp-grammar/src/glyph/siluet.rs::draw` | 251 |
+| `crates/qp-glyph/src/siluet.rs::draw` | 251 |
 | `crates/qp-shellcore/src/shell/inbound.rs::on_message` | 245 |
 | `crates/qp-capsule/src/engine/run.rs::run_bar` | 240 |
 | `crates/qp-capsule/src/comment/check.rs::validate` | 239 |
@@ -116,7 +116,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-grammar/src/open/nobra.rs::view` | 217 |
 | `crates/qp-live/src/mock/serve.rs::serve_connection` | 210 |
 | `crates/qp-cli/src/cmd/replay.rs::replay_cmd` | 199 |
-| `crates/qp-grammar/src/glyph/rozet.rs::draw` | 198 |
+| `crates/qp-glyph/src/rozet.rs::draw` | 198 |
 | `crates/qp-shellcore/src/shell/bench.rs::bench_tick` | 198 |
 | `crates/qp-session/src/authority/session/dispatch.rs::handle_resolved` | 196 |
 | `crates/qp-voice/src/selvi/clause.rs::clause` | 196 |
@@ -281,8 +281,8 @@ Hedef: ihlali düzelt, izni kaldır.
 | Kalem | Değer |
 |---|---|
 | `qp-session` | 71 |
-| `qp-grammar` | 30 |
 | `qp-compute` | 27 |
+| `qp-grammar` | 27 |
 | `qp-live` | 23 |
 | `qp-host` | 21 |
 | `qp-mcp` | 17 |
@@ -291,6 +291,7 @@ Hedef: ihlali düzelt, izni kaldır.
 | `qp-voice` | 12 |
 | `qp-facts` | 9 |
 | `qp-source` | 5 |
+| `qp-glyph` | 3 |
 | `qp-matriks` | 3 |
 | `qp-cli` | 2 |
 | `qp-render` | 1 |

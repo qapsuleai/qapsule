@@ -2,10 +2,10 @@
 //! (series, fact, finding, constant with an origin, none) × look, the glyph styles, the
 //! compile options around it, and the error paths (kind, layer, path, message).
 
-use qp_grammar::glyph::{outcome, ALPHABETS};
-use qp_grammar::look::R4;
+use qp_glyph::{outcome, ALPHABETS};
 use qp_grammar::open::{self, OpenCtx};
 use qp_grammar::{compile, CompileOptions, Cursor};
+use qp_look::look::R4;
 use qp_schema::grammar::View;
 use qp_schema::protocol::Language;
 use qp_schema::scene::{Prim, SceneDesc};

@@ -6,8 +6,8 @@
 //! `QP_DESIGN_SCENE_OUT=<file>` also writes the desk scene (960 × 600, dark, cursor) as
 //! JSON for a look at it.
 
-use qp_grammar::look::{ChartLook, Look, Profile, TypeRole, TypeScale, ValueLine, R4};
 use qp_grammar::{compile, CompileOptions, Cursor, MemProvider};
+use qp_look::look::{ChartLook, Look, Profile, TypeRole, TypeScale, ValueLine, R4};
 use qp_schema::scene::{Prim, SceneDesc};
 use qp_schema::Bar;
 

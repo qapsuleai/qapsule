@@ -1,0 +1,15 @@
+[package]
+name = "qp-glyph"
+description = "Qapsule meaning glyphs: the alphabet contract, the alphabets (siluet, rozet) and the outcome mark styles."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { path = "../qp-schema" }
+qp-look = { path = "../qp-look" }
+
+[lints]
+workspace = true

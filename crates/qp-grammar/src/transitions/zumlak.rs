@@ -26,7 +26,8 @@ use qp_schema::scene::{PixelRect, SceneDesc, ScenePanel};
 use qp_schema::{scene::DataSource, Mark};
 
 use super::{anchors, r3_frame, Frame, FrameElement, Side, Source};
-use crate::{detmath, scale};
+use crate::scale;
+use qp_look::detmath;
 
 /// The common window id.
 const SPAN: &str = "span";

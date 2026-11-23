@@ -49,10 +49,10 @@ fn the_presentation_asks_for_the_r5_picks() {
     let l = look(&page(&mut parity_host(), |_| {}));
     // (RD2, K2) `tavek`; the presentation is a phone surface: its touch profile, and
     // `tavek`'s companion face.
-    assert_eq!(qp_grammar::look::PRESENTED_LOOK, "tavek");
+    assert_eq!(qp_look::look::PRESENTED_LOOK, "tavek");
     assert_eq!(
         l["look"],
-        qp_grammar::look::phone_profile(qp_grammar::look::PRESENTED_LOOK),
+        qp_look::look::phone_profile(qp_look::look::PRESENTED_LOOK),
         "{l}"
     );
     assert_eq!(l["look"], "tavek-tel");

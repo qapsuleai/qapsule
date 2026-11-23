@@ -160,7 +160,7 @@ pub(crate) fn scene_cmd(args: &SceneArgs, explain: bool) -> Result<Outcome, Stri
 
 /// (R5/T3) `qp look`.
 pub(crate) fn look_cmd(c: &LookCommand) -> Result<Outcome, String> {
-    use qp_grammar::look;
+    use qp_look::look;
     match c {
         LookCommand::List => {
             for l in look::LOOKS {

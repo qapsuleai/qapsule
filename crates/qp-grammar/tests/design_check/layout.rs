@@ -10,7 +10,7 @@
 //! sits above the plot at every desktop width. `--layout <file>` (a gallery dump) still
 //! overrides the measurement. A touch look has no desktop layout: `n.a.`
 
-use qp_grammar::look::{Look, Profile};
+use qp_look::look::{Look, Profile};
 use qp_schema::scene::Prim;
 
 use crate::scene::Fixture;

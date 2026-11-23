@@ -12,7 +12,7 @@
 
 use std::fmt::Write as _;
 
-use qp_grammar::GrammarError;
+use qp_look::GrammarError;
 use qp_schema::scene::SceneDesc;
 
 /// SHA-256 (the only external helper; one place to change if it moves).

@@ -77,8 +77,8 @@ fn focus_point(a: &std::collections::BTreeMap<String, PixelRect>) -> Option<(f64
 /// The pin's box over `(x, y)`: above the point, or below it near the panel's top.
 #[allow(clippy::cast_possible_truncation)]
 fn pin_box(x: f64, y: f64, panel: &PixelRect) -> PixelRect {
-    let l = crate::detmath::px(x) - PIN_PX / 2;
-    let yi = crate::detmath::px(y);
+    let l = qp_look::detmath::px(x) - PIN_PX / 2;
+    let yi = qp_look::detmath::px(y);
     let top = if yi - PIN_GAP - PIN_PX >= panel.top {
         yi - PIN_GAP - PIN_PX
     } else {

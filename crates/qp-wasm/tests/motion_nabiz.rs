@@ -246,12 +246,12 @@ fn reduce_motion_loses_no_fact_and_paints_no_overlay() {
 
 #[test]
 fn the_marks_find_room_in_every_look() {
-    for look in qp_grammar::look::names() {
+    for look in qp_look::look::names() {
         let mut core = page(
             &mut parity_host(),
             &json!({"feed_order": "live_new", "look": look}),
         );
-        let l = qp_grammar::look::or_default(Some(look));
+        let l = qp_look::look::or_default(Some(look));
         let mut n = 0;
         for id in ids(&core).iter().take(8) {
             let Some(s) = core.face(id) else { continue };

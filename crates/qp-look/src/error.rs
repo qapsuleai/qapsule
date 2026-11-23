@@ -31,7 +31,7 @@ pub struct GrammarError {
 }
 
 impl GrammarError {
-    pub(crate) fn new(kind: ErrorKind, path: impl Into<String>, reason: impl Into<String>) -> Self {
+    pub fn new(kind: ErrorKind, path: impl Into<String>, reason: impl Into<String>) -> Self {
         Self {
             kind,
             layer: None,
@@ -40,7 +40,7 @@ impl GrammarError {
         }
     }
 
-    pub(crate) fn in_layer(
+    pub fn in_layer(
         kind: ErrorKind,
         layer: &str,
         path: impl Into<String>,
@@ -54,7 +54,7 @@ impl GrammarError {
         }
     }
 
-    pub(crate) fn with_layer(mut self, layer: &str) -> Self {
+    pub fn with_layer(mut self, layer: &str) -> Self {
         if self.layer.is_none() {
             self.layer = Some(layer.to_owned());
         }

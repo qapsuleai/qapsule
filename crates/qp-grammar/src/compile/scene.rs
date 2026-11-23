@@ -24,21 +24,21 @@ pub fn compile(
             format!("size {width}x{height} out of range ({MIN_WIDTH}x{MIN_HEIGHT} ..= {MAX_DIM}x{MAX_DIM})"),
         ));
     }
-    let look =
-        (opts.look_record.map(Ok)).unwrap_or_else(|| crate::look::by_name(opts.look.as_deref()))?;
+    let look = (opts.look_record.map(Ok))
+        .unwrap_or_else(|| qp_look::look::by_name(opts.look.as_deref()))?;
     let theme = look.theme(opts.theme.as_deref().or(view.theme.as_deref()))?;
     let outcome = match opts.outcome.as_deref() {
-        Some(n) => crate::glyph::outcome::by_name(n)?,
-        None => crate::glyph::outcome::default_style(),
+        Some(n) => qp_glyph::outcome::by_name(n)?,
+        None => qp_glyph::outcome::default_style(),
     };
-    let alphabet = crate::glyph::alphabet_named(opts.alphabet.as_deref()).ok_or_else(|| {
+    let alphabet = qp_glyph::alphabet_named(opts.alphabet.as_deref()).ok_or_else(|| {
         GrammarError::new(
             ErrorKind::Invalid,
             "",
             format!(
                 "unknown glyph alphabet `{}` (known: {})",
                 opts.alphabet.as_deref().unwrap_or_default(),
-                crate::glyph::ALPHABETS.join(", ")
+                qp_glyph::ALPHABETS.join(", ")
             ),
         )
     })?;

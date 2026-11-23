@@ -19,7 +19,7 @@
 //! the end mark's shape (or the bucket segment's fill pattern), "no longer holds" a
 //! double rail, "coin flip" (K53) a dotted lane.
 //!
-//! Values not in the look record yet (`crate::look`, R5/T3) are the `const`s below,
+//! Values not in the look record yet (`qp_look::look`, R5/T3) are the `const`s below,
 //! derived from the `r4` look's spacing and type scale; they should be moved into the
 //! record (M18 report).
 
@@ -34,10 +34,10 @@ use qp_schema::scene::{
 
 use super::{StoryDesign, StoryInput, StoryTap};
 use crate::compile::{compile, CompileOptions};
-use crate::error::GrammarError;
-use crate::look::Look;
 use crate::provider::{DataProvider, SeriesKind};
-use crate::theme::{with_opacity, Theme};
+use qp_look::error::GrammarError;
+use qp_look::look::Look;
+use qp_look::theme::{with_opacity, Theme};
 
 mod draw;
 mod scene;

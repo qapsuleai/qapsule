@@ -36,9 +36,9 @@ use qp_schema::capsule::{Stage, Validity};
 use qp_schema::protocol::{CapsuleItem, Language};
 use qp_schema::scene::{Align, PixelRect, Prim, SceneDesc};
 
-use crate::look::{self, Look};
-use crate::theme::Theme;
 use crate::transitions::{self, Frame, FrameElement, Source};
+use qp_look::look::{self, Look};
+use qp_look::theme::Theme;
 
 mod face;
 mod frame;
@@ -410,7 +410,7 @@ mod tests {
 
     #[test]
     fn progress_follows_the_look() {
-        let l = &crate::look::R4;
+        let l = &qp_look::look::R4;
         assert!((change_progress(l, 0.0, change_duration(l) / 2.0) - 0.5).abs() < 1e-12);
         assert!((change_progress(l, 0.0, 1e9) - 1.0).abs() < 1e-12);
     }
@@ -426,7 +426,7 @@ mod tests {
 
     #[test]
     fn stamp_puts_the_label_inside_the_face() {
-        for l in crate::look::LOOKS {
+        for l in qp_look::look::LOOKS {
             for th in [l.dark, l.light] {
                 for lang in [Language::Tr, Language::En] {
                     let mut sc = blank(th.bg);

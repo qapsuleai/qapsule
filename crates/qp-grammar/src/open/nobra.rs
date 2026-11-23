@@ -40,9 +40,9 @@ use qp_schema::Fact;
 use super::{Check, OpenCtx, OpenDesign, OpenTap};
 use crate::depth::{evidence_layers, evidence_note, CHART_LOOKBACK, GLYPH_MIN_LEDGER_N};
 use crate::draw::wrap;
-use crate::error::{ErrorKind, GrammarError};
-use crate::look::Look;
 use crate::provider::{DataProvider, SeriesKind};
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::look::Look;
 
 mod answers;
 
@@ -463,7 +463,7 @@ pub fn view(
 #[must_use]
 pub fn height(look: &Look) -> u32 {
     const R4_HEIGHT: f64 = 560.0;
-    let k = look.types.body.px / crate::look::R4.types.body.px;
+    let k = look.types.body.px / qp_look::look::R4.types.body.px;
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     let h = (R4_HEIGHT * k).round() as u32;
     h

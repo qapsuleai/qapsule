@@ -4,7 +4,7 @@
 use qp_schema::grammar::ScaleKind;
 use qp_schema::scene::{XMap, YMap};
 
-use crate::detmath;
+use qp_look::detmath;
 
 /// Pixel x of the centre column of bar slot `slot`:
 /// `floor(left + (slot - from_bar + 0.5) * slot_width)`.

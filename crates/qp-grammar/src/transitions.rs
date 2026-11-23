@@ -212,14 +212,17 @@ pub struct LiveMarks {
     pub draw_face: fn(
         &mut qp_schema::scene::SceneDesc,
         &nabiz::FaceMarks<'_>,
-        &crate::look::Look,
-        &crate::theme::Theme,
+        &qp_look::look::Look,
+        &qp_look::theme::Theme,
     ),
     /// Where a face's marks go (`None`: no glyph).
-    pub places: fn(&qp_schema::scene::SceneDesc, &crate::look::Look) -> Option<nabiz::Places>,
+    pub places: fn(&qp_schema::scene::SceneDesc, &qp_look::look::Look) -> Option<nabiz::Places>,
     /// The overlay boxes of one face at a frame.
-    pub overlay:
-        fn(&nabiz::FaceMotion, &crate::look::Look, &crate::theme::Theme) -> Vec<nabiz::OverlayBox>,
+    pub overlay: fn(
+        &nabiz::FaceMotion,
+        &qp_look::look::Look,
+        &qp_look::theme::Theme,
+    ) -> Vec<nabiz::OverlayBox>,
 }
 
 /// Registered names.
@@ -247,14 +250,14 @@ pub fn by_name(name: Option<&str>) -> &'static TransitionDesign {
 /// Progress of a transition that started at `t0` ms, at `t` ms (0..=1).
 #[must_use]
 pub fn progress(name: Option<&str>, t0: f64, t: f64) -> f64 {
-    progress_in(&crate::look::R4, name, t0, t)
+    progress_in(&qp_look::look::R4, name, t0, t)
 }
 
 /// (R5/T3) [`progress`] in `look`: the design's duration times the look's
 /// `motion.duration_scale`, the linear progress through the look's easing curve (`r4`:
 /// scale 1, linear: [`progress`] unchanged).
 #[must_use]
-pub fn progress_in(look: &crate::look::Look, name: Option<&str>, t0: f64, t: f64) -> f64 {
+pub fn progress_in(look: &qp_look::look::Look, name: Option<&str>, t0: f64, t: f64) -> f64 {
     let d = by_name(name).duration_ms * look.motion.duration_scale;
     if !(t.is_finite() && t0.is_finite()) || d <= 0.0 {
         return 1.0;
@@ -264,7 +267,7 @@ pub fn progress_in(look: &crate::look::Look, name: Option<&str>, t0: f64, t: f64
 
 /// (R5/T3) The duration of design `name` in `look`, ms.
 #[must_use]
-pub fn duration_in(look: &crate::look::Look, name: Option<&str>) -> f64 {
+pub fn duration_in(look: &qp_look::look::Look, name: Option<&str>) -> f64 {
     by_name(name).duration_ms * look.motion.duration_scale
 }
 

@@ -23,7 +23,7 @@
 //! All colours come from the [`Theme`].
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
-use crate::theme::{opacity_at_least, Theme};
+use qp_look::theme::{opacity_at_least, Theme};
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind};
 use qp_schema::scene::{Prim, Rgba};
 

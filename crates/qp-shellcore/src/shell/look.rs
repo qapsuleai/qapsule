@@ -10,8 +10,8 @@ use super::*;
 /// different CSS family), so that family's `font-weight` uses the real file.
 #[must_use]
 pub fn font_faces(
-    files: &[(&str, Option<&qp_grammar::look::FontAsset>)],
-    assets: &[qp_grammar::look::FontAsset],
+    files: &[(&str, Option<&qp_look::look::FontAsset>)],
+    assets: &[qp_look::look::FontAsset],
 ) -> Vec<Value> {
     let mut out = Vec::new();
     for (id, asset) in files {
@@ -48,15 +48,14 @@ impl ShellCore {
     /// profile (`look::phone_profile`, `tavek-tel`) and its companion face.
     #[must_use]
     pub fn presented_look() -> Value {
-        let look = qp_grammar::look::phone_profile(qp_grammar::look::PRESENTED_LOOK);
-        let face =
-            qp_grammar::look::companion_face(look).unwrap_or(qp_grammar::faces::PRESENTED_FACE);
+        let look = qp_look::look::phone_profile(qp_look::look::PRESENTED_LOOK);
+        let face = qp_look::look::companion_face(look).unwrap_or(qp_grammar::faces::PRESENTED_FACE);
         json!({"kind":"style",
                "face": face,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
                // (R5/S) The presented motion design's opening (M21, `surek`).
                "transition": qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition,
-               "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME,
+               "outcome": qp_glyph::outcome::PRESENTED_OUTCOME,
                // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
                "voice": qp_session::voices::PRESENTED_VOICE,
                "look": look,
@@ -73,11 +72,11 @@ impl ShellCore {
     pub fn choices_json() -> Value {
         json!({
             "face": qp_grammar::faces::names(),
-            "alphabet": qp_grammar::glyph::ALPHABETS,
+            "alphabet": qp_glyph::ALPHABETS,
             "feed": qp_grammar::feeds::names(),
             "transition": qp_grammar::transitions::names(),
-            "outcome": qp_grammar::glyph::outcome::names(),
-            "look": qp_grammar::look::names(),
+            "outcome": qp_glyph::outcome::names(),
+            "look": qp_look::look::names(),
             // (R5/M19) The feed orders (feed layouts) and the host's feed rules M19
             // measured, best first.
             // `layout`: no order chosen, the feed layout orders the feed.
@@ -109,7 +108,7 @@ impl ShellCore {
     }
 
     /// (R5/T3) The chrome's CSS custom properties for the connection's look and theme
-    /// (`qp_grammar::look::css_vars`) as a `{name: value}` object, or `None` when they did
+    /// (`qp_look::look::css_vars`) as a `{name: value}` object, or `None` when they did
     /// not change since the last hand-out (the page sets them verbatim on its root
     /// element; its stylesheet holds no colour, font, size or radius of its own).
     /// (R5/T3b) Also the frames the page lays out: `--qp-phone-w`/`-h` (the phone
@@ -127,7 +126,7 @@ impl ShellCore {
             return None;
         }
         let look = qp_session::viewer::look_of(&self.look);
-        let mut vars = qp_grammar::look::css_vars(look, self.look.theme.as_deref());
+        let mut vars = qp_look::look::css_vars(look, self.look.theme.as_deref());
         for (k, v) in [
             ("--qp-phone-w", PHONE_SCREEN.0),
             ("--qp-phone-h", PHONE_SCREEN.1),
@@ -156,11 +155,11 @@ impl ShellCore {
     /// semibold face and the browser does not synthesize one.
     #[must_use]
     pub fn fonts_json() -> Value {
-        let files: Vec<(&str, Option<&qp_grammar::look::FontAsset>)> = qp_render::fonts::FILES
+        let files: Vec<(&str, Option<&qp_look::look::FontAsset>)> = qp_render::fonts::FILES
             .iter()
-            .map(|(id, _)| (*id, qp_grammar::look::font(id)))
+            .map(|(id, _)| (*id, qp_look::look::font(id)))
             .collect();
-        Value::Array(font_faces(&files, qp_grammar::look::FONTS))
+        Value::Array(font_faces(&files, qp_look::look::FONTS))
     }
 
     /// (R5/T3) The bytes of embedded font asset `id` (empty if unknown).
@@ -379,7 +378,7 @@ impl ShellCore {
             if let Some(f) = g
                 .get("look")
                 .and_then(Value::as_str)
-                .and_then(qp_grammar::look::companion_face)
+                .and_then(qp_look::look::companion_face)
             {
                 g["face"] = json!(f);
             }
@@ -393,7 +392,7 @@ impl ShellCore {
 #[cfg(test)]
 mod font_tests {
     use super::*;
-    use qp_grammar::look::FontAsset;
+    use qp_look::look::FontAsset;
 
     fn asset(id: &'static str, family: &'static str, weight: u16, css: &'static str) -> FontAsset {
         FontAsset {
@@ -401,7 +400,7 @@ mod font_tests {
             family,
             weight,
             css_family: css,
-            ..qp_grammar::look::FONTS[0]
+            ..qp_look::look::FONTS[0]
         }
     }
 
@@ -410,7 +409,7 @@ mod font_tests {
     #[test]
     fn semibold_is_registered_under_the_body_family() {
         let assets = [
-            qp_grammar::look::FONTS[0],
+            qp_look::look::FONTS[0],
             asset("sans", "Some Sans", 400, "QpSans"),
             asset("sans-600", "Some Sans", 600, "QpSansSemi"),
         ];

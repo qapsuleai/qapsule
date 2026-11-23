@@ -2,8 +2,9 @@
 //! (`tests/support`), three R3 facts (level, band, swing points), findings with capsules in
 //! every story stage, a voice, headline pieces, story rows and feed items. No market data.
 
-use qp_grammar::look::{self as look_registry, Look};
-use qp_grammar::{compile, CompileOptions, GrammarError, HeadlineParts, MemProvider};
+use qp_grammar::{compile, CompileOptions, HeadlineParts, MemProvider};
+use qp_look::look::{self as look_registry, Look};
+use qp_look::GrammarError;
 use qp_schema::capsule::{
     Direction, Edge, EvidenceFamily, FactMeaning, GeoPoint, Geometry, LedgerStat, License,
     LicenseClass, MeaningKind, Stage, Story, TimeKind, Trust, Validity,

@@ -27,9 +27,9 @@ use qp_schema::grammar::{
     ColorSpec, Layer, Mark, Origin, Panel, PanelPos, Position, Scale, ScaleKind, SizeSpec, View,
 };
 
-use crate::error::GrammarError;
-use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts, SeriesKind};
+use qp_look::error::GrammarError;
+use qp_look::look::Look;
 
 /// Headline lines the card holds beside the glyph.
 const HEADLINE_LINES: f64 = 4.0;
@@ -44,7 +44,7 @@ const LEAD: f64 = 0.25;
 /// Horizon used when a story has none.
 const DEFAULT_HORIZON: u32 = 20;
 
-fn line_px(look: &Look, role: &crate::look::TypeRole) -> f64 {
+fn line_px(look: &Look, role: &qp_look::look::TypeRole) -> f64 {
     let _ = look;
     (role.px * role.line).round()
 }
@@ -290,7 +290,7 @@ mod tests {
 
     #[test]
     fn heights_fit_the_phone() {
-        for l in crate::look::LOOKS {
+        for l in qp_look::look::LOOKS {
             let h = height(l);
             assert!((120..=844).contains(&h), "{}: {h}", l.name);
         }

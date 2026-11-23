@@ -21,8 +21,8 @@ use qp_schema::capsule::{GlyphPhase, GlyphSpec};
 use qp_schema::scene::{Prim, Rgba};
 
 use super::{open_look, OutcomeStyle};
-use crate::glyph::{Alphabet, GlyphBox};
-use crate::theme::{at_least, with_opacity, Theme};
+use crate::{Alphabet, GlyphBox};
+use qp_look::theme::{at_least, with_opacity, Theme};
 
 /// The "seal / broken seal" outcome style.
 #[derive(Debug, Clone, Copy, Default)]
@@ -328,7 +328,7 @@ impl OutcomeStyle for Muhrak {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::glyph::siluet::Siluet;
+    use crate::siluet::Siluet;
     use qp_schema::capsule::{Direction, MeaningKind};
 
     fn inside(prims: &[Prim], bx: GlyphBox) -> bool {

@@ -324,7 +324,7 @@ struct ComputeArgs {
     list: bool,
 }
 
-/// (R5/T3) `qp look`: the design records (`qp_grammar::look`).
+/// (R5/T3) `qp look`: the design records (`qp_look::look`).
 #[derive(Debug, Subcommand)]
 enum LookCommand {
     /// The registered looks, one per line: name, default scheme, note (default first).

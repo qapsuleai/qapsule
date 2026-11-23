@@ -200,8 +200,8 @@ fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> Compi
 
 /// (R5/T3) The connection's look (`ViewState.look`; absent or unknown: `r4`).
 #[must_use]
-pub fn look_of(look: &ViewState) -> &'static qp_grammar::look::Look {
-    qp_grammar::look::or_default(look.look.as_deref())
+pub fn look_of(look: &ViewState) -> &'static qp_look::look::Look {
+    qp_look::look::or_default(look.look.as_deref())
 }
 
 // ---------------------------------------------------------------------------

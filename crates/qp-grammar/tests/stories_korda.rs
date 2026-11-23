@@ -451,7 +451,7 @@ fn contrast(a: [u8; 4], b: [u8; 4]) -> f64 {
 
 #[test]
 fn closed_marks_and_lane_text_keep_their_contrast() {
-    for look in qp_grammar::look::LOOKS {
+    for look in qp_look::look::LOOKS {
         for t in [look.dark, look.light] {
             // Marks and lines (WCAG 1.4.11): ≥ 3:1. The closed colour is drawn at full
             // opacity (faded by weight, not by alpha). Every look's closed colour; the

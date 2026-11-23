@@ -1,0 +1,16 @@
+[package]
+name = "qp-look"
+description = "Qapsule looks: the design records (look), themes, the grammar error type and the deterministic math shared by the grammar compiler and the designs."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { path = "../qp-schema" }
+# (R5/T3) `look::Look::to_json` (`qp look show`).
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

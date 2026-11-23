@@ -1,4 +1,4 @@
-//! The product alphabet (`qp_grammar::glyph::siluet`) draws exactly what the R3/M1
+//! The product alphabet (`qp_glyph::siluet`) draws exactly what the R3/M1
 //! experiment crate `m1-siluet` drew: a digest of every primitive over the full M1 glyph
 //! set (6 kinds × 3 directions × 5 phases × 4 strengths × 4 confidences × 5
 //! confirmations × 2 freshness/server = 14 400 specs) at 16, 24 and 32 px in both themes
@@ -6,8 +6,8 @@
 //! recorded in `rounds/R3/experiments/S/S-B.md` (one-off cross-check program there),
 //! and the experiment crate stays untouched.
 
-use qp_grammar::glyph::{alphabet, siluet::Siluet, Alphabet, GlyphBox};
-use qp_grammar::Theme;
+use qp_glyph::{alphabet, siluet::Siluet, Alphabet, GlyphBox};
+use qp_look::Theme;
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind};
 use qp_schema::scene::{Align, Prim};
 

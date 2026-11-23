@@ -69,3 +69,14 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   kod yazılmadan önce girsin; plandaki gibi.
 - Geri dönüş kuralı (tutmayan alt sistem çekirdekte kalır) doğru. Geri dönen her dalga raporda
   nedeniyle ve bir sonraki denemenin neye ihtiyaç duyacağıyla yazılsın.
+
+---
+
+## Uygulama notları (round oturumu)
+
+- **G2a, üretilmiş dosyanın yeri.** `PLAN.md` §3.1 ve §9 (B15–B19: `advances` taşıması
+  `config-diff`'te `DECISION.md`'yi anar) gereği `crates/qp-grammar/src/advances.rs`,
+  `look` ile birlikte saf taşımayla `crates/qp-look/src/advances.rs` oldu. Üreticisi aynı
+  (`QP_BLESS=1 cargo test -p qp-render --test fonts`), yalnız yazdığı yol değişti;
+  `arch-config.json` `generated_files` girdisi yeni yolu gösterir. Bu bir gevşetme değil,
+  aynı istisnanın yer değiştirmesidir.

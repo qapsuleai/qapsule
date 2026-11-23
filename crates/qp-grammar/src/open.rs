@@ -24,9 +24,9 @@ use qp_schema::grammar::View;
 use qp_schema::protocol::{CapsuleVoice, HitInfo, Language, OpenDepth};
 use qp_schema::Fact;
 
-use crate::error::GrammarError;
-use crate::look::Look;
 use crate::provider::DataProvider;
+use qp_look::error::GrammarError;
+use qp_look::look::Look;
 
 pub mod nobra;
 pub mod tesir;
@@ -371,8 +371,8 @@ mod tests {
         assert!(!is_styled(None) && !is_styled(Some("r4")) && is_styled(Some("nobra")));
         assert!(!is_open("nope"));
         assert_eq!(by_name(Some("nope")).name, DEFAULT_OPEN);
-        assert_eq!(height_in(&crate::look::R4, None), None);
-        assert!(height_in(&crate::look::R4, Some("tesir")).is_some());
+        assert_eq!(height_in(&qp_look::look::R4, None), None);
+        assert!(height_in(&qp_look::look::R4, Some("tesir")).is_some());
         for n in names() {
             assert!(n
                 .chars()

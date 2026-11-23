@@ -26,9 +26,9 @@ use qp_schema::protocol::Language;
 use qp_schema::{Bar, Fact};
 
 use crate::depth;
-use crate::error::{ErrorKind, GrammarError};
-use crate::look::Look;
 use crate::provider::{DataProvider, HeadlineParts, SeriesKind};
+use qp_look::error::{ErrorKind, GrammarError};
+use qp_look::look::Look;
 
 /// Face height in CSS px at the phone width.
 pub const HEIGHT: u32 = 228;
@@ -479,8 +479,8 @@ mod tests {
             .with_headline("fnd", "The long sentence.")
             .with_glyph("fnd", spec)
             .with_headline_parts("fnd", parts);
-        let v = view(&crate::look::R4, "fnd", 120, &p, "capsule-fnd").unwrap();
-        for alphabet in crate::glyph::ALPHABETS {
+        let v = view(&qp_look::look::R4, "fnd", 120, &p, "capsule-fnd").unwrap();
+        for alphabet in qp_glyph::ALPHABETS {
             let mut o = CompileOptions::new(390, HEIGHT);
             o.face = Some("fotolay".into());
             o.alphabet = Some(alphabet.into());

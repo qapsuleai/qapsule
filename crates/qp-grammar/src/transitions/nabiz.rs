@@ -33,8 +33,8 @@ use qp_schema::protocol::{Language, SharedElement};
 use qp_schema::scene::{Align, PixelRect, Prim, Rgba, SceneDesc};
 
 use super::{r3_shared, Frame, FrameElement, Side, Source};
-use crate::look::Look;
-use crate::theme::Theme;
+use qp_look::look::Look;
+use qp_look::theme::Theme;
 
 mod overlay;
 

@@ -386,6 +386,10 @@ pub struct StoryLook {
     pub closed_label: &'static str,
 }
 
+/// (R5/fix47, A46) The colour role of the claim's headline when it no longer holds: a text
+/// role (4.5:1 on the ground in every look, `look::tests`), as on the face `oltan`.
+pub const NO_LONGER_HEADLINE: &str = "muted";
+
 /// (R5/S) The open capsule design `tesir`'s line and bar counts (`crate::open::tesir`;
 /// M20's "values to record", `rounds/R5/experiments/M20/tesir/DESIGN.md`). Sizes,
 /// colours and spacing already come from the look.

@@ -5,7 +5,8 @@
 use qp_grammar::feeds::{self, FeedCtx, LocalStamp};
 use qp_grammar::motion::{self, ChangeKind};
 use qp_grammar::transitions::{self, nabiz, Side};
-use qp_grammar::{depth, faces, GrammarError, MemProvider};
+use qp_grammar::{depth, faces, MemProvider};
+use qp_look::GrammarError;
 use qp_schema::capsule::Direction;
 use qp_schema::protocol::{Language, OpenDepth, Profile};
 use qp_schema::scene::SceneDesc;

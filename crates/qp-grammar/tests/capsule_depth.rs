@@ -17,7 +17,7 @@ use qp_grammar::depth::{
     capsule_view, chart_view, evidence_layers, geometry_field, ledger_text, story_glyph,
     GLYPH_MIN_LEDGER_N,
 };
-use qp_grammar::{compile, CompileOptions, ErrorKind, MemProvider};
+use qp_grammar::{compile, CompileOptions, MemProvider};
 use qp_schema::capsule::{
     Direction, Edge, EvidenceFamily, FactMeaning, GeoPoint, Geometry, LedgerStat, License,
     LicenseClass, MeaningKind, Stage, Story, TimeKind, Trust,
@@ -331,7 +331,7 @@ fn outcome_style_is_a_compile_option() {
     assert_eq!(compile(&v, &p, &o).unwrap(), base);
     o.outcome = Some("no-such-style".into());
     let e = compile(&v, &p, &o).unwrap_err();
-    assert_eq!(e.kind, qp_grammar::ErrorKind::Invalid);
+    assert_eq!(e.kind, qp_look::ErrorKind::Invalid);
     assert_eq!(e.path, "(options)/outcome");
 }
 
@@ -414,7 +414,7 @@ fn r2_findings_keep_the_r2_views() {
     assert_eq!(layer_ids(&v), ["candles"]);
 }
 
-fn first_err(p: &MemProvider, layer: &str) -> qp_grammar::GrammarError {
+fn first_err(p: &MemProvider, layer: &str) -> qp_look::GrammarError {
     let v = support::view(&format!(
         r#"{{"id":"t","x":{{"kind":"time"}},"panels":[{{"id":0,"y":{{"kind":"linear"}}}}],
            "layers":[{{"id":"candles","mark":"candle","series":"px","panel":0}},{layer}]}}"#
@@ -425,54 +425,54 @@ fn first_err(p: &MemProvider, layer: &str) -> qp_grammar::GrammarError {
 #[test]
 fn glyph_and_segment_errors_are_typed() {
     let p = r3(true);
-    let cases: &[(&str, ErrorKind, &str)] = &[
+    let cases: &[(&str, qp_look::ErrorKind, &str)] = &[
         (
             r#"{"id":"g","mark":"glyph","panel":0}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/finding",
         ),
         (
             r#"{"id":"g","mark":"glyph","fact":"f-brk","panel":0}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/mark",
         ),
         (
             r#"{"id":"g","mark":"glyph","finding":"nope","panel":0}"#,
-            ErrorKind::NotFound,
+            qp_look::ErrorKind::NotFound,
             "/finding",
         ),
         (
             r#"{"id":"g","mark":"glyph","finding":"fnd-brk","panel":0,"encoding":{"color":"up"}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/color",
         ),
         (
             r#"{"id":"g","mark":"glyph","finding":"fnd-brk","panel":0,"encoding":{"size":{"field":"value","range":[8,30]}}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/size",
         ),
         (
             r#"{"id":"g","mark":"glyph","finding":"fnd-brk","panel":0,"encoding":{"x":180}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/x",
         ),
         (
             r#"{"id":"l","mark":"line","series":"px","panel":0,"encoding":{"y":{"panel":0.5}}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/y",
         ),
         (
             r#"{"id":"s","mark":"rule","panel":0,"encoding":{"y":121.5,"x2":180},
                 "origin":{"/encoding/y":{"kind":"fact","fact":"f-brk","field":"level"},
                           "/encoding/x2":{"kind":"fact","fact":"f-brk","field":"geometry.0.to_bar"}}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/x",
         ),
         (
             r#"{"id":"s","mark":"rule","panel":0,"encoding":{"y":121.5,"x":160,"x2":180},
                 "origin":{"/encoding/y":{"kind":"fact","fact":"f-brk","field":"level"},
                           "/encoding/x":{"kind":"fact","fact":"f-brk","field":"geometry.0.from_bar"}}}"#,
-            ErrorKind::NoOrigin,
+            qp_look::ErrorKind::NoOrigin,
             "/encoding/x2",
         ),
         (
@@ -480,17 +480,17 @@ fn glyph_and_segment_errors_are_typed() {
                 "origin":{"/encoding/y":{"kind":"fact","fact":"f-brk","field":"level"},
                           "/encoding/x":{"kind":"fact","fact":"f-brk","field":"geometry.0.from_bar"},
                           "/encoding/x2":{"kind":"fact","fact":"f-brk","field":"geometry.0.to_bar"}}}"#,
-            ErrorKind::NoOrigin,
+            qp_look::ErrorKind::NoOrigin,
             "/encoding/x",
         ),
         (
             r#"{"id":"p","mark":"point","series":"px","panel":0,"encoding":{"x":3}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/x",
         ),
         (
             r#"{"id":"c","mark":"line","series":"px","panel":0,"encoding":{"x2":3}}"#,
-            ErrorKind::Invalid,
+            qp_look::ErrorKind::Invalid,
             "/encoding/x2",
         ),
     ];
@@ -532,7 +532,7 @@ fn evidence_layers_for_band_and_points() {
         None,
     ));
     let mut taken = vec!["candles".to_owned()];
-    let ls = evidence_layers(&qp_grammar::look::R4, &f, 0, &mut taken);
+    let ls = evidence_layers(&qp_look::look::R4, &f, 0, &mut taken);
     let ids: Vec<&str> = ls.iter().filter_map(|l| l.id.as_deref()).collect();
     assert_eq!(ids, ["band", "swing", "swing-point", "swing-point-2"]);
     let p = support::provider().with_fact(f);
@@ -615,7 +615,7 @@ fn licensed_evidence_never_reaches_an_unentitled_reader() {
 
     // The entitled reader's view compiled for the unentitled reader: an error, never 0.
     let e = compile(&v, &unentitled, &CompileOptions::new(1200, 600)).unwrap_err();
-    assert_eq!(e.kind, ErrorKind::NotFound, "{e}");
+    assert_eq!(e.kind, qp_look::ErrorKind::NotFound, "{e}");
     assert_eq!(e.layer.as_deref(), Some("level"));
 }
 
@@ -643,7 +643,7 @@ fn text_roles(s: &SceneDesc) -> Vec<(f32, Option<String>, Option<String>, String
 fn looks_are_design_records() {
     use qp_grammar::depth::{capsule_view_in, face_view, face_view_in};
     use qp_grammar::faces::{height, height_in};
-    use qp_grammar::look;
+    use qp_look::look;
     let p = r3(true);
     let id = "capsule-fnd-brk";
     for f in [None, Some("vadrel"), Some("tavrik"), Some("fotolay")] {
@@ -746,7 +746,7 @@ fn looks_are_design_records() {
     }
     o.look = Some("no-such-look".into());
     let e = compile(&v, &p, &o).unwrap_err();
-    assert_eq!(e.kind, ErrorKind::Invalid);
+    assert_eq!(e.kind, qp_look::ErrorKind::Invalid);
 }
 
 /// (R5/M20) `nobra` question cards over the R3 breakout: the entitled reader sees the
@@ -757,7 +757,7 @@ fn looks_are_design_records() {
 fn nobra_question_cards_over_entitled_and_withheld_evidence() {
     use qp_grammar::open::{capsule_view as open_view, OpenCtx};
     use qp_schema::protocol::Language;
-    for look in [&qp_grammar::look::R4, &qp_grammar::look::ORNEK] {
+    for look in [&qp_look::look::R4, &qp_look::look::ORNEK] {
         for (evidence, ask) in [(true, None), (true, Some("before")), (false, Some("why"))] {
             let p = r3(evidence);
             let ctx = OpenCtx {

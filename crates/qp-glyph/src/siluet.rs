@@ -24,7 +24,7 @@
 //! target) only; the circle and sine samples are precomputed constants.
 
 use super::{Alphabet as AlphabetTrait, GlyphBox};
-use crate::theme::{at_least, opacity_at_least, with_opacity, Theme};
+use qp_look::theme::{at_least, opacity_at_least, with_opacity, Theme};
 use qp_schema::capsule::{Direction, GlyphPhase, GlyphSpec, MeaningKind, Validity};
 use qp_schema::scene::{Prim, Rgba};
 
@@ -553,8 +553,8 @@ mod tests {
     /// every freshness; the rozet's level likewise never goes below the floor.
     #[test]
     fn confidence_plate_keeps_the_look_floor() {
-        use crate::glyph::rozet::Rozet;
-        use crate::look::{ORNEK, R4};
+        use crate::rozet::Rozet;
+        use qp_look::look::{ORNEK, R4};
         let bx = GlyphBox {
             x: 0.0,
             y: 0.0,

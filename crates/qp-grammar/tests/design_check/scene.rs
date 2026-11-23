@@ -6,8 +6,8 @@
 use std::collections::BTreeMap;
 
 use qp_compute::Field;
-use qp_grammar::look::{font, Look, Profile, DEFAULT_FONT, FONTS};
 use qp_grammar::{compile, CompileOptions, Cursor, MemProvider};
+use qp_look::look::{font, Look, Profile, DEFAULT_FONT, FONTS};
 use qp_schema::grammar::View;
 use qp_schema::protocol::Language;
 use qp_schema::scene::{Align, PixelRect, Prim, SceneDesc};

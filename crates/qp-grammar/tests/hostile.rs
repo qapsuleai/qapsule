@@ -13,8 +13,8 @@ mod support;
 
 use std::time::{Duration, Instant};
 
-use qp_grammar::detmath::nice_step;
 use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_look::detmath::nice_step;
 use qp_schema::grammar::View;
 
 fn view(domain: Option<[f64; 2]>, series: &str) -> View {

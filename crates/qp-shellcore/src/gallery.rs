@@ -448,9 +448,9 @@ impl GalleryCore {
     /// current theme, and the page width.
     #[must_use]
     pub fn css(&self) -> Value {
-        let look = qp_grammar::look::or_default(None);
+        let look = qp_look::look::or_default(None);
         let mut m = serde_json::Map::new();
-        for (k, v) in qp_grammar::look::css_vars(look, Some(self.theme())) {
+        for (k, v) in qp_look::look::css_vars(look, Some(self.theme())) {
             m.insert(k, json!(v));
         }
         m.insert("--qp-gallery-w".to_owned(), json!(format!("{PAGE_W}px")));

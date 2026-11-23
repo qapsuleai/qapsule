@@ -1,5 +1,5 @@
 use super::*;
-use crate::look::{ORNEK, R4};
+use qp_look::look::{ORNEK, R4};
 use qp_schema::scene::XMap;
 
 fn r(l: i32, t: i32, rr: i32, b: i32) -> PixelRect {

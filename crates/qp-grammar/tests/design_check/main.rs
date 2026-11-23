@@ -26,7 +26,7 @@ mod record;
 mod scene;
 mod thresholds;
 
-use qp_grammar::look::{by_name, ChromeLook, Look, Profile, TypeRole, TypeScale, LOOKS, R4};
+use qp_look::look::{by_name, ChromeLook, Look, Profile, TypeRole, TypeScale, LOOKS, R4};
 
 /// A rule's outcome.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -251,7 +251,7 @@ fn a_bad_non_legacy_look_fails() {
     const BAD: Look = Look {
         name: "bad",
         profile: Profile::Dense,
-        chart: qp_grammar::look::ChartLook {
+        chart: qp_look::look::ChartLook {
             price_label_px: 120.0,
             mark_max_px: 40.0,
             ..alphabet::TRIAL.chart

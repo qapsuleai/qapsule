@@ -59,8 +59,17 @@
 #                reference with tolerance (tests/paint-canvas.mjs, Chromium, DPR 1)
 #  19 arch       RG1 (docs/ENGINEERING.md): scripts/arch-check --self-test (known violations
 #                are caught, the ratchet works) and scripts/arch-check (layers, size budgets,
-#                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json)
-#  20 design     RD2/S1: scripts/design-check: P1–P13 (../refs/reports/VISUAL.md §5) and R5's
+#                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json);
+#                scripts/refactor/moved.py --self-test (the move check's fingerprints, K-8)
+#  20 config     RF1/A2 (K-9): scripts/arch-check --config-diff prints the diff of
+#                scripts/arch-config.json and scripts/arch-baseline.json against main (merge
+#                base; on main $QP_CONFIG_BASE or the round's baseline commit) and fails on a
+#                new exception, generated file or loosened budget/baseline value that cites
+#                no real, new decision (a K<n> row under docs/decisions/ or an existing
+#                rounds/<R>/DECISION.md), or any other loosening without rule_changes;
+#                an explicit base that is HEAD or its descendant fails; skipped when git
+#                has no such base (shallow clone)
+#  21 design     RD2/S1: scripts/design-check: P1–P13 (../refs/reports/VISUAL.md §5) and R5's
 #                hard thresholds for every registered non-legacy look in both schemes (legacy
 #                looks are printed, never failing), and the value tables of
 #                docs/design/CONTRACT.md equal the look record (scripts/design-contract --check)
@@ -568,7 +577,17 @@ step_arch() {
   command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/arch-check needs it)"
   scripts/arch-check --self-test || fail "arch-check self-test failed"
   scripts/arch-check || fail "architecture rules broken (scripts/arch-check)"
-  note "self-test passes; no error outside the debt baseline"
+  python3 scripts/refactor/moved.py --self-test || fail "moved.py self-test failed"
+  note "self-tests pass (arch-check, moved.py); no error outside the debt baseline"
+}
+
+step_config() {
+  command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/arch-check needs it)"
+  local rc=0
+  scripts/arch-check --config-diff || rc=$?
+  [ "$rc" -ne 2 ] || skip "no base revision for the config diff (shallow clone?)"
+  [ "$rc" -eq 0 ] || fail "config diff: a loosening cites no decision, or the base is not a commit (see above)"
+  note "config/baseline diff against main printed; only tightening or cited loosening"
 }
 
 step_design() {
@@ -599,6 +618,7 @@ run_step replay step_replay
 run_step shell step_shell
 run_step demo step_demo
 run_step arch step_arch
+run_step config step_config
 run_step design step_design
 total=$((SECONDS - total_start))
 

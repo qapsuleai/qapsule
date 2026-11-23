@@ -31,12 +31,18 @@ def split_exceptions(findings, cfg):
     return kept, excepted, unused
 
 
+# Size rules: an exception from one of these must carry a `max` latch (K89; RF1/A2 for
+# file.hard and fn.lines: a single-function file or function may not grow past it).
+SIZED = ("crate.lines", "shell.lines", "file.hard", "file.soft", "fn.lines", "dir.files",
+         "test.file", "doc.size")
+
+
 def missing_ceilings(cfg):
-    """A crate.lines exception without a `max` latch is a configuration error (K89)."""
+    """A size-rule exception without a `max` latch is a configuration error (K89)."""
     return [{"rule": "exception.max", "item": e["item"], "value": 0, "limit": 0,
-             "message": f"exception {e.get('id', '')} crate.lines {e['item']} has no `max`",
-             "why": "a crate.lines exception must carry a ceiling (K89)"}
-            for e in cfg.get("exceptions", []) if e["rule"] == "crate.lines" and "max" not in e]
+             "message": f"exception {e.get('id', '')} {e['rule']} {e['item']} has no `max`",
+             "why": "a size-rule exception must carry a ceiling (K89)"}
+            for e in cfg.get("exceptions", []) if e["rule"] in SIZED and "max" not in e]
 
 
 def judge(findings, base, hard_rules):

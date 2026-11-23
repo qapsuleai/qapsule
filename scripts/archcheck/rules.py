@@ -36,9 +36,15 @@ def crates(root):
                   if os.path.isfile(os.path.join(root, "crates", d, "Cargo.toml")))
 
 
+def generated_paths(cfg):
+    """`generated_files` entries are a path or `{"path", "reason"}` (a new one cites its
+    decision; `--config-diff`)."""
+    return [g if isinstance(g, str) else g["path"] for g in cfg.get("generated_files", [])]
+
+
 def generated(cfg, rel, src):
     """Exempt from size budgets only if listed in the config *and* marked in its head."""
-    return rel in cfg.get("generated_files", []) and rs.is_generated(src)
+    return rel in generated_paths(cfg) and rs.is_generated(src)
 
 
 class Scan:
@@ -320,8 +326,45 @@ def cargo_edges(root):
     return sorted(set(edges)), sorted(names)
 
 
+def layer_orders(cfg):
+    """{layer name: declared order (bottom first)} as written in the config."""
+    return {l["name"]: list(l.get("order") or []) for l in cfg["layers"]}
+
+
+def layer_members(cfg):
+    """{layer name: set of crates} after `layer_overrides` (the effective layer map)."""
+    out = {l["name"]: set() for l in cfg["layers"]}
+    for c, v in layer_of_map(cfg).items():
+        if isinstance(v, tuple):
+            out[v[1]].add(c)
+    return out
+
+
+def rule_layer_orders(cfg):
+    """K-2 (K87): every layer declares an order of its crates, bottom first; each crate of
+    the layer (after `layer_overrides`) appears in it exactly once and nothing else does.
+    A linear order is acyclic by construction."""
+    members = layer_members(cfg)
+    for name, order in layer_orders(cfg).items():
+        have = members[name]
+        for c in sorted(have - set(order)):
+            yield finding("layer.order", f"{name}: {c}", 1, 0,
+                          f"layer `{name}`: crate {c} is missing from its declared order")
+        for c in sorted({c for c in order if order.count(c) > 1}):
+            yield finding("layer.order", f"{name}: {c} twice", 1, 0,
+                          f"layer `{name}`: crate {c} appears {order.count(c)} times in its order")
+        for c in sorted(set(order) - have):
+            yield finding("layer.order", f"{name}: {c} foreign", 1, 0,
+                          f"layer `{name}`: order names {c}, which is not a crate of this layer")
+
+
+def order_text(order):
+    return " < ".join(order) if order else "(no order declared)"
+
+
 def rule_layers(cfg, edges, names):
     m = layer_of_map(cfg)
+    orders = layer_orders(cfg)
     for n in names:
         if n not in m:
             yield finding("layer.unknown", n, 1, 0,
@@ -334,8 +377,13 @@ def rule_layers(cfg, edges, names):
             yield finding("layer.up", f"{a} -> {b}", 1, 0,
                           f"{a} ({la}) depends on {b} ({lb}): upward dependency")
         elif ib == ia:
+            order = orders.get(la, [])
+            if a in order and b in order and order.index(b) < order.index(a):
+                continue  # declared: b sits below a in the layer's order (K-2)
             yield finding("layer.lateral", f"{a} -> {b}", 1, 0,
-                          f"{a} -> {b}: sideways dependency inside layer `{la}`")
+                          f"{a} -> {b}: sideways dependency inside layer `{la}` against its "
+                          f"declared order {order_text(order)} (bottom first; {b} must come "
+                          f"before {a})")
 
 
 def all_findings(root, cfg, edges=None, names=None):
@@ -343,6 +391,7 @@ def all_findings(root, cfg, edges=None, names=None):
     if edges is None:
         edges, names = cargo_edges(root)
     out = []
+    out += list(rule_layer_orders(cfg))
     out += list(rule_layers(cfg, edges, names))
     out += list(rule_sizes(scan, cfg))
     out += list(rule_dirs(scan, cfg))

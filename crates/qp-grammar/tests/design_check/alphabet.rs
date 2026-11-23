@@ -54,19 +54,21 @@ fn texts(s: &SceneDesc) -> Vec<&str> {
 #[test]
 fn alphabet_passes_p4_to_p8() {
     let fx = scene::fixture();
+    let marks = crate::marks::fixture();
     let (dw, dh) = th::DESK;
     let mut rows = Vec::new();
     for scheme in ["dark", "light"] {
         let desk = fx.scene(&TRIAL, scheme, dw, dh);
         let phone = fx.scene(&TRIAL, scheme, th::P5_WIDTH, th::PHONE_H);
         let plot = fx.price_only(&TRIAL, scheme, th::P5_WIDTH, th::P4_PLOT_H);
+        let glyph = marks.scene(&TRIAL, scheme);
         let s: &'static str = if scheme == "dark" { "dark" } else { "light" };
         rows.extend([
             scene::p4(&desk, &plot, s),
             scene::p5(&phone, &TRIAL, s),
             scene::p6(&[&desk], &[&phone], s),
             scene::p7(&desk, &TRIAL, s),
-            scene::p8(&desk, &TRIAL, s),
+            scene::p8(&desk, &glyph, &TRIAL, s),
         ]);
     }
     crate::print_table(&TRIAL, &rows);

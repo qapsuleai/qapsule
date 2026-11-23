@@ -1,5 +1,5 @@
-//! Checks measured from the look record alone: P1, P3, P9–P13 and R5's H3 (H1, H2:
-//! `grounds.rs`).
+//! Checks measured from the look record alone: P1, P3, P10–P13 and R5's H3 (H1, H2:
+//! `grounds.rs`; P9: `layout.rs`).
 
 use qp_grammar::look::{Look, Profile, ROLES};
 use qp_grammar::theme::Theme;
@@ -62,29 +62,6 @@ pub fn p3(t: &Theme) -> Row {
             th::P3_LIGHT.1
         ),
         ok(us, ul) && ok(ds, dl),
-    )
-}
-
-/// P9: the desktop layout dump (`--layout`), if one was given.
-pub fn p9(layout: Option<&serde_json::Value>) -> Row {
-    let rule = "layout regions / panes / legend numbers";
-    let Some(l) = layout else {
-        return Row::na("P9", "-", rule);
-    };
-    let n = |k: &str| l.get(k).and_then(serde_json::Value::as_u64).unwrap_or(0);
-    let (r, p, g) = (n("regions"), n("chart_panes"), n("legend_numbers"));
-    Row::check(
-        "P9",
-        "-",
-        rule,
-        format!("{r} / {p} / {g}"),
-        format!(
-            ">= {} / {} / {}",
-            th::P9_REGIONS,
-            th::P9_PANES,
-            th::P9_LEGEND_NUMBERS
-        ),
-        r >= th::P9_REGIONS && p >= th::P9_PANES && g >= th::P9_LEGEND_NUMBERS,
     )
 }
 

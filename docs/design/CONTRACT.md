@@ -63,7 +63,7 @@ kayıtta yalnız karşılaştırma için durur.
 - Sağ fiyat ekseni, iki düzeyli zaman ekseni, son değer etiketi, değer çizgisi, imleç ve
   eksen hapları, OHLC lejantı, altta hacim: yeniden icat edilmez (`chart.*`; P4, P5, P7).
 - Veri üstündeki anlam işareti küçüktür ve veriyi örtmez (`chart.mark_max_px`; P8).
-- Masaüstü çalışma alanı birden çok bölge ve grafik bölmesi gösterir (P9, galeri düzen dökümü).
+- Masaüstü çalışma alanı birden çok bölge ve grafik bölmesi gösterir (P9, Ç1 maketi + çekirdek sahne).
 - Saat ve tarih etiketleri (zaman ekseni, tarih hapı) görünümün `display_tz` diliminde yazılır
   (K14); fiyat adımı `chart.price_label_px`'e en yakın adım (1 / 1,5 / 2 / 2,5 / 3 / 4 / 5 /
   7,5 × 10ⁿ); her ölçekli bölme en az bir eksen etiketi taşır (kısa bölmede daha ince adımdan).
@@ -96,11 +96,26 @@ Görünüş kaydında değildir, yönler değiştiremez (satır bütçesi; RD2/C
 
 ## Ölçüm
 
-- **P8 ve P9'un sınırı (RD2 kapanış denetimi):** P8 kaydın `mark_max_px` değerini ve sahnede çizilen işaretleri ölçer; tasarım fikstüründe işaret (glyph) yok, bu yüzden çizilen değer bugün 0 ve P8 fiilen kaydı ölçer. P9 düzen dökümünü ister (`scripts/design-check --layout`, döküm `scripts/design-gallery` çıktısı `layout-<görünüş>.json`); dökümsüz koşuda `n.a.`. RD2'de `tavek` ölçüldü: 5 bölge / 3 grafik bölmesi / 7 lejant sayısı, PASS.
+- **P8 ve P9 (RD2 denetim koşulu K1, RF1/Ö'de kapandı):** P8'in çizilen yarısı ayrı bir
+  tasarım fikstüründen ölçülür: `fixtures/design/desk-marks.json` (görünüm `marks`: mumlar ve
+  `SYN03` kapsülünün hikâyesinden anlam işareti, çizim alanının üst şeridinde; belge
+  `fixtures/design/docs/syn03-breakout.json`, `fixtures/views/docs/r3-breakout.json`'un
+  kopyası). `desk.json` ve altınları değişmedi; `desk` sahnesinde işaret yoktur. Satır
+  "kayıt / çizilen (n işaret)" basar ve işaret çizilmezse (n = 0) KALIR: çizilen değer bir
+  daha sessizce 0'a düşmez. `tavek` 20 / 20, `tavek-tel` 24 / 24 (derleyici işaret boyunu
+  `mark_max_px` ile sınırlar). P9 tarayıcısız ölçülür: bölge = Ç1 maketindeki
+  `data-region` öğeleri (`docs/design/mockups/<görünüş>/c1.html`, yoksa `_base/c1.html`;
+  galerinin çektiği dosya; maketler durağan HTML, betikleri bölge eklemez), grafik bölmesi
+  ve lejant sayısı = `desk` görünümünün imleçsiz, görünüşün varsayılan temasında 960 × 600
+  sahnesi (galerinin `layoutDump` sayımıyla aynı: bölmelerin içindeki metinlerde sayı
+  belirteçleri). `tavek` 5 / 3 / 7 (RD2 galeri dökümüyle aynı). Dokunmatik görünüşün
+  (`tavek-tel`) masaüstü düzeni yoktur: `n.a.` `--layout <dosya>` bir galeri dökümüyle
+  ölçümü geçersiz kılar (galeri, yuvanın tarayıcıdaki gerçek boyutunu kullanır).
 
 `scripts/design-check` (`crates/qp-grammar/tests/design_check`) her ölçütü ya kayıttan ya
 derlenmiş sahneden okur; sahne ölçütleri `fixtures/design/desk.json` görünümünü, imleç
-120. bardayken derler (RD2/C2a).
+120. bardayken derler (RD2/C2a); P8'in çizilen işareti `fixtures/design/desk-marks.json`
+görünümünden (imleçsiz, 960 × 600), P9 yukarıdaki gibi.
 
 - **P2 (sahne):** çizilen her ilkelin rengi; tam saydam ilkel ve arka plan rengi sayılmaz,
   alfa yok sayılır (ton bir renk rolüdür). CIELAB kroması 6'nın altındaki bütün renkler
@@ -115,8 +130,10 @@ derlenmiş sahneden okur; sahne ölçütleri `fixtures/design/desk.json` görün
 - **P7 (sahne):** son değer etiketi, ilk bölmede noktalı değer çizgisi, imleç (aynı sütunda
   en az üç kesik), oluktaki fiyat hapı ve zaman eksenindeki tarih hapı, başlık satırında
   O H L C (telefon: C).
-- **P8 (kayıt + sahne):** `chart.mark_max_px` ≤ 28 ve sahnede çizilmiş en yüksek anlam
-  işareti (derleyici işaret boyunu `mark_max_px` ile sınırlar).
+- **P8 (kayıt + sahne):** `chart.mark_max_px` ≤ 28 ve `desk` ile `desk-marks` sahnelerinde
+  çizilmiş en yüksek anlam işareti (işaret katmanının öğe kutusu ve çizilen ilkellerinin
+  dikey boyu; derleyici işaret boyunu `mark_max_px` ile sınırlar); en az bir işaret çizilmiş
+  olmalı.
 - **Seviyeler (sahne, RD2/C2b):** `desk-levels` görünümü (aynı fikstürde: insanın izleme
   seviyesi ve ajanın önerdiği destek, her biri yazarının olgusundan; RSI 70/30 eşikleri,
   motorun) iki temada derlenir: her seviyenin çizgisi köken renginde ve biçiminde (insan tek

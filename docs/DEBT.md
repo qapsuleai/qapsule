@@ -13,7 +13,6 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 |---|---|---|---|---|
 | İ1 | katman | `qp-source` → `alan` | §2 qp-source'u uyarlayıcıya koyar; içeriği veri düzlemidir (FeedStore §18.4, SourceProvider, MemoryProvider, sentetik piyasa, yeniden oynatma takvimi, canlı bar kurma) ve oturum onu otoritenin parçası olarak kullanır. Dış dünyaya bakan kısım yerel dosya okuma (local.rs, file.rs). Saf taşımayla ayrılamaz: Session::new_inner gövdesi MemoryProvider::from_init'i çağırır (RG1/PLAN §3.1). | onaylandı (K85, 2026-11-22) |
 | İ3 | `crate.lines` | `qp-session` | 23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4). | onaylandı (K85, 2026-11-22); tavan 20437 |
-| İ6 | `file.hard` | `crates/qp-grammar/src/compile/layer/prepare.rs` | Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 891 |
 
 ## Özet
 
@@ -94,7 +93,6 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 
 | Kalem | Değer |
 |---|---|
-| `crates/qp-grammar/src/compile/layer/prepare.rs::prepare` | 883 |
 | `crates/qp-designs/src/stories/pavka/extend.rs::extend` | 592 |
 | `crates/qp-ops/src/gops.rs::expand_grammar` | 571 |
 | `crates/qp-grammar/src/compile/scene.rs::compile` | 562 |
@@ -286,8 +284,8 @@ Hedef: ihlali düzelt, izni kaldır.
 | `qp-shellcore` | 17 |
 | `qp-capsule` | 14 |
 | `qp-designs` | 14 |
-| `qp-grammar` | 13 |
 | `qp-voice` | 12 |
+| `qp-grammar` | 11 |
 | `qp-facts` | 9 |
 | `qp-source` | 5 |
 | `qp-glyph` | 3 |

@@ -65,7 +65,10 @@
 #                scripts/arch-config.json and scripts/arch-baseline.json against main (merge
 #                base; on main $QP_CONFIG_BASE or the round's baseline commit) and fails on a
 #                new exception, generated file or loosened budget/baseline value that cites
-#                no decision (K<n> / DECISION.md); skipped when git has no such base (shallow)
+#                no real, new decision (a K<n> row under docs/decisions/ or an existing
+#                rounds/<R>/DECISION.md), or any other loosening without rule_changes;
+#                an explicit base that is HEAD or its descendant fails; skipped when git
+#                has no such base (shallow clone)
 #  21 design     RD2/S1: scripts/design-check: P1–P13 (../refs/reports/VISUAL.md §5) and R5's
 #                hard thresholds for every registered non-legacy look in both schemes (legacy
 #                looks are printed, never failing), and the value tables of

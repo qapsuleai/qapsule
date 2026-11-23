@@ -8,3 +8,4 @@
   (16 Kasım, 144 KB), `playwright-artifacts-Kmn72H` (16 Kasım, boş). Başka depo dışı klasöre dokunulmadı.
 - S1: d2 kolu (project_changes SetCapsuleState gizli) bugün ulaşılamaz savunma kolu (audit-s1 yeniden denetim); S3.2'de as_reader taşınırken yanına gerekçe yorumu.
 - Sıra notu: S4 (`expand_op` bölmesi) S2'den sonraya alındı. `qp-session` İ3 tavanı 31.999, değer 31.997; fonksiyon başlıkları tavanı aşardı. `expand_op` önce `qp-ops`'a iner, orada bölünür.
+- Kapanan istisnalar için karar satırı kapanışta önerilen kararlara (docs/decisions/rounds/RF1.md): İ2 (A2), İ4 (G2), İ5 (V), İ6 prepare (G3), İ6 op.rs (S4). audit-g3 B1: birden çok hatayı aynı anda kıran vakalar yok (sıra değişimi yakalanmaz) — Fark edilenler.

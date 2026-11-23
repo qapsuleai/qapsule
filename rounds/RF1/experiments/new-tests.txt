@@ -1,2 +1,13 @@
 # RF1: bilerek eklenen testler (ad, satır başına bir; scripts/refactor/snapshot.sh bunları tests.names dışında tutar)
 numeric_tokens_match_the_gallery
+charac_prepare_layer_matrix
+charac_glyph_styles
+charac_compile_options
+charac_face_headlines
+charac_open_designs
+charac_open_fields_and_terms
+charac_story_charts
+charac_depth_rules
+charac_transition_frames
+charac_motion_designs
+charac_feed_layouts

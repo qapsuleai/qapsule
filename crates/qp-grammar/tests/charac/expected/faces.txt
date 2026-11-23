@@ -1,0 +1,255 @@
+# charac/faces: today's output (RF1/G1); a refactor keeps every line
+r3.r4.fnd-brk  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+r3.r4.fnd-parts  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+r3.r4.fnd-sq  b55f644569753bb3  | 390x240 p2 l5 prims10 items124 over4 terms= headline=SAMPLE Squeeze Strengthened
+r3.r4.fnd-real  6579955ecc74f2e6  | 390x240 p2 l6 prims13 items125 over4 terms= headline=SAMPLE Breakout Realized (fnd-real).
+r3.r4.fnd-lock  dce964dbc917fb42  | 390x240 p2 l5 prims11 items124 over4 terms= headline=SAMPLE Breakout Born (fnd-lock).
+r3.r4.fnd-rsi  3799d2393c39547f  | 390x240 p1 l3 prims3 items122 over4 terms= headline=-
+r3.ornek.fnd-brk  670d93df5f87bf42  | 390x240 p2 l6 prims15 items125 over4 terms=kapanış headline=-
+r3.ornek.fnd-parts  7d88df1e577bccb9  | 390x240 p2 l6 prims11 items125 over4 terms= headline=SAMPLE Breakout Born
+r3.oltan.fnd-brk  6528a50e2fd9448d  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+r3.oltan.fnd-parts  81b863dff65d8f47  | 390x240 p2 l6 prims11 items125 over4 terms= headline=SAMPLE Breakout Born
+r3.zemre.fnd-brk  102f95693f731653  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+r3.zemre.fnd-parts  10f7c2f0c6913715  | 390x240 p2 l6 prims10 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+r3.tavek.fnd-brk  d9343d58ffe12ebf  | 390x240 p2 l6 prims92 items125 over4 terms=kapanış headline=-
+r3.tavek.fnd-parts  86b967d0bd62b3f2  | 390x240 p2 l6 prims89 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+r3.tavek.fnd-sq  c7f4945b6d9dada7  | 390x240 p2 l5 prims9 items124 over4 terms= headline=SAMPLE Squeeze Strengthened (fnd-sq).
+r3.tavek.fnd-real  5f5b672be9cd92e7  | 390x240 p2 l6 prims92 items125 over4 terms= headline=SAMPLE Breakout Realized (fnd-real).
+r3.tavek.fnd-lock  56b56b562d99a78a  | 390x240 p2 l5 prims11 items124 over4 terms= headline=SAMPLE Breakout Born (fnd-lock).
+r3.tavek.fnd-rsi  73ee10f026915098  | 390x240 p1 l3 prims82 items122 over6 terms= headline=-
+r3.tavek-tel.fnd-brk  400520b3c1c4068a  | 390x240 p2 l6 prims95 items125 over4 terms=kapanış headline=-
+r3.tavek-tel.fnd-parts  a279feb6f1fe1fb7  | 390x240 p2 l6 prims91 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+r3.r4.fnd-brk.en  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+r3.r4.fnd-parts.en  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+vadrel.r4.fnd-brk  376d99f8bec461c1  | 390x259 p1 l3 prims12 items3 over1 terms= headline=SAMPLE son 20 günün en
+vadrel.r4.fnd-parts  f3d91181e7cde527  | 390x188 p1 l2 prims8 items2 over1 terms= headline=Dün SAMPLE önemli bir
+vadrel.r4.fnd-sq  476d503e3f9b3f53  | 390x188 p1 l2 prims8 items2 over1 terms= headline=Dün SAMPLE önemli bir
+vadrel.r4.fnd-real  25c06b35eb230df9  | 390x188 p1 l2 prims10 items2 over1 terms= headline=SAMPLE Breakout
+vadrel.r4.fnd-lock  385154db9bf1ff99  | 390x188 p1 l2 prims9 items2 over1 terms= headline=SAMPLE Breakout Born
+vadrel.r4.fnd-rsi  bb4758e76a8fbbcd  | 390x188 p1 l3 prims3 items122 over4 terms= headline=-
+vadrel.ornek.fnd-brk  e2351bb977ff0206  | 390x274 p1 l3 prims12 items3 over1 terms= headline=SAMPLE son 20 günün
+vadrel.ornek.fnd-parts  1b2e09d0e32fcfb6  | 390x203 p1 l2 prims9 items2 over1 terms= headline=Dün SAMPLE önemli
+vadrel.oltan.fnd-brk  164fc801104f9edd  | 390x242 p1 l3 prims12 items3 over1 terms= headline=SAMPLE son 20
+vadrel.oltan.fnd-parts  19ab5bc164ee62b1  | 390x172 p1 l2 prims9 items2 over1 terms= headline=Dün SAMPLE
+vadrel.zemre.fnd-brk  9fd6b21ed66b5235  | 390x266 p1 l3 prims11 items3 over1 terms= headline=SAMPLE son 20 günün en
+vadrel.zemre.fnd-parts  bc15e657a1d09a9a  | 390x196 p1 l2 prims8 items2 over1 terms= headline=Dün SAMPLE önemli bir
+vadrel.tavek.fnd-brk  a5606f6fbe977408  | 390x235 p1 l3 prims10 items3 over1 terms= headline=SAMPLE son 20 günün en yüksek
+vadrel.tavek.fnd-parts  bbe9943af398fe85  | 390x173 p1 l2 prims7 items2 over1 terms= headline=Dün SAMPLE önemli bir eşiğin üstüne
+vadrel.tavek.fnd-sq  56239424996de7de  | 390x173 p1 l2 prims7 items2 over1 terms= headline=Dün SAMPLE önemli bir eşiğin üstüne
+vadrel.tavek.fnd-real  709ec45445bb858b  | 390x173 p1 l2 prims9 items2 over1 terms= headline=SAMPLE Breakout Realized (fnd-real).
+vadrel.tavek.fnd-lock  14403a660ab23471  | 390x173 p1 l2 prims8 items2 over1 terms= headline=SAMPLE Breakout Born (fnd-lock).
+vadrel.tavek.fnd-rsi  db54d302852adb1c  | 390x173 p1 l3 prims82 items122 over6 terms= headline=-
+vadrel.tavek-tel.fnd-brk  e21cac3f155430c7  | 390x275 p1 l3 prims11 items3 over1 terms= headline=SAMPLE son 20 günün en
+vadrel.tavek-tel.fnd-parts  bb3ea25bf702b0fc  | 390x197 p1 l2 prims7 items2 over1 terms= headline=Dün SAMPLE önemli bir eşiğin
+vadrel.r4.fnd-brk.en  e97964872b9fe924  | 390x259 p1 l3 prims11 items3 over1 terms= headline=SAMPLE broke its
+vadrel.r4.fnd-parts.en  08f660c08c99d853  | 390x188 p1 l2 prims8 items2 over1 terms= headline=Yesterday, SAMPLE
+fotolay.r4.fnd-brk  f72ddaeac249322e  | 390x228 p3 l6 prims92 items85 over1 terms= headline=SAMPLE son 20 günün en yüksek
+fotolay.r4.fnd-parts  6bb73c34c32d500d  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli.
+fotolay.r4.fnd-sq  927d33ac221da3c1  | 390x228 p3 l6 prims92 items100 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli.
+fotolay.r4.fnd-real  25e48060913c088c  | 390x228 p3 l6 prims93 items85 over1 terms= headline=SAMPLE Breakout Realized
+fotolay.r4.fnd-lock  b390a4824150ffd3  | 390x228 p3 l5 prims90 items84 over1 terms= headline=SAMPLE Breakout Born (fnd-lock).
+fotolay.r4.fnd-rsi  -  | ERR NotFound layer=glyph path=/finding :: layer `glyph` /finding: finding `fnd-rsi` has no meaning glyph (no R3 capsule with a story presents it)
+fotolay.ornek.fnd-brk  2bc8c8a886c3a710  | 390x228 p3 l6 prims92 items85 over1 terms= headline=SAMPLE son 20 günün en yüksek
+fotolay.ornek.fnd-parts  d549bc0ef38e0888  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli.
+fotolay.oltan.fnd-brk  fe89cecdc77cb01d  | 390x228 p3 l6 prims91 items85 over1 terms= headline=SAMPLE son 20 günün en yüksek fiyatını
+fotolay.oltan.fnd-parts  24e32bdac43a1dba  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli. Benzerleri 7'de
+fotolay.zemre.fnd-brk  67ead6ee0c4d4c3e  | 390x228 p3 l6 prims91 items85 over1 terms= headline=SAMPLE son 20 günün en yüksek fiyatını
+fotolay.zemre.fnd-parts  912666e44f8250a9  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli. Benzerleri
+fotolay.tavek.fnd-brk  86ce93edbb8d43e7  | 390x228 p3 l6 prims92 items85 over1 terms= headline=SAMPLE son 20 günün en yüksek
+fotolay.tavek.fnd-parts  d162d6747da354fb  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli.
+fotolay.tavek.fnd-sq  9b5d52b835f11f50  | 390x228 p3 l6 prims92 items100 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli.
+fotolay.tavek.fnd-real  845f3bbb2d4f1e43  | 390x228 p3 l6 prims93 items85 over1 terms= headline=SAMPLE Breakout Realized
+fotolay.tavek.fnd-lock  efe6cb6da26ed197  | 390x228 p3 l5 prims90 items84 over1 terms= headline=SAMPLE Breakout Born (fnd-lock).
+fotolay.tavek.fnd-rsi  -  | ERR NotFound layer=glyph path=/finding :: layer `glyph` /finding: finding `fnd-rsi` has no meaning glyph (no R3 capsule with a story presents it)
+fotolay.tavek-tel.fnd-brk  f85a856ec928b82c  | 390x228 p3 l6 prims91 items85 over1 terms= headline=SAMPLE son 20 günün en yüksek
+fotolay.tavek-tel.fnd-parts  1539dc0b535f5865  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Yukarı kırılım, dün: hâlâ geçerli.
+fotolay.r4.fnd-brk.en  15f4ab93b241f219  | 390x228 p3 l6 prims91 items85 over1 terms= headline=SAMPLE broke its 20-day high
+fotolay.r4.fnd-parts.en  e402735d81332afe  | 390x228 p3 l6 prims90 items85 over1 terms= headline=Upside breakout, yesterday: still
+tavrik.r4.fnd-brk  7683d3955e63e4ef  | 390x156 p1 l2 prims11 items2 over1 terms=kapanış headline=-
+tavrik.r4.fnd-parts  587ae7ddef0c1359  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Yukarı kırılım · dün ·
+tavrik.r4.fnd-sq  5a08e30a438ecfdb  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Yukarı kırılım · dün ·
+tavrik.r4.fnd-real  a5a232c18f69f1e2  | 390x156 p1 l2 prims10 items2 over1 terms= headline=SAMPLE Breakout Realized
+tavrik.r4.fnd-lock  e8e6fd74a70e6ef7  | 390x156 p1 l2 prims9 items2 over1 terms= headline=SAMPLE Breakout Born
+tavrik.r4.fnd-rsi  fa3617829e5087aa  | 390x156 p1 l3 prims3 items122 over4 terms= headline=-
+tavrik.ornek.fnd-brk  32290e7162dca3d2  | 390x156 p1 l2 prims11 items2 over1 terms=kapanış headline=-
+tavrik.ornek.fnd-parts  a8ceb472ce355cc8  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Yukarı kırılım · dün ·
+tavrik.oltan.fnd-brk  cecff709516149db  | 390x156 p1 l2 prims10 items2 over1 terms=kapanış headline=-
+tavrik.oltan.fnd-parts  116db08cb472e58f  | 390x156 p1 l2 prims7 items2 over1 terms= headline=Yukarı kırılım · dün · hâlâ geçerli ·
+tavrik.zemre.fnd-brk  25ea93b24870c603  | 390x156 p1 l2 prims10 items2 over1 terms=kapanış headline=-
+tavrik.zemre.fnd-parts  c3106b856cf80a0e  | 390x156 p1 l2 prims7 items2 over1 terms= headline=Yukarı kırılım · dün · hâlâ
+tavrik.tavek.fnd-brk  651d96a480464412  | 390x156 p1 l2 prims11 items2 over1 terms=kapanış headline=-
+tavrik.tavek.fnd-parts  a2cf0e90f6d0776e  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Yukarı kırılım · dün ·
+tavrik.tavek.fnd-sq  97fa3ab80e982833  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Yukarı kırılım · dün ·
+tavrik.tavek.fnd-real  b54c48251715a07e  | 390x156 p1 l2 prims10 items2 over1 terms= headline=SAMPLE Breakout Realized
+tavrik.tavek.fnd-lock  6e0e9426a046549d  | 390x156 p1 l2 prims9 items2 over1 terms= headline=SAMPLE Breakout Born
+tavrik.tavek.fnd-rsi  5d0b7b7a971a77ce  | 390x156 p1 l3 prims82 items122 over6 terms= headline=-
+tavrik.tavek-tel.fnd-brk  53ea9fa4da7d82d1  | 390x156 p1 l2 prims11 items2 over1 terms=kapanış headline=-
+tavrik.tavek-tel.fnd-parts  f6b1054141018dd2  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Yukarı kırılım · dün ·
+tavrik.r4.fnd-brk.en  7683d3955e63e4ef  | 390x156 p1 l2 prims11 items2 over1 terms=kapanış headline=-
+tavrik.r4.fnd-parts.en  95dcf6f554a4a9b8  | 390x156 p1 l2 prims8 items2 over1 terms= headline=Upside breakout ·
+oltan.r4.fnd-brk  5fee1e8f9ad4219b  | 390x228 p1 l3 prims11 items3 over1 terms= headline=SAMPLE son 20 günün en
+oltan.r4.fnd-parts  d155b6b709d72164  | 390x228 p1 l3 prims9 items3 over1 terms= headline=Dün SAMPLE önemli bir
+oltan.r4.fnd-sq  d7ee05671f165cc0  | 390x228 p1 l3 prims9 items3 over1 terms= headline=Dün SAMPLE önemli bir
+oltan.r4.fnd-real  8194b174ab8013c1  | 390x228 p1 l3 prims11 items3 over1 terms= headline=SAMPLE Breakout
+oltan.r4.fnd-lock  e8e5e13d4f88713f  | 390x228 p1 l3 prims10 items3 over1 terms= headline=SAMPLE Breakout Born
+oltan.r4.fnd-rsi  cc5ccd5868c2e67b  | 390x228 p1 l3 prims3 items122 over4 terms= headline=-
+oltan.ornek.fnd-brk  377332a4831c6f31  | 390x251 p1 l3 prims12 items3 over1 terms= headline=SAMPLE son 20 günün
+oltan.ornek.fnd-parts  6d8998eeb47c36a2  | 390x251 p1 l3 prims10 items3 over1 terms= headline=Dün SAMPLE önemli
+oltan.oltan.fnd-brk  8ef3c15e55f3967d  | 390x226 p1 l3 prims13 items3 over1 terms= headline=SAMPLE son 20
+oltan.oltan.fnd-parts  a3dcfebe05f62688  | 390x226 p1 l3 prims10 items3 over1 terms= headline=Dün SAMPLE
+oltan.zemre.fnd-brk  236186138e8e9d80  | 390x226 p1 l3 prims11 items3 over1 terms= headline=SAMPLE son 20 günün en
+oltan.zemre.fnd-parts  0b158a3fab06b2fa  | 390x226 p1 l3 prims9 items3 over1 terms= headline=Dün SAMPLE önemli bir
+oltan.tavek.fnd-brk  5735742f85872511  | 390x175 p1 l3 prims10 items3 over1 terms= headline=SAMPLE son 20 günün en yüksek
+oltan.tavek.fnd-parts  52077ad08fa2f559  | 390x175 p1 l3 prims8 items3 over1 terms= headline=Dün SAMPLE önemli bir eşiğin üstüne
+oltan.tavek.fnd-sq  fdcab8f98b137fdf  | 390x175 p1 l3 prims8 items3 over1 terms= headline=Dün SAMPLE önemli bir eşiğin üstüne
+oltan.tavek.fnd-real  44890d69323d9bbd  | 390x175 p1 l3 prims10 items3 over1 terms= headline=SAMPLE Breakout Realized (fnd-real).
+oltan.tavek.fnd-lock  41ea877d56d1af24  | 390x175 p1 l3 prims9 items3 over1 terms= headline=SAMPLE Breakout Born (fnd-lock).
+oltan.tavek.fnd-rsi  a301a5eb8268c40e  | 390x175 p1 l3 prims82 items122 over6 terms= headline=-
+oltan.tavek-tel.fnd-brk  3cb3e0c0d91c5530  | 390x203 p1 l3 prims10 items3 over1 terms= headline=SAMPLE son 20 günün en
+oltan.tavek-tel.fnd-parts  5495ba4d2075f5b5  | 390x203 p1 l3 prims8 items3 over1 terms= headline=Dün SAMPLE önemli bir eşiğin
+oltan.r4.fnd-brk.en  83aa43cd71c3f93b  | 390x228 p1 l3 prims10 items3 over1 terms= headline=SAMPLE broke its
+oltan.r4.fnd-parts.en  d585f93a5eb73c75  | 390x228 p1 l3 prims9 items3 over1 terms= headline=Yesterday, SAMPLE
+zemre.r4.fnd-brk  d54027098df55913  | 390x264 p2 l5 prims13 items30 over4 terms= headline=SAMPLE son 20 günün en
+zemre.r4.fnd-parts  8bc35d492d75c778  | 390x264 p2 l5 prims11 items30 over4 terms= headline=SAMPLE: yukarı kırılım
+zemre.r4.fnd-sq  3773ce582f4ecb8d  | 390x264 p2 l5 prims11 items30 over4 terms= headline=SAMPLE: yukarı kırılım
+zemre.r4.fnd-real  811a01f17ad71968  | 390x264 p2 l5 prims13 items30 over4 terms= headline=SAMPLE Breakout
+zemre.r4.fnd-lock  48713cf39225eea3  | 390x264 p2 l5 prims12 items30 over4 terms= headline=SAMPLE Breakout Born
+zemre.r4.fnd-rsi  93fc8d82692efad9  | 390x264 p1 l3 prims3 items122 over4 terms= headline=-
+zemre.ornek.fnd-brk  d62057ee11ba8073  | 390x284 p2 l5 prims14 items30 over4 terms= headline=SAMPLE son 20 günün
+zemre.ornek.fnd-parts  1bcc8293561b1448  | 390x284 p2 l5 prims12 items30 over4 terms= headline=SAMPLE: yukarı
+zemre.oltan.fnd-brk  7bd39235d078842e  | 390x284 p2 l5 prims14 items30 over4 terms= headline=SAMPLE son 20
+zemre.oltan.fnd-parts  bcf093c8d9c9b3a0  | 390x284 p2 l5 prims12 items30 over4 terms= headline=SAMPLE: yukarı
+zemre.zemre.fnd-brk  8b23e79dd6c71f8c  | 390x286 p2 l5 prims12 items30 over4 terms= headline=SAMPLE son 20 günün en
+zemre.zemre.fnd-parts  9e5452e031f71b72  | 390x286 p2 l5 prims11 items30 over4 terms= headline=SAMPLE: yukarı kırılım · 3
+zemre.tavek.fnd-brk  5008760576f341a4  | 390x254 p2 l5 prims12 items30 over4 terms= headline=SAMPLE son 20 günün en yüksek
+zemre.tavek.fnd-parts  3a2a4affa4ac336f  | 390x254 p2 l5 prims10 items30 over4 terms= headline=SAMPLE: yukarı kırılım · 3 işlem günü
+zemre.tavek.fnd-sq  53fa7e45c499b70a  | 390x254 p2 l5 prims10 items30 over4 terms= headline=SAMPLE: yukarı kırılım · birkaç gün
+zemre.tavek.fnd-real  d0a96518ccecbaa8  | 390x254 p2 l5 prims12 items30 over4 terms= headline=SAMPLE Breakout Realized (fnd-real).
+zemre.tavek.fnd-lock  1d213be78efd993a  | 390x254 p2 l5 prims11 items30 over4 terms= headline=SAMPLE Breakout Born (fnd-lock).
+zemre.tavek.fnd-rsi  60e45d4b2d19e530  | 390x254 p1 l3 prims82 items122 over6 terms= headline=-
+zemre.tavek-tel.fnd-brk  36beb495578c98ea  | 390x284 p2 l5 prims13 items30 over4 terms= headline=SAMPLE son 20 günün en
+zemre.tavek-tel.fnd-parts  23584cd6ca158ea2  | 390x284 p2 l5 prims10 items30 over4 terms= headline=SAMPLE: yukarı kırılım · 3 işlem
+zemre.r4.fnd-brk.en  c0a51f5a2d521b7f  | 390x264 p2 l5 prims12 items30 over4 terms= headline=SAMPLE broke its
+zemre.r4.fnd-parts.en  caeb58a8f26c2dc4  | 390x264 p2 l5 prims11 items30 over4 terms= headline=SAMPLE: upside
+card.r4.fnd-brk  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+card.r4.fnd-parts  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+card.r4.fnd-sq  b55f644569753bb3  | 390x240 p2 l5 prims10 items124 over4 terms= headline=SAMPLE Squeeze Strengthened
+card.r4.fnd-real  6579955ecc74f2e6  | 390x240 p2 l6 prims13 items125 over4 terms= headline=SAMPLE Breakout Realized (fnd-real).
+card.r4.fnd-lock  dce964dbc917fb42  | 390x240 p2 l5 prims11 items124 over4 terms= headline=SAMPLE Breakout Born (fnd-lock).
+card.r4.fnd-rsi  3799d2393c39547f  | 390x240 p1 l3 prims3 items122 over4 terms= headline=-
+card.ornek.fnd-brk  670d93df5f87bf42  | 390x240 p2 l6 prims15 items125 over4 terms=kapanış headline=-
+card.ornek.fnd-parts  7d88df1e577bccb9  | 390x240 p2 l6 prims11 items125 over4 terms= headline=SAMPLE Breakout Born
+card.oltan.fnd-brk  6528a50e2fd9448d  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+card.oltan.fnd-parts  81b863dff65d8f47  | 390x240 p2 l6 prims11 items125 over4 terms= headline=SAMPLE Breakout Born
+card.zemre.fnd-brk  102f95693f731653  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+card.zemre.fnd-parts  10f7c2f0c6913715  | 390x240 p2 l6 prims10 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+card.tavek.fnd-brk  d9343d58ffe12ebf  | 390x240 p2 l6 prims92 items125 over4 terms=kapanış headline=-
+card.tavek.fnd-parts  86b967d0bd62b3f2  | 390x240 p2 l6 prims89 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+card.tavek.fnd-sq  c7f4945b6d9dada7  | 390x240 p2 l5 prims9 items124 over4 terms= headline=SAMPLE Squeeze Strengthened (fnd-sq).
+card.tavek.fnd-real  5f5b672be9cd92e7  | 390x240 p2 l6 prims92 items125 over4 terms= headline=SAMPLE Breakout Realized (fnd-real).
+card.tavek.fnd-lock  56b56b562d99a78a  | 390x240 p2 l5 prims11 items124 over4 terms= headline=SAMPLE Breakout Born (fnd-lock).
+card.tavek.fnd-rsi  73ee10f026915098  | 390x240 p1 l3 prims82 items122 over6 terms= headline=-
+card.tavek-tel.fnd-brk  400520b3c1c4068a  | 390x240 p2 l6 prims95 items125 over4 terms=kapanış headline=-
+card.tavek-tel.fnd-parts  a279feb6f1fe1fb7  | 390x240 p2 l6 prims91 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+card.r4.fnd-brk.en  6fbeede88a340d8c  | 390x240 p2 l6 prims14 items125 over4 terms=kapanış headline=-
+card.r4.fnd-parts.en  bf768d0f035a073e  | 390x240 p2 l6 prims10 items125 over4 terms= headline=SAMPLE Breakout Born (fnd-parts).
+template.r3.tr  -  | none
+template.r3.en  -  | none
+template.r3.tr.redacted  -  | none
+headline_text.r3.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.r3.fnd-parts  -  | Some("SAMPLE Breakout Born (fnd-parts).")
+headline_text.r3.fnd-sq  -  | Some("SAMPLE Squeeze Strengthened (fnd-sq).")
+headline_text.r3.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.r3.nope  -  | None
+height.r3.r4  -  | 240 240 voiced=240
+height.r3.ornek  -  | 240 240 voiced=240
+height.r3.oltan  -  | 240 240 voiced=240
+height.r3.zemre  -  | 240 240 voiced=240
+height.r3.tavek  -  | 240 240 voiced=240
+height.r3.tavek-tel  -  | 240 240 voiced=240
+template.vadrel.tr  -  | Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+template.vadrel.en  -  | Yesterday, SAMPLE broke above a key level. Still holds.
+template.vadrel.tr.redacted  -  | Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+headline_text.vadrel.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.vadrel.fnd-parts  -  | Some("Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.")
+headline_text.vadrel.fnd-sq  -  | Some("Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.")
+headline_text.vadrel.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.vadrel.nope  -  | None
+height.vadrel.r4  -  | 188 188 voiced=259
+height.vadrel.ornek  -  | 203 188 voiced=274
+height.vadrel.oltan  -  | 172 188 voiced=242
+height.vadrel.zemre  -  | 196 188 voiced=266
+height.vadrel.tavek  -  | 173 188 voiced=235
+height.vadrel.tavek-tel  -  | 197 188 voiced=275
+template.fotolay.tr  -  | Yukarı kırılım, dün: hâlâ geçerli. Benzerleri 7'de 3 tuttu.
+template.fotolay.en  -  | Upside breakout, yesterday: still holds. Before: 7'de 3 tuttu.
+template.fotolay.tr.redacted  -  | Yukarı kırılım, dün: hâlâ geçerli. Benzerleri az örnek.
+headline_text.fotolay.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.fotolay.fnd-parts  -  | Some("Yukarı kırılım, dün: hâlâ geçerli. Benzerleri 7'de 3 tuttu.")
+headline_text.fotolay.fnd-sq  -  | Some("Yukarı kırılım, dün: hâlâ geçerli. Benzerleri az örnek.")
+headline_text.fotolay.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.fotolay.nope  -  | None
+height.fotolay.r4  -  | 228 228 voiced=228
+height.fotolay.ornek  -  | 228 228 voiced=228
+height.fotolay.oltan  -  | 228 228 voiced=228
+height.fotolay.zemre  -  | 228 228 voiced=228
+height.fotolay.tavek  -  | 228 228 voiced=228
+height.fotolay.tavek-tel  -  | 228 228 voiced=228
+template.tavrik.tr  -  | Yukarı kırılım · dün · hâlâ geçerli · geçmişte 7'de 3 tuttu
+template.tavrik.en  -  | Upside breakout · yesterday · still holds · past: 7'de 3 tuttu
+template.tavrik.tr.redacted  -  | Yukarı kırılım · dün · hâlâ geçerli · geçmişte az örnek
+headline_text.tavrik.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.tavrik.fnd-parts  -  | Some("Yukarı kırılım · dün · hâlâ geçerli · geçmişte 7'de 3 tuttu")
+headline_text.tavrik.fnd-sq  -  | Some("Yukarı kırılım · dün · hâlâ geçerli · geçmişte az örnek")
+headline_text.tavrik.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.tavrik.nope  -  | None
+height.tavrik.r4  -  | 156 156 voiced=156
+height.tavrik.ornek  -  | 156 156 voiced=156
+height.tavrik.oltan  -  | 156 156 voiced=156
+height.tavrik.zemre  -  | 156 156 voiced=156
+height.tavrik.tavek  -  | 156 156 voiced=156
+height.tavrik.tavek-tel  -  | 156 156 voiced=156
+template.oltan.tr  -  | Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+template.oltan.en  -  | Yesterday, SAMPLE broke above a key level. Still holds.
+template.oltan.tr.redacted  -  | Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.
+headline_text.oltan.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.oltan.fnd-parts  -  | Some("Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.")
+headline_text.oltan.fnd-sq  -  | Some("Dün SAMPLE önemli bir eşiğin üstüne çıktı. Hâlâ geçerli.")
+headline_text.oltan.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.oltan.nope  -  | None
+height.oltan.r4  -  | 228 228 voiced=228
+height.oltan.ornek  -  | 251 228 voiced=251
+height.oltan.oltan  -  | 226 228 voiced=226
+height.oltan.zemre  -  | 226 228 voiced=226
+height.oltan.tavek  -  | 175 228 voiced=175
+height.oltan.tavek-tel  -  | 203 228 voiced=203
+template.zemre.tr  -  | SAMPLE: yukarı kırılım · 3 işlem günü önce, hâlâ geçerli
+template.zemre.en  -  | SAMPLE: upside breakout · 3 işlem günü önce, still holds
+template.zemre.tr.redacted  -  | SAMPLE: yukarı kırılım · birkaç gün önce, hâlâ geçerli
+headline_text.zemre.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.zemre.fnd-parts  -  | Some("SAMPLE: yukarı kırılım · 3 işlem günü önce, hâlâ geçerli")
+headline_text.zemre.fnd-sq  -  | Some("SAMPLE: yukarı kırılım · birkaç gün önce, hâlâ geçerli")
+headline_text.zemre.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.zemre.nope  -  | None
+height.zemre.r4  -  | 264 264 voiced=264
+height.zemre.ornek  -  | 284 264 voiced=284
+height.zemre.oltan  -  | 284 264 voiced=284
+height.zemre.zemre  -  | 286 264 voiced=286
+height.zemre.tavek  -  | 254 264 voiced=254
+height.zemre.tavek-tel  -  | 284 264 voiced=284
+template.card.tr  -  | none
+template.card.en  -  | none
+template.card.tr.redacted  -  | none
+headline_text.card.fnd-brk  -  | Some("SAMPLE Breakout Confirmed (fnd-brk).")
+headline_text.card.fnd-parts  -  | Some("SAMPLE Breakout Born (fnd-parts).")
+headline_text.card.fnd-sq  -  | Some("SAMPLE Squeeze Strengthened (fnd-sq).")
+headline_text.card.fnd-rsi  -  | Some("RSI(14) crossed 70.")
+headline_text.card.nope  -  | None
+height.card.r4  -  | 240 240 voiced=240
+height.card.ornek  -  | 240 240 voiced=240
+height.card.oltan  -  | 240 240 voiced=240
+height.card.zemre  -  | 240 240 voiced=240
+height.card.tavek  -  | 240 240 voiced=240
+height.card.tavek-tel  -  | 240 240 voiced=240
+unknown  -  | ERR Invalid layer=- path=/face :: /face: unknown face `nope` (known: r3, vadrel, fotolay, tavrik, oltan, zemre)
+registry  -  | ["r3", "vadrel", "fotolay", "tavrik", "oltan", "zemre"] default=r3 presented=oltan

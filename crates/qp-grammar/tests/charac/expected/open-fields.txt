@@ -1,0 +1,171 @@
+# charac/open-fields: today's output (RF1/G1); a refactor keeps every line
+field.fnd-brk.open.h.basis  -  | ask=None open=Some("DAYANAK")
+field.fnd-brk.open.basis  -  | ask=None open=Some("En yüksek fiyat · 121,46")
+field.fnd-brk.open.basis2  -  | ask=None open=Some("Fiyat verisi · herkese açık, cihaz yeniden hesaplar")
+field.fnd-brk.open.why  -  | ask=None open=Some("O gün kapanış eşiğin üstünde oldu. Sonuç on işlem günü içinde belli olacak.")
+field.fnd-brk.open.h.trust  -  | ask=None open=Some("KİM DOĞRULADI")
+field.fnd-brk.open.trust  -  | ask=None open=Some("Sunucu doğruladı")
+field.fnd-brk.open.trust2  -  | ask=None open=Some("Açıkken bu cihaz da kendi verisiyle sınar.")
+field.fnd-brk.open.h.ledger  -  | ask=None open=Some("KARNE")
+field.fnd-brk.ask/tr/what/q/server  -  | ask=Some("+ Ne oldu?") open=None
+field.fnd-brk.ask/tr/what/a/server  -  | ask=Some("Hâlâ geçerli; ikinci bir kanıt ailesi teyit etti.") open=None
+field.fnd-brk.ask/tr/who/qo/server  -  | ask=Some("− Kim doğruladı?") open=None
+field.fnd-brk.ask/tr/who/a/server  -  | ask=Some("Sunucu doğruladı.") open=None
+field.fnd-brk.ask/tr/who/d/server  -  | ask=Some("Akıştaki her kapsül sunucunun kesinleşmiş iddiasıdır. Açtığında bu cihaz aynı kuralı yalnız bu hissenin kendi verisinde yeniden sınar.") open=None
+field.fnd-brk.ask/tr/before/q/server  -  | ask=Some("+ Daha önce kaç kez?") open=None
+field.fnd-brk.ask/tr/basis/q/server  -  | ask=Some("+ Neye dayanıyor?") open=None
+field.fnd-brk.ask/tr/basis/a/server  -  | ask=Some("Fiyat ve hacim verisine dayanıyor.") open=None
+term.fnd-brk.headline  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.detail  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.glyph  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.sentence  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.line  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.level  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.fact  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.open-h-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.open-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.open-basis2  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.open-why  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.open-h-trust  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.open-trust  -  | voice_terms_in=false layer_term=Some(GlossEntry { term: "Kim doğruladı?", text: "Sunucu doğruladı: iddia sunucuda kesinleşti. Bu cihazda sınandı: telefon aynı kuralı kendi aldığı fiyatlarla yeniden işletti, aynı sonucu buldu." })
+term.fnd-brk.open-trust2  -  | voice_terms_in=false layer_term=None
+term.fnd-brk.open-h-ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.what-q  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.what-a  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.who-qo  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.who-a  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.who-d  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.before-q  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.before-a  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.basis-q  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.basis-a  -  | voice_terms_in=true layer_term=None
+term.fnd-brk.candles  -  | voice_terms_in=true layer_term=None
+field.fnd-parts.open.h.basis  -  | ask=None open=Some("DAYANAK")
+field.fnd-parts.open.basis  -  | ask=None open=Some("Eşik · 121,46")
+field.fnd-parts.open.basis2  -  | ask=None open=Some("Fiyat verisi · herkese açık, cihaz yeniden hesaplar")
+field.fnd-parts.open.why  -  | ask=None open=Some("")
+field.fnd-parts.open.h.trust  -  | ask=None open=Some("KİM DOĞRULADI")
+field.fnd-parts.open.trust  -  | ask=None open=Some("Sunucu doğruladı")
+field.fnd-parts.open.trust2  -  | ask=None open=Some("Açıkken bu cihaz da kendi verisiyle sınar.")
+field.fnd-parts.open.h.ledger  -  | ask=None open=Some("KARNE")
+field.fnd-parts.ask/tr/what/q/server  -  | ask=Some("+ Ne oldu?") open=None
+field.fnd-parts.ask/tr/what/a/server  -  | ask=Some("Hâlâ geçerli.") open=None
+field.fnd-parts.ask/tr/who/qo/server  -  | ask=Some("− Kim doğruladı?") open=None
+field.fnd-parts.ask/tr/who/a/server  -  | ask=Some("Sunucu doğruladı.") open=None
+field.fnd-parts.ask/tr/who/d/server  -  | ask=Some("Akıştaki her kapsül sunucunun kesinleşmiş iddiasıdır. Açtığında bu cihaz aynı kuralı yalnız bu hissenin kendi verisinde yeniden sınar.") open=None
+field.fnd-parts.ask/tr/before/q/server  -  | ask=Some("+ Daha önce kaç kez?") open=None
+field.fnd-parts.ask/tr/basis/q/server  -  | ask=Some("+ Neye dayanıyor?") open=None
+field.fnd-parts.ask/tr/basis/a/server  -  | ask=Some("Fiyat ve hacim verisine dayanıyor.") open=None
+term.fnd-parts.headline  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.detail  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.glyph  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.sentence  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.line  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.level  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.fact  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.open-h-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.open-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.open-basis2  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.open-why  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.open-h-trust  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.open-trust  -  | voice_terms_in=false layer_term=Some(GlossEntry { term: "Kim doğruladı?", text: "Sunucu doğruladı: iddia sunucuda kesinleşti. Bu cihazda sınandı: telefon aynı kuralı kendi aldığı fiyatlarla yeniden işletti, aynı sonucu buldu." })
+term.fnd-parts.open-trust2  -  | voice_terms_in=false layer_term=None
+term.fnd-parts.open-h-ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.what-q  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.what-a  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.who-qo  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.who-a  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.who-d  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.before-q  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.before-a  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.basis-q  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.basis-a  -  | voice_terms_in=true layer_term=None
+term.fnd-parts.candles  -  | voice_terms_in=true layer_term=None
+field.fnd-lock.open.h.basis  -  | ask=None open=Some("DAYANAK")
+field.fnd-lock.open.basis  -  | ask=None open=Some("Kilitli: flow/SAMPLE yetkisi")
+field.fnd-lock.open.basis2  -  | ask=None open=Some("Fiyat verisi lisanslı; değerler bu yetkiyle açılır.")
+field.fnd-lock.open.why  -  | ask=None open=Some("")
+field.fnd-lock.open.h.trust  -  | ask=None open=Some("KİM DOĞRULADI")
+field.fnd-lock.open.trust  -  | ask=None open=Some("Sunucu doğruladı")
+field.fnd-lock.open.trust2  -  | ask=None open=Some("Lisanslı veri: bu cihaz kendisi sınayamaz.")
+field.fnd-lock.open.h.ledger  -  | ask=None open=Some("KARNE")
+field.fnd-lock.ask/tr/what/q/server  -  | ask=Some("+ Ne oldu?") open=None
+field.fnd-lock.ask/tr/what/a/server  -  | ask=Some("Hâlâ geçerli.") open=None
+field.fnd-lock.ask/tr/who/qo/server  -  | ask=Some("− Kim doğruladı?") open=None
+field.fnd-lock.ask/tr/who/a/server  -  | ask=Some("Sunucu doğruladı.") open=None
+field.fnd-lock.ask/tr/who/d/server  -  | ask=Some("Bu iddia lisanslı veriden sunucuda hesaplandı. Bu cihaz o veriyi almadığı için yeniden hesaplayamaz; gördüğün, sunucunun kesinleşmiş iddiası.") open=None
+field.fnd-lock.ask/tr/before/q/server  -  | ask=Some("+ Daha önce kaç kez?") open=None
+field.fnd-lock.ask/tr/basis/q/server  -  | ask=Some("+ Neye dayanıyor?") open=None
+field.fnd-lock.ask/tr/basis/a/server  -  | ask=Some("Fiyat ve hacim verisine dayanıyor. İşaretlerin değerleri sende gizli.") open=None
+term.fnd-lock.headline  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.detail  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.glyph  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.sentence  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.line  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.level  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.fact  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.open-h-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.open-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.open-basis2  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.open-why  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.open-h-trust  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.open-trust  -  | voice_terms_in=false layer_term=Some(GlossEntry { term: "Kim doğruladı?", text: "Sunucu doğruladı: iddia sunucuda, lisanslı veriyle hesaplanıp kesinleşti. Bu cihaz o veriyi almadığı için kendisi yeniden sınayamaz." })
+term.fnd-lock.open-trust2  -  | voice_terms_in=false layer_term=None
+term.fnd-lock.open-h-ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.what-q  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.what-a  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.who-qo  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.who-a  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.who-d  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.before-q  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.before-a  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.basis-q  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.basis-a  -  | voice_terms_in=true layer_term=None
+term.fnd-lock.candles  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.headline  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.detail  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.glyph  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.sentence  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.line  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.level  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.fact  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.open-h-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.open-basis  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.open-basis2  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.open-why  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.open-h-trust  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.open-trust  -  | voice_terms_in=false layer_term=None
+term.fnd-rsi.open-trust2  -  | voice_terms_in=false layer_term=None
+term.fnd-rsi.open-h-ledger  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.what-q  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.what-a  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.who-qo  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.who-a  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.who-d  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.before-q  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.before-a  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.basis-q  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.basis-a  -  | voice_terms_in=true layer_term=None
+term.fnd-rsi.candles  -  | voice_terms_in=true layer_term=None
+terms.detail.detail  cf27aceb832b9634  | [TermMark { term: "kapanış", text: "Günün son fiyatı.", layer: "detail", hit: PixelRect { left: 52, top: 82, right: 98, bottom: 95 } }] detail:O gün kapanış eşiğin üstünde oldu. Sonuç on / detail:işlem günü içinde belli olacak.
+terms.detail.ledger  65fb98aa5d9c33ed  | [] detail:Benzer otuz durumun çoğunda fiyat yükseldi.
+terms.detail.open.trust  17f8817f726bba16  | [] detail:Sunucu doğruladı
+terms.headline.detail  122344cbe6afc3d0  | [] headline:O gün kapanış eşiğin üstünde oldu. Sonuç on / headline:işlem günü içinde belli olacak.
+terms.headline.ledger  b7e1178b78d3f21c  | [] headline:Benzer otuz durumun çoğunda fiyat yükseldi.
+terms.headline.open.trust  285b6ab3fda07ea8  | [] headline:Sunucu doğruladı
+terms.ledger.detail  0ec0a1d26113ed31  | [TermMark { term: "kapanış", text: "Günün son fiyatı.", layer: "ledger", hit: PixelRect { left: 52, top: 82, right: 98, bottom: 95 } }] ledger:O gün kapanış eşiğin üstünde oldu. Sonuç on / ledger:işlem günü içinde belli olacak.
+terms.ledger.ledger  165553c54002e61b  | [] ledger:Benzer otuz durumun çoğunda fiyat yükseldi.
+terms.ledger.open.trust  aa0ff94b3dd9893d  | [] ledger:Sunucu doğruladı
+terms.open-trust.detail  41cdb27ae62dad54  | [TermMark { term: "Kim doğruladı?", text: "Sunucu doğruladı: iddia sunucuda kesinleşti. Bu cihazda sınandı: telefon aynı kuralı kendi aldığı fiyatlarla yeniden işletti, aynı sonucu buldu.", layer: "open-trust", hit: PixelRect { left: 8, top: 34, right: 318, bottom: 276 } }] open-trust:O gün kapanış eşiğin üstünde oldu. Sonuç on / open-trust:işlem günü içinde belli olacak.
+terms.open-trust.ledger  ecb22e75ab2392fa  | [TermMark { term: "Kim doğruladı?", text: "Sunucu doğruladı: iddia sunucuda kesinleşti. Bu cihazda sınandı: telefon aynı kuralı kendi aldığı fiyatlarla yeniden işletti, aynı sonucu buldu.", layer: "open-trust", hit: PixelRect { left: 8, top: 34, right: 318, bottom: 276 } }] open-trust:Benzer otuz durumun çoğunda fiyat yükseldi.
+terms.open-trust.open.trust  7aed00ffc91da60f  | [TermMark { term: "Kim doğruladı?", text: "Sunucu doğruladı: iddia sunucuda kesinleşti. Bu cihazda sınandı: telefon aynı kuralı kendi aldığı fiyatlarla yeniden işletti, aynı sonucu buldu.", layer: "open-trust", hit: PixelRect { left: 8, top: 34, right: 318, bottom: 276 } }] open-trust:Sunucu doğruladı
+terms.open-basis.detail  29bf31aa93c53f1d  | [TermMark { term: "kapanış", text: "Günün son fiyatı.", layer: "open-basis", hit: PixelRect { left: 52, top: 82, right: 98, bottom: 95 } }] open-basis:O gün kapanış eşiğin üstünde oldu. Sonuç on / open-basis:işlem günü içinde belli olacak.
+terms.open-basis.ledger  80424ae72057f436  | [] open-basis:Benzer otuz durumun çoğunda fiyat yükseldi.
+terms.open-basis.open.trust  f32dcf06f3c9c8cf  | [] open-basis:Sunucu doğruladı
+terms.note.detail  5f1d99a2a07a8211  | [TermMark { term: "kapanış", text: "Günün son fiyatı.", layer: "note", hit: PixelRect { left: 52, top: 82, right: 98, bottom: 95 } }] note:O gün kapanış eşiğin üstünde oldu. Sonuç on / note:işlem günü içinde belli olacak.
+terms.note.ledger  65207584dc4dd146  | [] note:Benzer otuz durumun çoğunda fiyat yükseldi.
+terms.note.open.trust  4ca0d3eecd753d87  | [] note:Sunucu doğruladı

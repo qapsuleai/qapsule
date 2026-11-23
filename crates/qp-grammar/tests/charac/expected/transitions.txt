@@ -1,0 +1,188 @@
+# charac/transitions: today's output (RF1/G1); a refactor keeps every line
+r3.sentence-capsule.shared  82ba9fd7f3efb247  | glyph,ledger
+r3.sentence-capsule.p0  cb77d80e4ece769a  | 2 els scene_opacity=0
+r3.sentence-capsule.p0.25  4a6cb6542ceb3aec  | 2 els scene_opacity=0.25
+r3.sentence-capsule.p0.5  c9aec5f0edc7911b  | 2 els scene_opacity=0.5
+r3.sentence-capsule.p0.75  212c8f456ba6fbd0  | 2 els scene_opacity=0.75
+r3.sentence-capsule.p1  3fc480d55d4617b1  | 2 els scene_opacity=1
+r3.capsule-chart.shared  e1b238b5f37d986a  | bar:180,evidence:f-brk,glyph,price
+r3.capsule-chart.p0  462981dfc6ece5ba  | 4 els scene_opacity=0
+r3.capsule-chart.p0.25  e9ea908f724b76a8  | 4 els scene_opacity=0.25
+r3.capsule-chart.p0.5  c518069a29015d9f  | 4 els scene_opacity=0.5
+r3.capsule-chart.p0.75  608ed11239204d23  | 4 els scene_opacity=0.75
+r3.capsule-chart.p1  a676316224dd9244  | 4 els scene_opacity=1
+r3.chart-capsule.shared  694a097c2cbf10a6  | bar:180,evidence:f-brk,glyph,price
+r3.chart-capsule.p0  73c3fa5673c3bd36  | 4 els scene_opacity=0
+r3.chart-capsule.p0.25  63a9f11bfc222254  | 4 els scene_opacity=0.25
+r3.chart-capsule.p0.5  d5c2d6d2126e13c1  | 4 els scene_opacity=0.5
+r3.chart-capsule.p0.75  3ef5608acc06fb1f  | 4 els scene_opacity=0.75
+r3.chart-capsule.p1  657775f8cf35b956  | 4 els scene_opacity=1
+r3.capsule-sentence.shared  90c58a04411d0a8a  | glyph,ledger
+r3.capsule-sentence.p0  684cfd00ad4bc10a  | 2 els scene_opacity=0
+r3.capsule-sentence.p0.25  61b6642f27157d74  | 2 els scene_opacity=0.25
+r3.capsule-sentence.p0.5  a21d89352c0713b1  | 2 els scene_opacity=0.5
+r3.capsule-sentence.p0.75  ead0a4b3854aef2a  | 2 els scene_opacity=0.75
+r3.capsule-sentence.p1  b3c1d95fcfe0291d  | 2 els scene_opacity=1
+r3.bare-capsule.shared  c81ecad736cd2bbe  | headline
+r3.bare-capsule.p0  c42c0e4d3599912d  | 0 els scene_opacity=0
+r3.bare-capsule.p0.25  d736d0d57e1643f3  | 0 els scene_opacity=0.25
+r3.bare-capsule.p0.5  d6d8cfa413d4f2fd  | 0 els scene_opacity=0.5
+r3.bare-capsule.p0.75  022dfd946bcdf671  | 0 els scene_opacity=0.75
+r3.bare-capsule.p1  816d23a9f7be787b  | 0 els scene_opacity=1
+r3.timing.r4  -  | dur=260 p(0)=0 p(100)=0.38461538461538464 p(1000)=1
+r3.timing.ornek  -  | dur=325 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.6987944159877824 p(1000)=1
+r3.timing.oltan  -  | dur=221 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.8456074654035259 p(1000)=1
+r3.timing.zemre  -  | dur=260 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.7877495511296548 p(1000)=1
+r3.timing.tavek  -  | dur=234 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.8259839979804013 p(1000)=1
+r3.timing.tavek-tel  -  | dur=234 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.8259839979804013 p(1000)=1
+r3.progress  -  | 0.5
+tutamir.sentence-capsule.shared  1fb04b6cb9cb8ce9  | backdrop,glyph,ledger,bar:180,evidence:f-brk,fact:f-brk
+tutamir.sentence-capsule.p0  0e1e9a3f95ec9b1d  | 6 els scene_opacity=0
+tutamir.sentence-capsule.p0.25  c6f0744fea40a97c  | 6 els scene_opacity=0
+tutamir.sentence-capsule.p0.5  b1dbca21bd443ae0  | 6 els scene_opacity=0.22576240327719627
+tutamir.sentence-capsule.p0.75  a9b3b45752727a26  | 6 els scene_opacity=0.7742375967228039
+tutamir.sentence-capsule.p1  724a4fc906f72b22  | 6 els scene_opacity=1
+tutamir.capsule-chart.shared  a648cef25e41bd04  | backdrop,bar:180,evidence:f-brk,price,pin
+tutamir.capsule-chart.p0  5695a1414742ccf0  | 5 els scene_opacity=0
+tutamir.capsule-chart.p0.25  7f64da6a8c5ce2c2  | 5 els scene_opacity=0
+tutamir.capsule-chart.p0.5  ccb3430c832a2fa7  | 5 els scene_opacity=0.22576240327719627
+tutamir.capsule-chart.p0.75  c92aa073571fe0b2  | 5 els scene_opacity=0.7742375967228039
+tutamir.capsule-chart.p1  26542afc19ab7873  | 5 els scene_opacity=1
+tutamir.chart-capsule.shared  052d82b157ed8082  | backdrop,bar:180,evidence:f-brk,glyph,price,fact:f-brk
+tutamir.chart-capsule.p0  103df3bda10c5de8  | 6 els scene_opacity=0
+tutamir.chart-capsule.p0.25  66ec32ea2b275b1f  | 6 els scene_opacity=0
+tutamir.chart-capsule.p0.5  92ddbaff8bf05bda  | 6 els scene_opacity=0.22576240327719627
+tutamir.chart-capsule.p0.75  f316af70c44b5c5a  | 6 els scene_opacity=0.7742375967228039
+tutamir.chart-capsule.p1  902462ec710580e6  | 6 els scene_opacity=1
+tutamir.capsule-sentence.shared  a90aba21f7aadcde  | backdrop,glyph,ledger
+tutamir.capsule-sentence.p0  ceed7d04de410162  | 3 els scene_opacity=0
+tutamir.capsule-sentence.p0.25  6d942ee277c4961d  | 3 els scene_opacity=0
+tutamir.capsule-sentence.p0.5  82c41b60c1aab9b4  | 3 els scene_opacity=0.22576240327719627
+tutamir.capsule-sentence.p0.75  755f78649c6c313d  | 3 els scene_opacity=0.7742375967228039
+tutamir.capsule-sentence.p1  8dbdd50ff822f03a  | 3 els scene_opacity=1
+tutamir.bare-capsule.shared  c81ecad736cd2bbe  | headline
+tutamir.bare-capsule.p0  c42c0e4d3599912d  | 0 els scene_opacity=0
+tutamir.bare-capsule.p0.25  c42c0e4d3599912d  | 0 els scene_opacity=0
+tutamir.bare-capsule.p0.5  bd861af644025701  | 0 els scene_opacity=0.22576240327719627
+tutamir.bare-capsule.p0.75  e4101cb04c5427a9  | 0 els scene_opacity=0.7742375967228039
+tutamir.bare-capsule.p1  816d23a9f7be787b  | 0 els scene_opacity=1
+tutamir.timing.r4  -  | dur=420 p(0)=0 p(100)=0.23809523809523808 p(1000)=1
+tutamir.timing.ornek  -  | dur=525 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.4754101444319977 p(1000)=1
+tutamir.timing.oltan  -  | dur=357 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.6583843833059537 p(1000)=1
+tutamir.timing.zemre  -  | dur=420 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.5845390358552558 p(1000)=1
+tutamir.timing.tavek  -  | dur=378 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.6329708028965039 p(1000)=1
+tutamir.timing.tavek-tel  -  | dur=378 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.6329708028965039 p(1000)=1
+tutamir.progress  -  | 0.30952380952380953
+zumlak.sentence-capsule.shared  82ba9fd7f3efb247  | glyph,ledger
+zumlak.sentence-capsule.p0  cb77d80e4ece769a  | 2 els scene_opacity=0
+zumlak.sentence-capsule.p0.25  4a6cb6542ceb3aec  | 2 els scene_opacity=0.25
+zumlak.sentence-capsule.p0.5  c9aec5f0edc7911b  | 2 els scene_opacity=0.5
+zumlak.sentence-capsule.p0.75  212c8f456ba6fbd0  | 2 els scene_opacity=0.75
+zumlak.sentence-capsule.p1  3fc480d55d4617b1  | 2 els scene_opacity=1
+zumlak.capsule-chart.shared  18cc44341de6b73e  | bar:180,evidence:f-brk,glyph,span,scene:before,pane:before,scene:after
+zumlak.capsule-chart.p0  60cdfba1c633ec45  | 5 els scene_opacity=0
+zumlak.capsule-chart.p0.25  3c66814d9fe354df  | 5 els scene_opacity=0
+zumlak.capsule-chart.p0.5  2eafcdc7ed0ed48d  | 5 els scene_opacity=0
+zumlak.capsule-chart.p0.75  a9e054673d3550c4  | 5 els scene_opacity=0
+zumlak.capsule-chart.p1  fde5a287a0e9f25d  | 5 els scene_opacity=1
+zumlak.chart-capsule.shared  5547b79a55bef4c0  | bar:180,evidence:f-brk,glyph,span,scene:before,pane:before,scene:after
+zumlak.chart-capsule.p0  6dc8e87174876e72  | 5 els scene_opacity=0
+zumlak.chart-capsule.p0.25  123ffdf0dac0004f  | 5 els scene_opacity=0
+zumlak.chart-capsule.p0.5  d6e064d3e738df17  | 5 els scene_opacity=0
+zumlak.chart-capsule.p0.75  b4495cedec736308  | 5 els scene_opacity=0
+zumlak.chart-capsule.p1  c24cb506a3d1f3d2  | 5 els scene_opacity=1
+zumlak.capsule-sentence.shared  90c58a04411d0a8a  | glyph,ledger
+zumlak.capsule-sentence.p0  684cfd00ad4bc10a  | 2 els scene_opacity=0
+zumlak.capsule-sentence.p0.25  61b6642f27157d74  | 2 els scene_opacity=0.25
+zumlak.capsule-sentence.p0.5  a21d89352c0713b1  | 2 els scene_opacity=0.5
+zumlak.capsule-sentence.p0.75  ead0a4b3854aef2a  | 2 els scene_opacity=0.75
+zumlak.capsule-sentence.p1  b3c1d95fcfe0291d  | 2 els scene_opacity=1
+zumlak.bare-capsule.shared  c81ecad736cd2bbe  | headline
+zumlak.bare-capsule.p0  c42c0e4d3599912d  | 0 els scene_opacity=0
+zumlak.bare-capsule.p0.25  d736d0d57e1643f3  | 0 els scene_opacity=0.25
+zumlak.bare-capsule.p0.5  d6d8cfa413d4f2fd  | 0 els scene_opacity=0.5
+zumlak.bare-capsule.p0.75  022dfd946bcdf671  | 0 els scene_opacity=0.75
+zumlak.bare-capsule.p1  816d23a9f7be787b  | 0 els scene_opacity=1
+zumlak.timing.r4  -  | dur=480 p(0)=0 p(100)=0.20833333333333334 p(1000)=1
+zumlak.timing.ornek  -  | dur=600 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.40632793513373733 p(1000)=1
+zumlak.timing.oltan  -  | dur=408 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.5980670782441138 p(1000)=1
+zumlak.timing.zemre  -  | dur=480 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.5202703966126013 p(1000)=1
+zumlak.timing.tavek  -  | dur=432 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.5712458096254408 p(1000)=1
+zumlak.timing.tavek-tel  -  | dur=432 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.5712458096254408 p(1000)=1
+zumlak.progress  -  | 0.2708333333333333
+surek.sentence-capsule.shared  eb8a112384b83471  | glyph,ledger,scene:before
+surek.sentence-capsule.p0  8093f80bd77ce6c9  | 3 els scene_opacity=0
+surek.sentence-capsule.p0.25  f2ee8e4159a26895  | 3 els scene_opacity=0
+surek.sentence-capsule.p0.5  4d6591abc55494d1  | 3 els scene_opacity=0.3005259203606311
+surek.sentence-capsule.p0.75  78161eafb341f14c  | 3 els scene_opacity=0.9128474830954169
+surek.sentence-capsule.p1  57da35706aa13553  | 3 els scene_opacity=1
+surek.capsule-chart.shared  ec891cb9885a7881  | bar:180,glyph,scene:before
+surek.capsule-chart.p0  ccda2a773526deb4  | 3 els scene_opacity=0
+surek.capsule-chart.p0.25  6a7e4eca4423e1da  | 3 els scene_opacity=0
+surek.capsule-chart.p0.5  601336c425ee0a3b  | 3 els scene_opacity=0.3005259203606311
+surek.capsule-chart.p0.75  774bffc4fe55d7d4  | 3 els scene_opacity=0.9128474830954169
+surek.capsule-chart.p1  05d0702cc2638d53  | 3 els scene_opacity=1
+surek.chart-capsule.shared  3ae96d17ed0ad37f  | bar:180,glyph,scene:before
+surek.chart-capsule.p0  e6657b71d1bc7c6f  | 3 els scene_opacity=0
+surek.chart-capsule.p0.25  b220d3826464d477  | 3 els scene_opacity=0
+surek.chart-capsule.p0.5  6e7afc8c167af208  | 3 els scene_opacity=0.3005259203606311
+surek.chart-capsule.p0.75  771ee25afca85bbc  | 3 els scene_opacity=0.9128474830954169
+surek.chart-capsule.p1  9c9498652cf7c028  | 3 els scene_opacity=1
+surek.capsule-sentence.shared  8883954a1e4cb7be  | glyph,ledger,scene:before
+surek.capsule-sentence.p0  17c7e107702c8d73  | 3 els scene_opacity=0
+surek.capsule-sentence.p0.25  6803e23e98174ebf  | 3 els scene_opacity=0
+surek.capsule-sentence.p0.5  d618fbba6784b2d4  | 3 els scene_opacity=0.3005259203606311
+surek.capsule-sentence.p0.75  1d68a84cb32a4cbd  | 3 els scene_opacity=0.9128474830954169
+surek.capsule-sentence.p1  9e30cae6130ba48a  | 3 els scene_opacity=1
+surek.bare-capsule.shared  c81ecad736cd2bbe  | headline
+surek.bare-capsule.p0  c42c0e4d3599912d  | 0 els scene_opacity=0
+surek.bare-capsule.p0.25  c42c0e4d3599912d  | 0 els scene_opacity=0
+surek.bare-capsule.p0.5  fac44493226d5cf6  | 0 els scene_opacity=0.3005259203606311
+surek.bare-capsule.p0.75  eef1e17bb60c0338  | 0 els scene_opacity=0.9128474830954169
+surek.bare-capsule.p1  816d23a9f7be787b  | 0 els scene_opacity=1
+surek.timing.r4  -  | dur=300 p(0)=0 p(100)=0.3333333333333333 p(1000)=1
+surek.timing.ornek  -  | dur=375 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.6365502182583432 p(1000)=1
+surek.timing.oltan  -  | dur=255 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.7949888910010687 p(1000)=1
+surek.timing.zemre  -  | dur=300 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.7318806493842593 p(1000)=1
+surek.timing.tavek  -  | dur=270 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.7734398643749821 p(1000)=1
+surek.timing.tavek-tel  -  | dur=270 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.7734398643749821 p(1000)=1
+surek.progress  -  | 0.43333333333333335
+nabiz.sentence-capsule.shared  a7b1a245c8abd2f2  | glyph,ledger,scene:before,scene:after
+nabiz.sentence-capsule.p0  1729c967831eaf67  | 2 els scene_opacity=0
+nabiz.sentence-capsule.p0.25  f1b9262497386e70  | 2 els scene_opacity=0
+nabiz.sentence-capsule.p0.5  ca6d5f1ba8cdd9be  | 2 els scene_opacity=0
+nabiz.sentence-capsule.p0.75  3fca495719a0cc9e  | 2 els scene_opacity=0
+nabiz.sentence-capsule.p1  86c2444d6d2c6ed3  | 2 els scene_opacity=1
+nabiz.capsule-chart.shared  1706edb947920b28  | bar:180,evidence:f-brk,glyph,price,scene:before,scene:after
+nabiz.capsule-chart.p0  ae573643a67d04f0  | 2 els scene_opacity=0
+nabiz.capsule-chart.p0.25  ceba519b30d2f10d  | 2 els scene_opacity=0
+nabiz.capsule-chart.p0.5  6405a0b479deeb2c  | 2 els scene_opacity=0
+nabiz.capsule-chart.p0.75  6d55661903d39069  | 2 els scene_opacity=0
+nabiz.capsule-chart.p1  3ad01007d989ff51  | 2 els scene_opacity=1
+nabiz.chart-capsule.shared  950b77870af54b12  | bar:180,evidence:f-brk,glyph,price,scene:before:out,scene:after
+nabiz.chart-capsule.p0  0244a0332717703c  | 2 els scene_opacity=0
+nabiz.chart-capsule.p0.25  f8cd18a67558614d  | 2 els scene_opacity=0
+nabiz.chart-capsule.p0.5  831e80aaf1a07a19  | 2 els scene_opacity=0
+nabiz.chart-capsule.p0.75  9a2ff89cad00cf71  | 2 els scene_opacity=0
+nabiz.chart-capsule.p1  6785845e788f4f21  | 2 els scene_opacity=1
+nabiz.capsule-sentence.shared  0319b03c3f20797d  | glyph,ledger,scene:before:out,scene:after
+nabiz.capsule-sentence.p0  2e77287426100298  | 2 els scene_opacity=0
+nabiz.capsule-sentence.p0.25  dc47a9a62e1792b0  | 2 els scene_opacity=0
+nabiz.capsule-sentence.p0.5  4685e764475affd9  | 2 els scene_opacity=0
+nabiz.capsule-sentence.p0.75  cb5658b65117c09f  | 2 els scene_opacity=0
+nabiz.capsule-sentence.p1  e65da380c940be46  | 2 els scene_opacity=1
+nabiz.bare-capsule.shared  6061d57cb7b34a1e  | headline,scene:after
+nabiz.bare-capsule.p0  faf261ea435f787c  | 1 els scene_opacity=0
+nabiz.bare-capsule.p0.25  f98f34cf9b4903c4  | 1 els scene_opacity=0
+nabiz.bare-capsule.p0.5  3a50b648c0eee956  | 1 els scene_opacity=0
+nabiz.bare-capsule.p0.75  64a96624c54e2d27  | 1 els scene_opacity=0
+nabiz.bare-capsule.p1  b749584f0da23a95  | 1 els scene_opacity=1
+nabiz.timing.r4  -  | dur=220 p(0)=0 p(100)=0.45454545454545453 p(1000)=1
+nabiz.timing.ornek  -  | dur=275 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.7663704314257271 p(1000)=1
+nabiz.timing.oltan  -  | dur=187 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.897936991052669 p(1000)=1
+nabiz.timing.zemre  -  | dur=220 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.8471289910234214 p(1000)=1
+nabiz.timing.tavek  -  | dur=198 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.8809243709529921 p(1000)=1
+nabiz.timing.tavek-tel  -  | dur=198 p(0)=0.0000000000000000000000006203854594145827 p(100)=0.8809243709529921 p(1000)=1
+nabiz.progress  -  | 0.5909090909090909
+anchors.capsule  67b7c5a61f80fec2  | -
+registry  -  | ["r3", "tutamir", "zumlak", "surek", "nabiz"] default=r3 presented=zumlak unknown=r3

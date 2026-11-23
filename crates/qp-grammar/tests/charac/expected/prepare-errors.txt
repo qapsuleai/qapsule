@@ -1,0 +1,36 @@
+# charac/prepare-errors: today's output (RF1/G1); a refactor keeps every line
+candle.series.values  -  | ERR Invalid layer=t path=/series :: layer `t` /series: `candle` needs a bar series; `rsi14` is not one
+candle.points  -  | ERR Invalid layer=t path=/series :: layer `t` /series: `candle` needs a bar series; `q` is not one
+candle.fact  -  | ERR Invalid layer=t path=/mark :: layer `t` /mark: `candle` needs a bar series
+candle.finding  -  | ERR Invalid layer=t path=/mark :: layer `t` /mark: `candle` needs a bar series
+candle.none  -  | ERR Invalid layer=t path=/mark :: layer `t` /mark: `candle` needs a bar series
+band.no_y2  -  | ERR Invalid layer=t path=/encoding/y2 :: layer `t` /encoding/y2: `band` needs `y2`
+band.no_y  -  | ERR Invalid layer=t path=/encoding/y :: layer `t` /encoding/y: `band` needs `y`
+rule.no_origin  -  | ERR NoOrigin layer=t path=/encoding/y :: layer `t` /encoding/y: constant 123.45 has no origin (bind it to a fact or a named threshold via the layer's `origin`)
+rule.series  -  | ERR Invalid layer=t path=/encoding :: layer `t` /encoding: `rule` needs `y` (horizontal) or `x` (vertical), or fact/finding data
+point.none  -  | ERR Invalid layer=t path=/encoding/y :: layer `t` /encoding/y: `point` needs `y`
+text.series  -  | ERR Invalid layer=t path=/encoding/text :: layer `t` /encoding/text: in v0 `text` reads a text field of a fact or finding
+text.fact.unknown  -  | ERR NotFound layer=t path=/encoding/text :: layer `t` /encoding/text: text field `nope` not found (fields: text)
+text.none  -  | ERR Invalid layer=t path=/encoding/y :: layer `t` /encoding/y: `text` needs `y`
+text.panel.no_data  -  | ERR Invalid layer=t path=/encoding/text :: layer `t` /encoding/text: `text` reads a text field of a fact or finding
+glyph.no_capsule  -  | ERR NotFound layer=t path=/finding :: layer `t` /finding: finding `fnd-rsi` has no meaning glyph (no R3 capsule with a story presents it)
+glyph.fact  -  | ERR Invalid layer=t path=/mark :: layer `t` /mark: `glyph` draws the capsule of a finding: bind the layer to its `finding`
+glyph.series  -  | ERR Invalid layer=t path=/mark :: layer `t` /mark: `glyph` draws the capsule of a finding: bind the layer to its `finding`
+glyph.none  -  | ERR Invalid layer=t path=/finding :: layer `t` /finding: `glyph` draws the capsule of a finding: bind the layer to its `finding`
+err.two_sources  -  | ERR Invalid layer=t path=- :: layer `t`: a layer has at most one of `series`, `fact`, `finding`
+err.three_sources  -  | ERR Invalid layer=t path=- :: layer `t`: a layer has at most one of `series`, `fact`, `finding`
+err.unknown_series  -  | ERR NotFound layer=t path=/series :: layer `t` /series: series `nope` does not exist
+err.unknown_field  -  | ERR NotFound layer=t path=/encoding/y :: layer `t` /encoding/y: field `uper` not found in series `bb` (fields: upper, middle, lower, bandwidth)
+err.unknown_ref_field  -  | ERR NotFound layer=t path=/encoding/y2 :: layer `t` /encoding/y2: field `smaa` not found in series `sma50` (fields: sma)
+err.unknown_fact  -  | ERR NotFound layer=t path=/fact :: layer `t` /fact: fact `nope` does not exist
+err.unknown_finding  -  | ERR NotFound layer=t path=/finding :: layer `t` /finding: finding `nope` does not exist
+err.finding_missing_fact  -  | ERR NotFound layer=t path=/finding :: layer `t` /finding: fact `nope` of finding `fnd-missing` does not exist
+err.opacity  -  | ERR Invalid layer=t path=/encoding/opacity :: layer `t` /encoding/opacity: opacity must be in 0..=1
+err.width  -  | ERR Invalid layer=t path=/encoding/width :: layer `t` /encoding/width: width must be > 0
+err.x2_on_point  -  | ERR Invalid layer=t path=/encoding/x2 :: layer `t` /encoding/x2: `x2` (the last bar of an extent) is used by `rule`, `band` and `area`
+err.x2_without_x  -  | ERR Invalid layer=t path=/encoding/x :: layer `t` /encoding/x: `x2` needs `x` (the first bar)
+err.x_not_a_bar  -  | ERR Invalid layer=t path=/encoding/x :: layer `t` /encoding/x: the layer has no data (series, fact or finding), so `c` cannot be a field
+err.bad_color  -  | ERR Invalid layer=t path=/encoding/color :: layer `t` /encoding/color: unknown colour `chartreuse-ish` (use #rrggbb, #rrggbbaa or one of: bg, grid, axis, text, muted, up, down, accent, warn, s1, s2, s3, s4, s5, s6, s7, s8, surface, line, neutral, valid, invalid, closed, focus)
+err.bad_size  -  | ERR Invalid layer=t path=/encoding/size :: layer `t` /encoding/size: size must be > 0
+err.threshold_no_origin  -  | ERR NoOrigin layer=t path=/encoding/color/thresholds/0 :: layer `t` /encoding/color/thresholds/0: constant 50 has no origin (bind it to a fact or a named threshold via the layer's `origin`)
+err.panel  -  | ERR NotFound layer=t path=/panel :: layer `t` /panel: panel 9 does not exist (panels: 0 (price), 1 (rsi), 2 (macd))

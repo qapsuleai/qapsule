@@ -1,0 +1,76 @@
+# charac/open: today's output (RF1/G1); a refactor keeps every line
+r4.r4.fnd-brk  3d40169109ad0e4a  | 390x640 p2 l6 prims14 items125 over4 terms=kapanış
+r4.r4.fnd-parts  4ff455563ff89942  | 390x640 p2 l6 prims10 items125 over4 terms=
+r4.r4.fnd-sq  d2bdfed79dd60c46  | 390x640 p2 l5 prims10 items124 over4 terms=
+r4.r4.fnd-lock  ca389e4af15decee  | 390x640 p2 l5 prims11 items124 over4 terms=
+r4.r4.fnd-div  ed47892c3e9f1848  | 390x640 p2 l5 prims8 items124 over4 terms=
+r4.r4.fnd-rsi  d045dc71c1232c9a  | 390x640 p1 l3 prims3 items122 over4 terms=
+r4.ornek.fnd-brk  cd22f653d3440fcc  | 390x640 p2 l6 prims15 items125 over4 terms=kapanış
+r4.oltan.fnd-brk  c0576e699419c9a1  | 390x640 p2 l6 prims14 items125 over4 terms=kapanış
+r4.zemre.fnd-brk  0c9243073501c548  | 390x640 p2 l6 prims14 items125 over4 terms=kapanış
+r4.tavek.fnd-brk  b6969f1fafe4746b  | 390x640 p2 l6 prims92 items125 over4 terms=kapanış
+r4.tavek.fnd-parts  ad72e109602c9f1f  | 390x640 p2 l6 prims89 items125 over6 terms=
+r4.tavek.fnd-sq  df2600e52bcdc6aa  | 390x640 p2 l5 prims9 items124 over4 terms=
+r4.tavek.fnd-lock  b7af63addadb34e1  | 390x640 p2 l5 prims11 items124 over4 terms=
+r4.tavek.fnd-div  2c41cc995c169aca  | 390x640 p2 l5 prims8 items124 over4 terms=
+r4.tavek.fnd-rsi  b74788b88ce94bd8  | 390x640 p1 l3 prims82 items122 over6 terms=
+r4.tavek-tel.fnd-brk  d57d635b7c916020  | 390x640 p2 l6 prims95 items125 over4 terms=kapanış
+r4.r4.fnd-brk.en  3d40169109ad0e4a  | 390x640 p2 l6 prims14 items125 over4 terms=kapanış
+r4.r4.fnd-brk.device  3d40169109ad0e4a  | 390x640 p2 l6 prims14 items125 over4 terms=kapanış
+r4.meta  -  | styled=false hint=None height=None scene_text=None
+tesir.r4.fnd-brk  adb2cd19f53fe616  | 390x670 p6 l14 prims25 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.r4.fnd-parts  22038acb83fd551e  | 390x670 p6 l14 prims19 items44 over4 terms=Kim doğruladı?
+tesir.r4.fnd-sq  bc9adb4e88d14fa6  | 390x670 p6 l14 prims21 items59 over4 terms=Kim doğruladı?
+tesir.r4.fnd-lock  176c43bfd7c2de3d  | 390x670 p6 l12 prims19 items42 over4 terms=Kim doğruladı?
+tesir.r4.fnd-div  91763efea71e4c51  | 390x670 p6 l16 prims20 items46 over4 terms=Kim doğruladı?
+tesir.r4.fnd-rsi  7f65a2bff9678d78  | 390x670 p1 l3 prims3 items122 over4 terms=
+tesir.ornek.fnd-brk  098b8cc8c3236730  | 390x774 p6 l14 prims28 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.oltan.fnd-brk  e8b49823d69c747c  | 390x800 p6 l14 prims25 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.zemre.fnd-brk  4861c182145103e4  | 390x844 p6 l14 prims25 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.tavek.fnd-brk  b824591dc122af72  | 390x710 p6 l14 prims24 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.tavek.fnd-parts  cfeb74fa4b453fa5  | 390x710 p6 l14 prims18 items44 over4 terms=Kim doğruladı?
+tesir.tavek.fnd-sq  33de0e9eb50024ab  | 390x710 p6 l14 prims20 items59 over4 terms=Kim doğruladı?
+tesir.tavek.fnd-lock  b2b2d94654182693  | 390x710 p6 l12 prims18 items42 over4 terms=Kim doğruladı?
+tesir.tavek.fnd-div  140434cd9fb0a868  | 390x710 p6 l16 prims19 items46 over4 terms=Kim doğruladı?
+tesir.tavek.fnd-rsi  232025322b7af013  | 390x710 p1 l3 prims82 items122 over6 terms=
+tesir.tavek-tel.fnd-brk  d6aa463e9b9deb61  | 390x842 p6 l14 prims26 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.r4.fnd-brk.en  3512859adc9776c3  | 390x670 p6 l14 prims24 items44 over4 terms=kapanış/Who verified it?
+tesir.r4.fnd-brk.device  78ac7c3f7a1211a5  | 390x670 p6 l14 prims26 items44 over4 terms=en yüksek fiyat/kapanış/Kim doğruladı?
+tesir.meta  -  | styled=true hint=None height=Some(670) scene_text=Some("")
+nobra.r4.fnd-brk  53173d7c9a383845  | 390x560 p5 l11 prims116 items60 over3 terms=
+nobra.r4.fnd-parts  a4ec239ba04e2627  | 390x560 p5 l11 prims114 items60 over3 terms=
+nobra.r4.fnd-sq  b8b82344252e67e6  | 390x560 p5 l11 prims107 items70 over3 terms=
+nobra.r4.fnd-lock  66ba40d6f067e6cf  | 390x560 p6 l12 prims119 items61 over3 terms=
+nobra.r4.fnd-div  1f4d2709b0688b2a  | 390x560 p5 l13 prims100 items54 over3 terms=
+nobra.r4.fnd-rsi  493dc85624b430b0  | 390x560 p1 l3 prims3 items122 over4 terms=
+nobra.ornek.fnd-brk  fb38a976ac1fe37b  | 390x700 p5 l11 prims117 items60 over3 terms=
+nobra.oltan.fnd-brk  a2b28f387dbcb0ce  | 390x747 p5 l11 prims117 items60 over3 terms=
+nobra.zemre.fnd-brk  a1b39521eb7d9121  | 390x747 p5 l11 prims117 items60 over3 terms=
+nobra.tavek.fnd-brk  16cdf69fe6de7d41  | 390x607 p5 l11 prims115 items60 over3 terms=
+nobra.tavek.fnd-parts  f1676a8b47573bef  | 390x607 p5 l11 prims114 items60 over3 terms=
+nobra.tavek.fnd-sq  04f9c6b2a5782f6c  | 390x607 p5 l11 prims106 items70 over3 terms=
+nobra.tavek.fnd-lock  a170d649955ec68b  | 390x607 p6 l12 prims118 items61 over3 terms=
+nobra.tavek.fnd-div  ad2d3fc71bd7ea33  | 390x607 p5 l13 prims99 items54 over3 terms=
+nobra.tavek.fnd-rsi  806f1d6f45402ee5  | 390x607 p1 l3 prims82 items122 over6 terms=
+nobra.tavek-tel.fnd-brk  67a1cb113726f508  | 390x747 p5 l11 prims116 items60 over3 terms=
+nobra.r4.fnd-brk.en  5e4fdf11ea9322fb  | 390x560 p5 l11 prims116 items60 over3 terms=
+nobra.r4.fnd-brk.device  53173d7c9a383845  | 390x560 p5 l11 prims116 items60 over3 terms=
+nobra.meta  -  | styled=true hint=Some("Bir soruya dokunun: ayrıntısı açılır. Grafik için grafiğe dokunun.") height=Some(560) scene_text=None
+nobra.ask.what  7dfcedfba7d7a407  | 390x560 p5 l12 prims120 items61 over3 terms=kapanış
+nobra.ask.who  6c654951599778b0  | 390x560 p5 l12 prims120 items61 over3 terms=
+nobra.ask.before  da016e4ea45460c9  | 390x560 p5 l12 prims122 items61 over3 terms=kapanış
+nobra.ask.why  53173d7c9a383845  | 390x560 p5 l11 prims116 items60 over3 terms=
+nobra.ask.basis  ab8fa4f4b9492cc2  | 390x560 p5 l12 prims118 items61 over3 terms=
+nobra.check.server  6c654951599778b0  | 390x560 p5 l12 prims120 items61 over3 terms=
+nobra.check.checking  fa0f14fb6269fb0f  | 390x560 p5 l12 prims121 items61 over3 terms=
+nobra.check.device  688f5027610bdd93  | 390x560 p5 l12 prims121 items61 over3 terms=
+nobra.check.differs  b6b5390c23580f9c  | 390x560 p5 l12 prims122 items61 over3 terms=
+text.tesir.voiced  -  | SAMPLE son 20 günün en yüksek fiyatını (121,46) aştı · bugün, hâlâ geçerli⏎⏎DAYANAK⏎En yüksek fiyat · 121,46⏎Fiyat verisi · herkese açık, cihaz yeniden hesaplar⏎O gün kapanış eşiğin üstünde oldu. Sonuç on işlem günü içinde belli olacak.⏎⏎KİM DOĞRULADI⏎Sunucu doğruladı⏎Sunucu hesapladı ve doğruladı; bu cihaz veriyi almadığı için kendisi sınayamaz.⏎⏎KARNE⏎Benzer otuz durumun çoğunda fiyat yükseldi.
+text.tesir.plain  -  | SAMPLE⏎⏎DAYANAK⏎Eşik · 121,46⏎Fiyat verisi · herkese açık, cihaz yeniden hesaplar⏎⏎KİM DOĞRULADI⏎Bu cihazda sınandı⏎Sunucu da doğruladı; telefon aynı kuralı kendi verisiyle yeniden işletti.⏎⏎KARNE⏎Karne 18/30
+text.tesir.locked  -  | SAMPLE⏎⏎DAYANAK⏎Kilitli: flow/SAMPLE yetkisi⏎Fiyat verisi lisanslı; değerler bu yetkiyle açılır.⏎⏎KİM DOĞRULADI⏎Sunucu doğruladı⏎Sunucu hesapladı ve doğruladı; bu cihaz veriyi almadığı için kendisi sınayamaz.⏎⏎KARNE⏎Karne 18/30
+text_rows.fnd-brk.Tr  0c4c81eb4b11efb0  | 5 rows
+text_rows.fnd-brk.En  9eba7668f8464259  | 5 rows
+text_rows.fnd-parts.Tr  a8a778bfd53962ec  | 5 rows
+text_rows.fnd-parts.En  554bb495f60e9fd7  | 5 rows
+text_rows.fnd-sq.Tr  96808117fb9226cd  | 5 rows
+text_rows.fnd-sq.En  4156dce17aec6aa5  | 5 rows

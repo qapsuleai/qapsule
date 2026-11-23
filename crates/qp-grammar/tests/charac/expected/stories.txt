@@ -1,0 +1,59 @@
+# charac/stories: today's output (RF1/G1); a refactor keeps every line
+pavka.r4.focus.420  e7238bdbf44b1413  | 390x420 p2 l16 prims150 items61 over4 terms=
+pavka.r4.focus.640  c3780d98bf0d3789  | 390x640 p2 l16 prims150 items61 over4 terms=
+pavka.r4.nofocus.hide.420  a3631fb010183b6d  | 390x420 p2 l11 prims126 items56 over4 terms=
+pavka.r4.nofocus.hide.640  64211bf7278f3362  | 390x640 p2 l11 prims126 items56 over4 terms=
+pavka.r4.closedfocus.en.stamp.420  f3efdeed59d21212  | 390x420 p2 l16 prims150 items61 over4 terms=
+pavka.r4.closedfocus.en.stamp.640  f428039f697dd4b5  | 390x640 p2 l16 prims150 items61 over4 terms=
+pavka.r4.price_height  -  | 150 159 342
+pavka.ornek.focus.420  2938b5c258c59ee7  | 390x420 p2 l16 prims147 items61 over4 terms=
+pavka.ornek.focus.640  f7efb3e0275c7aa8  | 390x640 p2 l16 prims147 items61 over4 terms=
+pavka.ornek.price_height  -  | 150 159 342
+pavka.oltan.focus.420  fa41373e74373ac0  | 390x420 p2 l16 prims150 items61 over4 terms=
+pavka.oltan.focus.640  e087b0a0d0e7e0d6  | 390x640 p2 l16 prims150 items61 over4 terms=
+pavka.oltan.price_height  -  | 150 159 342
+pavka.zemre.focus.420  b5cd4b7b8fb3f0c8  | 390x420 p2 l16 prims150 items61 over4 terms=
+pavka.zemre.focus.640  3f8731c9403a7921  | 390x640 p2 l16 prims150 items61 over4 terms=
+pavka.zemre.price_height  -  | 150 159 342
+pavka.tavek.focus.420  05747427577bc678  | 390x420 p2 l16 prims150 items61 over11 terms=
+pavka.tavek.focus.640  aa0a0a7423071e7d  | 390x640 p2 l16 prims150 items61 over11 terms=
+pavka.tavek.nofocus.hide.420  be091abeb0cf827b  | 390x420 p2 l11 prims126 items56 over11 terms=
+pavka.tavek.nofocus.hide.640  0e59b79c665e2666  | 390x640 p2 l11 prims126 items56 over11 terms=
+pavka.tavek.closedfocus.en.stamp.420  920a130cf8424139  | 390x420 p2 l16 prims150 items61 over11 terms=
+pavka.tavek.closedfocus.en.stamp.640  cd44ec1580ee3f3a  | 390x640 p2 l16 prims150 items61 over11 terms=
+pavka.tavek.price_height  -  | 150 159 342
+pavka.tavek-tel.focus.420  dbb945f9363c1259  | 390x420 p2 l16 prims147 items61 over6 terms=
+pavka.tavek-tel.focus.640  f100534db56f3adc  | 390x640 p2 l16 prims147 items61 over6 terms=
+pavka.tavek-tel.price_height  -  | 150 159 342
+pavka.meta  -  | note=story spine: lanes of every story on the time axis, price as a context strip compiles=false tap(None,focus)=None tap(None,None)=None
+korda.r4.focus.420  5d241827e297a3a6  | 390x420 p2 l12 prims155 items61 over4 terms=
+korda.r4.focus.640  2a3e4259a4fa1e66  | 390x640 p2 l12 prims155 items61 over4 terms=
+korda.r4.nofocus.hide.420  9e882d8dfb493acd  | 390x420 p2 l7 prims128 items56 over4 terms=
+korda.r4.nofocus.hide.640  35b16424489e499c  | 390x640 p2 l7 prims128 items56 over4 terms=
+korda.r4.closedfocus.en.stamp.420  0d6ab17d1e6e94ab  | 390x420 p2 l12 prims155 items61 over4 terms=
+korda.r4.closedfocus.en.stamp.640  be26290241729482  | 390x640 p2 l12 prims155 items61 over4 terms=
+korda.r4.price_height  -  | 300 420 900
+korda.ornek.focus.420  b89938f313b5bd5a  | 390x420 p2 l12 prims154 items61 over4 terms=
+korda.ornek.focus.640  71f55106af878889  | 390x640 p2 l12 prims154 items61 over4 terms=
+korda.ornek.price_height  -  | 300 420 900
+korda.oltan.focus.420  b4b95480bf23e89a  | 390x420 p2 l12 prims155 items61 over4 terms=
+korda.oltan.focus.640  9858dd8b5cc2b484  | 390x640 p2 l12 prims155 items61 over4 terms=
+korda.oltan.price_height  -  | 300 420 900
+korda.zemre.focus.420  cad3353be58d5b12  | 390x420 p2 l12 prims155 items61 over4 terms=
+korda.zemre.focus.640  f7fec040344b4f00  | 390x640 p2 l12 prims155 items61 over4 terms=
+korda.zemre.price_height  -  | 300 420 900
+korda.tavek.focus.420  e6bc372beebc8313  | 390x420 p2 l12 prims155 items61 over11 terms=
+korda.tavek.focus.640  16df6fbcf8792b76  | 390x640 p2 l12 prims155 items61 over11 terms=
+korda.tavek.nofocus.hide.420  0a5ce0fe7083bf22  | 390x420 p2 l7 prims128 items56 over11 terms=
+korda.tavek.nofocus.hide.640  9ee692ca69eb9ad9  | 390x640 p2 l7 prims128 items56 over11 terms=
+korda.tavek.closedfocus.en.stamp.420  d3efe11fda6750c5  | 390x420 p2 l12 prims155 items61 over11 terms=
+korda.tavek.closedfocus.en.stamp.640  5d74fe1ff4f08efa  | 390x640 p2 l12 prims155 items61 over11 terms=
+korda.tavek.price_height  -  | 300 420 900
+korda.tavek-tel.focus.420  1bd7b7d942f52ee8  | 390x420 p2 l12 prims155 items61 over6 terms=
+korda.tavek-tel.focus.640  38699cc830383338  | 390x640 p2 l12 prims155 items61 over6 terms=
+korda.tavek-tel.price_height  -  | 300 420 900
+korda.meta  -  | note=lifelines: one time-aligned lane per story under the price, birth mark to outcome compiles=true tap(None,focus)=None tap(None,None)=None
+pavka.r4.empty  a71d5862e783f072  | 390x420 p2 l5 prims117 items53 over4 terms=
+korda.r4.empty  07beb0667a3c2187  | 390x420 p1 l3 prims107 items52 over4 terms=
+registry  -  | ["r4", "pavka", "korda"] default=r4 presented=korda by_name(None)=None by_name(r4)=None
+open.tap  -  | Nothing false

@@ -5,15 +5,15 @@
 use super::*;
 
 /// `add_intent`: an intent, optionally with a trigger.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_intent(
     doc: &Document,
-    op: &Op,
+    id: &Option<String>,
+    text: &String,
+    trigger: &Option<Condition>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddIntent { id, text, trigger } = op else {
-        unreachable!("only add_intent")
-    };
     if let Some(t) = trigger {
         check_condition(doc, t, &ptr(p, "trigger"))?;
         cond_entitled(doc, ctx, t, &ptr(p, "trigger"))?;
@@ -42,13 +42,11 @@ pub(super) fn add_intent(
 /// `set_intent_active`: an intent (not a watch) turned on or off.
 pub(super) fn set_intent_active(
     doc: &Document,
-    op: &Op,
+    intent: &String,
+    active: &bool,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::SetIntentActive { intent, active } = op else {
-        unreachable!("only set_intent_active")
-    };
     // (R5B, §25.5) Another person's watch reads as a missing intent; suggestions
     // come from the intents the speaker may see.
     let visible = |x: &&Intent| crate::watch::intent_visible(x, ctx);
@@ -87,23 +85,17 @@ pub(super) fn set_intent_active(
 }
 
 /// `add_comment`: a comment about a capsule or an instrument.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_comment(
-    doc: &Document,
-    op: &Op,
-    p: &str,
-    ctx: &mut Ctx<'_>,
+    arm: Arm<'_, '_>,
+    id: &Option<String>,
+    about: &qp_schema::protocol::CommentAbout,
+    lang: &qp_schema::protocol::Language,
+    text: &String,
+    cites: &Vec<String>,
+    external: &Vec<qp_schema::comment::ExternalQuote>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddComment {
-        id,
-        about,
-        lang,
-        text,
-        cites,
-        external,
-    } = op
-    else {
-        unreachable!("only add_comment")
-    };
+    let Arm { doc, p, ctx } = arm;
     let ap = ptr(p, "about");
     let about = match (&about.capsule, &about.instrument) {
         (Some(c), None) => {
@@ -166,13 +158,10 @@ pub(super) fn add_comment(
 /// `remove`: an item removed (a watch ends with `remove_watch`).
 pub(super) fn remove(
     doc: &Document,
-    op: &Op,
+    id: &String,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::Remove { id } = op else {
-        unreachable!("only remove")
-    };
     // (R5B, §25.5) A watch: another person's reads as missing; one's own ends
     // with `remove_watch`.
     if let Some(i) = doc
@@ -208,14 +197,12 @@ pub(super) fn remove(
 }
 
 /// `set_audience`: a principal's audience.
-pub(super) fn set_audience(op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<ChangeOp>> {
-    let Op::SetAudience {
-        principal,
-        audience,
-    } = op
-    else {
-        unreachable!("only set_audience")
-    };
+pub(super) fn set_audience(
+    principal: &Option<String>,
+    audience: &qp_schema::capsule::Audience,
+    p: &str,
+    ctx: &mut Ctx<'_>,
+) -> PResult<Vec<ChangeOp>> {
     let who = audience_target(principal.as_deref(), p, ctx)?;
     for (sym, q) in &audience.positions {
         if !q.is_finite() {
@@ -240,17 +227,11 @@ pub(super) fn set_audience(op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult<Vec<C
 /// `set_sensitivity`: a principal's sensitivity.
 pub(super) fn set_sensitivity(
     doc: &Document,
-    op: &Op,
+    principal: &Option<String>,
+    sensitivity: &Option<qp_schema::capsule::Sensitivity>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::SetSensitivity {
-        principal,
-        sensitivity,
-    } = op
-    else {
-        unreachable!("only set_sensitivity")
-    };
     let who = audience_target(principal.as_deref(), p, ctx)?;
     let mut a = doc
         .audiences
@@ -270,15 +251,14 @@ pub(super) fn set_sensitivity(
 }
 
 /// `reject_proposal`: a pending proposal rejected.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn reject_proposal(
     doc: &Document,
-    op: &Op,
+    proposal: &String,
+    note: &Option<String>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::RejectProposal { proposal, note } = op else {
-        unreachable!("only reject_proposal")
-    };
     let pr = need_proposal(doc, proposal, &ptr(p, "proposal"))?;
     let mut np = pr.clone();
     np.state = ProposalState::Rejected;

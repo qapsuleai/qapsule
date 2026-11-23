@@ -4,23 +4,17 @@
 use super::*;
 
 /// `add_fact`: a fact on a bar, with frozen evidence.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_fact(
-    doc: &Document,
-    op: &Op,
-    p: &str,
-    ctx: &mut Ctx<'_>,
+    arm: Arm<'_, '_>,
+    id: &Option<String>,
+    kind: &String,
+    series: &String,
+    bar: &u64,
+    text: &String,
+    evidence: &BTreeMap<String, f64>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddFact {
-        id,
-        kind,
-        series,
-        bar,
-        text,
-        evidence,
-    } = op
-    else {
-        unreachable!("only add_fact")
-    };
+    let Arm { doc, p, ctx } = arm;
     need_series(doc, series, &ptr(p, "series"))?;
     // `add_fact` reads the fact's bar time: the speaker needs the data
     // entitlement of a bound series (§18.3).
@@ -71,23 +65,17 @@ pub(super) fn add_fact(
 }
 
 /// `add_finding`: a finding on facts, optionally with a capsule.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_finding(
-    doc: &Document,
-    op: &Op,
-    p: &str,
-    ctx: &mut Ctx<'_>,
+    arm: Arm<'_, '_>,
+    id: &Option<String>,
+    claim: &String,
+    facts: &Vec<String>,
+    confidence: &f64,
+    invalidation: &Condition,
+    capsule: &Option<String>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddFinding {
-        id,
-        claim,
-        facts,
-        confidence,
-        invalidation,
-        capsule,
-    } = op
-    else {
-        unreachable!("only add_finding")
-    };
+    let Arm { doc, p, ctx } = arm;
     if facts.is_empty() {
         return Err(invalid(
             "a finding rests on at least one fact",
@@ -143,21 +131,16 @@ pub(super) fn add_finding(
 }
 
 /// `update_finding`: claim, confidence or invalidation changed.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn update_finding(
     doc: &Document,
-    op: &Op,
+    finding: &String,
+    claim: &Option<String>,
+    confidence: &Option<f64>,
+    invalidation: &Option<Condition>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::UpdateFinding {
-        finding,
-        claim,
-        confidence,
-        invalidation,
-    } = op
-    else {
-        unreachable!("only update_finding")
-    };
     let f = need_finding(doc, finding, &ptr(p, "finding"))?;
     if claim.is_none() && confidence.is_none() && invalidation.is_none() {
         return Err(E::new(ErrorCode::Invalid, "nothing to update")
@@ -188,12 +171,11 @@ pub(super) fn update_finding(
 pub(super) fn decide_finding(
     doc: &Document,
     op: &Op,
+    finding: &String,
+    note: &Option<String>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let (Op::ApproveFinding { finding, note } | Op::RejectFinding { finding, note }) = op else {
-        unreachable!("only decide_finding")
-    };
     need_finding(doc, finding, &ptr(p, "finding"))?;
     let state = if matches!(op, Op::ApproveFinding { .. }) {
         CapsuleState::Approved
@@ -226,15 +208,15 @@ pub(super) fn decide_finding(
 }
 
 /// `add_narrative`: a narrative of timed steps about an item.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_narrative(
     doc: &Document,
-    op: &Op,
+    id: &Option<String>,
+    about: &String,
+    steps: &Vec<qp_schema::protocol::NarrativeStep>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddNarrative { id, about, steps } = op else {
-        unreachable!("only add_narrative")
-    };
     need_item(doc, about, &ptr(p, "about"))?;
     if steps.is_empty() {
         return Err(invalid(
@@ -276,13 +258,11 @@ pub(super) fn add_narrative(
 /// `show_finding`: the presenter's view of a finding.
 pub(super) fn show_finding(
     doc: &Document,
-    op: &Op,
+    finding: &String,
+    view: &Option<String>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::ShowFinding { finding, view } = op else {
-        unreachable!("only show_finding")
-    };
     let f = need_finding(doc, finding, &ptr(p, "finding"))?;
     let vid = match view {
         Some(v) => {

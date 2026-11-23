@@ -6,13 +6,10 @@ use super::*;
 /// `put_view`: a view in canonical form.
 pub(super) fn put_view(
     doc: &Document,
-    op: &Op,
+    view: &View,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::PutView { view } = op else {
-        unreachable!("only put_view")
-    };
     let vp = ptr(p, "view");
     check_id(&view.id, &ptr(&vp, "id"))?;
     match find_collection(doc, &view.id) {
@@ -37,15 +34,15 @@ pub(super) fn put_view(
 }
 
 /// `add_layer`: a layer inserted at an index.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_layer(
     doc: &Document,
-    op: &Op,
+    view: &String,
+    layer: &Layer,
+    index: &Option<u32>,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddLayer { view, layer, index } = op else {
-        unreachable!("only add_layer")
-    };
     let v = need_view(doc, view, &ptr(p, "view"))?;
     if let Some(i) = index {
         if *i as usize > v.layers.len() {
@@ -68,10 +65,12 @@ pub(super) fn add_layer(
 }
 
 /// `remove_layer`: a layer removed by index.
-pub(super) fn remove_layer(doc: &Document, op: &Op, p: &str) -> PResult<Vec<ChangeOp>> {
-    let Op::RemoveLayer { view, index } = op else {
-        unreachable!("only remove_layer")
-    };
+pub(super) fn remove_layer(
+    doc: &Document,
+    view: &String,
+    index: &u32,
+    p: &str,
+) -> PResult<Vec<ChangeOp>> {
     let v = need_view(doc, view, &ptr(p, "view"))?;
     if *index as usize >= v.layers.len() {
         return Err(E::new(
@@ -96,18 +95,12 @@ pub(super) fn remove_layer(doc: &Document, op: &Op, p: &str) -> PResult<Vec<Chan
 /// `set_view_range`: the view's x domain from two bars.
 pub(super) fn set_view_range(
     doc: &Document,
-    op: &Op,
+    view: &String,
+    from_bar: &u64,
+    to_bar: &u64,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::SetViewRange {
-        view,
-        from_bar,
-        to_bar,
-    } = op
-    else {
-        unreachable!("only set_view_range")
-    };
     let v = need_view(doc, view, &ptr(p, "view"))?;
     let bars = view_bar_series_any(doc, v)
         .and_then(|s| qp_plane::plane::bars_for(doc, ctx.data.as_ref(), &s.id))

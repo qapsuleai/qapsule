@@ -6,13 +6,10 @@ use super::*;
 /// `put_series`: a series (inline, study or bound) checked and stored.
 pub(super) fn put_series(
     doc: &Document,
-    op: &Op,
+    series: &Series,
     p: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::PutSeries { series } = op else {
-        unreachable!("only put_series")
-    };
     let sp = ptr(p, "series");
     check_id(&series.id, &ptr(&sp, "id"))?;
     match find_collection(doc, &series.id) {
@@ -120,22 +117,16 @@ fn put_series_source(
 }
 
 /// `add_study`: a study series over inputs, optionally shown in a view.
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
 pub(super) fn add_study(
-    doc: &Document,
-    op: &Op,
-    p: &str,
-    ctx: &mut Ctx<'_>,
+    arm: Arm<'_, '_>,
+    id: &Option<String>,
+    study: &String,
+    inputs: &Vec<String>,
+    params: &BTreeMap<String, f64>,
+    show: &Option<qp_schema::protocol::Show>,
 ) -> PResult<Vec<ChangeOp>> {
-    let Op::AddStudy {
-        id,
-        study,
-        inputs,
-        params,
-        show,
-    } = op
-    else {
-        unreachable!("only add_study")
-    };
+    let Arm { doc, p, ctx } = arm;
     let full = check_study(doc, study, inputs, params, p, "study")?;
     // Validate `show` before assigning the id so errors point at the cause.
     let show_view = match show {
@@ -195,10 +186,12 @@ pub(super) fn add_study(
 }
 
 /// `set_params`: new parameters of a study series.
-pub(super) fn set_params(doc: &Document, op: &Op, p: &str) -> PResult<Vec<ChangeOp>> {
-    let Op::SetParams { series, params } = op else {
-        unreachable!("only set_params")
-    };
+pub(super) fn set_params(
+    doc: &Document,
+    series: &String,
+    params: &BTreeMap<String, f64>,
+    p: &str,
+) -> PResult<Vec<ChangeOp>> {
     let s = need_series(doc, series, &ptr(p, "series"))?;
     let SeriesSource::Study {
         study,
@@ -253,10 +246,13 @@ pub(super) fn set_params(doc: &Document, op: &Op, p: &str) -> PResult<Vec<Change
 }
 
 /// `append_bars`: bars appended to an inline bar series.
-pub(super) fn append_bars(doc: &Document, op: &Op, p: &str) -> PResult<Vec<ChangeOp>> {
-    let Op::AppendBars { series, bars } = op else {
-        unreachable!("only append_bars")
-    };
+#[allow(clippy::ptr_arg)] // the match's field bindings (`&String`, `&Vec<_>`); bodies unchanged
+pub(super) fn append_bars(
+    doc: &Document,
+    series: &String,
+    bars: &Vec<qp_schema::Bar>,
+    p: &str,
+) -> PResult<Vec<ChangeOp>> {
     let s = need_series(doc, series, &ptr(p, "series"))?;
     bound_no_bar_writes(s, &ptr(p, "series"))?;
     let Some(old) = inline_bars(s) else {
@@ -295,10 +291,12 @@ pub(super) fn append_bars(doc: &Document, op: &Op, p: &str) -> PResult<Vec<Chang
 }
 
 /// `update_last_bar`: the last bar of an inline bar series replaced.
-pub(super) fn update_last_bar(doc: &Document, op: &Op, p: &str) -> PResult<Vec<ChangeOp>> {
-    let Op::UpdateLastBar { series, bar } = op else {
-        unreachable!("only update_last_bar")
-    };
+pub(super) fn update_last_bar(
+    doc: &Document,
+    series: &String,
+    bar: &qp_schema::Bar,
+    p: &str,
+) -> PResult<Vec<ChangeOp>> {
     let s = need_series(doc, series, &ptr(p, "series"))?;
     bound_no_bar_writes(s, &ptr(p, "series"))?;
     let Some(last) = inline_bars(s).and_then(<[qp_schema::Bar]>::last) else {

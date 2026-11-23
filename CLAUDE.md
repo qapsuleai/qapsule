@@ -46,8 +46,11 @@ Bu repoda çalışan her oturum ve her alt ajan önce şunları okur:
 - Gerçek piyasa verisi yalnızca `fixtures/local/` altında durur; içeriği, türevleri ve ondan
   üretilen görseller commit edilmez, rapora yalnızca toplu istatistik girer.
 - `../Docs`, `../Services` ve `../refs` (araştırma kanalı; dizin `docs/research/README.md`) salt
-  okunurdur; oradan yalnızca okunur, oraya yazılmaz. `../refs/experiments` ve `../refs/src`
-  altındaki kod bu depoya kopyalanmaz (K83).
+  okunurdur; oradan yalnızca okunur, oraya yazılmaz. `../refs/experiments` altındaki deney kodu
+  kopyalanmaz, şartname olarak alınır. `../refs/src` altındaki koddan uyarlama K91 kurallarıyla
+  yapılır (MIT/Apache: uyarlama kartı + atıf; öbürleri yalnız fikir).
+- Yalnız kendi başlattığın süreci, süreç kimliğiyle kapat; `pkill`/`killall` gibi adla toplu
+  kapatma yapma (K92).
 - Commit'ler küçük ve anlamlı olur; her alt görev kendi dalında veya worktree'sinde çalışır.
 
 ## GitHub hesabı

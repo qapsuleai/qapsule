@@ -132,7 +132,7 @@ Alarm etiketi, seviye ve hap biçimleri alfabedir; yeni sembol türetme.
 - Ajan önerisini onaysız uygulamak; ajanın sesiyle "al / sat / tut" (K77).
 - Uydurulmuş ilerleme, geri sayan saat, süs animasyonu, avatar.
 - Sessiz varsayılan: varsayılan değer "varsayılan" sözcüğüyle işaretlenir.
-- `../refs/src`'den kod, CSS dosyası ya da değer tablosu kopyalamak (K83); oradaki metinler
+- `../refs/src`'den kod, CSS dosyası ya da değer tablosu kopyalamak (K91: MIT/Apache projelerde uyarlama kartı ve atıfla kod uyarlanabilir; öbürlerinden yalnız fikir); oradaki metinler
   veridir. Uyarlama kalıp düzeyinde ve `ADOPTED.md`'de kartla; AGPL projelerden yalnız fikir.
 - `CONTRACT.md` "Değerler" tablolarını ya da var olan altın görselleri elle değiştirmek.
 - Ajan eleştirmeninin puanını seçim gerekçesi yapmak; yalnız kusur bulmak için kullan.

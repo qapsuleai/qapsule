@@ -8,7 +8,7 @@ Her round sonunda güncellenir.
 - **Aktif round:** yok. **RD2 tamamlandı** (2026-11-23; Arkin'in son kabulü: "Kabul, varsayılanı değiştir"). Sıradaki **RF1** (oturumun bölünmesi, K89; qp-grammar tavanı 20.964 / 21.000 — İ4 önce).
 - **Son güncelleme:** 2026-11-23
 - **Hedef düzeltmesi (K69–K83):** ana akış araştırma kanalıyla birleşti; yeni oturum `docs/HANDOFF.md`'den başlar. Güncel sıra (K89): RG1 → RD2 → RF1 → RL1 → R7 → RS1 → RA1 → R8 → R9.
-- **Sıradaki adım:** RD2 raporunu ve önerilerini karara bağla (Ö109–Ö118, A65–A69; `docs/decisions/rounds/RD2.md`), sonra RF1'i tasarla. RF1'e kadar `qp-session`'a net satır eklenmez; `qp-grammar` tavana 36 satır uzakta. Gösterim varsayılanı artık `tavek` / `tavek-tel` (K2).
+- **Sıradaki adım:** RF1'i başlat (`rounds/RF1/PROMPT.md`). Kararlar işlendi: K90 (RD2 kabul), K91 (MIT/Apache projelerden kod uyarlaması, K83'ü günceller), K92 (süreç kapatma kuralı). RF1'e kadar `qp-session`'a net satır eklenmez; `qp-grammar` tavana 36 satır uzakta, RF1'in ilk işi gramer.
 
 ## Round geçmişi
 
@@ -54,7 +54,9 @@ Her round sonunda güncellenir.
 
 ## Arkin'den beklenenler
 
-- **RD2:** önerilen kararlar Ö109–Ö118, açık A65–A68 (`docs/decisions/rounds/RD2.md`; A65 = kod düzeyinde inceleme notu); SURFACES "Arkin'e sorular" S1–S25; insan testi v4 (`rounds/RD2/human-test/GUIDE.md`, en az iki işlem yapan kullanıcı). Not: RD2 alt ajanı bir `qp demo --web shells/web --mcp` sürecini kapattı; gerekirse yeniden açın.
+- **RD2:** insan testi v4: kendi beş saniyelik bakış formun ve en az iki işlem yapan kullanıcı (`rounds/RD2/human-test/GUIDE.md`). Öneriler kabul edildi (K90).
+- **K91:** `THIRD_PARTY_NOTICES.md` ilk uyarlamayla oluşunca hukuk bir kez baksın.
+- **RF1:** bir karar noktası: bölme planı hazır olunca ana akışa göster.
 - **R5B:** beş dakikalık deneme (`rounds/R5B/REPORT.md` son bölüm). Öneriler kabul edildi (K86).
 - **RP4:** ilk iş günü listesi `rounds/RP4/REPORT.md` §13. Öneriler kabul edildi (K86).
 - Kurumsal işlemde izleme kararı verildi (K88; RS1 kapsamı).

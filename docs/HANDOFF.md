@@ -30,7 +30,7 @@ bir ana akış oturumu (yeni sohbet, başka bir araç) şu sırayla okur:
 - Round'lar yalın: kesme sırası önceden yazılır; bitirmek genişletmekten önce gelir.
 - Her round sonunda temizlik zorunlu (K68); yapı kuralları kabul ölçütüdür (K80).
 - Gerektiğinde belirteç ve model kullanımı kaydedilir; ürün için hangi iş hangi model boyuyla.
-- Dışarıdan alınan her şey temiz odada, kendi kurallarımızla yeniden kurulur (K83).
+- Dışarıdan uyarlama iki kademeli (K91): MIT/Apache projelerde kod uyarlanabilir (kart + atıf); öbürlerinden yalnız fikir.
 - Arkin'e sorulacak sorular önerisiyle birlikte gelir; karar onundur.
 
 ## Tek ana akış

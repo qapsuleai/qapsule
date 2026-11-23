@@ -153,11 +153,13 @@ karıştırılmaz:
 
 ## 9. Dışarıdan uyarlama (OpenChart ve benzerleri → Rust / WASM)
 
-- **Temiz oda:** kod kopyalanmaz, kaynak yapının klasör düzeni ve adları da aynalanmaz.
-  Davranış kendi şartnamemize yazılır, sonra bu belgenin katman ve bütçe kurallarına göre
-  kurulur.
+- **İki kademe (K91):** MIT ve Apache-2.0 lisanslı projelerde kod okunur ve uyarlanabilir;
+  atıf `THIRD_PARTY_NOTICES.md`'de, lisansın istediği bildirim korunur. AGPL, ticari olmayan ya
+  da belirsiz lisanslı projelerden yalnız fikir alınır. Hüküm tablosu `../refs/reports/LICENSES.md`.
+- Uyarlanan kod bu belgenin katman, bütçe ve kavram kurallarına uyar; kaynak projenin klasör
+  düzeni ve adları aynalanmaz. Çizim ve hesap çekirdekte kalır.
 - Her uyarlama için bir **uyarlama kartı**: kaynak (proje, dosya), lisans hükmü, aldığımız
-  şey (fikir / kalıp), bizim tasarımımız, hangi katmana oturduğu, hangi testle sınandığı.
+  şey (fikir / kalıp / kod), bizim tasarımımız, hangi katmana oturduğu, hangi testle sınandığı.
 - Uyarlanan kalıp var olan bir kavramla örtüşüyorsa yeni kavram açılmaz; var olan genişletilir.
 - Testler kaynak projenin testlerinden çevrilmez; davranış şartnamesinden yazılır.
 

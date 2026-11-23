@@ -1,0 +1,109 @@
+{
+  "covers": [
+    "put_view"
+  ],
+  "description": "RF1/O (RD2 audit K1) design fixture for P8's drawn half (synthetic): chart view `marks` with candles and the meaning glyph of the capsule `cap.SYN03.breakout-up.144` (finding `fnd.SYN03.breakout-up.144`) on the plot; 151 daily bars of SYN03 with its R3 capsule and story (fixtures/design/docs/syn03-breakout.json, a copy of fixtures/views/docs/r3-breakout.json). scripts/design-check compiles it and measures the drawn glyph's height (P8). No view here is named `desk`: scripts/design-gallery keeps picking fixtures/design/desk.json.",
+  "final": {
+    "document": {
+      "views": [
+        {
+          "id": "marks"
+        }
+      ]
+    }
+  },
+  "init": {
+    "clock": 1760000000000,
+    "document": "fixtures/design/docs/syn03-breakout.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      }
+    ]
+  },
+  "name": "desk-marks",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "principal": "arkin",
+            "role": "owner",
+            "type": "welcome"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c1",
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "op": "put_view",
+              "view": {
+                "id": "marks",
+                "layers": [
+                  {
+                    "id": "candles",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  },
+                  {
+                    "finding": "fnd.SYN03.breakout-up.144",
+                    "id": "glyph",
+                    "mark": "glyph",
+                    "panel": 0
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "name": "price",
+                    "y": {
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "x": {
+                  "kind": "time"
+                }
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

@@ -255,6 +255,25 @@ fn charac_open_designs() {
             );
         }
     }
+    // A feed item names no evidence families: with more than one confirmation the rows
+    // count them in words (`families_of`'s "independent families" branch).
+    for conf in [2, 3] {
+        let mut item = fixture::feed_items()[0].clone();
+        item.confirmations = conf;
+        for lang in [Language::Tr, Language::En] {
+            let rows = open::text_rows(Some("nobra"), OpenDepth::Capsule, &item, lang);
+            let counted: Vec<String> = rows
+                .iter()
+                .map(|r| format!("{r:?}"))
+                .filter(|r| r.contains("bağımsız kanıt") || r.contains("independent evidence"))
+                .collect();
+            b.put(
+                &format!("text_rows.confirmations{conf}.{lang:?}"),
+                &debug_digest(&rows),
+                &format!("{} rows; {}", rows.len(), counted.join(" ")),
+            );
+        }
+    }
     b.check();
 }
 

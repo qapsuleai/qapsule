@@ -1,6 +1,7 @@
 //! Marla's headline: "Ne değişti?" + when + validity.
 
 use super::*;
+use qp_capsule::realize;
 
 // ---------------------------------------------------------------------------
 // Headline: "Ne değişti?" + when + validity
@@ -336,8 +337,8 @@ fn core(f: &Frame<'_>, lang: Lang, tier: u8) -> String {
             }
         }
         _ => match lang {
-            Lang::Tr => format!("{i}: {}", crate::realize::tr::noun_state(f.kind, f.dir)),
-            Lang::En => format!("{i}: {}", crate::realize::en::noun_bare(f.kind, f.dir)),
+            Lang::Tr => format!("{i}: {}", realize::tr::noun_state(f.kind, f.dir)),
+            Lang::En => format!("{i}: {}", realize::en::noun_bare(f.kind, f.dir)),
         },
     }
 }

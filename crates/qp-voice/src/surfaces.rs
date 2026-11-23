@@ -5,9 +5,9 @@ use qp_calendar::ExchangeCalendar;
 
 use super::marla;
 use super::selvi;
-use crate::realize::elapsed::Period;
-use crate::realize::parts::Parts;
-use crate::{Lang, SentenceInput};
+use qp_capsule::realize::elapsed::Period;
+use qp_capsule::realize::parts::Parts;
+use qp_capsule::{Lang, SentenceInput};
 
 /// One glossary entry of a screen: the term as the screen writes it and its short
 /// explanation (no digit: a redacted reader gets it too).
@@ -46,7 +46,7 @@ pub struct Input<'a> {
     pub calendar: &'a ExchangeCalendar,
     /// The bar period of the story's series.
     pub period: Period,
-    /// (RP4/T7) The row's time stamp (`[tr, en]`, `crate::realize::stamp`) to put before
+    /// (RP4/T7) The row's time stamp (`[tr, en]`, `qp_capsule::realize::stamp`) to put before
     /// the headline (`"<stamp> · <headline>"`); the voice keeps the whole within its
     /// headline limit. `None`: the headline as before.
     pub stamp: Option<[&'a str; 2]>,
@@ -67,8 +67,8 @@ pub fn speak(name: &str, inp: &Input<'_>) -> Option<[Surfaces; 2]> {
             // The stamp and its separator take their characters off the headline's room.
             let take = st.iter().map(|s| s.chars().count()).max().unwrap_or(0) + 3;
             let [mut tr, mut en] = speak_raw(name, inp, marla::MAX_HEADLINE.saturating_sub(take))?;
-            tr.headline = crate::realize::stamp::with_stamp(st[0], &tr.headline);
-            en.headline = crate::realize::stamp::with_stamp(st[1], &en.headline);
+            tr.headline = qp_capsule::realize::stamp::with_stamp(st[0], &tr.headline);
+            en.headline = qp_capsule::realize::stamp::with_stamp(st[1], &en.headline);
             [tr, en]
         }
     };

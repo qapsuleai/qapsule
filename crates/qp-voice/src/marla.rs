@@ -17,7 +17,7 @@
 //! percentage distance), the period it is the extreme of ("son 20 günün"), the average it
 //! is a multiple of ("20 günlük ortalamanın 2,5 katı"), the time left until the outcome is
 //! known ("en geç 7 işlem günü içinde"). Time is an elapsed phrase from the exchange
-//! calendar ([`crate::realize::elapsed`]), never a bar count.
+//! calendar ([`qp_capsule::realize::elapsed`]), never a bar count.
 //!
 //! # Entry point
 //!
@@ -56,12 +56,12 @@ use qp_schema::capsule::{Direction, Edge, LedgerStat, LicenseClass, MeaningKind,
 use qp_schema::Fact;
 
 use super::marla_glossary::{entry, Concept, Gloss, UnitWords};
-use crate::realize::elapsed::{Elapsed, Period};
-use crate::realize::morph::{capitalize, Word};
-use crate::realize::num::{fmt, Cat};
-use crate::realize::parts::{Ending, Parts};
-use crate::realize::LEDGER_MIN_N;
-use crate::{Lang, SentenceInput};
+use qp_capsule::realize::elapsed::{Elapsed, Period};
+use qp_capsule::realize::morph::{capitalize, Word};
+use qp_capsule::realize::num::{fmt, Cat};
+use qp_capsule::realize::parts::{Ending, Parts};
+use qp_capsule::realize::LEDGER_MIN_N;
+use qp_capsule::{Lang, SentenceInput};
 
 /// Headline length limit (characters).
 pub const MAX_HEADLINE: usize = 80;
@@ -103,7 +103,7 @@ pub fn speak_both(inp: &SentenceInput<'_>, parts: &Parts) -> [Voice; 2] {
 }
 
 /// (RP4/T7) [`speak_both`] with the headline kept within `room` characters (a row stamp
-/// goes before it, `crate::voice::Input::stamp`).
+/// goes before it, `crate::Input::stamp`).
 #[must_use]
 pub fn speak_both_in(inp: &SentenceInput<'_>, parts: &Parts, room: usize) -> [Voice; 2] {
     let room = room.min(MAX_HEADLINE);
@@ -387,9 +387,9 @@ impl<'a> Frame<'a> {
 
 fn el(e: &Elapsed, lang: Lang, red: bool) -> String {
     if red {
-        crate::realize::elapsed::phrase_vague(e, lang)
+        qp_capsule::realize::elapsed::phrase_vague(e, lang)
     } else {
-        crate::realize::elapsed::phrase(e, lang)
+        qp_capsule::realize::elapsed::phrase(e, lang)
     }
 }
 
@@ -464,11 +464,11 @@ mod tests;
 #[cfg(test)]
 mod engine_tests {
     use super::*;
-    use crate::engine::EngineConfig;
-    use crate::pipeline::simulate_engine;
-    use crate::realize::parts::parts;
-    use crate::sentence::{closed_override, condition_now, sentence_lead, validity_now, Reader};
-    use crate::InstrumentInput;
+    use qp_capsule::realize::parts::parts;
+    use qp_capsule::sentence::{
+        closed_override, condition_now, sentence_lead, validity_now, Reader,
+    };
+    use qp_capsule::{engine::EngineConfig, pipeline::simulate_engine, InstrumentInput};
     use qp_facts::{default_detectors, FlowPoint};
     use qp_schema::Fact;
 

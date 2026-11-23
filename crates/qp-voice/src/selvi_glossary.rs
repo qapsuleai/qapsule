@@ -17,10 +17,10 @@
 use qp_schema::capsule::{Direction, MeaningKind};
 
 use super::selvi::{GlossCtx, Span};
-use crate::outcome::base_params;
-use crate::realize::elapsed::Period;
-use crate::realize::num::{fmt, Cat};
-use crate::Lang;
+use qp_capsule::outcome::base_params;
+use qp_capsule::realize::elapsed::Period;
+use qp_capsule::realize::num::{fmt, Cat};
+use qp_capsule::Lang;
 use qp_facts::{BandSqueeze, RsiExtreme};
 
 /// A glossary term.
@@ -158,7 +158,7 @@ pub fn entry(term: Term, cx: &GlossCtx, lang: Lang) -> (String, String) {
             let head_en = "Earlier cases of the same kind and direction on any stock.";
             let text = match (tr, red, cx.dir) {
                 // Directional: the price reached k average swings its way before k the
-                // other way (the barrier rule, `crate::outcome::Barrier`).
+                // other way (the barrier rule, `qp_capsule::outcome::Barrier`).
                 (true, false, Direction::Up | Direction::Down) => format!(
                     "{head_tr} Tutan: fiyatın önce ters yöne dönmeden {adj_tr} ortalama salınımının {kk} katı {}.",
                     if cx.dir == Direction::Up { "yükselmesi" } else { "düşmesi" }

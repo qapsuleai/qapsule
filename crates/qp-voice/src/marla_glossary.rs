@@ -13,7 +13,7 @@
 //! The time unit follows the bar period ([`UnitWords`]): a daily capsule says "gün", an
 //! hourly one "saat".
 
-use crate::Lang;
+use qp_capsule::Lang;
 
 /// A term a screen can carry.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

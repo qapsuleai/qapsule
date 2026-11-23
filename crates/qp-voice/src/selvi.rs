@@ -13,7 +13,7 @@
 //!
 //! [`speak`] takes a [`VoiceInput`] — the product's [`SentenceInput`] (story, lead and
 //! latest fact, now, `still_holds`, `current`, `redacted`), the face's building blocks
-//! [`Parts`] (`crate::realize::parts::parts`: when / moved / validity / ending / ledger,
+//! [`Parts`] (`qp_capsule::realize::parts::parts`: when / moved / validity / ending / ledger,
 //! the same values the glyph and the face carry, K42), the exchange calendar and the bar
 //! period — and returns a [`Voice`]: the four surfaces in Turkish **and** English
 //! ([`Surfaces`]: `headline`, `detail`, `ledger`, `glossary`, plus a short `trust` chip).
@@ -29,7 +29,7 @@
 //!   parameter ("önceki 20 günün en yükseği, 148,90"; "RSI 70 çizgisi"; "20 günlük
 //!   ortalama 48,10"; "son 120 günün en dar bandı, 45,10–47,30"; "20 günlük ortalamanın
 //!   2,5 katı hacim"; "5 günlük ortalamanın 2 katı kurum net alımı").
-//! - **Time** is the calendar elapsed phrase ([`crate::realize::elapsed`]), never a bar
+//! - **Time** is the calendar elapsed phrase ([`qp_capsule::realize::elapsed`]), never a bar
 //!   count; spans are trading days / trading hours ("10 işlem günü içinde").
 //! - **Validity** comes only from [`Parts::validity`] and [`Parts::ending`]: the headline's
 //!   second part says it; the detail never says a different validity (A33).
@@ -51,12 +51,12 @@ use qp_schema::capsule::{Direction, Edge, LicenseClass, MeaningKind, Story, Trus
 use qp_schema::Fact;
 
 use super::selvi_glossary::{self, Term};
-use crate::realize::elapsed::{elapsed, phrase, phrase_vague, Period};
-use crate::realize::morph::{capitalize, number_last_word, Word};
-use crate::realize::num::{fmt, Cat};
-use crate::realize::parts::{Ending, Parts};
-use crate::realize::LEDGER_MIN_N;
-use crate::{Lang, SentenceInput};
+use qp_capsule::realize::elapsed::{elapsed, phrase, phrase_vague, Period};
+use qp_capsule::realize::morph::{capitalize, number_last_word, Word};
+use qp_capsule::realize::num::{fmt, Cat};
+use qp_capsule::realize::parts::{Ending, Parts};
+use qp_capsule::realize::LEDGER_MIN_N;
+use qp_capsule::{Lang, SentenceInput};
 
 /// Headline limit (characters).
 pub const MAX_HEADLINE: usize = 80;
@@ -133,7 +133,7 @@ pub fn speak(inp: &VoiceInput<'_>) -> Voice {
 }
 
 /// (RP4/T7) [`speak`] with the headline kept within `room` characters (a row stamp goes
-/// before it, `crate::voice::Input::stamp`).
+/// before it, `crate::Input::stamp`).
 #[must_use]
 pub fn speak_in(inp: &VoiceInput<'_>, room: usize) -> Voice {
     let mut cx = Cx::new(inp);

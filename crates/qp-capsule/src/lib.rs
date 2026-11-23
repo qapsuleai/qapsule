@@ -57,7 +57,6 @@ pub mod sentence;
 pub mod sentinel;
 pub mod theme;
 pub mod trust;
-pub mod voice;
 
 mod contract;
 pub use contract::{

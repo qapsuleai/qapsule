@@ -2056,6 +2056,7 @@ dependencies = [
  "qp-grammar",
  "qp-schema",
  "qp-source",
+ "qp-voice",
  "schemars",
  "serde",
  "serde_json",
@@ -2088,6 +2089,17 @@ dependencies = [
  "qp-compute",
  "qp-schema",
  "serde_json",
+]
+
+[[package]]
+name = "qp-voice"
+version = "0.0.0"
+dependencies = [
+ "qp-calendar",
+ "qp-capsule",
+ "qp-facts",
+ "qp-schema",
+ "qp-source",
 ]
 
 [[package]]

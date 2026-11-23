@@ -58,8 +58,8 @@ impl Session {
             }
         }
         if let Some(v) = r.voice {
-            if !qp_capsule::voice::is_voice(v) {
-                return Err(unknown("voice", v, qp_capsule::voice::names()));
+            if !qp_voice::is_voice(v) {
+                return Err(unknown("voice", v, qp_voice::names()));
             }
         }
         if let Some(st) = r.story {
@@ -84,7 +84,7 @@ impl Session {
             look.open = next;
         }
         if let Some(v) = r.voice {
-            look.voice = (v != qp_capsule::voice::DEFAULT_VOICE).then(|| v.to_owned());
+            look.voice = (v != qp_voice::DEFAULT_VOICE).then(|| v.to_owned());
         }
         if let Some(st) = r.story {
             look.story = (st != qp_grammar::stories::DEFAULT_STORY).then(|| st.to_owned());

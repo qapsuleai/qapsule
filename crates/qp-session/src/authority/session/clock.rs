@@ -115,7 +115,7 @@ impl Session {
         if let Some(v) = it.voice.as_mut() {
             v.headline = with_clause(&v.headline, note, lang);
             v.detail = with_sentence(&v.detail, note, lang, red);
-            v.face = qp_capsule::voice::text_face(&qp_capsule::voice::Surfaces {
+            v.face = qp_voice::text_face(&qp_voice::Surfaces {
                 headline: v.headline.clone(),
                 detail: v.detail.clone(),
                 ledger: v.ledger.clone(),

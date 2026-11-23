@@ -16,6 +16,9 @@
     clippy::cognitive_complexity
 )]
 
+mod opcase;
+mod ops_doc;
+mod ops_flow;
 mod rig;
 mod snap;
 mod transcripts;

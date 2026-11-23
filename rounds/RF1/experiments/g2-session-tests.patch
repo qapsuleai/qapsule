@@ -1,0 +1,164 @@
+diff -ru a/crates/qp-session/tests/interaction.rs b/crates/qp-session/tests/interaction.rs
+--- a/crates/qp-session/tests/interaction.rs	2026-11-23 22:34:12
++++ b/crates/qp-session/tests/interaction.rs	2026-11-23 23:23:46
+@@ -75,7 +75,7 @@
+     let mut s = session();
+     hello(&mut s, "px", "arkin");
+     hello(&mut s, "bar", "ana");
+-    let opts = qp_session::CompileOptions::new(390, 300);
++    let opts = qp_designs::options(390, 300);
+     for (i, dx) in [37.0, -120.0, 5.0, 400.0, -3.0, -1000.0]
+         .into_iter()
+         .enumerate()
+diff -ru a/crates/qp-session/tests/open_design.rs b/crates/qp-session/tests/open_design.rs
+--- a/crates/qp-session/tests/open_design.rs	2026-11-23 22:34:12
++++ b/crates/qp-session/tests/open_design.rs	2026-11-23 23:23:46
+@@ -119,7 +119,7 @@
+         .find(|i| i.voice.is_some() && !i.redacted)
+         .expect("a voiced capsule")
+         .clone();
+-    let fh = qp_grammar::open::height_in(&qp_grammar::look::R4, Some("tesir")).unwrap();
++    let fh = qp_designs::open::height_in(&qp_look::look::R4, Some("tesir")).unwrap();
+     let m = input(
+         &mut h,
+         json!({"kind":"open","capsule":it.id,"to":"capsule","width":390,"height":fh}),
+diff -ru a/crates/qp-session/tests/open_nobra.rs b/crates/qp-session/tests/open_nobra.rs
+--- a/crates/qp-session/tests/open_nobra.rs	2026-11-23 22:34:12
++++ b/crates/qp-session/tests/open_nobra.rs	2026-11-23 23:23:46
+@@ -1,4 +1,4 @@
+-//! R5/M20 `nobra` (question cards, `qp_grammar::open::nobra`): the open capsule design a
++//! R5/M20 `nobra` (question cards, `qp_designs::open::nobra`): the open capsule design a
+ //! connection chooses with `style {open}`.
+ //!
+ //! - `style {open}`: `r4` (the default, today's card) and `nobra`; an unknown name is
+@@ -23,7 +23,7 @@
+ use std::collections::BTreeMap;
+ use std::path::{Path, PathBuf};
+ 
+-use qp_grammar::open::Check;
++use qp_designs::open::Check;
+ use qp_schema::protocol::{
+     CapsuleItem, Language, Opening, OutboundLine, ReplayInit, ReplaySourceKind, ViewState,
+ };
+@@ -241,7 +241,7 @@
+     // The design states its height (560 px in `r4`); the width is the surface's.
+     assert_eq!(
+         o.frame,
+-        Some([W, qp_grammar::open::nobra::height(&qp_grammar::look::R4)])
++        Some([W, qp_designs::open::nobra::height(&qp_look::look::R4)])
+     );
+     assert_eq!(o.frame, Some([W, 560]));
+     let reader = OpenReader::default();
+@@ -378,7 +378,7 @@
+             // This reader has no data of the instrument: no scene; the page lists the
+             // design's question cards as text (A32).
+             assert!(o.frame.is_none(), "a scene for the visitor");
+-            let rows = qp_grammar::open::text_rows(Some("nobra"), o.to, it, l);
++            let rows = qp_designs::open::text_rows(Some("nobra"), o.to, it, l);
+             let keys: Vec<&str> = rows.iter().map(|r| r.key).collect();
+             assert_eq!(keys, ["what", "who", "before", "why", "basis"]);
+             assert_eq!(rows[3].q, why_q);
+@@ -391,7 +391,7 @@
+                 }
+             }
+             // The reference design lists none.
+-            assert!(qp_grammar::open::text_rows(None, o.to, it, l).is_empty());
++            assert!(qp_designs::open::text_rows(None, o.to, it, l).is_empty());
+             texted += 1;
+             input(&mut h, "v", json!({"kind":"close","to":"sentence"}));
+         }
+diff -ru a/crates/qp-session/tests/presenter.rs b/crates/qp-session/tests/presenter.rs
+--- a/crates/qp-session/tests/presenter.rs	2026-11-23 22:34:12
++++ b/crates/qp-session/tests/presenter.rs	2026-11-23 23:23:46
+@@ -16,7 +16,7 @@
+ use std::collections::BTreeSet;
+ use std::time::Instant;
+ 
+-use qp_grammar::{compile, depth, CompileOptions};
++use qp_grammar::{compile, depth};
+ use qp_schema::grammar::View;
+ use qp_schema::protocol::SurfaceKind;
+ use qp_schema::Depth;
+@@ -81,10 +81,10 @@
+     let cv: View = serde_json::from_value(p["capsule_view"].clone()).unwrap();
+     let chart: View = serde_json::from_value(d["view"].clone()).unwrap();
+     let prov = h.s.provider();
+-    let s = compile(&cv, &prov, &CompileOptions::new(390, 300)).unwrap();
++    let s = compile(&cv, &prov, &qp_designs::options(390, 300)).unwrap();
+     assert_eq!(s.x.to_bar - s.x.from_bar + 1, 60);
+     assert_eq!(s.panels[0].layers[2].items[0].bar, Some(150));
+-    let s = compile(&chart, &prov, &CompileOptions::new(1200, 600)).unwrap();
++    let s = compile(&chart, &prov, &qp_designs::options(1200, 600)).unwrap();
+     assert_eq!((s.x.from_bar, s.x.to_bar), (120, 199));
+     assert_eq!(s.emphasis[0].from_bar, Some(150));
+ }
+diff -ru a/crates/qp-session/tests/reading.rs b/crates/qp-session/tests/reading.rs
+--- a/crates/qp-session/tests/reading.rs	2026-11-23 22:34:12
++++ b/crates/qp-session/tests/reading.rs	2026-11-23 23:23:46
+@@ -17,7 +17,6 @@
+ use qp_grammar::scale::{pixel_span, slot_x, value_y};
+ use qp_schema::grammar::Mark;
+ use qp_schema::scene::{DataSource, SceneDesc, ScenePanel};
+-use qp_session::CompileOptions;
+ use serde_json::{json, Value};
+ use support::H;
+ 
+@@ -334,7 +333,7 @@
+     let mut h = H::new();
+     h.hello("a", "arkin", "desktop");
+     // The asker's viewport: bars 80..=199 (120 slots over the 1120-pixel plot).
+-    let mut opts = CompileOptions::new(1200, 600);
++    let mut opts = qp_designs::options(1200, 600);
+     opts.range = None;
+     let scene = h.s.scene_for("a", Some("main"), &opts).unwrap();
+     assert_eq!((scene.x.from_bar, scene.x.to_bar), (80, 199));
+@@ -412,7 +411,7 @@
+     for conn in ["a", "s"] {
+         for view in &views {
+             let scene =
+-                h.s.scene_for(conn, Some(view), &CompileOptions::new(1200, 600))
++                h.s.scene_for(conn, Some(view), &qp_designs::options(1200, 600))
+                     .unwrap();
+             for _ in 0..250 {
+                 let x = rng.below(1200.0).floor() + 0.5;
+@@ -471,7 +470,7 @@
+     let mut asserted = 0;
+     for view in &views {
+         let scene =
+-            h.s.scene_for("s", Some(view), &CompileOptions::new(1200, 600))
++            h.s.scene_for("s", Some(view), &qp_designs::options(1200, 600))
+                 .unwrap();
+         let mut per_view = 0;
+         let mut tries = 0;
+@@ -519,7 +518,7 @@
+     let (mut trips, mut same_layer) = (0, 0);
+     for view in &views {
+         let scene =
+-            h.s.scene_for("s", Some(view), &CompileOptions::new(1200, 600))
++            h.s.scene_for("s", Some(view), &qp_designs::options(1200, 600))
+                 .unwrap();
+         let span = scene.x.to_bar.min(scene.bars - 1) - scene.x.from_bar + 1;
+         for _ in 0..25 {
+diff -ru a/crates/qp-session/tests/voice.rs b/crates/qp-session/tests/voice.rs
+--- a/crates/qp-session/tests/voice.rs	2026-11-23 22:34:12
++++ b/crates/qp-session/tests/voice.rs	2026-11-23 23:23:46
+@@ -222,7 +222,7 @@
+         voice: Some(voice.into()),
+         ..ViewState::default()
+     };
+-    let fh = qp_grammar::faces::height_for(&qp_grammar::look::R4, Some("vadrel"), true);
++    let fh = qp_designs::faces::height_for(&qp_look::look::R4, Some("vadrel"), true);
+     for it in items {
+         let s = qp_session::viewer::face_scene(h.session_mut(), it, &look, 60, 390, fh)?;
+         if !s.terms.is_empty() {
+@@ -320,8 +320,8 @@
+         face: Some("vadrel".into()),
+         ..ViewState::default()
+     };
+-    let fh = qp_grammar::faces::height_for(&qp_grammar::look::R4, Some("vadrel"), false);
+-    assert_eq!(fh, qp_grammar::faces::height(Some("vadrel")));
++    let fh = qp_designs::faces::height_for(&qp_look::look::R4, Some("vadrel"), false);
++    assert_eq!(fh, qp_designs::faces::height(Some("vadrel")));
+     let mut seen = 0;
+     for it in &items {
+         if let Some(s) = qp_session::viewer::face_scene(h.session_mut(), it, &look, 60, 390, fh) {

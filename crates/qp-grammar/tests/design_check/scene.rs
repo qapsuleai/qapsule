@@ -130,7 +130,7 @@ impl Fixture {
         w: u32,
         h: u32,
     ) -> SceneDesc {
-        let mut o = CompileOptions::new(w, h);
+        let mut o = CompileOptions::without_designs(w, h);
         o.look_record = Some(look);
         o.theme = Some(scheme.to_owned());
         o.roles = true;
@@ -144,7 +144,7 @@ impl Fixture {
     /// (RF1/Ö) The view as the gallery's P9 dump compiles it (`qp scene --look --roles`):
     /// the look's default scheme, no pointer.
     pub fn layout_scene(&self, look: &'static Look, w: u32, h: u32) -> SceneDesc {
-        let mut o = CompileOptions::new(w, h);
+        let mut o = CompileOptions::without_designs(w, h);
         o.look_record = Some(look);
         o.roles = true;
         compile(&self.view, &self.provider, &o).expect("the design fixture compiles")

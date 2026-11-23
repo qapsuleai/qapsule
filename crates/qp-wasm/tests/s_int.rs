@@ -58,10 +58,10 @@ fn the_presentation_asks_for_the_r5_picks() {
     assert_eq!(l["look"], "tavek-tel");
     assert_eq!(l["face"], "zemre", "{l}");
     assert_eq!(l["voice"], "marla", "{l}");
-    assert_eq!(l["story"], qp_grammar::stories::PRESENTED_STORY, "{l}");
+    assert_eq!(l["story"], qp_designs::stories::PRESENTED_STORY, "{l}");
     // (R6/T0, K57) Arkin's pick.
     assert_eq!(l["story"], "korda");
-    assert_eq!(l["open"], qp_grammar::open::PRESENTED_OPEN, "{l}");
+    assert_eq!(l["open"], qp_designs::open::PRESENTED_OPEN, "{l}");
     assert_eq!(l["open"], "tesir");
     // (R5/S) M21's provisional pick opens with its own transition.
     assert_eq!(l["transition"], "surek", "{l}");

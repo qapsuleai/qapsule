@@ -81,7 +81,7 @@ impl Session {
             .collect();
         let mut cache = Cache::default();
         warm(&rd, &mut cache);
-        let opts = CompileOptions::new(
+        let opts = qp_designs::options(
             width.unwrap_or(HIT_WIDTH).clamp(16, 8192),
             height.unwrap_or(HIT_HEIGHT).clamp(16, 8192),
         );

@@ -44,13 +44,13 @@ impl Session {
                 .with_clock(self.conns[ci].look.clock);
             // (R5/M20) The design's view; `nobra` also reads the opened question and the
             // frame (the authority has no device check: "verified by the server").
-            let ctx = qp_grammar::open::OpenCtx {
+            let ctx = qp_designs::open::OpenCtx {
                 ask: ask.as_deref(),
                 lang,
                 check: None,
                 frame: [w, h],
             };
-            return Ok(qp_grammar::open::capsule_view(
+            return Ok(qp_designs::open::capsule_view(
                 open.as_deref(),
                 look,
                 finding,
@@ -74,7 +74,7 @@ impl Session {
                 .with_parts(self, lang)
                 .with_voice(voice.as_deref())
                 .with_clock(self.conns[ci].look.clock);
-            return Ok(depth::face_view_in(
+            return Ok(qp_designs::depth::face_view_in(
                 look,
                 name.as_deref(),
                 finding,
@@ -146,7 +146,7 @@ impl Session {
             filtered = without_layers(view, &blocked);
             &filtered
         };
-        let mut opts = CompileOptions::new(frame.0, frame.1);
+        let mut opts = qp_designs::options(frame.0, frame.1);
         opts.range = range;
         // (R4/T5) The connection's style (view state).
         opts.theme.clone_from(&self.conns[ci].look.theme);
@@ -163,7 +163,7 @@ impl Session {
             .with_clock(self.conns[ci].look.clock);
         // (RP4/T7) The rows' time, when the connection asked for it.
         let stamp = |r: &qp_schema::protocol::StoryRow| self.row_stamp(r, lang);
-        let stamp_of: Option<&qp_grammar::stories::StampFn<'_>> =
+        let stamp_of: Option<&qp_designs::stories::StampFn<'_>> =
             self.conns[ci].look.clock.then_some(&stamp);
         // (R5/S) A story chart design that compiles the whole scene (`korda`).
         let scene = match story {
@@ -171,7 +171,7 @@ impl Session {
                 view,
                 &p,
                 &opts,
-                &qp_grammar::stories::StoryInput {
+                &qp_designs::stories::StoryInput {
                     rows,
                     focus: Some(finding),
                     hide_closed: self.conns[ci].look.hide_closed,
@@ -214,7 +214,7 @@ impl Session {
         };
         // (R5/M18) A story chart design: the chart at its price height, then the stories.
         let story = if d >= OpenDepth::Chart {
-            depth::story_design(self.conns[ci].look.story.as_deref())
+            qp_designs::depth::story_design(self.conns[ci].look.story.as_deref())
         } else {
             None
         };
@@ -249,7 +249,7 @@ impl Session {
     fn story_extend(
         &mut self,
         ci: usize,
-        sd: &qp_grammar::stories::StoryDesign,
+        sd: &qp_designs::stories::StoryDesign,
         view: &View,
         scene: SceneDesc,
         h: u32,
@@ -265,13 +265,13 @@ impl Session {
         let fact_of = |f: &str| firsts.get(f);
         let look = &self.conns[ci].look;
         let stamp = |r: &qp_schema::protocol::StoryRow| self.row_stamp(r, lang);
-        let stamp_of: Option<&qp_grammar::stories::StampFn<'_>> = look.clock.then_some(&stamp);
+        let stamp_of: Option<&qp_designs::stories::StampFn<'_>> = look.clock.then_some(&stamp);
         (sd.extend)(
             crate::viewer::look_of(look),
             look.theme.as_deref().or(view.theme.as_deref()),
             scene,
             h,
-            &qp_grammar::stories::StoryInput {
+            &qp_designs::stories::StoryInput {
                 rows: &rows,
                 focus: Some(finding),
                 hide_closed: look.hide_closed,
@@ -360,7 +360,7 @@ impl Session {
         if to == OpenDepth::Capsule
             && presentation.capsule_view.is_none()
             && presentation.facts.is_empty()
-            && qp_grammar::open::by_name(self.conns[ci].look.open.as_deref())
+            && qp_designs::open::by_name(self.conns[ci].look.open.as_deref())
                 .text
                 .is_some()
         {
@@ -401,10 +401,10 @@ impl Session {
         }
         let after = self.side_scene(ci, finding, to)?;
         // (R4/H-M8910) The connection's transition design picks the shared elements
-        // (`qp_grammar::transitions`; `r3` = the anchors both scenes have).
+        // (`qp_designs::transitions`; `r3` = the anchors both scenes have).
         let shared = {
-            fn side(d: OpenDepth, s: Option<&SideScene>) -> qp_grammar::transitions::Side<'_> {
-                qp_grammar::transitions::Side {
+            fn side(d: OpenDepth, s: Option<&SideScene>) -> qp_designs::transitions::Side<'_> {
+                qp_designs::transitions::Side {
                     depth: d,
                     scene: s.map(|x| &x.0),
                     price_series: s.and_then(|x| x.1.as_deref()),
@@ -412,7 +412,7 @@ impl Session {
                 }
             }
             let design =
-                qp_grammar::transitions::by_name(self.conns[ci].look.transition.as_deref());
+                qp_designs::transitions::by_name(self.conns[ci].look.transition.as_deref());
             (design.shared)(&side(from, before.as_ref()), &side(to, after.as_ref()))
         };
         let frame = after.is_some().then(|| {

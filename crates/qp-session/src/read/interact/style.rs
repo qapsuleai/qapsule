@@ -15,8 +15,8 @@ impl Session {
                 .build()
         };
         if let Some(f) = r.face {
-            if !qp_grammar::faces::is_face(f) {
-                return Err(unknown("face", f, qp_grammar::faces::names()));
+            if !qp_designs::faces::is_face(f) {
+                return Err(unknown("face", f, qp_designs::faces::names()));
             }
         }
         if let Some(a) = r.alphabet {
@@ -38,13 +38,13 @@ impl Session {
             }
         }
         if let Some(f) = r.feed {
-            if !qp_grammar::feeds::is_feed(f) {
-                return Err(unknown("feed", f, qp_grammar::feeds::names()));
+            if !qp_designs::feeds::is_feed(f) {
+                return Err(unknown("feed", f, qp_designs::feeds::names()));
             }
         }
         if let Some(t) = r.transition {
-            if !qp_grammar::transitions::is_transition(t) {
-                return Err(unknown("transition", t, qp_grammar::transitions::names()));
+            if !qp_designs::transitions::is_transition(t) {
+                return Err(unknown("transition", t, qp_designs::transitions::names()));
             }
         }
         if let Some(o) = r.outcome {
@@ -63,18 +63,18 @@ impl Session {
             }
         }
         if let Some(st) = r.story {
-            if !qp_grammar::stories::is_story(st) {
-                return Err(unknown("story", st, qp_grammar::stories::names()));
+            if !qp_designs::stories::is_story(st) {
+                return Err(unknown("story", st, qp_designs::stories::names()));
             }
         }
         if let Some(o) = r.open {
-            if !qp_grammar::open::is_open(o) {
-                return Err(unknown("open", o, qp_grammar::open::names()));
+            if !qp_designs::open::is_open(o) {
+                return Err(unknown("open", o, qp_designs::open::names()));
             }
         }
         let look = &mut self.conns[ci].look;
         if let Some(o) = r.open {
-            let next = (o != qp_grammar::open::DEFAULT_OPEN).then(|| o.to_owned());
+            let next = (o != qp_designs::open::DEFAULT_OPEN).then(|| o.to_owned());
             // Another design: the capsule frame a design's height set no longer holds, nor
             // the question `nobra` had opened.
             if next != look.open {
@@ -87,7 +87,7 @@ impl Session {
             look.voice = (v != qp_voice::DEFAULT_VOICE).then(|| v.to_owned());
         }
         if let Some(st) = r.story {
-            look.story = (st != qp_grammar::stories::DEFAULT_STORY).then(|| st.to_owned());
+            look.story = (st != qp_designs::stories::DEFAULT_STORY).then(|| st.to_owned());
         }
         if let Some(h) = r.hide_closed {
             look.hide_closed = h;
@@ -99,8 +99,8 @@ impl Session {
             look.look = (l != qp_look::look::DEFAULT_LOOK).then(|| l.to_owned());
         }
         if let Some(f) = r.face {
-            let c = qp_grammar::faces::canonical(f).unwrap_or(qp_grammar::faces::DEFAULT_FACE);
-            look.face = (c != qp_grammar::faces::DEFAULT_FACE).then(|| c.to_owned());
+            let c = qp_designs::faces::canonical(f).unwrap_or(qp_designs::faces::DEFAULT_FACE);
+            look.face = (c != qp_designs::faces::DEFAULT_FACE).then(|| c.to_owned());
         }
         if let Some(a) = r.alphabet {
             look.alphabet = (a != qp_glyph::ALPHABETS[0]).then(|| a.to_owned());
@@ -109,11 +109,11 @@ impl Session {
             look.theme = (t != "view").then(|| t.to_owned());
         }
         if let Some(f) = r.feed {
-            look.feed = (f != qp_grammar::feeds::DEFAULT_FEED).then(|| f.to_owned());
+            look.feed = (f != qp_designs::feeds::DEFAULT_FEED).then(|| f.to_owned());
         }
         if let Some(t) = r.transition {
             look.transition =
-                (t != qp_grammar::transitions::DEFAULT_TRANSITION).then(|| t.to_owned());
+                (t != qp_designs::transitions::DEFAULT_TRANSITION).then(|| t.to_owned());
         }
         if let Some(o) = r.outcome {
             look.outcome = (o != qp_glyph::outcome::DEFAULT_OUTCOME).then(|| o.to_owned());
@@ -160,7 +160,7 @@ impl Session {
         // at it, whichever frame the surface reported (a tap on a face opens it too).
         if key == "capsule" {
             let look = crate::viewer::look_of(&c.look);
-            if let Some(h) = qp_grammar::open::height_in(look, c.look.open.as_deref()) {
+            if let Some(h) = qp_designs::open::height_in(look, c.look.open.as_deref()) {
                 let w = c
                     .look
                     .frames

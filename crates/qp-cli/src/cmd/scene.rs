@@ -95,7 +95,7 @@ fn compile_source(
     Result<Box<qp_schema::protocol::ProtocolError>, String>,
 > {
     let (mut session, principal) = scene_session(src).map_err(Err)?;
-    let mut opts = qp_session::CompileOptions::new(width, height);
+    let mut opts = qp_designs::options(width, height);
     opts.look = look.map(str::to_owned);
     opts.roles = roles;
     opts.theme = theme.map(str::to_owned);

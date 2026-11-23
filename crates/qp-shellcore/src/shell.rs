@@ -55,7 +55,7 @@ pub use start::{core_from_start, demo_session_init, DemoOptions, Frames, VISITOR
 use start::{BindFrame, DataFrame, MarketFrame};
 
 /// Face frame height of the default face design (`r3`, 240 CSS px). (R4/H-M8910) The
-/// height a face is laid out at is the design's own (`qp_grammar::faces::height`), read
+/// height a face is laid out at is the design's own (`qp_designs::faces::height`), read
 /// by [`ShellCore::face_size_json`]; the shell never computes it. Reported with every face
 /// gesture (the authority's own default is 140).
 pub const FACE_HEIGHT: u32 = 240;
@@ -176,7 +176,7 @@ pub struct ShellCore {
     /// said, not left blank), and how many stories its coin-flip rule kept out.
     feed_known: bool,
     coin_flip_hidden: u32,
-    /// (R5/M19) The page's feed order (`?feed_order=`, `qp_grammar::feeds::ORDERS`): when
+    /// (R5/M19) The page's feed order (`?feed_order=`, `qp_designs::feeds::ORDERS`): when
     /// set, it orders the feed instead of the connection's layout (a presentation setting,
     /// not a protocol value). And the feed rule the page asked its host for
     /// (`?feed_rule=`; the host applies it on connect), shown by the settings page.
@@ -299,7 +299,7 @@ impl ShellCore {
             coin_flip_hidden: 0,
             // (R5/fix47) The presentation's feed order (live and new first); `?feed_order=
             // layout` gives the connection's layout back.
-            feed_order: Some(qp_grammar::feeds::PRESENTED_FEED_ORDER.to_owned()),
+            feed_order: Some(qp_designs::feeds::PRESENTED_FEED_ORDER.to_owned()),
             feed_rule: None,
             feed_dirty: false,
             feed_inflight: false,
@@ -319,7 +319,7 @@ impl ShellCore {
             frames: BTreeMap::from([
                 (
                     "face".to_owned(),
-                    (PHONE_FRAME.0, qp_grammar::faces::height(None)),
+                    (PHONE_FRAME.0, qp_designs::faces::height(None)),
                 ),
                 ("scene".to_owned(), PHONE_FRAME),
             ]),
@@ -342,7 +342,7 @@ impl ShellCore {
             // (R5/S) The presentation's motion design (M21: `surek`, provisional); its
             // transition goes with the presented `style` gesture (`presented_look`).
             mo: motion::MotionState {
-                design: Some(qp_grammar::motion::PRESENTED_MOTION.to_owned()),
+                design: Some(qp_designs::motion::PRESENTED_MOTION.to_owned()),
                 ..motion::MotionState::default()
             },
             pass_since: None,

@@ -57,7 +57,7 @@ impl Marks {
     /// The view compiled in `look` and `scheme` at the desktop chart size.
     pub fn scene(&self, look: &'static Look, scheme: &str) -> SceneDesc {
         let (w, h) = th::DESK;
-        let mut o = CompileOptions::new(w, h);
+        let mut o = CompileOptions::without_designs(w, h);
         o.look_record = Some(look);
         o.theme = Some(scheme.to_owned());
         compile(&self.view, &self.provider, &o).expect("the marks fixture compiles")

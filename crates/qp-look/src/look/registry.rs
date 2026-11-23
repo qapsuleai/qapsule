@@ -16,7 +16,7 @@ pub const DEFAULT_LOOK: &str = "r4";
 /// surface shows its touch profile ([`phone_profile`]: `tavek-tel`).
 pub const PRESENTED_LOOK: &str = "tavek";
 
-/// (R5/S) Each look's companion face design (`qp_grammar::faces`): choosing a look in the
+/// (R5/S) Each look's companion face design (`qp_designs::faces`): choosing a look in the
 /// presentation chooses its face too, unless the reader names a face (`?face=`). `r4`:
 /// R4's presented face. A look without one keeps the face as it is. (RD2/C3) `tavek`:
 /// `zemre`'s sentence, track record and price strip (`docs/FACE.md`).

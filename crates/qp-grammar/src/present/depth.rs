@@ -33,7 +33,7 @@ pub use card::{
     ledger_text, story_glyph, CARD_GLYPH_PX, CHART_GLYPH_PX, FRESHNESS_HALF_BARS,
     GLYPH_MIN_LEDGER_N,
 };
-pub(crate) use card::{has_story, named_panel, panel_at, uniq};
+pub use card::{has_story, named_panel, panel_at, uniq};
 pub use opening::{
     deeper, presenter_depth, shallower, shared_elements, tap_opens, transition_anchors,
 };
@@ -83,7 +83,7 @@ fn not_found(path: &str, why: String) -> GrammarError {
     GrammarError::new(ErrorKind::NotFound, path, why)
 }
 
-pub(crate) fn finding_and_fact<'p>(
+pub fn finding_and_fact<'p>(
     id: &str,
     p: &'p dyn DataProvider,
 ) -> Result<(Cow<'p, Finding>, Cow<'p, Fact>), GrammarError> {
@@ -104,7 +104,7 @@ pub(crate) fn finding_and_fact<'p>(
 
 /// The bar series a fact's series sits on, and its bars (borrowed from the provider;
 /// only the first/last visible bar times are read).
-pub(crate) fn bar_series_bars<'p>(
+pub fn bar_series_bars<'p>(
     fact: &Fact,
     p: &'p dyn DataProvider,
 ) -> Result<(String, Cow<'p, [Bar]>), GrammarError> {
@@ -120,7 +120,7 @@ pub(crate) fn bar_series_bars<'p>(
     }
 }
 
-pub(crate) fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
+pub fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
     match p.series_kind(series)? {
         SeriesKind::Bars => Some("c".to_owned()),
         SeriesKind::Points => Some("v".to_owned()),
@@ -128,7 +128,7 @@ pub(crate) fn main_field(series: &str, p: &dyn DataProvider) -> Option<String> {
     }
 }
 
-pub(crate) fn layer(id: &str, mark: Mark, panel: u32) -> Layer {
+pub fn layer(id: &str, mark: Mark, panel: u32) -> Layer {
     let mut l = Layer::new(mark, panel);
     l.id = Some(id.to_owned());
     l
@@ -151,7 +151,7 @@ fn level_rule(fact: &Fact, panel: u32) -> Option<Layer> {
 }
 
 #[allow(clippy::cast_precision_loss)]
-pub(crate) fn time_scale(t0: i64, t1: i64) -> Scale {
+pub fn time_scale(t0: i64, t1: i64) -> Scale {
     Scale {
         kind: ScaleKind::Time,
         domain: Some([t0 as f64, t1 as f64]),
@@ -357,61 +357,6 @@ pub fn present(
         confidence,
         view,
     })
-}
-
-// ---------------------------------------------------------------------------
-// R4/T5: capsule face designs (`docs/PROTOCOL.md` §4.6.2)
-// ---------------------------------------------------------------------------
-
-/// Whether `name` is a known face design (`crate::faces`, R4/H-M8910: the registry with
-/// each design's height; `card` is the earlier name of `r3`).
-#[must_use]
-pub fn is_face(name: &str) -> bool {
-    crate::faces::is_face(name)
-}
-
-/// The face of a capsule in the feed (open depth `sentence`) by face design `face`
-/// (`None`: the default, `r3` = the §18.4 capsule card [`capsule_view`] at `max_points`).
-/// The designs are registered in [`crate::faces::FACES`].
-///
-/// # Errors
-/// An unknown face name (`invalid`, `/face`) or the design's own errors.
-pub fn face_view(
-    face: Option<&str>,
-    finding: &str,
-    max_points: u32,
-    p: &dyn DataProvider,
-    id: &str,
-) -> Result<View, GrammarError> {
-    crate::faces::face_view(face, finding, max_points, p, id)
-}
-
-/// (R5/T3) [`face_view`] in `look`.
-///
-/// # Errors
-/// As [`face_view`].
-pub fn face_view_in(
-    look: &Look,
-    face: Option<&str>,
-    finding: &str,
-    max_points: u32,
-    p: &dyn DataProvider,
-    id: &str,
-) -> Result<View, GrammarError> {
-    crate::faces::face_view_in(look, face, finding, max_points, p, id)
-}
-
-// ---------------------------------------------------------------------------
-// R5/M18: the story chart (`crate::stories`)
-// ---------------------------------------------------------------------------
-
-/// (R5/M18, K50) The story chart design a connection chose (`ViewState.story`), drawn at
-/// `chart`/`evidence` depth around the open capsule's chart; `None` (the default, `r4`):
-/// the open capsule's chart alone. The designs are registered in
-/// [`crate::stories::STORIES`].
-#[must_use]
-pub fn story_design(name: Option<&str>) -> Option<&'static crate::stories::StoryDesign> {
-    crate::stories::by_name(name)
 }
 
 #[cfg(test)]

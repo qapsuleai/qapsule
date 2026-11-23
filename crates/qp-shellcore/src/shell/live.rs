@@ -1,4 +1,4 @@
-//! (R5/M21 `nabiz`; R5/S: one motion registry, `qp_grammar::motion::MOTIONS`, and one
+//! (R5/M21 `nabiz`; R5/S: one motion registry, `qp_designs::motion::MOTIONS`, and one
 //! motion state, `super::motion::MotionState`) The live marks of a motion design.
 //!
 //! A motion design with live marks (`nabiz`) gets from here:
@@ -17,7 +17,7 @@
 
 use std::collections::BTreeMap;
 
-use qp_grammar::transitions::nabiz::{self, Beat, Change, FaceMarks, FaceMotion, Places};
+use qp_designs::transitions::nabiz::{self, Beat, Change, FaceMarks, FaceMotion, Places};
 use qp_schema::capsule::{Stage, Validity};
 use qp_schema::protocol::Language;
 use qp_schema::scene::{Rgba, SceneDesc};

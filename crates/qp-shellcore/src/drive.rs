@@ -146,7 +146,7 @@ impl Agent {
         let fresh = vec![false; self.feed.len()];
         // (R5/fix47) The presentation's feed order, as the shell core orders its feed.
         crate::shell::feed_rows(
-            Some(qp_grammar::feeds::PRESENTED_FEED_ORDER),
+            Some(qp_designs::feeds::PRESENTED_FEED_ORDER),
             self.look.feed.as_deref(),
             &self.feed,
             lang,
@@ -156,8 +156,8 @@ impl Agent {
         )
         .into_iter()
         .filter_map(|r| match r {
-            qp_grammar::feeds::FeedRow::Capsule { id, .. } => Some(id),
-            qp_grammar::feeds::FeedRow::Header { .. } => None,
+            qp_designs::feeds::FeedRow::Capsule { id, .. } => Some(id),
+            qp_designs::feeds::FeedRow::Header { .. } => None,
         })
         .collect()
     }
@@ -173,7 +173,7 @@ impl Agent {
         let look = self.look.clone();
         let mp = self.max_points;
         let items = self.feed.clone();
-        let fh = qp_grammar::faces::height_for(
+        let fh = qp_designs::faces::height_for(
             qp_session::viewer::look_of(&look),
             look.face.as_deref(),
             look.voice.is_some(),
@@ -239,7 +239,7 @@ fn scene_frame(look: &ViewState, d: OpenDepth, phone: (u32, u32)) -> (u32, u32) 
     if d != OpenDepth::Capsule {
         return phone;
     }
-    qp_grammar::open::height_in(qp_session::viewer::look_of(look), look.open.as_deref())
+    qp_designs::open::height_in(qp_session::viewer::look_of(look), look.open.as_deref())
         .map_or(phone, |h| (phone.0, h))
 }
 
@@ -310,7 +310,7 @@ pub fn shell_less(host: &mut ReplayHost, principal: &str, lang: &str, script: &[
             a.refresh_feed(host);
             let i = usize::try_from(t["index"].as_u64().unwrap_or(0)).unwrap_or(0);
             let cap = a.face_ids(lang)[i].clone();
-            let fh = qp_grammar::faces::height_for(
+            let fh = qp_designs::faces::height_for(
                 qp_session::viewer::look_of(&a.look),
                 a.look.face.as_deref(),
                 a.look.voice.is_some(),

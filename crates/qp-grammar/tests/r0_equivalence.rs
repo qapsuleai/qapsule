@@ -105,8 +105,12 @@ fn r0_scene_is_reproduced_exactly() {
     let series = support::sample_series();
     let expected = r0::build_scene(&series, 1200, 600).expect("oracle");
     let p = support::provider();
-    let scene =
-        compile(&support::view(R0_VIEW), &p, &CompileOptions::new(1200, 600)).expect("compile");
+    let scene = compile(
+        &support::view(R0_VIEW),
+        &p,
+        &CompileOptions::without_designs(1200, 600),
+    )
+    .expect("compile");
     assert_eq!(scene.width, expected.width);
     assert_eq!(scene.height, expected.height);
     assert_eq!(scene.background, expected.background);

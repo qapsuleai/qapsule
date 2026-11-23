@@ -136,7 +136,7 @@ fn selected_on_top(s: &SceneDesc, cap: &str) {
         .expect("the open story has a lane");
     assert_eq!(
         l.items[0].hit.top,
-        p.rect.top + qp_grammar::stories::korda::HEADER_PX
+        p.rect.top + qp_designs::stories::korda::HEADER_PX
     );
 }
 
@@ -237,7 +237,7 @@ fn closed_stories_hide_and_show() {
     let hdr = p
         .layers
         .iter()
-        .find(|l| l.id == qp_grammar::stories::korda::TOGGLE_LAYER)
+        .find(|l| l.id == qp_designs::stories::korda::TOGGLE_LAYER)
         .expect("header");
     assert_eq!(hdr.items[0].values["shown"], 1.0);
     let closed = hdr.items[0].values["closed"];
@@ -245,7 +245,7 @@ fn closed_stories_hide_and_show() {
     let (x, y) = center(&hdr.items[0].hit);
     assert_eq!(
         device_hit(&s, x, y).as_deref(),
-        Some(qp_grammar::stories::korda::TOGGLE_LAYER)
+        Some(qp_designs::stories::korda::TOGGLE_LAYER)
     );
     d.tap(x, y);
     assert!(d.core.look().hide_closed);
@@ -271,7 +271,7 @@ fn closed_stories_hide_and_show() {
     let hdr = stories_panel(&s)
         .layers
         .iter()
-        .find(|l| l.id == qp_grammar::stories::korda::TOGGLE_LAYER)
+        .find(|l| l.id == qp_designs::stories::korda::TOGGLE_LAYER)
         .unwrap();
     assert_eq!(hdr.items[0].values["shown"], 0.0);
     assert_eq!(hdr.items[0].values["closed"], closed);
@@ -308,7 +308,7 @@ fn zoomed_out_stories_cluster_and_a_cluster_zooms_in() {
     let clusters: Vec<_> = p
         .layers
         .iter()
-        .filter(|l| l.id.starts_with(qp_grammar::stories::korda::CLUSTER_LAYER))
+        .filter(|l| l.id.starts_with(qp_designs::stories::korda::CLUSTER_LAYER))
         .collect();
     assert!(!clusters.is_empty(), "the whole range is summarized");
     // Every story in view is either a lane or counted in a cluster.

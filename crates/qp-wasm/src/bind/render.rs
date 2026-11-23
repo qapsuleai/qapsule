@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-use qp_grammar::{compile, CompileOptions, MemProvider};
+use qp_grammar::{compile, MemProvider};
 use qp_schema::scene::SceneDesc;
 use qp_schema::Series;
 use wasm_bindgen::prelude::*;
@@ -42,7 +42,7 @@ pub(super) fn r0_scene(series: &Series, width: u32, height: u32) -> Result<Scene
         .with_values("sma20", "px", vec![("sma", line)], "sma", &["sma"])
         .with_label("sma20", "SMA20");
     let view = serde_json::from_str(R0_VIEW).map_err(|e| JsError::new(&e.to_string()))?;
-    compile(&view, &provider, &CompileOptions::new(width, height))
+    compile(&view, &provider, &qp_designs::options(width, height))
         .map_err(|e| JsError::new(&e.to_string()))
 }
 

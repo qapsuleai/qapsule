@@ -19,10 +19,10 @@ pub(super) fn depth_name(d: OpenDepth) -> &'static str {
     }
 }
 
-/// (R4/S1) The feed rows of `items` by layout `feed` (`qp_grammar::feeds`), with the local
+/// (R4/S1) The feed rows of `items` by layout `feed` (`qp_designs::feeds`), with the local
 /// wall times the layout reads filled from the display zone: the shell core's feed and the
 /// shell-less driver use the same rows. (R5/fix47) `order`: the presentation's feed order
-/// (`qp_grammar::feeds::ORDERS`), which replaces the layout when it names one.
+/// (`qp_designs::feeds::ORDERS`), which replaces the layout when it names one.
 #[must_use]
 pub fn feed_rows(
     order: Option<&str>,
@@ -32,10 +32,10 @@ pub fn feed_rows(
     seen: Option<i64>,
     fresh: &[bool],
     now: Option<i64>,
-) -> Vec<qp_grammar::feeds::FeedRow> {
-    let local: Vec<qp_grammar::feeds::LocalStamp> =
+) -> Vec<qp_designs::feeds::FeedRow> {
+    let local: Vec<qp_designs::feeds::LocalStamp> =
         items.iter().map(|it| local_stamp(it.t)).collect();
-    let ctx = qp_grammar::feeds::FeedCtx {
+    let ctx = qp_designs::feeds::FeedCtx {
         items,
         lang,
         seen,
@@ -46,17 +46,17 @@ pub fn feed_rows(
         seen_local: seen.map(local_stamp),
     };
     match order {
-        Some(o) => qp_grammar::feeds::order(o, &ctx).unwrap_or_default(),
-        None => qp_grammar::feeds::layout(feed, &ctx),
+        Some(o) => qp_designs::feeds::order(o, &ctx).unwrap_or_default(),
+        None => qp_designs::feeds::layout(feed, &ctx),
     }
 }
 
 /// (R4/S1) The local wall time of `t` (ms) in the display time zone, from the zone's
 /// embedded rules (`qp_calendar::Zone`); UTC if the zone were missing.
 #[must_use]
-pub fn local_stamp(t: i64) -> qp_grammar::feeds::LocalStamp {
+pub fn local_stamp(t: i64) -> qp_designs::feeds::LocalStamp {
     let off = qp_calendar::Zone::get(DISPLAY_TZ).map_or(0, |z| z.offset_at(t.div_euclid(1000)));
-    qp_grammar::feeds::LocalStamp::at_offset(t, i64::from(off) * 1000)
+    qp_designs::feeds::LocalStamp::at_offset(t, i64::from(off) * 1000)
 }
 
 /// `YYYY-MM-DD HH:MM` of `t` in the display time zone.
@@ -72,7 +72,7 @@ pub fn display_time(t: i64) -> String {
 impl ShellCore {
     /// The feed rows, top to bottom, by the presentation's feed order (`feed_order`; R5/fix47
     /// default `live_new`) or, with none (`?feed_order=layout`), the connection's feed layout
-    /// (`look.feed`, `qp_grammar::feeds`; `r3`: the authority's `capsules` order): a capsule row is
+    /// (`look.feed`, `qp_designs::feeds`; `r3`: the authority's `capsules` order): a capsule row is
     /// `{id, target, text, scene, relevant, closed, mark?}` (R4/S1 `closed`: the story is
     /// closed, its glyph shows the outcome mark) — `text` is the reader's sentence (shown
     /// as text when there is no face scene), `mark` the layout's short mark; a layout row
@@ -87,7 +87,7 @@ impl ShellCore {
             .collect();
         let rows = if self.feed.is_empty() && self.feed_known {
             // (R5/M19, K53) The empty feed says so, and why (the core writes it).
-            qp_grammar::feeds::empty_rows(lang, self.coin_flip_hidden)
+            qp_designs::feeds::empty_rows(lang, self.coin_flip_hidden)
         } else {
             feed_rows(
                 self.feed_order.as_deref(),
@@ -102,8 +102,8 @@ impl ShellCore {
         let out: Vec<Value> = rows
             .into_iter()
             .filter_map(|r| match r {
-                qp_grammar::feeds::FeedRow::Header { text } => Some(json!({"header": text})),
-                qp_grammar::feeds::FeedRow::Capsule { id, mark } => {
+                qp_designs::feeds::FeedRow::Header { text } => Some(json!({"header": text})),
+                qp_designs::feeds::FeedRow::Capsule { id, mark } => {
                     let it = self.feed.iter().find(|i| i.id == id)?;
                     // A face scene needs the reader's own bars of the capsule's series
                     // (RP3/M15: a viewer's comes ready when the reader may see them).

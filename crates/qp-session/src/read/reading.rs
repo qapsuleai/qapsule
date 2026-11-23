@@ -7,6 +7,7 @@ use std::collections::BTreeMap;
 
 use qp_grammar::scale::{slot_at, value_at};
 use qp_grammar::{compile, CompileOptions};
+use qp_look::{ErrorKind, GrammarError};
 use qp_schema::protocol::{
     ErrorCode, HitInfo, HitItem, LayerInfo, ProtocolError, ScaleInfo, SurfaceKind, Viewport,
 };
@@ -41,11 +42,11 @@ pub fn screen_frame(kind: SurfaceKind) -> (u32, u32) {
 }
 
 /// A compile error as a protocol error at `path`.
-fn grammar_error(e: &qp_look::GrammarError, path: &str) -> ProtocolError {
+fn grammar_error(e: &GrammarError, path: &str) -> ProtocolError {
     let code = match e.kind {
-        qp_look::ErrorKind::NotFound => ErrorCode::NotFound,
-        qp_look::ErrorKind::Invalid => ErrorCode::Invalid,
-        qp_look::ErrorKind::NoOrigin => ErrorCode::NoOrigin,
+        ErrorKind::NotFound => ErrorCode::NotFound,
+        ErrorKind::Invalid => ErrorCode::Invalid,
+        ErrorKind::NoOrigin => ErrorCode::NoOrigin,
     };
     E::new(code, e.to_string()).at(path).build()
 }
@@ -245,7 +246,7 @@ impl Session {
         let qp = "/query";
         let vid = self.view_of(ci, view, &format!("{qp}/view"))?;
         let mut opts =
-            CompileOptions::new(size.0.unwrap_or(HIT_WIDTH), size.1.unwrap_or(HIT_HEIGHT));
+            qp_designs::options(size.0.unwrap_or(HIT_WIDTH), size.1.unwrap_or(HIT_HEIGHT));
         opts.range = self.hit_range(&self.conns[ci], &vid);
         warm(rd!(self), &mut self.cache);
         let view = need_view(rd!(self), &vid, &format!("{qp}/view"))?;
@@ -379,7 +380,7 @@ impl Session {
         view: &View,
     ) -> BTreeMap<u32, (Option<String>, ScaleInfo, Vec<LayerInfo>)> {
         let (w, h) = screen_frame(c.surface.kind);
-        let mut opts = CompileOptions::new(w, h);
+        let mut opts = qp_designs::options(w, h);
         opts.range = Some((vp.from_bar, vp.to_bar));
         if c.profile.max_points > 0 {
             opts.max_points = Some(u64::from(c.profile.max_points));

@@ -8,6 +8,7 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+qp-designs = { path = "../qp-designs" }
 qp-glyph = { path = "../qp-glyph" }
 qp-look = { path = "../qp-look" }
 # RP3/M12c: the GPU paint path's glyph atlas (the same fontdue as qp-render, already in
@@ -15,7 +16,6 @@ qp-look = { path = "../qp-look" }
 fontdue = { version = "0.9.5", default-features = false }
 qp-calendar = { path = "../qp-calendar" }
 qp-capsule = { path = "../qp-capsule" }
-qp-grammar = { path = "../qp-grammar" }
 qp-render = { path = "../qp-render" }
 qp-schema = { path = "../qp-schema" }
 qp-session = { path = "../qp-session" }

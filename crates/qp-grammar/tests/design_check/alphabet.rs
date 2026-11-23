@@ -163,7 +163,7 @@ fn intraday_labels_read_the_display_zone() {
         let view = serde_json::json!({"id": "v", "display_tz": tz, "x": {"kind": "time"},
             "layers": [{"id": "c", "mark": "candle", "panel": 0, "series": "px"}],
             "panels": [{"id": 0, "y": {"kind": "linear"}}]});
-        let mut o = CompileOptions::new(960, 400);
+        let mut o = CompileOptions::without_designs(960, 400);
         o.look_record = Some(&TRIAL);
         o.cursor = Some(Cursor {
             bar: 0,

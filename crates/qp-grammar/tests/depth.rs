@@ -113,7 +113,7 @@ fn chart_view_keeps_the_transcript_16_shape() {
         Some("fact-rsi-cross70")
     );
     // It compiles: highlight strip at the fact bar, 60 visible bars.
-    let s = compile(&v, &p, &CompileOptions::new(1200, 600)).unwrap();
+    let s = compile(&v, &p, &CompileOptions::without_designs(1200, 600)).unwrap();
     assert_eq!((s.x.from_bar, s.x.to_bar), (140, 199));
     assert_eq!(s.emphasis[0].from_bar, Some(170));
     assert_eq!(s.panels[1].layers[1].constants["/encoding/y"].value, 70.0);
@@ -133,7 +133,7 @@ fn capsule_view_rule() {
     assert_eq!(v.title.as_deref(), Some("Overbought: RSI above 70"));
     let bars = support::sample_bars();
     assert_eq!(v.x.domain, Some([bars[140].t as f64, bars[199].t as f64]));
-    let s = compile(&v, &p, &CompileOptions::new(400, 200)).unwrap();
+    let s = compile(&v, &p, &CompileOptions::without_designs(400, 200)).unwrap();
     assert_eq!(s.x.to_bar - s.x.from_bar + 1, 60);
     assert_eq!(s.panels[0].layers[2].items.len(), 1);
     // Fact bar outside the last max_points bars: no point.
@@ -246,5 +246,5 @@ fn chart_view_for_a_fact_on_bars() {
         c.layers[0].encoding.y,
         Some(qp_schema::grammar::Position::Name("c".into()))
     );
-    compile(&c, &p, &CompileOptions::new(400, 200)).unwrap();
+    compile(&c, &p, &CompileOptions::without_designs(400, 200)).unwrap();
 }

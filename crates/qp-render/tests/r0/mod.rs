@@ -43,13 +43,13 @@ pub fn scene_with(series: &Series, options: &CompileOptions) -> SceneDesc {
 
 /// The R0 scene for `series` at `width` x `height` (default options: LOD on).
 pub fn scene(series: &Series, width: u32, height: u32) -> SceneDesc {
-    scene_with(series, &CompileOptions::new(width, height))
+    scene_with(series, &qp_designs::options(width, height))
 }
 
 /// The R0 scene for `series` at `width` x `height` with level of detail off (every bar
 /// drawn, as the R0 layout did).
 pub fn scene_full(series: &Series, width: u32, height: u32) -> SceneDesc {
-    let mut o = CompileOptions::new(width, height);
+    let mut o = qp_designs::options(width, height);
     o.lod = false;
     scene_with(series, &o)
 }

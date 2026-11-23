@@ -189,7 +189,7 @@ fn item_lang(item: &CapsuleItem) -> Language {
 }
 
 fn options(look: &ViewState, w: u32, h: u32, range: Option<(u64, u64)>) -> CompileOptions {
-    let mut o = CompileOptions::new(w, h);
+    let mut o = qp_designs::options(w, h);
     o.range = range;
     o.theme.clone_from(&look.theme);
     o.alphabet.clone_from(&look.alphabet);

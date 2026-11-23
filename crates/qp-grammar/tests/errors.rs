@@ -15,7 +15,12 @@ use qp_look::{ErrorKind, GrammarError};
 
 fn err(json: &str) -> GrammarError {
     let p = support::provider();
-    compile(&support::view(json), &p, &CompileOptions::new(1200, 600)).unwrap_err()
+    compile(
+        &support::view(json),
+        &p,
+        &CompileOptions::without_designs(1200, 600),
+    )
+    .unwrap_err()
 }
 
 fn one(layer: &str) -> String {
@@ -118,7 +123,7 @@ fn origin_without_written_constant_supplies_it() {
     let v = support::view(&one(
         r#"{"id":"r","mark":"rule","panel":0,"origin":{"/encoding/y":{"kind":"series","series":"px","field":"c","at":"last"}}}"#,
     ));
-    let s = compile(&v, &p, &CompileOptions::new(1200, 600)).unwrap();
+    let s = compile(&v, &p, &CompileOptions::without_designs(1200, 600)).unwrap();
     let r = &s.panels[0].layers[1];
     let last = support::sample_bars().last().unwrap().c;
     assert_eq!(r.constants["/encoding/y"].value, last);
@@ -193,13 +198,13 @@ fn view_level_errors() {
     let v = support::view(&one(
         r#"{"id":"x","mark":"line","series":"sma20","panel":0}"#,
     ));
-    assert!(compile(&v, &p, &CompileOptions::new(100, 600)).is_err());
+    assert!(compile(&v, &p, &CompileOptions::without_designs(100, 600)).is_err());
 }
 
 #[test]
 fn emphasis_target_must_exist() {
     let p = support::provider();
-    let mut o = CompileOptions::new(1200, 600);
+    let mut o = CompileOptions::without_designs(1200, 600);
     o.emphasis =
         vec![serde_json::from_str(r#"{"target":{"layer":"nope"},"kind":"focus"}"#).unwrap()];
     let v = support::view(&one(

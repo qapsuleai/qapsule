@@ -111,15 +111,15 @@ pub fn evidence_note(fact: &Fact) -> Option<String> {
 }
 
 /// Whether an R3 capsule with a story presents `finding`.
-pub(crate) fn has_story(finding: &str, p: &dyn DataProvider) -> bool {
+pub fn has_story(finding: &str, p: &dyn DataProvider) -> bool {
     p.capsule(finding).is_some_and(|c| c.story.is_some())
 }
 
-pub(crate) fn panel_at(panel: f64, px: f64) -> Position {
+pub fn panel_at(panel: f64, px: f64) -> Position {
     Position::Panel(PanelPos { panel, px })
 }
 
-pub(crate) fn named_panel(id: u32, name: &str, weight: f64) -> Panel {
+pub fn named_panel(id: u32, name: &str, weight: f64) -> Panel {
     let mut p = linear_panel(id);
     p.name = Some(name.to_owned());
     p.weight = Some(weight);
@@ -246,7 +246,7 @@ impl FactExt for Fact {
 }
 
 /// Unique layer ids: `base`, then `base-2`, `base-3`… (K25: the presenter's own names).
-pub(crate) fn uniq(taken: &mut Vec<String>, base: &str) -> String {
+pub fn uniq(taken: &mut Vec<String>, base: &str) -> String {
     let mut id = base.to_owned();
     let mut k = 2;
     while taken.contains(&id) {

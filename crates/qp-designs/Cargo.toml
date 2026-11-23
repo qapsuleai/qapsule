@@ -1,0 +1,25 @@
+[package]
+name = "qp-designs"
+description = "Qapsule named designs: capsule faces, open capsule designs, story charts, feed layouts, depth transitions and motion designs, and the default design registry the grammar compiler is handed."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { path = "../qp-schema" }
+qp-look = { path = "../qp-look" }
+qp-glyph = { path = "../qp-glyph" }
+qp-grammar = { path = "../qp-grammar" }
+
+[dev-dependencies]
+# Tests only: study values for the providers (moved with the design tests from qp-grammar),
+# the characterization books' SHA-256 (`qp_capsule::trust::seal::sha256`) and the feed and
+# motion record tests' JSON.
+qp-compute = { path = "../qp-compute" }
+qp-capsule = { path = "../qp-capsule" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

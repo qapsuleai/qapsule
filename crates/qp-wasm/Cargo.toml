@@ -24,6 +24,7 @@ spike-vello-cpu = ["qp-render/spike-vello-cpu"]
 spike-vello-gpu = ["qp-render/spike-vello-gpu", "dep:wasm-bindgen-futures"]
 
 [dependencies]
+qp-designs = { path = "../qp-designs" }
 qp-compute = { path = "../qp-compute" }
 qp-grammar = { path = "../qp-grammar" }
 qp-capsule = { path = "../qp-capsule", optional = true }

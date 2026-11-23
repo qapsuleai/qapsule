@@ -5,7 +5,7 @@ use super::*;
 
 impl ShellCore {
     /// (R4/H-M8910) The face frame: `{css:[w,h], px:[w,h], style:{width,height}}` — the
-    /// design's height (`qp_grammar::faces::height`), the backing size at the device scale
+    /// design's height (`qp_designs::faces::height`), the backing size at the device scale
     /// and the CSS lengths (the shell sizes its canvases with these, computes nothing).
     #[must_use]
     pub fn face_size_json(&self) -> Value {
@@ -253,7 +253,7 @@ impl ShellCore {
         let Some(o) = self.opening.as_ref().filter(|o| o.to == OpenDepth::Capsule) else {
             return;
         };
-        let design = qp_grammar::open::by_name(self.look.open.as_deref());
+        let design = qp_designs::open::by_name(self.look.open.as_deref());
         if self.look.open.is_none() {
             return;
         }
@@ -270,7 +270,7 @@ impl ShellCore {
         else {
             return;
         };
-        let t = qp_grammar::open::TextInput {
+        let t = qp_designs::open::TextInput {
             lang: self.lang,
             headline: &it.sentence.text,
             voice: self.open_voice.as_ref(),
@@ -300,7 +300,7 @@ impl ShellCore {
                 // (R5/M20 `nobra`) The open capsule design's own hint for its depth (absent:
                 // the page's).
                 if let Some(h) = o.frame.and_then(|_| {
-                    qp_grammar::open::hint(self.look.open.as_deref(), o.to, self.lang)
+                    qp_designs::open::hint(self.look.open.as_deref(), o.to, self.lang)
                 }) {
                     v["hint"] = json!(h);
                 }
@@ -312,7 +312,7 @@ impl ShellCore {
                         .iter()
                         .find(|i| i.id == o.capsule)
                         .map(|i| {
-                            qp_grammar::open::text_rows(
+                            qp_designs::open::text_rows(
                                 self.look.open.as_deref(),
                                 o.to,
                                 i,

@@ -1902,6 +1902,7 @@ dependencies = [
  "prost",
  "qp-calendar",
  "qp-compute",
+ "qp-designs",
  "qp-grammar",
  "qp-host",
  "qp-live",
@@ -1921,6 +1922,19 @@ name = "qp-compute"
 version = "0.0.0"
 dependencies = [
  "proptest",
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
+name = "qp-designs"
+version = "0.0.0"
+dependencies = [
+ "qp-capsule",
+ "qp-compute",
+ "qp-glyph",
+ "qp-grammar",
+ "qp-look",
  "qp-schema",
  "serde_json",
 ]
@@ -1949,7 +1963,6 @@ version = "0.0.0"
 dependencies = [
  "proptest",
  "qp-calendar",
- "qp-capsule",
  "qp-compute",
  "qp-glyph",
  "qp-look",
@@ -2024,6 +2037,7 @@ dependencies = [
 name = "qp-mcp"
 version = "0.0.0"
 dependencies = [
+ "qp-designs",
  "qp-render",
  "qp-schema",
  "qp-session",
@@ -2041,6 +2055,7 @@ dependencies = [
  "pollster",
  "qp-capsule",
  "qp-compute",
+ "qp-designs",
  "qp-facts",
  "qp-glyph",
  "qp-grammar",
@@ -2073,6 +2088,7 @@ dependencies = [
  "qp-calendar",
  "qp-capsule",
  "qp-compute",
+ "qp-designs",
  "qp-facts",
  "qp-glyph",
  "qp-grammar",
@@ -2094,8 +2110,8 @@ dependencies = [
  "fontdue",
  "qp-calendar",
  "qp-capsule",
+ "qp-designs",
  "qp-glyph",
- "qp-grammar",
  "qp-look",
  "qp-render",
  "qp-schema",
@@ -2133,6 +2149,7 @@ version = "0.0.0"
 dependencies = [
  "qp-capsule",
  "qp-compute",
+ "qp-designs",
  "qp-glyph",
  "qp-grammar",
  "qp-look",

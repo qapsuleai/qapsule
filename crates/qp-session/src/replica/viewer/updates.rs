@@ -256,7 +256,7 @@ impl Session {
             up.coin_flip_hidden = coin_flip_hidden;
         }
         // The faces on screen.
-        let fh = qp_grammar::faces::height_for(
+        let fh = qp_designs::faces::height_for(
             look_of(look),
             look.face.as_deref(),
             look.voice.is_some(),

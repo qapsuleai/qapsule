@@ -23,7 +23,7 @@ use qp_look::theme::with_opacity;
 
 mod alphabet;
 mod axis;
-pub(crate) mod draw;
+pub mod draw;
 mod emphasis;
 pub(crate) mod frame;
 pub(crate) mod layer;
@@ -116,15 +116,17 @@ pub struct Cursor {
 }
 
 impl CompileOptions {
-    /// Options for a `width` x `height` frame with the product's designs, everything else
+    /// (RF1/G2c) Options for a `width` x `height` frame compiled with no named designs
+    /// ([`crate::designs::NONE`]: the compiler's own tests and benches), everything else
     /// default.
     #[must_use]
-    pub fn new(width: u32, height: u32) -> Self {
-        crate::registry::options(width, height)
+    pub fn without_designs(width: u32, height: u32) -> Self {
+        Self::with_designs(width, height, &crate::designs::NONE)
     }
 
     /// (RF1/G2b) Options for a `width` x `height` frame compiled with `designs`, everything
-    /// else default.
+    /// else default. The product's designs: `qp_designs::options(width, height)` (what
+    /// `CompileOptions::new` was before RF1).
     #[must_use]
     pub fn with_designs(width: u32, height: u32, designs: &'static Designs) -> Self {
         Self {

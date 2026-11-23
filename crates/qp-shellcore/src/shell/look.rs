@@ -38,9 +38,9 @@ pub fn font_faces(
 impl ShellCore {
     /// (R4/S1) The `style` gesture of the presentation's defaults (RP4/T7: and the rows'
     /// time, `clock`): feed layout, depth
-    /// transition and outcome mark picked in M9–M11 (`qp_grammar::feeds::PRESENTED_FEED`,
+    /// transition and outcome mark picked in M9–M11 (`qp_designs::feeds::PRESENTED_FEED`,
     /// `transitions::PRESENTED_TRANSITION`, `glyph::outcome::PRESENTED_OUTCOME`) and the
-    /// face (`qp_grammar::faces::PRESENTED_FACE`). (R5/S) R5's picks: the look and its
+    /// face (`qp_designs::faces::PRESENTED_FACE`). (R5/S) R5's picks: the look and its
     /// companion face (M16, `look::PRESENTED_LOOK`), the voice (M17), the story chart
     /// (M18, `stories::PRESENTED_STORY`) and the open capsule design (M20,
     /// `open::PRESENTED_OPEN`). The protocol's own defaults (a bare connection) stay `r3`
@@ -49,18 +49,18 @@ impl ShellCore {
     #[must_use]
     pub fn presented_look() -> Value {
         let look = qp_look::look::phone_profile(qp_look::look::PRESENTED_LOOK);
-        let face = qp_look::look::companion_face(look).unwrap_or(qp_grammar::faces::PRESENTED_FACE);
+        let face = qp_look::look::companion_face(look).unwrap_or(qp_designs::faces::PRESENTED_FACE);
         json!({"kind":"style",
                "face": face,
-               "feed": qp_grammar::feeds::PRESENTED_FEED,
+               "feed": qp_designs::feeds::PRESENTED_FEED,
                // (R5/S) The presented motion design's opening (M21, `surek`).
-               "transition": qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition,
+               "transition": qp_designs::motion::by_name(Some(qp_designs::motion::PRESENTED_MOTION)).transition,
                "outcome": qp_glyph::outcome::PRESENTED_OUTCOME,
                // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
                "voice": qp_session::voices::PRESENTED_VOICE,
                "look": look,
-               "story": qp_grammar::stories::PRESENTED_STORY,
-               "open": qp_grammar::open::PRESENTED_OPEN,
+               "story": qp_designs::stories::PRESENTED_STORY,
+               "open": qp_designs::open::PRESENTED_OPEN,
                // (RP4/T7) Rows carry the event's time (`?clock=0`: as before).
                "clock": true})
     }
@@ -71,23 +71,23 @@ impl ShellCore {
     #[must_use]
     pub fn choices_json() -> Value {
         json!({
-            "face": qp_grammar::faces::names(),
+            "face": qp_designs::faces::names(),
             "alphabet": qp_glyph::ALPHABETS,
-            "feed": qp_grammar::feeds::names(),
-            "transition": qp_grammar::transitions::names(),
+            "feed": qp_designs::feeds::names(),
+            "transition": qp_designs::transitions::names(),
             "outcome": qp_glyph::outcome::names(),
             "look": qp_look::look::names(),
             // (R5/M19) The feed orders (feed layouts) and the host's feed rules M19
             // measured, best first.
             // `layout`: no order chosen, the feed layout orders the feed.
-            "feed_order": std::iter::once("layout").chain(qp_grammar::feeds::FEED_ORDERS).collect::<Vec<_>>(),
+            "feed_order": std::iter::once("layout").chain(qp_designs::feeds::FEED_ORDERS).collect::<Vec<_>>(),
             "feed_rule": qp_capsule::feedrule::FEED_RULES.iter().map(|(n, _)| *n).collect::<Vec<_>>(),
             "voice": qp_session::voices::names(),
-            "story": qp_grammar::stories::names(),
+            "story": qp_designs::stories::names(),
             // (R5/M20) The open capsule designs (`r4`: today's).
-            "open": qp_grammar::open::names(),
+            "open": qp_designs::open::names(),
             // (R5/M21) Motion designs (the default first).
-            "motion": qp_grammar::motion::names(),
+            "motion": qp_designs::motion::names(),
         })
     }
 
@@ -348,7 +348,7 @@ impl ShellCore {
         // (R5/M19) The feed order and the feed rule (presentation settings, not protocol
         // values): a known name is kept; `""` leaves it unchanged.
         if let Some(v) = choice.get("feed_order").and_then(Value::as_str) {
-            if v == "layout" || qp_grammar::feeds::FEED_ORDERS.contains(&v) {
+            if v == "layout" || qp_designs::feeds::FEED_ORDERS.contains(&v) {
                 self.feed_order = (v != "layout").then(|| v.to_owned());
                 // The page repaints the feed at its next paint pass.
                 self.pending.insert("feed".to_owned(), json!(true));

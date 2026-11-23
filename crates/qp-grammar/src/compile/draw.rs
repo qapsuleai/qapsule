@@ -19,7 +19,7 @@ use marks::{anchored_text, glyphs, points, rules, segments};
 use series::{areas, bars, candles, lines};
 
 /// Pixel-aligned rectangle primitive (negative sizes clamp to 0), as R0 builds them.
-pub(crate) fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
+pub fn rect(x: i32, y: i32, w: i32, h: i32, color: Rgba) -> Prim {
     Prim::Rect {
         x,
         y,
@@ -190,12 +190,7 @@ fn panel_px(pp: PanelPos, lo: i32, hi: i32) -> f64 {
 
 /// Words of `text` wrapped into lines of at most `room` pixels at `size` (estimate as in
 /// [`est_width`]); a word longer than a line stands alone.
-pub(crate) fn wrap(
-    text: &str,
-    room: i32,
-    size: f64,
-    adv: &qp_look::look::FontAsset,
-) -> Vec<String> {
+pub fn wrap(text: &str, room: i32, size: f64, adv: &qp_look::look::FontAsset) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
     let mut cur = String::new();
     for w in text.split_whitespace() {

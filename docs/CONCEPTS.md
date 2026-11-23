@@ -277,6 +277,22 @@ Kararlar K60–K63; kaynak belgeler `docs/matriks/` (`INTEGRATION.md`, `MESSAGES
 | Niyetin izleme biçimi | watch (`Intent.watch`, `Watch`, `WatchMatch`; `add_watch`, `remove_watch`) | Yapılandırılmış niyet: kimin için, hangi hikâye geçişleri (enstrüman, elindekiler, anlam türü, yön, aşamalar, olumsuz), ne zamana kadar, kaç kez. Eşleşme motorda, deterministik; yaşam döngüsü `active → matched \| expired \| removed`; olay `intent_matched`. Kişi başına 32. Kişisel veridir: başkasına gitmez. Serbest metni yapılandırılmış izlemeye çevirmek ajanın işidir. |
 | Öneri önizlemesi | `preview` sorgusu | Bekleyen önerinin, kabul edilse o an yazacağı değişimler ve etkilediği görünümlerin sahne özeti; doküman değişmez. |
 
+### Oturumun ve gramerin bölünmesi (RF1)
+
+Çerçeve `rounds/RF1/PLAN.md` (§3, §4, §11); ek noktası `docs/ARCHITECTURE.md` "Yeni alt sistem nasıl eklenir".
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Otorite çekirdeği | `qp-authority` (`Authority`) | Otoritenin kendisi: alım, komut yolu, kabul, günlük, saat, bağlantılar, iki dünya; bu round'da kapsül yaşamı, iddia/itiraz/yorum ve canlı yol da burada. Donuktur: sonraki round'lar ona kayıt satırı dışında dokunmaz. |
+| Alt sistem | subsystem (`Subsystem`) | Otoriteye kayıtla takılan, kendi durumunu taşıyan iş parçası (ör. izleme, okuma, görüntüleyici). Otoriteyi tanımaz; ihtiyacını dar bir görünümden alır, yazacağını giden kutusuna koyar. Davranışı durumsuz bir nesnedir; durumu otoritenin tuttuğu tipli yuvadadır. |
+| Alt sistem sözleşmesi | `qp-subsystem` | Otorite ile alt sistemler arasındaki tek arayüz: `Subsystem`, oturum görünümü (`SessionView`), bağlam (`SessionCtx`), fazlar, durum yuvaları (`Slots`, `PerWorld`), işlem kaydı, sorgu/girdi/konu kaydı. |
+| Faz | phase (`Phase`) | Otoritenin alt sistemleri çağırdığı adlı, sabit an (denetim, açılım, kayıttan sonra, veriden sonra, öneri süresi, abonelik, bağlantı, sonuç kesinleşti, uyarlama). Her fazın toplama ve yazma adımı ayrıdır; otorite onu bugün o işin yapıldığı satırda çağırır, böylece bildirim sırası belirlenimci kalır. |
+| Bileşim | composition (`qp-session`, `Session`) | Otoriteyi standart alt sistemlerin kaydıyla kuran ince kök: `Session` = otorite + kayıt satırları. Yeni alt sistem buraya bir satırla girer. |
+| İşlem kaydı | op handler (`OpHandler`) | Bir alt sistemin bir işlem türü için verdiği açılım ve politika (yetki sınıfı, önerilebilirlik, ajan sınıfı, kamu dünyası eşlemesi, okuyucu gizliliği). Kayıtta karşılığı olmayan işlem bugünkü hatayı alır. |
+| Değer kaynağı | value source (`ValueSource`) | Veri düzleminde bir adresin değerini veren kayıt kolu: bir alt sistem "bu serinin değerini ben veririm" der (RL1'in program çıktısı). |
+| Canlı yol | live path (`data/live`) | Bar değişince koşulların, niyetlerin ve canlı kapsüllerin artımlı değerlendirmesi. Çekirdektedir; yeni koşul türleri koşul kaydıyla bağlanır. |
+| Tasarım kaydı | design registry (`Designs`; varsayılanı `qp-designs`) | Derleyicinin adlı tasarımlara (yüz, açılmış kapsül, katman terimi) eriştiği fonksiyon tablosu. Derleyici tasarım tarafını tanımaz; kaydı dışarıdan alır. |
+
 ## Kapsülün yaşam döngüsü
 
 R3'ten itibaren kapsülün hikâye aşamaları `Stage`'dir (yukarıda; `docs/CAPSULE.md` §3).

@@ -1,6 +1,6 @@
 # RF1 — Bölme planı (v2)
 
-Durum: **v2, karar noktasında.** v1 (`eb86a055`) iki bağımsız eleştiriden geçti
+Durum: **v3 — onaylandı (`DECISION.md`, 2026-11-23); v2 + §11 düzeltmeleri bağlayıcı.** v1 (`eb86a055`) iki bağımsız eleştiriden geçti
 (`experiments/critique-1.md` uygulanabilirlik, `critique-2.md` sonraki round'ların yükü); cevaplar
 §9'da. Kod değişmedi. Ölçümler `05430e06` kodunda, `scripts/refactor/graph.py` ile (dökümler ve
 eşlemeler `experiments/graph/`). Satırlar `arch-check` sayımıdır.
@@ -330,3 +330,61 @@ Eleştiri 1: uygulanabilirlik (`critique-1.md`, 19 bulgu). Eleştiri 2: sonraki 
 3. **Crate adları:** `qp-ops`, `qp-subsystem`, `qp-authority`, `qp-watch`, `qp-read`,
    `qp-viewer`, `qp-replica`, `qp-replayhost`, `qp-look`, `qp-glyph`, `qp-designs`, `qp-voice`.
    Uygun mu?
+
+## 11. Karar noktasından sonra (v3; bağlayıcı)
+
+Arkin v2'yi onayladı (`DECISION.md`). Üç sorunun cevabı ve dört düzeltme plana şöyle işlendi.
+
+**Cevaplar:**
+
+- **Çekirdek istisnası.** `qp-authority` tek adlı istisnadır; tavanı ölçülen değerdir ve
+  13.000'i geçemez. Tavan mandallıdır.
+- **Çekirdek donuktur.** Sonraki round'lar çekirdeğe kayıt satırı dışında dokunmaz.
+- **Kalan ayrım borç olarak yazılır.** Kapsül yaşamı, iddia/itiraz/yorum ve canlı yolun
+  ayrılması `docs/DEBT.md`'ye adıyla girer. Aday zamanı: RS1'den sonra.
+- **Çekirdek 13.000'i aşarsa yeniden sorulur.** Bu, okuma ya da yansı dalgası çekirdekte kalırsa
+  olur. Soruyla birlikte hangi dalganın neden tutmadığı ve çekirdeğin yeni boyutu getirilir.
+- **Ad notu.** `qp-drawing` (alan) ile `qp-drawings` (oturum) adlarını R7 ayırt edilir biçimde
+  verecek. Bu round'un işi değil.
+
+**D1 — sicilin kapısı.** İki taslak kanca açılır; ikisinin de tipi, çağrı noktası ve birer
+sınaması olur:
+
+- **`Settled` fazı (sonuç kesinleşti).** Bugün sonucun yazıldığı satırda çağrılır
+  (`capsule/settled.rs`, iddianın ve kapsülün sonucu).
+- **İddia türü kaydı.**
+
+Bayt eşitliğini tutmuyorsa bu kancalar yapılmaz. Bunun yerine raporda "RS1 çekirdeğin şu
+dosyalarına dokunacak" listesi adıyla verilir.
+
+**D2 — yeni doküman nesnesi.**
+
+- `ChangeOp` için kayıt kurulmaz.
+- `docs/ARCHITECTURE.md`'ye "Yeni doküman nesnesi nasıl eklenir" bölümü yazılır: dokunulacak
+  dosyaların tam listesi, hedef "otorite 0 dosya".
+- `qp-ops`'ta pay en az 2,5 bin olmalı:
+  - Veri düzlemi ile değer önbelleği (`plane`, `values`; gerekirse `present`) ayrı bir crate'e
+    ayrılır: `qp-plane`. Ayrım S2'de `graph.py --map` ile ölçülür.
+  - Hata kurucusu (`error`, `suggest`) iki crate'in de altında kalır: ya `qp-plane`'de ya da
+    ölçüme göre en alttaki crate'te.
+  - Payı en az 2,5 bin tutmuyorsa nedeni ölçümle gösterilir.
+
+**D3 — değer kaynağı.** Veri düzleminde değer kaynağı için bir kayıt kolu açılır (taslak kanca).
+Bir alt sistem "bu adresin değerini ben veririm" diyebilir. RL1'in program çıktısı buradan girer.
+
+**D4 — sıra.**
+
+- Dalga sırası: S3.0 → S3.1 (`qp-watch`) → **E** → S3.2 (`qp-read`) → S3.3 (yansı,
+  görüntüleyici, bileşim, barındırma).
+- `Tally` sınaması işlem kaydının yanında bir fazı, bir sorguyu ve bir konuyu da kullanır.
+
+**Küçük notlar:**
+
+- **`Deref` yalnız çağrı yerlerini korumak için.** Yeni kod `Deref`'e yaslanmaz, `sub::<T>()`
+  kullanır. Bu, `qp-session` README'sine yazılır.
+- **Boş kaydın maliyeti.** Kayıt boşken faz çağrılarının maliyeti S3.0 sonunda bir kez ölçülür:
+  K17 ve K52.
+- **Sözlük önce.** `docs/CONCEPTS.md` adları kod yazılmadan önce girer: alt sistem, alt sistem
+  sözleşmesi, faz, bileşim, işlem kaydı, tasarım kaydı, canlı yol, değer kaynağı.
+- **Geri dönen dalgalar raporda.** Her biri nedeniyle ve bir sonraki denemenin neye ihtiyaç
+  duyacağıyla yazılır.

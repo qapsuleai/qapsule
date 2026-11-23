@@ -25,6 +25,17 @@ gerçek veriyle (GARAN, günlük) karşılaştırma sayfası; `oltan` (R5) ve ba
   ("Öneriler", "Arkin'e sorular"): K83 bugün kod kopyalamayı yasaklıyor; MIT/Apache projelerde
   kod düzeyinde inceleme ve uyarlamanın sınırı yeni bir karar ister.
 
-## 2. Son kabul (K2)
+## 2. Son kabul (K2) — 2026-11-23
 
-(Bekliyor.)
+Sunulan: `tavek` / `tavek-tel` çekirdekte (görünüş kaydı, ortak grafik alfabesi, köken çizgileri ve
+seviye etiketleri, eşlik eden yüz `zemre`), sözleşme ve `design-check` (P1–P13, H1–H3 geçiyor),
+Y01–Y37 şartnamesi, 30 yüzey maketi, proje becerisi, insan testi v4 paketi, E1 ölçümleri (gri
+düzeltmesi sonrası bütün öğelerde eşik altı 0), önce/sonra görseli, bilinen eksikler listesi.
+Soru: "profesyonel ve güvenilir" bulup kabul ediyor musunuz; kabulde gösterim varsayılanı
+`oltan` → `tavek` olur.
+
+**Arkin'in cevabı (aynen):** "Kabul, varsayılanı değiştir"
+
+Uygulama: gösterim varsayılanı `tavek` (telefon profili `tavek-tel`); protokol varsayılanı `r4`
+ve var olan altınlar değişmez. İnsan testi v4'ün öbür katılımcılarının sonuçları sonradan
+`human-test/RESULTS.md`'ye eklenir.

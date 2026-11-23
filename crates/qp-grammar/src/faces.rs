@@ -27,7 +27,8 @@
 use qp_schema::View;
 
 use crate::depth;
-use crate::provider::{DataProvider, HeadlineParts};
+use crate::designs::HeadlineFn;
+use crate::provider::DataProvider;
 use qp_look::error::{ErrorKind, GrammarError};
 use qp_look::look::Look;
 
@@ -41,12 +42,6 @@ pub type FaceViewFn = fn(
     p: &dyn DataProvider,
     id: &str,
 ) -> Result<View, GrammarError>;
-
-/// A face design's headline template (R4/H-FP): the headline sentence from the reader's
-/// headline pieces, in the pieces' language ([`HeadlineParts::lang`]). Deterministic;
-/// at most 80 characters (SPEC §2(b)); for a redacted reader ([`HeadlineParts::redacted`])
-/// it must not add digits (the pieces have none).
-pub type HeadlineFn = fn(&HeadlineParts) -> String;
 
 /// One face design.
 #[derive(Debug, Clone, Copy)]
@@ -220,20 +215,6 @@ pub fn headline_template(name: Option<&str>) -> Result<Option<HeadlineFn>, Gramm
     Ok(by_name(name)?.headline)
 }
 
-/// The face's `headline` text for `finding`: design `template`'s output over the
-/// provider's pieces when both exist, else the capsule's sentence
-/// ([`DataProvider::headline`]).
-#[must_use]
-pub fn headline_text(
-    template: Option<HeadlineFn>,
-    finding: &str,
-    p: &dyn DataProvider,
-) -> Option<String> {
-    template
-        .and_then(|t| p.headline_parts(finding).map(|hp| t(&hp)))
-        .or_else(|| p.headline(finding))
-}
-
 /// The face view of `finding` by design `face` (`None`: the default).
 ///
 /// # Errors
@@ -266,7 +247,7 @@ pub fn face_view_in(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{compile, CompileOptions, MemProvider};
+    use crate::{compile, CompileOptions, HeadlineParts, MemProvider};
     use qp_schema::capsule::{Stage, Validity};
     use qp_schema::protocol::Language;
     use qp_schema::scene::Prim;

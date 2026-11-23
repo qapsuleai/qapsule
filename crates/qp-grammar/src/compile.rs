@@ -11,6 +11,7 @@ use qp_schema::scene::{
     Align, DataSource, Lod, PixelRect, Prim, Rgba, SceneDesc, SceneEmphasis, ScenePanel, XMap, YMap,
 };
 
+use crate::designs::Designs;
 use crate::draw::{draw, est_width, rect, Geo};
 use crate::frame::Frame;
 use crate::layer::{prepare, Geom, Prepared};
@@ -99,6 +100,9 @@ pub struct CompileOptions {
     /// (RD2/C2a) A look record that is not registered (design trials, tests); overrides
     /// `look`.
     pub look_record: Option<&'static qp_look::look::Look>,
+    /// (RF1/G2b) The design registry the compiler reaches the named designs through
+    /// (faces' headline templates, open designs' text fields and terms).
+    pub designs: &'static Designs,
 }
 
 /// (RD2/C2a) The pointer's place in data terms: a slot and, optionally, a price on the
@@ -112,9 +116,17 @@ pub struct Cursor {
 }
 
 impl CompileOptions {
-    /// Options for a `width` x `height` frame, everything else default.
+    /// Options for a `width` x `height` frame with the product's designs, everything else
+    /// default.
     #[must_use]
     pub fn new(width: u32, height: u32) -> Self {
+        crate::registry::options(width, height)
+    }
+
+    /// (RF1/G2b) Options for a `width` x `height` frame compiled with `designs`, everything
+    /// else default.
+    #[must_use]
+    pub fn with_designs(width: u32, height: u32, designs: &'static Designs) -> Self {
         Self {
             width,
             height,
@@ -130,6 +142,7 @@ impl CompileOptions {
             roles: false,
             cursor: None,
             look_record: None,
+            designs,
         }
     }
 }

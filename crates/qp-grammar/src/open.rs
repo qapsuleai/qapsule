@@ -24,27 +24,13 @@ use qp_schema::grammar::View;
 use qp_schema::protocol::{CapsuleVoice, HitInfo, Language, OpenDepth};
 use qp_schema::Fact;
 
+use crate::designs::DeviceCheck;
 use crate::provider::DataProvider;
 use qp_look::error::GrammarError;
 use qp_look::look::Look;
 
 pub mod nobra;
 pub mod tesir;
-
-/// (R5/M20, K48) What the device found when it checked the open capsule on its own data
-/// (the viewer's check; `qp_session::viewer::TrustState`). The authority has none.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DeviceCheck {
-    /// The authority's settled claim; the device did not check it ("verified by the
-    /// server").
-    Server,
-    /// The device's data does not cover it yet ("checking on this device").
-    Checking,
-    /// Checked on the device's own data ("checked on this device").
-    Device,
-    /// The device's data contradicts it ("sources differ").
-    Differs,
-}
 
 /// The capsule depth's view of design `name`.
 pub type ViewFn = fn(

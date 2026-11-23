@@ -42,10 +42,7 @@ pub fn compile(
             ),
         )
     })?;
-    let headline = match opts.face.as_deref() {
-        Some(n) => crate::faces::headline_template(Some(n))?,
-        None => None,
-    };
+    let headline = (opts.designs.headline_template)(opts.face.as_deref())?;
     if view.x.kind != ScaleKind::Time {
         return Err(GrammarError::new(
             ErrorKind::Invalid,
@@ -121,6 +118,7 @@ pub fn compile(
     let mut fr = Frame {
         p: provider,
         headline,
+        designs: opts.designs,
         look,
         theme,
         bar_series: bar_series.clone(),
@@ -542,7 +540,7 @@ pub fn compile(
     }
 
     // (R5/m17-int, K49) Glossary terms of a capsule scene under a voice.
-    let terms = crate::terms::mark(&mut scene_panels, provider, look);
+    let terms = crate::terms::mark(&mut scene_panels, provider, look, opts.designs);
 
     // (R5/T3) Type roles: each text's font from its role (marks: by size, glyph texts:
     // `glyph`); the role itself stays in the scene only when asked for.

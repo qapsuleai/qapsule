@@ -12,7 +12,8 @@
 
 mod support;
 
-use qp_grammar::open::{self, DeviceCheck, TextInput};
+use qp_grammar::designs::DeviceCheck;
+use qp_grammar::open::{self, TextInput};
 use qp_grammar::{compile, CompileOptions, MemProvider};
 use qp_schema::capsule::{
     Direction, Edge, EvidenceFamily, FactMeaning, Geometry, LedgerStat, License, LicenseClass,

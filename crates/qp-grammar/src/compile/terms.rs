@@ -33,6 +33,7 @@
 use qp_schema::protocol::GlossEntry;
 use qp_schema::scene::{Align, PixelRect, Prim, ScenePanel, TermMark};
 
+use crate::designs::Designs;
 use crate::draw::{est_width, text_metrics};
 use crate::provider::DataProvider;
 use qp_look::look::Look;
@@ -131,7 +132,12 @@ pub fn find(text: &[char], cue: &[char]) -> Option<(usize, usize)> {
 #[allow(clippy::too_many_lines)]
 /// Marks the glossary terms of every capsule text layer in `panels` (see the module docs)
 /// and returns them in paint order.
-pub(crate) fn mark(panels: &mut [ScenePanel], p: &dyn DataProvider, look: &Look) -> Vec<TermMark> {
+pub(crate) fn mark(
+    panels: &mut [ScenePanel],
+    p: &dyn DataProvider,
+    look: &Look,
+    designs: &Designs,
+) -> Vec<TermMark> {
     let mut out: Vec<TermMark> = Vec::new();
     for panel in panels.iter_mut() {
         for layer in &mut panel.layers {
@@ -145,41 +151,13 @@ pub(crate) fn mark(panels: &mut [ScenePanel], p: &dyn DataProvider, look: &Look)
                 continue;
             }
             // (R5/M20) A design's layer with its own entry: the whole panel opens it, the
-            // first line is underlined (`crate::open::layer_term`).
-            if let Some(g) = crate::open::layer_term(&layer.id, finding, p) {
+            // first line is underlined (`Designs::layer_term`).
+            if let Some(g) = (designs.layer_term)(&layer.id, finding, p) {
                 if !out.iter().any(|t| t.term == g.term) {
-                    if let Some(Prim::Text {
-                        x,
-                        baseline,
-                        px,
-                        text,
-                        color,
-                        ..
-                    }) = layer.prims.iter().find(|q| matches!(q, Prim::Text { .. }))
-                    {
-                        let size = f64::from(*px);
-                        let (adv, _, _) = text_metrics(look, size);
-                        #[allow(clippy::cast_possible_truncation)]
-                        let under = baseline + (size * 0.18).round().max(2.0) as i32;
-                        let w = u32::try_from(est_width(text, size, adv).max(1)).unwrap_or(1);
-                        let line = Prim::Rect {
-                            x: *x,
-                            y: under,
-                            w,
-                            h: 1,
-                            color: *color,
-                        };
-                        out.push(TermMark {
-                            term: g.term,
-                            text: g.text,
-                            layer: layer.id.clone(),
-                            hit: panel.rect,
-                        });
-                        layer.prims.push(line);
-                    }
+                    underline_layer(&mut out, &mut layer.prims, &layer.id, panel.rect, g, look);
                 }
             }
-            if !crate::open::voice_terms_in(&layer.id) {
+            if !(designs.voice_terms_in)(&layer.id) {
                 continue;
             }
             let Some(voice) = p.voice(finding) else {
@@ -246,6 +224,47 @@ pub(crate) fn mark(panels: &mut [ScenePanel], p: &dyn DataProvider, look: &Look)
         }
     }
     out
+}
+
+/// (R5/M20; RF1/G2b: split out of [`mark`]) A design layer's own glossary entry `g`: the
+/// layer's first text line is underlined and the term's box is the whole panel `hit`.
+fn underline_layer(
+    out: &mut Vec<TermMark>,
+    prims: &mut Vec<Prim>,
+    layer: &str,
+    hit: PixelRect,
+    g: GlossEntry,
+    look: &Look,
+) {
+    if let Some(Prim::Text {
+        x,
+        baseline,
+        px,
+        text,
+        color,
+        ..
+    }) = prims.iter().find(|q| matches!(q, Prim::Text { .. }))
+    {
+        let size = f64::from(*px);
+        let (adv, _, _) = text_metrics(look, size);
+        #[allow(clippy::cast_possible_truncation)]
+        let under = baseline + (size * 0.18).round().max(2.0) as i32;
+        let w = u32::try_from(est_width(text, size, adv).max(1)).unwrap_or(1);
+        let line = Prim::Rect {
+            x: *x,
+            y: under,
+            w,
+            h: 1,
+            color: *color,
+        };
+        out.push(TermMark {
+            term: g.term,
+            text: g.text,
+            layer: layer.to_owned(),
+            hit,
+        });
+        prims.push(line);
+    }
 }
 
 /// Where glossary entry `g`'s term is drawn in `line` (the first cue that matches).

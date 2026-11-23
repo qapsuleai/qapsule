@@ -100,7 +100,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-grammar/src/compile/layer/prepare.rs::prepare` | 883 |
 | `crates/qp-grammar/src/stories/pavka/extend.rs::extend` | 592 |
 | `crates/qp-session/src/ops/gops.rs::expand_grammar` | 571 |
-| `crates/qp-grammar/src/compile/scene.rs::compile` | 564 |
+| `crates/qp-grammar/src/compile/scene.rs::compile` | 562 |
 | `crates/qp-session/src/read/query.rs::query` | 372 |
 | `crates/qp-session/src/authority/session/command.rs::command` | 300 |
 | `crates/qp-host/src/live_trades/compare.rs::compare_trades` | 294 |
@@ -177,7 +177,6 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-host/src/mcp_serve/host.rs::post` | 117 |
 | `crates/qp-mcp/src/surfaces/query.rs::shape` | 117 |
 | `crates/qp-session/src/read/interact/scenes.rs::transition` | 117 |
-| `crates/qp-grammar/src/compile/terms.rs::mark` | 116 |
 | `crates/qp-session/src/capsule/watch.rs::expand_watch` | 116 |
 | `crates/qp-session/src/read/interact/style.rs::set_style` | 116 |
 | `crates/qp-shellcore/src/gallery/build_impl.rs::shots` | 116 |
@@ -226,6 +225,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-session/src/ops/expand/describe.rs::summarize` | 94 |
 | `crates/qp-capsule/src/realize/plan.rs::new` | 93 |
 | `crates/qp-grammar/src/compile/emphasis.rs::resolve_emphasis` | 93 |
+| `crates/qp-grammar/src/compile/terms.rs::mark` | 93 |
 | `crates/qp-host/src/live/rest.rs::trades` | 93 |
 | `crates/qp-session/src/host/replayhost/control.rs::host_control` | 93 |
 | `crates/qp-session/src/read/query/view.rs::screen_info` | 93 |

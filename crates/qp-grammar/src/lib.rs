@@ -13,11 +13,13 @@
 //!   The same view and data give the same scene, bit for bit, on every target.
 
 pub mod compile;
+pub mod designs;
 pub mod faces;
 pub mod feeds;
 pub mod open;
 mod present;
 pub mod provider;
+mod registry;
 pub mod stories;
 pub mod transitions;
 
@@ -26,4 +28,5 @@ pub use compile::{scale, terms};
 pub use present::{depth, gesture, motion};
 
 pub use compile::{compile, CompileOptions, Cursor};
+pub use designs::Designs;
 pub use provider::{DataProvider, HeadlineParts, MemProvider, SeriesKind};

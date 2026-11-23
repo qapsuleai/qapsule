@@ -199,7 +199,7 @@ pub fn view(
     let mut layers = vec![glyph];
     let voiced = p.voice(finding).is_some();
     let has_headline = voiced
-        || crate::faces::headline_text(Some(headline), finding, p).is_some()
+        || crate::designs::headline_text(Some(headline), finding, p).is_some()
         || p.headline(finding).is_some();
     if has_headline {
         let mut h = layer("headline", Mark::Text, 0);

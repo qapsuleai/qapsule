@@ -2,8 +2,9 @@
 //! headlines (every face design), open capsule text fields (`ask/…`, `open.*`), glossary
 //! terms (voice terms and a design's own entries) and story charts (every story design).
 
+use qp_grammar::designs::{self, DeviceCheck};
 use qp_grammar::open::nobra::ASKS;
-use qp_grammar::open::{self, Check, DeviceCheck, OpenCtx, OpenTap, TextInput};
+use qp_grammar::open::{self, Check, OpenCtx, OpenTap, TextInput};
 use qp_grammar::stories::{self, StoryInput};
 use qp_grammar::{depth, faces, DataProvider as _};
 use qp_grammar::{CompileOptions, MemProvider};
@@ -104,7 +105,7 @@ fn charac_face_headlines() {
         for f in ["fnd-brk", "fnd-parts", "fnd-sq", "fnd-rsi", "nope"] {
             b.note(
                 &format!("headline_text.{face}.{f}"),
-                &format!("{:?}", faces::headline_text(t, f, &tr)),
+                &format!("{:?}", designs::headline_text(t, f, &tr)),
             );
         }
         for look_name in looks() {

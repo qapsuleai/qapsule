@@ -147,7 +147,7 @@ pub trait DataProvider {
     }
     /// (R5/M20, K48) The device's own check of the capsule presenting `finding` (a viewer
     /// that checked it on its own data). Default: none (the authority).
-    fn device_check(&self, finding: &str) -> Option<crate::open::DeviceCheck> {
+    fn device_check(&self, finding: &str) -> Option<crate::designs::DeviceCheck> {
         let _ = finding;
         None
     }
@@ -185,7 +185,7 @@ pub struct MemProvider {
     parts: BTreeMap<String, HeadlineParts>,
     voices: BTreeMap<String, qp_schema::protocol::CapsuleVoice>,
     lang: Option<Language>,
-    checks: BTreeMap<String, crate::open::DeviceCheck>,
+    checks: BTreeMap<String, crate::designs::DeviceCheck>,
 }
 
 impl Default for MemProvider {
@@ -340,7 +340,7 @@ impl MemProvider {
 
     /// (R5/M20) Sets the device's check of the capsule presenting `finding`.
     #[must_use]
-    pub fn with_check(mut self, finding: &str, check: crate::open::DeviceCheck) -> Self {
+    pub fn with_check(mut self, finding: &str, check: crate::designs::DeviceCheck) -> Self {
         self.checks.insert(finding.to_owned(), check);
         self
     }
@@ -468,7 +468,7 @@ impl DataProvider for MemProvider {
     fn reader_lang(&self) -> Option<Language> {
         self.lang
     }
-    fn device_check(&self, finding: &str) -> Option<crate::open::DeviceCheck> {
+    fn device_check(&self, finding: &str) -> Option<crate::designs::DeviceCheck> {
         self.checks.get(finding).copied()
     }
 }

@@ -92,12 +92,12 @@ pub struct OpenExtra {
 impl TrustState {
     /// The grammar's form of it (an open capsule design's trust row).
     #[must_use]
-    pub fn device_check(self) -> qp_grammar::open::DeviceCheck {
+    pub fn device_check(self) -> qp_grammar::designs::DeviceCheck {
         match self {
-            TrustState::Server => qp_grammar::open::DeviceCheck::Server,
-            TrustState::Checking => qp_grammar::open::DeviceCheck::Checking,
-            TrustState::Device => qp_grammar::open::DeviceCheck::Device,
-            TrustState::Differs => qp_grammar::open::DeviceCheck::Differs,
+            TrustState::Server => qp_grammar::designs::DeviceCheck::Server,
+            TrustState::Checking => qp_grammar::designs::DeviceCheck::Checking,
+            TrustState::Device => qp_grammar::designs::DeviceCheck::Device,
+            TrustState::Differs => qp_grammar::designs::DeviceCheck::Differs,
         }
     }
 }
@@ -172,7 +172,7 @@ impl DataProvider for Reader<'_> {
     fn reader_lang(&self) -> Option<qp_schema::protocol::Language> {
         self.extra.lang.or_else(|| self.inner.reader_lang())
     }
-    fn device_check(&self, finding: &str) -> Option<qp_grammar::open::DeviceCheck> {
+    fn device_check(&self, finding: &str) -> Option<qp_grammar::designs::DeviceCheck> {
         let _ = finding;
         self.extra.check.map(TrustState::device_check)
     }

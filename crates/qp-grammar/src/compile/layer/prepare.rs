@@ -80,7 +80,7 @@ pub(crate) fn prepare(
         let voice = fr.p.voice(f);
         let headline = match &voice {
             Some(v) => Some(v.headline.clone()),
-            None => crate::faces::headline_text(fr.headline, f, fr.p),
+            None => crate::designs::headline_text(fr.headline, f, fr.p),
         };
         let ledger = match &voice {
             Some(v) => Some(v.ledger.clone()),
@@ -97,7 +97,7 @@ pub(crate) fn prepare(
             .encoding
             .text
             .as_deref()
-            .and_then(|k| crate::open::field_text(k, f, fr.p).map(|t| (k.to_owned(), t)));
+            .and_then(|k| (fr.designs.field_text)(k, f, fr.p).map(|t| (k.to_owned(), t)));
         for row in &mut all_rows {
             if let Some((k, t)) = &asked {
                 row.texts.insert(k.clone(), t.clone());
@@ -114,7 +114,7 @@ pub(crate) fn prepare(
         }
         // (R5/M20) An open capsule design's own field (`open.*`, `crate::open::text`).
         if let Some(k) = layer.encoding.text.as_deref() {
-            if let Some(t) = crate::open::text(k, f, fr.p) {
+            if let Some(t) = (fr.designs.open_text)(k, f, fr.p) {
                 for row in &mut all_rows {
                     row.texts.insert(k.to_owned(), t.clone());
                 }

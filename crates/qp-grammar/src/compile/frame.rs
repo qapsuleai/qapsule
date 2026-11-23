@@ -78,7 +78,9 @@ pub(crate) fn bucket_count(count: u64, k: u64) -> u64 {
 pub(crate) struct Frame<'a> {
     pub p: &'a dyn DataProvider,
     /// (R4/H-FP) The face design's headline template (`CompileOptions::face`).
-    pub headline: Option<crate::faces::HeadlineFn>,
+    pub headline: Option<crate::designs::HeadlineFn>,
+    /// (RF1/G2b) The design registry (`CompileOptions::designs`).
+    pub designs: &'static crate::designs::Designs,
     /// (R5/T3) The look (`CompileOptions::look`).
     pub look: &'static qp_look::look::Look,
     pub theme: Theme,

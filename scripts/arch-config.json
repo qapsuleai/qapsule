@@ -157,15 +157,6 @@
     {
       "id": "İ6",
       "rule": "file.hard",
-      "item": "crates/qp-ops/src/expand/op.rs",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var.",
-      "max": 910,
-      "max_note": "RG1 sonu satır sayısı (RF1/A2: tek fonksiyonlu dosyaya tavan)"
-    },
-    {
-      "id": "İ6",
-      "rule": "file.hard",
       "item": "crates/qp-grammar/src/compile/layer/prepare.rs",
       "status": "onaylandı (K85, 2026-11-22)",
       "reason": "Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var.",

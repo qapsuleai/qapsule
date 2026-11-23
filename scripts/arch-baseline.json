@@ -58,7 +58,7 @@
    }
   },
   "fn.lines": {
-   "count": 177,
+   "count": 176,
    "items": {
     "crates/qp-capsule/src/comment/check.rs::validate": 239,
     "crates/qp-capsule/src/engine/run.rs::run_bar": 240,
@@ -148,7 +148,6 @@
     "crates/qp-ops/src/canon/origin.rs::resolve_origins": 142,
     "crates/qp-ops/src/expand.rs::check_bind": 96,
     "crates/qp-ops/src/expand/describe.rs::summarize": 94,
-    "crates/qp-ops/src/expand/op.rs::expand_op": 898,
     "crates/qp-ops/src/expand/undo.rs::expand_remove": 100,
     "crates/qp-ops/src/expand/undo.rs::expand_undo": 153,
     "crates/qp-ops/src/gops.rs::expand_grammar": 571,
@@ -253,7 +252,7 @@
     "qp-live": 23,
     "qp-matriks": 3,
     "qp-mcp": 17,
-    "qp-ops": 22,
+    "qp-ops": 20,
     "qp-plane": 1,
     "qp-render": 1,
     "qp-session": 48,

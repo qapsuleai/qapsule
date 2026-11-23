@@ -30,3 +30,5 @@ charac_session_transcripts_surface
 charac_session_viewer_two_readers
 charac_session_worlds_flow
 charac_session_worlds_single
+charac_session_order_commands_full
+charac_session_order_data_full

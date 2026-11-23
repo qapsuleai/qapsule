@@ -585,6 +585,7 @@ fn watch_rig() -> Rig {
     r.hello("a", "ana", "headless");
     r.hello("b", "bot", "headless");
     r.hello("e", "eve", "headless");
+    r.hello("h", "host", "headless");
     for c in ["a", "b", "e"] {
         r.sub(c, "w", json!({"kind":"intents"}));
         r.sub(c, "ch", json!({"kind":"changes"}));
@@ -638,6 +639,10 @@ fn charac_session_ops_watch() {
         ("set_intent_active.err.watch", "b", "active"),
         ("remove.err.watch", "b", "remove"),
         ("remove.err.watch_other", "e", "remove"),
+        ("set_intent_active.err.watch_hidden", "h", "active"),
+        ("remove.err.watch_hidden", "h", "remove"),
+        ("remove.err.missing_hides_watches", "h", "remove_missing"),
+        ("remove_watch.err.host", "h", "own"),
     ] {
         let mut rig = watch_rig();
         let id = made(&mut rig);
@@ -645,6 +650,7 @@ fn charac_session_ops_watch() {
             "own" => json!([{"op":"remove_watch","intent":id}]),
             "active" => json!([{"op":"set_intent_active","intent":id,"active":false}]),
             "remove" => json!([{"op":"remove","id":id}]),
+            "remove_missing" => json!([{"op":"remove","id":"watch-3-9"}]),
             other => json!([{"op":"remove_watch","intent":other}]),
         };
         on(&mut b, name, &mut rig, &[], conn, ops);

@@ -141,6 +141,23 @@ fn charac_session_worlds_flow() {
             r.query(&format!("{l}_{c}"), c, q.clone());
         }
     }
+    // The validator's real verdicts (host side): a licence catch the restricted writer
+    // was told as an unsupported number.
+    let audit: Vec<String> = r
+        .rig
+        .session()
+        .comment_audit()
+        .iter()
+        .map(|a| {
+            format!(
+                "{} accepted={} reasons={}",
+                a.principal,
+                a.accepted,
+                serde_json::to_string(&a.reasons).unwrap()
+            )
+        })
+        .collect();
+    r.book.note("w.comment_audit", &audit.join(" ; "));
     r.finish();
     book.check();
 }

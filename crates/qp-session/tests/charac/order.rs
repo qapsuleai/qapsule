@@ -83,13 +83,25 @@ const T0: i64 = 1_760_000_000_000;
 
 #[test]
 fn charac_session_order_commands() {
-    let mut book = Book::new("order-commands");
+    commands("order-commands", true);
+}
+
+/// The same scenario on the full (non-incremental) path (`set_incremental(false)`).
+#[test]
+fn charac_session_order_commands_full() {
+    commands("order-commands-full", false);
+}
+
+fn commands(name: &'static str, incremental: bool) {
+    let mut book = Book::new(name);
     let mut init = init_of("06-proposal-reject-expire");
     init["principals"]
         .as_array_mut()
         .unwrap()
         .push(json!({"id":"viewer","author":{"kind":"human","name":"viewer"},"role":"viewer"}));
-    let mut r = Run::new(&mut book, "cmd", Rig::json(init));
+    let mut rig = Rig::json(init);
+    rig.session_mut().set_incremental(incremental);
+    let mut r = Run::new(&mut book, "cmd", rig);
     // Open: before hello, a bad hello, then four principals (and arkin twice).
     r.send(
         "before_hello",
@@ -240,8 +252,20 @@ fn charac_session_order_commands() {
 /// comments; then every data event of the transcript, each one a case.
 #[test]
 fn charac_session_order_data() {
-    let mut book = Book::new("order-data");
-    let mut r = Run::new(&mut book, "data", Rig::of("69-watch"));
+    data("order-data", true);
+}
+
+/// The same scenario on the full (non-incremental) path.
+#[test]
+fn charac_session_order_data_full() {
+    data("order-data-full", false);
+}
+
+fn data(name: &'static str, incremental: bool) {
+    let mut book = Book::new(name);
+    let mut rig = Rig::of("69-watch");
+    rig.session_mut().set_incremental(incremental);
+    let mut r = Run::new(&mut book, "data", rig);
     r.hello("a", "ana", "phone");
     r.hello("b", "bot", "headless");
     r.hello("e", "eve", "headless");

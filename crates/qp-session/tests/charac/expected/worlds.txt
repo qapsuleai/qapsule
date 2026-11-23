@@ -120,4 +120,5 @@ w.117.q_intents_C  64616346d5c463c4  | C>result(q_intents_C,seq=16,items)
 w.118.q_comments_C  fcd8ba205e64e6dd  | C>result(q_comments_C,seq=16,items)
 w.119.q_doc_C  ff7c87fb03d9d6ca  | C>result(q_doc_C,seq=16,document)
 w.120.q_describe_C  1b917d9b36b1cb68  | C>result(q_describe_C,seq=16,description)
+w.comment_audit  -  | aa accepted=true reasons=[] ; cc accepted=true reasons=[] ; cc accepted=false reasons=[{"check":"license","code":"licensed_value","token":"5,23","sentence":0,"hint":"This number is licensed data the reader may not see; remove it."}] ; aa accepted=false reasons=[{"check":"advice","code":"advice_word","token":"fırsat","sentence":0,"hint":"Describe what happened; do not advise (no buy/sell, opportunity, target price, should)."}]
 w.final  693b7f57beed5a2d  | log=16 doc=b38cd17d3710a9a1 replay=equal

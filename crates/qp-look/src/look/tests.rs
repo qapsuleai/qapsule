@@ -257,7 +257,9 @@ fn oltan_meets_the_hard_thresholds() {
         // (R5/fix47, A46) The open capsule's headline when the claim no longer holds is
         // text (19 px semibold, 600 not counted as bold): 4.5:1 on the ground and the
         // surface. The chart's axis line is a non-text element: 3:1 (WCAG 1.4.11).
-        let head = t.token(crate::look::NO_LONGER_HEADLINE).unwrap_or([0; 4]);
+        let head = t
+            .token(super::super::look::NO_LONGER_HEADLINE)
+            .unwrap_or([0; 4]);
         for bg in [t.bg, t.surface] {
             let k = contrast(head, bg);
             assert!(k >= 4.5, "{}: no-longer headline {k:.2}", t.name);

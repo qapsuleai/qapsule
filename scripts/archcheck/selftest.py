@@ -8,7 +8,7 @@ import os
 import tempfile
 
 from . import baseline as bl
-from . import configdiff, rules
+from . import rules, selftest_config
 
 CFG = {
     "layers": [
@@ -208,7 +208,7 @@ def run():
         ok &= hit
     ok &= _orders()
     ok &= _ceilings()
-    ok &= _config_diff()
+    ok &= selftest_config.run(CFG, _check)
     print("self-test:", "PASS" if ok else "FAIL")
     return ok
 
@@ -255,38 +255,4 @@ def _ceilings():
             g["item"]: 31}}}}, CFG["hard_rules"])
         ok &= _check(f"ceiling: fn.lines {v} vs baseline 31 {'fails' if want else 'holds'}",
                      bool(errs) == want)
-    return ok
-
-
-def _config_diff():
-    """K-9: a loosening must cite a decision; tightening and removals pass."""
-    ok = True
-    ex = {"id": "T", "rule": "file.hard", "item": "crates/qp-b/src/x.rs", "max": 50,
-          "status": "istek", "reason": "tek fonksiyon"}
-    base = {"rules": {"fn.lines": {"count": 1, "items": {"crates/qp-b/src/a.rs::f": 90}}}}
-
-    def run(old_cfg, new_cfg, old_b=base, new_b=base):
-        return configdiff.judge(old_cfg, new_cfg, old_b, new_b).fails
-
-    ok &= _check("config-diff: new exception without a decision fails",
-                 run(CFG, dict(CFG, exceptions=[ex])) == 1)
-    ok &= _check("config-diff: new exception citing K93 passes",
-                 run(CFG, dict(CFG, exceptions=[dict(ex, status="onaylandı (K93)")])) == 0)
-    ok &= _check("config-diff: removing an exception passes", run(dict(CFG, exceptions=[ex]), CFG) == 0)
-    ok &= _check("config-diff: raising a max without a new decision fails", run(
-        dict(CFG, exceptions=[dict(ex, status="K85")]),
-        dict(CFG, exceptions=[dict(ex, status="K85", max=60)])) == 1)
-    loose = copy.deepcopy(CFG)
-    loose["budgets"]["fn_lines"] = 12
-    ok &= _check("config-diff: a raised budget without rule_changes fails", run(CFG, loose) == 1)
-    ok &= _check("config-diff: new generated file without a decision fails",
-                 run(CFG, dict(CFG, generated_files=["crates/qp-b/src/t.rs"])) == 1)
-    swap = copy.deepcopy(CFG)
-    swap["layers"][1]["order"] = ["qp-b", "qp-c"]
-    ok &= _check("config-diff: swapping a layer order fails", run(CFG, swap) == 1)
-    raised = {"rules": {"fn.lines": {"count": 1, "items": {"crates/qp-b/src/a.rs::f": 95}}}}
-    moved = {"rules": {"fn.lines": {"count": 1, "items": {"crates/qp-d/src/a.rs::f": 90}}}}
-    ok &= _check("config-diff: a raised baseline value fails", run(CFG, CFG, base, raised) == 1)
-    ok &= _check("config-diff: a moved baseline item (same fn, not larger) passes",
-                 run(CFG, CFG, base, moved) == 0)
     return ok

@@ -1,30 +1,35 @@
-"""`arch-check --config-diff` (K-9; RG1 denetim B5): prints the diff of
-scripts/arch-config.json and scripts/arch-baseline.json against a base revision and judges
-it. Tightening and removals pass. A loosening passes only when it cites a decision
-(`K<n>` or `DECISION.md`) that the base did not already cite for it:
+"""`arch-check --config-diff` (K-9; RG1 denetim B5; RF1/A denetimi O1–O4, D1, D5): prints
+the diff of scripts/arch-config.json and scripts/arch-baseline.json against a base revision
+and judges it. Tightening and removals pass. A loosening passes only with a real, new
+decision citation (citation.py: a `K<n>` row under docs/decisions/ or an existing
+`rounds/<R>/DECISION.md`, not cited anywhere in the base configuration):
 
-- a new exception / layer override: in its `status` or `reason`; a raised or dropped `max`,
-  or a changed override layer: a citation new to that entry (`status`, `reason`, `max_note`);
-- a new `generated_files` entry: written as `{"path", "reason"}`, the reason citing;
-- a new or raised baseline item: in its `note` (item written as `{"value", "note"}`); a new
-  item that only moved (same rule, same function name / file name, value not above the
-  removed one) passes as a move; `lint.allow` may spread over new crates while the rule's
-  total does not grow; a rule count may rise only by the cited new items;
-- a raised budget, a removed hard rule / forbidden name / doc glob, a crate moved to another
-  layer, or two crates swapped in a layer order: a new top-level `rule_changes` entry
-  `{"key": "budgets.fn_lines" | "hard_rules.<r>" | "forbidden_names.<n>" | "doc_globs.<g>" |
-  "layers.<crate>" | "order.<layer>", "reason": "K<n> …"}`.
+- a new exception / layer override, a raised or dropped `max`, a changed override layer:
+  in the entry's `status` / `reason` / `max_note`;
+- a new `generated_files` entry: written as `{"path", "reason"}`;
+- a new or raised baseline item: in its `note` (item written as `{"value", "note"}`). A new
+  item that replaces a vanished one (same rule, same function name / file name, value not
+  above it) passes as a move only inside the same crate or into a crate new in this
+  change; `lint.allow` may spread only onto new crates while the rule's total does not
+  grow; a rule count may rise only by the accepted new items;
+- any other configuration change that loosens — a raised budget; a removed hard rule /
+  forbidden name / doc glob; a crate moved to another layer; two crates whose relative
+  order (in any layer, whatever its name) is reversed; a layer added, removed or renamed;
+  `shell_layer` changed; any key this check does not know — needs a new top-level
+  `rule_changes` entry `{"key": "<key>", "reason": "K<n> …"}` (keys are printed).
 """
 
 import json
 import os
-import re
 import subprocess
+
+from .citation import Citer
 
 FILES = ("scripts/arch-config.json", "scripts/arch-baseline.json")
 ROUND_BASELINE = "rounds/RF1/experiments/baseline"  # default base on main (VERIFY 8)
-DECISION = re.compile(r"\bK\d+\b|DECISION\.md")
-SPREAD = ("lint.allow",)  # per-crate counts: a crate split spreads them (sum may not grow)
+SPREAD = ("lint.allow",)  # per-crate counts: a crate split spreads them onto new crates
+KNOWN = {"layers", "layer_overrides", "shell_layer", "budgets", "forbidden_names",
+         "doc_globs", "hard_rules", "generated_files", "exceptions", "rule_changes"}
 
 
 def _git(root, *args):
@@ -51,117 +56,127 @@ def find_base(root, rev=None):
     return None, "no main branch and no round baseline commit (shallow clone?)"
 
 
-def _load_rev(root, rev, path):
-    text = _git(root, "show", f"{rev}:{path}")
-    return json.loads(text) if text else {}
+class Verdict:
+    def __init__(self, citer):
+        self.citer = citer
+        self.lines, self.fails = [], 0
+        self.covered = set()
 
+    def ok(self, kind, text):
+        self.lines.append(f"{kind:9} {text}")
 
-def cites(*texts):
-    return set(DECISION.findall(" ".join(t for t in texts if isinstance(t, str))))
+    def fail(self, text, why):
+        self.fails += 1
+        self.lines.append(f"FAIL      {text}: {why}")
+
+    def loosen(self, text, *cite_texts):
+        good, bad = self.citer.fresh(*cite_texts)
+        if good:
+            self.lines.append(f"LOOSER    {text} (cites {', '.join(sorted(good))})")
+            return True
+        why = "; ".join(bad) if bad else "no decision cited"
+        self.fail(text, f"a loosening needs a new decision citation (K<n> row / rounds/<R>/DECISION.md) — {why}")
+        return False
+
+    def rule_change(self, key, text):
+        if key in self.covered:
+            self.lines.append(f"LOOSER    {text} (rule_changes[{key}])")
+        else:
+            self.fail(text, f"needs a new rule_changes entry {{\"key\": \"{key}\", \"reason\": \"K<n> …\"}}")
 
 
 def _entry_text(e):
     return [e.get(k, "") for k in ("status", "reason", "max_note", "note")] if isinstance(e, dict) else []
 
 
-def _new_cite(old, new):
-    return cites(*_entry_text(new)) - cites(*_entry_text(old))
-
-
-def _rule_changes(old_cfg, new_cfg):
-    """Keys covered by a `rule_changes` entry that is new and cites a decision."""
-    seen = {(r.get("key"), r.get("reason")) for r in old_cfg.get("rule_changes", [])}
-    return {r.get("key") for r in new_cfg.get("rule_changes", [])
-            if (r.get("key"), r.get("reason")) not in seen and cites(r.get("reason", ""))}
-
-
-class Verdict:
-    def __init__(self):
-        self.lines, self.fails = [], 0
-
-    def ok(self, kind, text):
-        self.lines.append(f"{kind:9} {text}")
-
-    def loosen(self, text, cited):
-        if cited:
-            self.lines.append(f"LOOSER    {text} (cites {', '.join(sorted(cited))})")
-        else:
-            self.fails += 1
-            self.lines.append(f"FAIL      {text}: a loosening must cite a decision (K<n> / DECISION.md)")
+def _cover(old, new, v):
+    """`rule_changes` keys that are new and carry a real, new citation."""
+    seen = {(r.get("key"), r.get("reason")) for r in old.get("rule_changes", [])}
+    for r in new.get("rule_changes", []):
+        if (r.get("key"), r.get("reason")) not in seen and v.citer.fresh(r.get("reason", ""))[0]:
+            v.covered.add(r.get("key"))
 
 
 def judge_config(old, new, v):
-    covered = _rule_changes(old, new)
+    _cover(old, new, v)
+    _judge_exceptions(old, new, v)
+    og = {g if isinstance(g, str) else g.get("path") for g in old.get("generated_files", [])}
+    ng = {g if isinstance(g, str) else g.get("path"): g for g in new.get("generated_files", [])}
+    for path in sorted(ng.keys() - og):
+        v.loosen(f"new generated file {path}", *_entry_text(ng[path]))
+    for path in sorted(og - ng.keys()):
+        v.ok("removed", f"generated file {path}")
+    ob, nb = old.get("budgets", {}), new.get("budgets", {})
+    for k in sorted(ob.keys() | nb.keys()):
+        a, b = ob.get(k), nb.get(k)
+        if a is not None and (b is None or b > a):
+            v.rule_change(f"budgets.{k}", f"budget {k}: {a} -> {b}")
+        elif b is not None and (a is None or b < a):
+            v.ok("tighter", f"budget {k}: {a} -> {b}")
+    for field in ("hard_rules", "forbidden_names", "doc_globs"):
+        a, b = set(old.get(field, [])), set(new.get(field, []))
+        for x in sorted(a - b):
+            v.rule_change(f"{field}.{x}", f"{field}: {x} removed")
+        for x in sorted(b - a):
+            v.ok("tighter", f"{field}: {x} added")
+    if old.get("shell_layer") != new.get("shell_layer") and "shell_layer" in old:
+        v.rule_change("shell_layer", f"shell_layer: {old.get('shell_layer')} -> {new.get('shell_layer')}")
+    for k in sorted((old.keys() | new.keys()) - KNOWN):
+        if not k.startswith("_") and old.get(k) != new.get(k):
+            v.rule_change(k, f"unknown configuration key `{k}` changed")
+    _judge_layers(old, new, v)
 
-    def rule_change(key, text):
-        v.loosen(text, {f"rule_changes[{key}]"} if key in covered else set())
 
+def _judge_exceptions(old, new, v):
     oe = {(e["rule"], e["item"]): e for e in old.get("exceptions", [])}
     ne = {(e["rule"], e["item"]): e for e in new.get("exceptions", [])}
     for k in sorted(oe.keys() - ne.keys()):
         v.ok("removed", f"exception {oe[k].get('id', '')} [{k[0]}] {k[1]}")
     for k in sorted(ne.keys() - oe.keys()):
-        v.loosen(f"new exception {ne[k].get('id', '')} [{k[0]}] {k[1]}", cites(*_entry_text(ne[k])))
+        v.loosen(f"new exception {ne[k].get('id', '')} [{k[0]}] {k[1]}", *_entry_text(ne[k]))
     for k in sorted(ne.keys() & oe.keys()):
         a, b = oe[k], ne[k]
         if "max" in a and ("max" not in b or b["max"] > a["max"]):
-            v.loosen(f"exception [{k[0]}] {k[1]}: max {a['max']} -> {b.get('max', 'none')}",
-                     _new_cite(a, b))
+            v.loosen(f"exception [{k[0]}] {k[1]}: max {a['max']} -> {b.get('max', 'none')}", *_entry_text(b))
         elif "max" in b and ("max" not in a or b["max"] < a["max"]):
             v.ok("tighter", f"exception [{k[0]}] {k[1]}: max {a.get('max', 'none')} -> {b['max']}")
     oo, no = old.get("layer_overrides", {}), new.get("layer_overrides", {})
     for c in sorted(oo.keys() - no.keys()):
         v.ok("removed", f"layer override {c}")
     for c in sorted(no.keys() - oo.keys()):
-        v.loosen(f"new layer override {c} -> {no[c].get('layer')}", cites(*_entry_text(no[c])))
+        v.loosen(f"new layer override {c} -> {no[c].get('layer')}", *_entry_text(no[c]))
     for c in sorted(no.keys() & oo.keys()):
         if no[c].get("layer") != oo[c].get("layer"):
-            v.loosen(f"layer override {c}: {oo[c].get('layer')} -> {no[c].get('layer')}",
-                     _new_cite(oo[c], no[c]))
-    og = {g if isinstance(g, str) else g.get("path") for g in old.get("generated_files", [])}
-    for g in new.get("generated_files", []):
-        path = g if isinstance(g, str) else g.get("path")
-        if path not in og:
-            v.loosen(f"new generated file {path}", cites(*_entry_text(g)))
-    for g in sorted(og - {g if isinstance(g, str) else g.get("path") for g in new.get("generated_files", [])}):
-        v.ok("removed", f"generated file {g}")
-    ob, nb = old.get("budgets", {}), new.get("budgets", {})
-    for k in sorted(ob.keys() | nb.keys()):
-        a, b = ob.get(k), nb.get(k)
-        if a is not None and (b is None or b > a):
-            rule_change(f"budgets.{k}", f"budget {k}: {a} -> {b}")
-        elif b is not None and (a is None or b < a):
-            v.ok("tighter", f"budget {k}: {a} -> {b}")
-    for field in ("hard_rules", "forbidden_names", "doc_globs"):
-        a, b = set(old.get(field, [])), set(new.get(field, []))
-        for x in sorted(a - b):
-            rule_change(f"{field}.{x}", f"{field}: {x} removed")
-        for x in sorted(b - a):
-            v.ok("tighter", f"{field}: {x} added")
-    _judge_layers(old, new, v, rule_change)
+            v.loosen(f"layer override {c}: {oo[c].get('layer')} -> {no[c].get('layer')}", *_entry_text(no[c]))
 
 
-def _judge_layers(old, new, v, rule_change):
-    def where(cfg):
-        return {c: (i, l["name"]) for i, l in enumerate(cfg.get("layers", [])) for c in l["crates"]}
+def crates_of(cfg):
+    return {c for l in cfg.get("layers", []) for c in l.get("crates", [])} | set(cfg.get("layer_overrides", {}))
 
-    wa, wb = where(old), where(new)
+
+def _judge_layers(old, new, v):
+    ol, nl = old.get("layers", []), new.get("layers", [])
+    if [l["name"] for l in ol] != [l["name"] for l in nl] and ol:
+        v.rule_change("layers.names", f"layers {[l['name'] for l in ol]} -> {[l['name'] for l in nl]}")
+    wa = {c: i for i, l in enumerate(ol) for c in l["crates"]}
+    wb = {c: i for i, l in enumerate(nl) for c in l["crates"]}
     for c in sorted(wb.keys() - wa.keys()):
-        v.ok("placed", f"new crate {c} in layer `{wb[c][1]}`")
+        v.ok("placed", f"new crate {c} in layer `{nl[wb[c]]['name']}`")
     for c in sorted(wa.keys() & wb.keys()):
-        if wa[c][0] != wb[c][0]:
-            rule_change(f"layers.{c}", f"crate {c}: layer `{wa[c][1]}` -> `{wb[c][1]}`")
-    oo = {l["name"]: l.get("order") for l in old.get("layers", [])}
-    for layer in new.get("layers", []):
-        a, b = oo.get(layer["name"]), layer.get("order") or []
-        if a is None:
-            v.ok("declared", f"order of `{layer['name']}`: {' < '.join(b)}")
+        if wa[c] != wb[c]:
+            v.rule_change(f"layers.{c}", f"crate {c}: layer {wa[c]} -> {wb[c]}")
+    # relative order of every crate pair, whatever the layer is called (O1)
+    below = {(x, y) for l in ol for i, x in enumerate(l.get("order") or [])
+             for y in (l.get("order") or [])[i + 1:]}
+    for l in nl:
+        order = l.get("order") or []
+        if not any(l2.get("order") for l2 in ol):
+            v.ok("declared", f"order of `{l['name']}`: {' < '.join(order)}")
             continue
-        both = [c for c in b if c in a]
-        swapped = [(x, y) for i, x in enumerate(both) for y in both[i + 1:] if a.index(x) > a.index(y)]
-        if swapped:
-            pairs = ", ".join(f"{x}<{y}" for x, y in swapped)
-            rule_change(f"order.{layer['name']}", f"order of `{layer['name']}` swaps {pairs}")
+        for i, x in enumerate(order):
+            for y in order[i + 1:]:
+                if (y, x) in below:
+                    v.rule_change(f"order.{y}<{x}", f"order of `{l['name']}`: {x} now below {y} (was above)")
 
 
 def _val(x):
@@ -172,8 +187,16 @@ def _tail(rule, item):
     return item.rsplit("::", 1)[-1] if rule == "fn.lines" else os.path.basename(item)
 
 
-def judge_baseline(old, new, v):
+def _crate(item):
+    parts = item.split("/")
+    return parts[1] if len(parts) > 1 and parts[0] == "crates" else item
+
+
+def judge_baseline(old, new, v, new_crates=frozenset()):
     orules, nrules = old.get("rules", {}), new.get("rules", {})
+    for k in sorted((old.keys() | new.keys()) - {"rules"}):
+        if not k.startswith("_") and old.get(k) != new.get(k):
+            v.rule_change(f"baseline.{k}", f"unknown baseline key `{k}` changed")
     for rule in sorted(orules.keys() - nrules.keys()):
         v.ok("removed", f"baseline rule {rule}")
     for rule in sorted(nrules):
@@ -183,38 +206,48 @@ def judge_baseline(old, new, v):
         for k in sorted(ni.keys() & oi.keys()):
             a, b = _val(oi[k]), _val(ni[k])
             if b > a:
-                v.loosen(f"baseline {rule} {k}: {a} -> {b}", _new_cite(oi[k], ni[k]))
+                v.loosen(f"baseline {rule} {k}: {a} -> {b}", *_entry_text(ni[k]))
             elif b < a:
                 v.ok("tighter", f"baseline {rule} {k}: {a} -> {b}")
-        cited_new = 0
-        spread_ok = rule in SPREAD and sum(_val(x) for x in ni.values()) <= sum(_val(x) for x in oi.values())
+        accepted = 0
+        total_ok = sum(_val(x) for x in ni.values()) <= sum(_val(x) for x in oi.values())
         for k in sorted(ni.keys() - oi.keys()):
-            b = _val(ni[k])
-            mate = next((g for g in sorted(gone) if _tail(rule, g) == _tail(rule, k) and b <= gone[g]), None)
+            b, crate = _val(ni[k]), _crate(k)
+            mate = next((g for g in sorted(gone) if _tail(rule, g) == _tail(rule, k) and b <= gone[g]
+                         and (_crate(g) == crate or crate in new_crates)), None)
             if mate is not None:
                 del gone[mate]
                 v.ok("moved", f"baseline {rule} {mate} -> {k} ({b})")
-            elif spread_ok:
-                v.ok("spread", f"baseline {rule} {k} ({b}; the rule's total does not grow)")
-                cited_new += 1
+            elif rule in SPREAD and total_ok and crate in new_crates:
+                v.ok("spread", f"baseline {rule} {k} ({b}; new crate; the rule's total does not grow)")
+                accepted += 1
             else:
-                c = cites(*_entry_text(ni[k]))
-                cited_new += bool(c)
-                v.loosen(f"new baseline item {rule} {k} ({b})", c)
+                accepted += v.loosen(f"new baseline item {rule} {k} ({b})", *_entry_text(ni[k]))
         for k in sorted(gone):
             v.ok("removed", f"baseline {rule} {k}")
         a, b = orules.get(rule, {}).get("count", 0), nrules[rule].get("count", 0)
-        if b > a + cited_new:
-            v.loosen(f"baseline {rule} count {a} -> {b}", set())
+        if b > a + accepted:
+            v.fail(f"baseline {rule} count {a} -> {b}", "more than the accepted new items")
         elif b < a:
             v.ok("tighter", f"baseline {rule} count {a} -> {b}")
 
 
-def judge(old_cfg, new_cfg, old_base, new_base):
-    v = Verdict()
+def judge(old_cfg, new_cfg, old_base, new_base, citer):
+    v = Verdict(citer)
     judge_config(old_cfg, new_cfg, v)
-    judge_baseline(old_base, new_base, v)
+    judge_baseline(old_base, new_base, v, frozenset(crates_of(new_cfg) - crates_of(old_cfg)))
     return v
+
+
+def _check_base(root, base, how):
+    """The base must be a commit, and not HEAD or a descendant of it (D5)."""
+    full = _git(root, "rev-parse", "--verify", f"{base}^{{commit}}")
+    if not full:
+        return f"base {base} ({how}) is not a commit here"
+    if _git(root, "merge-base", "--is-ancestor", "HEAD", full) is not None:
+        return (f"WARNING: base {base} ({how}) is HEAD or a descendant of HEAD — the diff would "
+                f"be empty or reversed and judge nothing")
+    return None
 
 
 def main(root, rev=None):
@@ -222,18 +255,23 @@ def main(root, rev=None):
     if base is None:
         print(f"config-diff: {how}")
         return 2
-    short = _git(root, "rev-parse", "--short", "--verify", f"{base}^{{commit}}")
-    if not short:
-        print(f"config-diff: base {base} ({how}) is not a commit here")
+    bad = _check_base(root, base, how)
+    if bad and how not in ("given", "$QP_CONFIG_BASE") and "WARNING" in bad:
+        print(f"config-diff: base {base} ({how}) is HEAD itself: nothing to judge")
+        return 0
+    if bad:  # an explicit base that is not a commit, or HEAD / a descendant (D5)
+        print(f"config-diff: {bad}")
         return 1
-    print(f"config-diff: base {short} ({how})")
+    print(f"config-diff: base {_git(root, 'rev-parse', '--short', base)} ({how})")
     diff = _git(root, "diff", "--no-color", base, "--", *FILES)
     print(diff if diff else "(no change in arch-config.json / arch-baseline.json)")
+    old_text = [_git(root, "show", f"{base}:{f}") or "" for f in FILES]
     cur = []
     for f in FILES:
         with open(os.path.join(root, f), encoding="utf-8") as fh:
             cur.append(json.load(fh))
-    v = judge(_load_rev(root, base, FILES[0]), cur[0], _load_rev(root, base, FILES[1]), cur[1])
+    old = [json.loads(t) if t else {} for t in old_text]
+    v = judge(old[0], cur[0], old[1], cur[1], Citer.from_repo(root, "\n".join(old_text)))
     for line in v.lines:
         print(line)
     print(f"config-diff: {len(v.lines)} change(s), {v.fails} uncited loosening(s)")

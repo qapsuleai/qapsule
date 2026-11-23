@@ -4,10 +4,12 @@
 - items: `fn` (with its body), `struct`, `enum`, `union`, `trait`, `type`, `const`,
   `static`, `macro_rules!`, and item-level macro invocations (`foo! { … }`, `foo!(…);`),
   each with the attributes and doc comments right above it (so a changed or dropped
-  `#[cfg(…)]` changes the item);
+  `#[cfg(…)]` changes the item); an item inside an `impl` block is prefixed with that
+  block's header, so a method that changes impl (other bounds, other `#[cfg]`) changes;
 - `impl` headers (attributes + `impl<…> Trait for Type where …`), as a set: an impl may be
   split or merged, but every header must survive unchanged;
-- `mod` declarations carrying a `#[cfg(…)]` other than a bare `#[cfg(test)]`;
+- `mod` declarations with their `#[cfg(…)]` attributes;
+- inner attributes (`#![cfg(…)]`, `#![allow(…)]`, …) at file or module level;
 - `use` / `extern crate` declarations outside fn bodies, expanded to one leaf per name,
   with their `#[cfg]` / `#[macro_use]` attributes.
 """
@@ -42,22 +44,30 @@ def norm(text):
 
 
 class File:
-    """One file's fingerprints: `items` [(kind, name, text)], `impls` {text}, `cfg_mods`
-    [(name, text)], `uses` [(category, key, leaf, attrs)]."""
+    """One file's fingerprints: `items` [(kind, name, text)], `impls` {text}, `mods`
+    [(name, [cfg attrs], text)], `inner` [text], `uses` [(category, key, leaf, attrs)]."""
 
     def __init__(self, src):
         self.src = src
         self.code = rs.strip(src)
         self.free = _not_in_fn_body(self.code)
+        self.impls, self.impl_spans = self._impls()
         items, covered = self._items()
         macros, spans = self._macros(covered)
         # an item written inside a macro's arguments (`thread_local!(static N: …)`) is part
         # of the macro, not an item of its own
         self.items = [it for it, (a, _) in zip(items, covered)
                       if not any(x <= a <= z for x, z in spans)] + macros
-        self.impls = self._impls()
-        self.cfg_mods = self._cfg_mods()
+        self.mods = self._mods()
+        self.inner = self._inner()
         self.uses = self._uses()
+
+    def _in_impl(self, pos, text):
+        """`text` prefixed with the header of the impl block around `pos` (if any)."""
+        for a, z, hdr in self.impl_spans:
+            if a < pos < z:
+                return hdr + "{" + text
+        return text
 
     def _attrs(self, pos):
         start = _attr_start(self.src, _line_start(self.code, pos))
@@ -81,7 +91,7 @@ class File:
                 continue
             start, _ = self._attrs(pos)
             covered.append((pos, end))
-            out.append((kind, m.group(2) or "", norm(self.src[start:end + 1])))
+            out.append((kind, m.group(2) or "", self._in_impl(pos, norm(self.src[start:end + 1]))))
         return out, covered
 
     def _macros(self, covered):
@@ -93,11 +103,11 @@ class File:
             end = _macro_end(code, m.end(2) - 1)
             start, _ = self._attrs(pos)
             spans.append((pos, end))
-            out.append(("macro!", m.group(1), norm(self.src[start:end + 1])))
+            out.append(("macro!", m.group(1), self._in_impl(pos, norm(self.src[start:end + 1]))))
         return out, spans
 
     def _impls(self):
-        out = set()
+        out, spans = set(), []
         for m in IMPL.finditer(self.code):
             pos = m.end() - 4
             if not self.free[pos]:
@@ -106,18 +116,26 @@ class File:
             if brace is None:
                 continue
             start, _ = self._attrs(pos)
-            out.add(norm(self.src[start:brace]))
-        return out
+            hdr = norm(self.src[start:brace])
+            out.add(hdr)
+            spans.append((brace, rs.match_brace(self.code, brace), hdr))
+        return out, spans
 
-    def _cfg_mods(self):
+    def _mods(self):
         out = []
         for m in MOD.finditer(self.code):
             if not self.free[m.start(1)]:
                 continue
             _, attrs = self._attrs(m.start(1))
-            cfgs = re.findall(r"#\[cfg\b.*", attrs)
-            if cfgs and [norm(c) for c in cfgs] != ["#[cfg(test)]"]:
-                out.append((m.group(1), norm(attrs + "mod " + m.group(1))))
+            cfgs = [norm(c) for c in re.findall(r"#\[cfg\b.*", attrs)]
+            out.append((m.group(1), cfgs, norm(attrs + "mod " + m.group(1))))
+        return out
+
+    def _inner(self):
+        out = []
+        for m in re.finditer(r"#!\[", self.code):
+            if self.free[m.start()]:
+                out.append(norm(self.src[m.start():_macro_end(self.code, m.end() - 1) + 1]))
         return out
 
     def _uses(self):

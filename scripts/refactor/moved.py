@@ -19,15 +19,25 @@ In addition (K-8; RG1 denetim B8):
 - `impl` headers: an impl may be split, merged or moved, but the set of headers (with their
   attributes, generics, bounds, trait) must be equal up to paths; a new or lost header is
   CHANGED (`impl<T: A>` -> `impl<T: B>`, a trait changed, a `#[cfg]` dropped).
+- Methods are bound to their impl: an item inside an `impl` block is fingerprinted with
+  the block's header, so a method moved to an impl with other bounds or another `#[cfg]`
+  is CHANGED even when both headers still exist.
 - `mod` declarations with a `#[cfg(…)]` (other than a bare `#[cfg(test)]`): a changed or
-  dropped cfg is CHANGED.
+  dropped cfg is CHANGED; a `mod x;` that lost its `#[cfg(test)]`, or a new plain
+  `mod tests;`, is CHANGED. Inner `#![cfg(…)]` / `#![cfg_attr(…)]` must match across the
+  change (CHANGED); other inner attributes (`#![allow]`, …) that do not match are FLAG.
+- A primitive type is not a path: `i32::MAX` -> `i64::MAX`, `f32::EPSILON` ->
+  `f64::EPSILON` are CHANGED, not PATH.
 - `use`: plain imports are reported per file as PATH-ONLY counts (they follow moved items);
   `pub use` re-exports are listed as REEXPORT (public paths may change; list them); glob
   (`use a::*`), anonymous (`as _`), `#[cfg]`-gated and `extern crate` / `#[macro_use]`
-  imports are matched across the whole change, and an unmatched one is a FLAG: the reviewer
-  looks at each (a split adds `use super::*;` routinely); `--strict-use` makes FLAG fail.
-  A `use` cannot change behaviour unseen the way an item can: a missing one fails to
-  compile, a superfluous one fails clippy (`-D warnings`).
+  imports are matched across the whole change, and an unmatched one is a FLAG; so is a
+  name imported from a different module (`exact::round` -> `fast::round`; a crate or
+  folder rename that keeps the module before the name is not).
+  FLAG lines do not fail by default (a split adds `use super::*;` routinely); the reviewer
+  must read every one: a `use` CAN change behaviour unseen — a redirected import compiles
+  when the other item has the same signature, and a glob can shadow a prelude name.
+  `--strict-use` makes FLAG fail.
 """
 
 import collections
@@ -41,7 +51,9 @@ sys.path.insert(0, os.path.dirname(HERE))  # scripts/ (archcheck)
 sys.path.insert(0, HERE)
 from rustitems import File  # noqa: E402
 
-PATH = re.compile(r"\b((?:crate|super|self|[a-z_][a-z0-9_]*)::)+(?=[A-Za-z_{*])")
+# A primitive type is not a path prefix: `i32::MAX` -> `i64::MAX` changes meaning (D2).
+PRIM = r"(?:[iu](?:8|16|32|64|128|size)|f32|f64|bool|char|str)::"
+PATH = re.compile(r"\b((?!" + PRIM + r")(?:crate|super|self|[a-z_][a-z0-9_]*)::)+(?=[A-Za-z_{*])")
 ALLOW_IN = re.compile(r"#\[allow\(clippy::[a-z_]+(,\s*clippy::[a-z_]+)*\)\]\s*")
 PATH_KINDS = ("plain", "reexport")
 
@@ -99,6 +111,7 @@ def compare(pairs, strict_use=False):
     where_a, where_b = {}, {}
     hdr_a, hdr_b, mods_a, mods_b = {}, {}, collections.Counter(), collections.Counter()
     use_a, use_b = [], []
+    inner = {False: collections.Counter(), True: collections.Counter()}
     for old, osrc, new, nsrc in pairs:
         fa = File(osrc) if old else None
         fb = File(nsrc) if new else None
@@ -111,19 +124,42 @@ def compare(pairs, strict_use=False):
                 where.setdefault(text, (path, kind, name))
             for h in f.impls:
                 hdr.setdefault(h, path)
-            for name, text in f.cfg_mods:
-                mods[text] += 1
-                where.setdefault(text, (path, "mod", name))
+            for name, cfgs, text in f.mods:
+                if cfgs and cfgs != ["#[cfg(test)]"]:
+                    mods[text] += 1
+                    where.setdefault(text, (path, "mod", name))
+            for text in f.inner:
+                key = ("#![cfg]" if text.startswith(("#![cfg(", "#![cfg_attr(")) else "#![]", text)
+                inner[cnt is after][key] += 1
+                where.setdefault(text, (path, key[0], text))
             uses += [(path, *u) for u in f.uses]
         _file_uses(res, old, new, fa, fb)
+        _test_mods(res, new or old, fa, fb)
     _items(res, before, after, where_a, where_b)
     _headers(res, hdr_a, hdr_b)
     for t, n in (mods_a - mods_b).items():
         res.changed += [("-", where_a[t], t)] * n
     for t, n in (mods_b - mods_a).items():
         res.changed += [("+", where_b[t], t)] * n
+    for sign, x, y in (("-", inner[False], inner[True]), ("+", inner[True], inner[False])):
+        for (kind, t), n in (x - y).items():
+            w = where_a.get(t) or where_b.get(t)
+            if kind == "#![cfg]":
+                res.changed += [(sign, w, t)] * n
+            else:
+                res.flags += [(sign, w[0], "inner attribute", t)] * n
     _global_uses(res, use_a, use_b)
     return res
+
+
+def _test_mods(res, path, fa, fb):
+    """D3: a `mod x;` that was `#[cfg(test)]` (in the same file) or a new plain `mod tests`
+    brings test code into the product."""
+    tests_a = {n for n, c, _ in (fa.mods if fa else []) if "#[cfg(test)]" in c}
+    plain_a = {n for n, c, _ in (fa.mods if fa else []) if not c}
+    for n, c, t in (fb.mods if fb else []):
+        if not c and (n in tests_a or (n == "tests" and n not in plain_a)):
+            res.changed.append(("+", (path, "mod", n), t + "  (without #[cfg(test)])"))
 
 
 def _items(res, before, after, where_a, where_b):
@@ -187,6 +223,7 @@ def _global_uses(res, use_a, use_b):
         res.flags.append(("-", where[k][0], k[0], k[1]))
     for k in sorted((b - a).elements()):
         res.flags.append(("+", where[k][0], k[0], k[1]))
+    _redirects(res, use_a, use_b)
     ra = collections.Counter(u[3] for u in use_a if u[1] == "reexport")
     rb = collections.Counter(u[3] for u in use_b if u[1] == "reexport")
     pa = {u[3]: u for u in use_a if u[1] == "reexport"}
@@ -195,6 +232,36 @@ def _global_uses(res, use_a, use_b):
         res.reexports.append(("-", pa[leaf][0], leaf))
     for leaf in sorted((rb - ra).elements()):
         res.reexports.append(("+", pb[leaf][0], leaf))
+
+
+def _parent(leaf):
+    path = leaf.partition(" as ")[0].split("::")[:-1]
+    return [p for p in path if p not in ("crate", "self", "super")]
+
+
+def _same_source(a, b):
+    """Two import paths of one name point to the same source when the module right before
+    the name is the same (a crate or folder rename), or one module path extends the other
+    (`a::round` -> `a::b::round`). `exact::round` -> `fast::round` is a redirect (D4)."""
+    pa, pb = _parent(a), _parent(b)
+    if not pa or not pb or pa[-1] == pb[-1]:
+        return True
+    return pa == pb[:len(pa)] or pb == pa[:len(pb)]
+
+
+def _redirects(res, use_a, use_b):
+    """D4: the same name imported from a different source compiles and may bind another
+    item with the same signature: a FLAG for the reviewer."""
+    a = collections.Counter((u[2], u[3]) for u in use_a if u[1] == "plain")
+    b = collections.Counter((u[2], u[3]) for u in use_b if u[1] == "plain")
+    gone = collections.defaultdict(list)
+    for name, leaf in (a - b).elements():
+        gone[name].append(leaf)
+    where = {(u[2], u[3]): u[0] for u in use_b}
+    for name, leaf in sorted((b - a).elements()):
+        olds = gone.get(name, [])
+        if olds and not any(_same_source(o, leaf) for o in olds):
+            res.flags.append(("~", where[(name, leaf)], "redirected", f"{' | '.join(sorted(set(olds)))} -> {leaf}"))
 
 
 def report(res, listing=False):

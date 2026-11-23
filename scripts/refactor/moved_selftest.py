@@ -101,6 +101,49 @@ CASES = [
      _variant('#[cfg(feature = "net")]\nmod net;', "mod net;"), "mod"),
     ("path: a re-pathed import and impl trait path pass as PATH-ONLY",
      _variant("impl fmt::Display", "impl core::fmt::Display"), None),
+    ("D3: `#[cfg(test)] mod tests;` -> `mod tests;` is CHANGED",
+     _variant("#[cfg(test)]\nmod tests;", "mod tests;"), "mod"),
+]
+
+# (label, before, after, expected) for changes that need their own "before"
+IMPLS = """#[cfg(feature = "x")]
+impl Foo {
+    fn a() {}
+}
+#[cfg(feature = "x")]
+impl Foo {
+    fn b() {}
+}
+impl Foo {
+    fn c() {}
+}
+impl<T: Send> G<T> {
+    fn s() {}
+}
+impl<T: Send> G<T> {
+    fn u() {}
+}
+impl<T> G<T> {
+    fn t() {}
+}
+"""
+CASES2 = [
+    ("O5: a method moved from a #[cfg] impl to a plain one is CHANGED", IMPLS, IMPLS.replace(
+        "    fn a() {}\n", "").replace("    fn c() {}\n", "    fn c() {}\n    fn a() {}\n"), "fn"),
+    ("O5: a method moved to an impl with other bounds is CHANGED", IMPLS, IMPLS.replace(
+        "    fn s() {}\n", "").replace("    fn t() {}\n", "    fn t() {}\n    fn s() {}\n"), "fn"),
+    ("O5: a method moved between two blocks with the same header passes", IMPLS, IMPLS.replace(
+        "    fn s() {}\n", "").replace("    fn u() {}\n", "    fn u() {}\n    fn s() {}\n"), None),
+    ("D2: `i32::MAX` -> `i64::MAX` is CHANGED, not PATH",
+     "pub fn m() -> i64 { i32::MAX as i64 }\n", "pub fn m() -> i64 { i64::MAX as i64 }\n", "fn"),
+    ("D2: `f32::EPSILON` -> `f64::EPSILON` is CHANGED, not PATH",
+     "pub fn e() -> f64 { f32::EPSILON as f64 }\n", "pub fn e() -> f64 { f64::EPSILON as f64 }\n", "fn"),
+    ("D3: a dropped file-level `#![cfg(…)]` is CHANGED",
+     '#![cfg(feature = "x")]\npub fn w() {}\n', "pub fn w() {}\n", "#![cfg]"),
+    ("D4: `use crate::exact::round` -> `crate::fast::round` is a FLAG",
+     "use crate::exact::round;\npub fn r() {}\n", "use crate::fast::round;\npub fn r() {}\n", "flag"),
+    ("D4: a crate rename keeping the module (`x::query::Q` -> `y::query::Q`) passes",
+     "use qp_session::read::query::Q;\npub fn q() {}\n", "use qp_read::query::Q;\npub fn q() {}\n", "noflag"),
 ]
 
 
@@ -119,13 +162,16 @@ def run(compare):
         from moved import report
         report(res, True)
     ok &= bool(good)
-    for label, after, want in CASES:
-        before = BEFORE
+    cases = [(label, BEFORE, after, want) for label, after, want in CASES] + CASES2
+    for label, before, after, want in cases:
         if "as _" in label:
             before = BEFORE.replace("use std::fmt;", "use std::fmt;\nuse std::io::Write as _;", 1)
         res = compare([("a.rs", before, "a.rs", after)])
         kinds = _kinds(res)
-        hit = (not res.failed) if want is None else (want in kinds)
+        if want == "noflag":
+            hit = not res.failed and not res.flags
+        else:
+            hit = (not res.failed) if want is None else (want in kinds)
         if want == "flag":  # a FLAG is for the reviewer; it fails only with --strict-use
             hit = hit and not res.failed and compare([("a.rs", before, "a.rs", after)], True).failed
         print(f"moved self-test: {label:66} {'ok' if hit else 'MISSED'}")

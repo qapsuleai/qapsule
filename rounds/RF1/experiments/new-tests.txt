@@ -1,1 +1,2 @@
 # RF1: bilerek eklenen testler (ad, satır başına bir; scripts/refactor/snapshot.sh bunları tests.names dışında tutar)
+numeric_tokens_match_the_gallery

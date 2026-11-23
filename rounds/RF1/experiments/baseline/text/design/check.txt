@@ -1,5 +1,6 @@
+PASS desk-marks
 PASS desk
-1 transcript(s), 1 passed, 0 failed (inproc)
+2 transcript(s), 2 passed, 0 failed (inproc)
 ## design-check `c2a-trial` (profile dense): PASS
 | P# | scheme | rule | measured | threshold | result |
 |---|---|---|---|---|---|
@@ -7,12 +8,12 @@ PASS desk
 | P5 | dark | two-level time axis / labels at 390 px | yes / 6 | yes / >= 4 | PASS |
 | P6 | dark | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
 | P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
-| P8 | dark | on-plot mark height px (record / drawn) | 28 / 0 | <= 28 | PASS |
+| P8 | dark | on-plot mark height px (record / drawn, desk + desk-marks) | 28 / 24 (1 glyph) | <= 28 / >= 1 glyph | PASS |
 | P4 | light | price label spacing px / labels in 300 px plot | 52 / 5 | 40-60 / >= 4 | PASS |
 | P5 | light | two-level time axis / labels at 390 px | yes / 6 | yes / >= 4 | PASS |
 | P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
 | P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
-| P8 | light | on-plot mark height px (record / drawn) | 28 / 0 | <= 28 | PASS |
+| P8 | light | on-plot mark height px (record / drawn, desk + desk-marks) | 28 / 24 (1 glyph) | <= 28 / >= 1 glyph | PASS |
 ## design-check `tavek` (profile dense): PASS
 | P# | scheme | rule | measured | threshold | result |
 |---|---|---|---|---|---|
@@ -30,9 +31,9 @@ PASS desk
 | P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
 | P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
 | P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / OHLC | Y / Y / Y / OHLC (touch: C) | PASS |
-| P8 | dark | on-plot mark height px (record / drawn) | 20 / 0 | <= 28 | PASS |
-| P8 | light | on-plot mark height px (record / drawn) | 20 / 0 | <= 28 | PASS |
-| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P8 | dark | on-plot mark height px (record / drawn, desk + desk-marks) | 20 / 20 (1 glyph) | <= 28 / >= 1 glyph | PASS |
+| P8 | light | on-plot mark height px (record / drawn, desk + desk-marks) | 20 / 20 (1 glyph) | <= 28 / >= 1 glyph | PASS |
+| P9 | - | layout regions / panes / legend numbers (Ç1 mockup + desk) | 5 / 3 / 7 | >= 4 / 2 / 5 | PASS |
 | P10 | - | dense: body / figure / smallest px | 13 / 11 / 11 | 13-14 / 11-12 / >= 11 | PASS |
 | P11 | - | figure font 0-9 advance spread (1000 px) | 0 (plex-mono: 600-600) | 0 | PASS |
 | P12 | - | control / card radius px | 6 / 8 | <= 8 / 12 | PASS |
@@ -61,9 +62,9 @@ PASS desk
 | P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
 | P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / C only | Y / Y / Y / OHLC (touch: C) | PASS |
 | P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / Y / Y / C only | Y / Y / Y / OHLC (touch: C) | PASS |
-| P8 | dark | on-plot mark height px (record / drawn) | 24 / 0 | <= 28 | PASS |
-| P8 | light | on-plot mark height px (record / drawn) | 24 / 0 | <= 28 | PASS |
-| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P8 | dark | on-plot mark height px (record / drawn, desk + desk-marks) | 24 / 24 (1 glyph) | <= 28 / >= 1 glyph | PASS |
+| P8 | light | on-plot mark height px (record / drawn, desk + desk-marks) | 24 / 24 (1 glyph) | <= 28 / >= 1 glyph | PASS |
+| P9 | - | layout regions / panes / legend numbers (touch: no desktop layout) | - | - | n.a. |
 | P10 | - | touch: body / smallest / control px | 16 / 13 / 44 | >= 15 / 13 / 44 | PASS |
 | P11 | - | figure font 0-9 advance spread (1000 px) | 0 (plex-mono: 600-600) | 0 | PASS |
 | P12 | - | control / card radius px | 6 / 8 | <= 8 / 12 | PASS |
@@ -75,7 +76,7 @@ PASS desk
 | H2 | light | non-text contrast, every ground (worst) | 3.06 (up/own volume on strip) | >= 3 | PASS |
 | H3 | dark | semantic + origin ΔE00, 5 conditions | 11.3 (up/down grey) | >= 10 | PASS |
 | H3 | light | semantic + origin ΔE00, 5 conditions | 10.7 (agent/engine grey) | >= 10 | PASS |
-## design-check `oltan` (profile legacy, for comparison, never fails): 19 FAIL
+## design-check `oltan` (profile legacy, for comparison, never fails): 20 FAIL
 | P# | scheme | rule | measured | threshold | result |
 |---|---|---|---|---|---|
 | P1 | dark | chrome surface+text OKLCH C | 0.017 (axis) | <= 0.02 | PASS |
@@ -92,9 +93,9 @@ PASS desk
 | P6 | light | axis-label overlaps + overflow (desk + phone) | 2 (2 + 0) | = 0 | FAIL |
 | P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
 | P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
-| P8 | dark | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
-| P8 | light | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
-| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P8 | dark | on-plot mark height px (record / drawn, desk + desk-marks) | 32 / 28 (1 glyph) | <= 28 / >= 1 glyph | FAIL |
+| P8 | light | on-plot mark height px (record / drawn, desk + desk-marks) | 32 / 28 (1 glyph) | <= 28 / >= 1 glyph | FAIL |
+| P9 | - | layout regions / panes / legend numbers (Ç1 mockup + desk) | 5 / 3 / 3 | >= 4 / 2 / 5 | FAIL |
 | P10 | - | dense: body / figure / smallest px | 16 / 13 / 13 | 13-14 / 11-12 / >= 11 | FAIL |
 | P11 | - | figure font 0-9 advance spread (1000 px) | 0 (atkinson-next: 632-632) | 0 | PASS |
 | P12 | - | control / card radius px | 14 / 14 | <= 8 / 12 | FAIL |
@@ -106,7 +107,7 @@ PASS desk
 | H2 | light | non-text contrast, every ground (worst) | 1.91 (axis/evidence band on strip) | >= 3 | FAIL |
 | H3 | dark | semantic + origin ΔE00, 5 conditions | 4.3 (agent/engine grey) | >= 10 | FAIL |
 | H3 | light | semantic + origin ΔE00, 5 conditions | 7.3 (human/engine grey) | >= 10 | FAIL |
-## design-check `r4` (profile legacy, for comparison, never fails): 22 FAIL
+## design-check `r4` (profile legacy, for comparison, never fails): 23 FAIL
 | P# | scheme | rule | measured | threshold | result |
 |---|---|---|---|---|---|
 | P1 | dark | chrome surface+text OKLCH C | 0.024 (axis) | <= 0.02 | FAIL |
@@ -123,9 +124,9 @@ PASS desk
 | P6 | light | axis-label overlaps + overflow (desk + phone) | 0 (0 + 0) | = 0 | PASS |
 | P7 | dark | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
 | P7 | light | last-value tag / value line / crosshair+pills / OHLC legend | Y / N / N / C only | Y / Y / Y / OHLC (touch: C) | FAIL |
-| P8 | dark | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
-| P8 | light | on-plot mark height px (record / drawn) | 32 / 0 | <= 28 | FAIL |
-| P9 | - | layout regions / panes / legend numbers | - | - | n.a. |
+| P8 | dark | on-plot mark height px (record / drawn, desk + desk-marks) | 32 / 24 (1 glyph) | <= 28 / >= 1 glyph | FAIL |
+| P8 | light | on-plot mark height px (record / drawn, desk + desk-marks) | 32 / 24 (1 glyph) | <= 28 / >= 1 glyph | FAIL |
+| P9 | - | layout regions / panes / legend numbers (Ç1 mockup + desk) | 5 / 3 / 3 | >= 4 / 2 / 5 | FAIL |
 | P10 | - | dense: body / figure / smallest px | 14 / 11 / 9 | 13-14 / 11-12 / >= 11 | FAIL |
 | P11 | - | figure font 0-9 advance spread (1000 px) | 0 (plex-mono: 600-600) | 0 | PASS |
 | P12 | - | control / card radius px | 6 / 6 | <= 8 / 12 | PASS |

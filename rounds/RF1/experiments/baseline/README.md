@@ -14,3 +14,18 @@ RD2 kalemleriyle genişletildi). Karşılaştırma: `scripts/refactor/compare.sh
 Belirlenimcilik: tutanak iki kez üretildi (`a`, `b`), `manifest.sha256` bayt eşit.
 Test adları `experiments/new-tests.txt`'teki adlar dışarıda tutularak alınır (round'un bilerek
 eklediği karakterizasyon ve ek noktası sınamaları).
+
+## v2 (ön iş Ö'den sonra, kod değişmeden)
+
+Ö (RD2 denetim koşulu K1: P8 çizilen ayrı fikstürde, P9 `design-check`'te; `793a0975`,
+denetim `experiments/audit-o.md`) yalnız iki kalemi bilerek değiştirdi; tutanak bunun üstüne
+yeniden alındı (manifest v1 ↔ v2 farkı tam bu iki satır):
+
+- `design/check.txt`: `PASS desk-marks` satırı, uygunluk özeti 1 → 2 döküm, her görünüşte P8
+  satırı (`record / drawn, desk + desk-marks`) ve P9 satırı; eski görünüşlerin karşılaştırma
+  sayacı `oltan` 19 → 20, `r4` 22 → 23 FAIL (çıkış kodunu etkilemez).
+- `fixtures/committed.sha256`: iki yeni fikstür (`fixtures/design/desk-marks.json`,
+  `fixtures/design/docs/syn03-breakout.json`).
+
+Ö'nün eklediği test `numeric_tokens_match_the_gallery` `new-tests.txt`'te. Öbür 268 kalem v1 ile
+aynı.

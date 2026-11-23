@@ -1,0 +1,21 @@
+# charac/order-live: today's output (RF1/S1); a refactor keeps every line
+live.00.pre  3df790adfb290189  | a>welcome(arkin,owner,seq=1)
+live.01.pre  24c0ebff759121d2  | b>welcome(viewer,viewer,seq=1)
+live.02.pre  7e4aa726869d30db  | f>welcome(feed,feed,seq=1)
+live.03.pre  1d523cf8c0323f4f  | a>ack(va,subscribed)
+live.04.pre  4d9ded598651db5a  | a>ack(ca,subscribed)
+live.05.pre  2cfa53f596115f14  | b>ack(vb,subscribed)
+live.06.pre  981fb1ed568b743a  | b>ack(vi,subscribed)
+live.07.pre  130f350b896c342a  | b>ack(cb,subscribed)
+live.08.pre  cd65f17a0d58e9b3  | b>ack(chb,subscribed)
+live.09.sub_a_all  8cfbc2897b593a9f  | a>ack(all,subscribed)
+live.10.sub_a_cl  905b44eaa3815bc0  | a>ack(cl,subscribed)
+live.11.sub_b_all  7a8e53fb39f96a62  | b>ack(all,subscribed)
+live.12.sub_b_cl  0140575c98e7af2c  | b>ack(cl,subscribed)
+live.13.ev0  607de779f0dea6ec  | a>notify(va,view_changed,seq=1)
+live.14.ev1  bf55e4f21d3ac8a3  | a>notify(va,view_changed,seq=1) a>notify(ca,condition_met,seq=1) a>notify(cl,claim,seq=1,state=asserted)
+live.15.ev2  c3b135c8fde2160f  | a>notify(va,view_changed,seq=1)
+live.16.ev3  da9eaee16f6e7259  | b>notify(vb,view_changed,seq=1) b>notify(cb,condition_met,seq=1) b>notify(cl,claim,seq=1,state=asserted)
+live.17.send4  006162257e95fd04  | f>ack(i1,applied,seq=2) a>notify(all,change,seq=2) b>notify(chb,change,seq=2) b>notify(all,change,seq=2) b>notify(vi,view_changed,seq=2)
+live.refused  -  | refused: no bound series and no feed NOPE/1d
+live.final  c60ba04748dd9bc3  | log=2 doc=fc83396151d7bf20 replay=equal

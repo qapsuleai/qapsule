@@ -2,22 +2,20 @@
 //! headlines (every face design), open capsule text fields (`ask/…`, `open.*`), glossary
 //! terms (voice terms and a design's own entries) and story charts (every story design).
 
-use qp_grammar::faces;
+use qp_grammar::open::nobra::ASKS;
 use qp_grammar::open::{self, Check, DeviceCheck, OpenCtx, OpenTap, TextInput};
 use qp_grammar::stories::{self, StoryInput};
+use qp_grammar::{depth, faces, DataProvider as _, GrammarError};
 use qp_grammar::{CompileOptions, MemProvider};
 use qp_schema::capsule::{LedgerStat, Trust, Validity};
-use qp_schema::protocol::{Language, OpenDepth};
+use qp_schema::protocol::{Language, OpenDepth, StoryRow};
 use qp_schema::scene::SceneDesc;
 
-use crate::fixture::{self, compile_in, field_text, looks, shape, texts};
+use crate::fixture::{self, compile_in, field_text, look, looks, shape, texts};
 use crate::snap::{debug_digest, err_line, scene_digest, Book};
+use crate::support::view;
 
 const W: u32 = 390;
-
-fn look(name: &str) -> &'static qp_grammar::look::Look {
-    qp_grammar::look::or_default(Some(name))
-}
 
 /// A face scene of `finding` by design `face` in `look_name`, compiled with the face set.
 pub fn face_scene(
@@ -25,7 +23,7 @@ pub fn face_scene(
     face: &str,
     look_name: &str,
     finding: &str,
-) -> Result<SceneDesc, qp_grammar::GrammarError> {
+) -> Result<SceneDesc, GrammarError> {
     let l = look(look_name);
     let v = faces::face_view_in(
         l,
@@ -38,8 +36,6 @@ pub fn face_scene(
     let h = faces::height_for(l, Some(face), p.voice(finding).is_some());
     compile_in(&v, p, look_name, W, h, Some(face))
 }
-
-use qp_grammar::DataProvider as _;
 
 #[test]
 fn charac_face_headlines() {
@@ -147,7 +143,7 @@ fn open_scene(
     ask: Option<&str>,
     check: Option<Check>,
     lang: Language,
-) -> Result<SceneDesc, qp_grammar::GrammarError> {
+) -> Result<SceneDesc, GrammarError> {
     let l = look(look_name);
     let h = open::height_in(l, Some(name)).unwrap_or(640);
     let ctx = OpenCtx {
@@ -168,7 +164,7 @@ fn open_scene(
     compile_in(&v, p, look_name, W, h, None)
 }
 
-fn open_line(b: &mut Book, case: &str, r: Result<SceneDesc, qp_grammar::GrammarError>) {
+fn open_line(b: &mut Book, case: &str, r: Result<SceneDesc, GrammarError>) {
     match r {
         Ok(s) => b.put(case, &scene_digest(&s), &shape(&s)),
         Err(e) => b.note(case, &err_line(&e)),
@@ -214,7 +210,7 @@ fn charac_open_designs() {
         );
     }
     // nobra: every question opened, every device check.
-    for ask in qp_grammar::open::nobra::ASKS {
+    for ask in ASKS {
         let r = open_scene(&tr, "nobra", "r4", "fnd-brk", Some(ask), None, Language::Tr);
         open_line(&mut b, &format!("nobra.ask.{ask}"), r);
     }
@@ -319,7 +315,7 @@ fn charac_open_fields_and_terms() {
         "note",
     ] {
         for field in ["detail", "ledger", "open.trust"] {
-            let v = crate::support::view(&format!(
+            let v = view(&format!(
                 r#"{{"id":"v","x":{{"kind":"time"}},"panels":[{{"id":0,"y":{{"kind":"linear"}}}}],
                 "layers":[{{"id":"{id}","mark":"text","finding":"fnd-brk","panel":0,
                   "encoding":{{"x":{{"panel":0,"px":4}},"x2":{{"panel":1,"px":-4}},"y":{{"panel":0.2}},"text":"{field}"}}}}]}}"#
@@ -344,9 +340,9 @@ fn story_scene(
     p: &MemProvider,
     inp: &StoryInput<'_>,
     h: u32,
-) -> Result<SceneDesc, qp_grammar::GrammarError> {
+) -> Result<SceneDesc, GrammarError> {
     let l = look(look_name);
-    let v = qp_grammar::depth::chart_view_in(l, "fnd-brk", p, "present-fnd-brk")?;
+    let v = depth::chart_view_in(l, "fnd-brk", p, "present-fnd-brk")?;
     match d.compile {
         Some(c) => {
             let mut o = CompileOptions::new(W, h);
@@ -367,7 +363,7 @@ fn charac_story_charts() {
     let p = fixture::provider(Language::Tr);
     let rows = fixture::story_rows(9);
     let fact_of = |f: &str| f.ends_with('2').then(|| "f-brk".to_owned());
-    let stamp = |r: &qp_schema::protocol::StoryRow| Some(format!("b{}", r.born_bar));
+    let stamp = |r: &StoryRow| Some(format!("b{}", r.born_bar));
     for d in stories::STORIES {
         for look_name in looks() {
             for (n, focus, hide, lang, stamped) in [

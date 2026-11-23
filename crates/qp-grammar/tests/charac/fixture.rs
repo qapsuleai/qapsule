@@ -2,6 +2,7 @@
 //! (`tests/support`), three R3 facts (level, band, swing points), findings with capsules in
 //! every story stage, a voice, headline pieces, story rows and feed items. No market data.
 
+use qp_grammar::look::{self as look_registry, Look};
 use qp_grammar::{compile, CompileOptions, GrammarError, HeadlineParts, MemProvider};
 use qp_schema::capsule::{
     Direction, Edge, EvidenceFamily, FactMeaning, GeoPoint, Geometry, LedgerStat, License,
@@ -13,13 +14,20 @@ use qp_schema::protocol::{
     StoryRow,
 };
 use qp_schema::scene::{Prim, SceneDesc};
-use qp_schema::{Author, Capsule, CapsuleState, Depth, Fact, Finding, Point, Provenance};
+use qp_schema::{
+    Author, Capsule, CapsuleState, Condition, Depth, Fact, Finding, Point, Provenance,
+};
 
 use crate::support;
 
 /// Every registered look, in registry order.
 pub fn looks() -> Vec<&'static str> {
-    qp_grammar::look::names()
+    look_registry::names()
+}
+
+/// The look record named `name` (unknown: the default).
+pub fn look(name: &str) -> &'static Look {
+    look_registry::or_default(Some(name))
 }
 
 pub fn prov() -> Provenance {
@@ -249,7 +257,7 @@ fn finding(id: &str, facts: &[&str]) -> Finding {
         claim: format!("claim of {id}"),
         facts: facts.iter().map(|f| (*f).to_owned()).collect(),
         confidence: 0.5,
-        invalidation: qp_schema::Condition::Text { text: "-".into() },
+        invalidation: Condition::Text { text: "-".into() },
         provenance: prov(),
     }
 }

@@ -2,17 +2,17 @@
 //! designs' frames, the motion designs (change frames, stamps, live marks) and the feed
 //! layouts.
 
-use qp_grammar::depth;
 use qp_grammar::feeds::{self, FeedCtx, LocalStamp};
 use qp_grammar::motion::{self, ChangeKind};
 use qp_grammar::transitions::{self, nabiz, Side};
+use qp_grammar::{depth, faces, GrammarError, MemProvider};
 use qp_schema::capsule::Direction;
 use qp_schema::protocol::{Language, OpenDepth, Profile};
 use qp_schema::scene::SceneDesc;
 use qp_schema::Depth;
 
 use crate::designs::face_scene;
-use crate::fixture::{self, compile_in, looks, shape};
+use crate::fixture::{self, compile_in, look, looks, shape};
 use crate::snap::{debug_digest, err_line, scene_digest, Book};
 
 const DEPTHS: [Depth; 4] = [
@@ -38,31 +38,27 @@ fn profile(depth: Depth, series: bool, points: u32) -> Profile {
     }
 }
 
-fn look(name: &str) -> &'static qp_grammar::look::Look {
-    qp_grammar::look::or_default(Some(name))
-}
-
 fn capsule_scene(
-    p: &qp_grammar::MemProvider,
+    p: &MemProvider,
     l: &str,
     f: &str,
     face: Option<&str>,
-) -> Result<SceneDesc, qp_grammar::GrammarError> {
+) -> Result<SceneDesc, GrammarError> {
     let v = depth::capsule_view_in(look(l), f, 120, p, &format!("capsule-{f}"))?;
     compile_in(&v, p, l, 390, 240, face)
 }
 
 fn chart_scene(
-    p: &qp_grammar::MemProvider,
+    p: &MemProvider,
     l: &str,
     f: &str,
     face: Option<&str>,
-) -> Result<SceneDesc, qp_grammar::GrammarError> {
+) -> Result<SceneDesc, GrammarError> {
     let v = depth::chart_view_in(look(l), f, p, &format!("present-{f}"))?;
     compile_in(&v, p, l, 900, 520, face)
 }
 
-fn scene_line(b: &mut Book, case: &str, r: Result<SceneDesc, qp_grammar::GrammarError>) {
+fn scene_line(b: &mut Book, case: &str, r: Result<SceneDesc, GrammarError>) {
     match r {
         Ok(s) => b.put(case, &scene_digest(&s), &shape(&s)),
         Err(e) => b.note(case, &err_line(&e)),
@@ -144,7 +140,7 @@ fn charac_depth_rules() {
             }
         }
     }
-    for face in qp_grammar::faces::names() {
+    for face in faces::names() {
         for f in ["fnd-brk", "fnd-parts", "fnd-sq"] {
             scene_line(
                 &mut b,

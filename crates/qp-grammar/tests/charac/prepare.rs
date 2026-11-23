@@ -2,6 +2,9 @@
 //! (series, fact, finding, constant with an origin, none) × look, the glyph styles, the
 //! compile options around it, and the error paths (kind, layer, path, message).
 
+use qp_grammar::glyph::{outcome, ALPHABETS};
+use qp_grammar::look::R4;
+use qp_grammar::open::{self, OpenCtx};
 use qp_grammar::{compile, CompileOptions, Cursor};
 use qp_schema::grammar::View;
 use qp_schema::protocol::Language;
@@ -248,22 +251,14 @@ fn cases() -> Vec<(String, String)> {
 /// The `ask/…` text fields the `nobra` open design reads (from its own view).
 pub fn ask_fields() -> Vec<String> {
     let p = fixture::provider(Language::Tr);
-    let ctx = qp_grammar::open::OpenCtx {
+    let ctx = OpenCtx {
         ask: Some("who"),
         lang: Language::Tr,
         check: None,
         frame: [390, 640],
     };
-    let v = qp_grammar::open::capsule_view(
-        Some("nobra"),
-        &qp_grammar::look::R4,
-        "fnd-brk",
-        120,
-        &p,
-        "v",
-        &ctx,
-    )
-    .expect("nobra view");
+    let v =
+        open::capsule_view(Some("nobra"), &R4, "fnd-brk", 120, &p, "v", &ctx).expect("nobra view");
     v.layers
         .iter()
         .filter_map(|l| l.encoding.text.clone())
@@ -359,8 +354,8 @@ fn charac_glyph_styles() {
     for f in fixture::capsule_findings() {
         let json = serde_json::to_string(&v).unwrap().replace("FND", f);
         let v: View = serde_json::from_str(&json).unwrap();
-        for alphabet in qp_grammar::glyph::ALPHABETS {
-            for outcome in qp_grammar::glyph::outcome::names() {
+        for alphabet in ALPHABETS {
+            for outcome in outcome::names() {
                 for look in ["r4", "tavek"] {
                     let mut o = CompileOptions::new(W, H);
                     o.look = Some(look.into());

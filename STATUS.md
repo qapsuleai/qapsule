@@ -7,8 +7,8 @@ Her round sonunda güncellenir.
 
 - **Aktif round:** yok. **RD2 tamamlandı** (2026-11-23; Arkin'in son kabulü: "Kabul, varsayılanı değiştir"). Sıradaki **RF1** (oturumun bölünmesi, K89; qp-grammar tavanı 20.964 / 21.000 — İ4 önce).
 - **Son güncelleme:** 2026-11-23
-- **Hedef düzeltmesi (K69–K83):** ana akış araştırma kanalıyla birleşti; yeni oturum `docs/HANDOFF.md`'den başlar. Yeni sıra (K81): RG1 → RD2 → RL1 → R7 → RS1 → RA1 → R8 → R9.
-- **Sıradaki adım:** RD2'yi başlat (`rounds/RD2/PROMPT.md`). Kararlar işlendi: K86 (RP4 ve R5B önerileri), K87 (RG1 kabul, kural inceltmeleri), K88 (kurumsal işlemde izleme), K89 (RF1 ve sıra: RG1 → RD2 → RF1 → RL1 → R7 → RS1 → RA1 → R8 → R9). RF1'e kadar `qp-session`'a net satır eklenmez. Arkin'de bekleyenler: beş dakikalık ajan denemesi (`rounds/R5B/REPORT.md` son bölüm); ilk iş gününde RP4 canlı doğrulamaları; RD2'de iki karar noktası (yön seçimi, son kabul).
+- **Hedef düzeltmesi (K69–K83):** ana akış araştırma kanalıyla birleşti; yeni oturum `docs/HANDOFF.md`'den başlar. Güncel sıra (K89): RG1 → RD2 → RF1 → RL1 → R7 → RS1 → RA1 → R8 → R9.
+- **Sıradaki adım:** RD2 raporunu ve önerilerini karara bağla (Ö109–Ö118, A65–A69; `docs/decisions/rounds/RD2.md`), sonra RF1'i tasarla. RF1'e kadar `qp-session`'a net satır eklenmez; `qp-grammar` tavana 36 satır uzakta. Gösterim varsayılanı artık `tavek` / `tavek-tel` (K2).
 
 ## Round geçmişi
 

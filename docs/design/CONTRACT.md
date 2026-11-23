@@ -96,6 +96,8 @@ Görünüş kaydında değildir, yönler değiştiremez (satır bütçesi; RD2/C
 
 ## Ölçüm
 
+- **P8 ve P9'un sınırı (RD2 kapanış denetimi):** P8 kaydın `mark_max_px` değerini ve sahnede çizilen işaretleri ölçer; tasarım fikstüründe işaret (glyph) yok, bu yüzden çizilen değer bugün 0 ve P8 fiilen kaydı ölçer. P9 düzen dökümünü ister (`scripts/design-check --layout`, döküm `scripts/design-gallery` çıktısı `layout-<görünüş>.json`); dökümsüz koşuda `n.a.`. RD2'de `tavek` ölçüldü: 5 bölge / 3 grafik bölmesi / 7 lejant sayısı, PASS.
+
 `scripts/design-check` (`crates/qp-grammar/tests/design_check`) her ölçütü ya kayıttan ya
 derlenmiş sahneden okur; sahne ölçütleri `fixtures/design/desk.json` görünümünü, imleç
 120. bardayken derler (RD2/C2a).

@@ -1,4 +1,4 @@
-# RD2 — Tasarım turu: rapor (yazılıyor)
+# RD2 — Tasarım turu: rapor
 
 Round başı: `9aee506c` (ana akış commit'i; RG1 sonu `ec1c7c89`).
 
@@ -150,7 +150,7 @@ Protokol varsayılanı `r4`, şema, MCP, `qp-session` değişmedi. Eski varsayı
 varsayılanı soran sınamalar `tavek-tel`/`zemre` bekler. **Yeni altınlar** (yalnız yeni görünüm):
 `fixtures/golden/demo/rd2-*` (9 dosya: feed-tr-dark yüz 0–2, feed-en-light yüz 0–1, closed-tr-light,
 capsule-tr-dark, chart-tr-dark, chart-en-light).
-**Açık konu:** `viewer_m15` trafik sınırı (açılmış kapsül ≤ 400.000 B) yeni varsayılanla 505.752 B;
+**Açık konu (A69):** `viewer_m15` trafik sınırı (açılmış kapsül ≤ 400.000 B) yeni varsayılanla 505.752 B;
 sınama `oltan`'a sabitlendi, bütçe `tavek-tel` için yeniden bakılmalı (R7/RF1 notu).
 
 ## 10. Ölçümler

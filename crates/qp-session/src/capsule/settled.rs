@@ -81,7 +81,7 @@ impl Session {
     /// Refreshes the authority's own headlines (TR, entitled) after the engine wrote.
     ///
     /// (R3/perf) Only the capsules whose sentence input may have changed since the last
-    /// refresh are rewritten ([`crate::capidx::HeadState`]): those the log entries since
+    /// refresh are rewritten ([`qp_plane::capidx::HeadState`]): those the log entries since
     /// then put or whose facts they put, and those of a series whose bars (as the
     /// sentences read them, bit for bit) changed. A series put, anything deleted, a
     /// capsule put at an index or two capsules with a story sharing a finding: all of
@@ -106,7 +106,7 @@ impl Session {
             || !self.refresh_some(&mut st);
         if full {
             self.headlines = self.story_headlines(None, Language::Tr);
-            st = crate::capidx::HeadState::default();
+            st = qp_plane::capidx::HeadState::default();
             let mut ok = true;
             for c in &self.doc.capsules {
                 let Some(s) = c.story.as_ref() else { continue };
@@ -128,10 +128,10 @@ impl Session {
 
     /// The bars the sentences of series `s` read: in the reading document and in the
     /// document.
-    fn bars_snaps(&self, s: &str) -> (crate::capidx::BarsSnap, crate::capidx::BarsSnap) {
+    fn bars_snaps(&self, s: &str) -> (qp_plane::capidx::BarsSnap, qp_plane::capidx::BarsSnap) {
         (
-            crate::capidx::snap(bar_series(rd!(self), s).and_then(qp_schema::Series::bars)),
-            crate::capidx::snap(bar_series(&self.doc, s).and_then(qp_schema::Series::bars)),
+            qp_plane::capidx::snap(bar_series(rd!(self), s).and_then(qp_schema::Series::bars)),
+            qp_plane::capidx::snap(bar_series(&self.doc, s).and_then(qp_schema::Series::bars)),
         )
     }
 
@@ -146,7 +146,7 @@ impl Session {
 
     /// The incremental step of [`Session::refresh_headlines`]; `false`: not possible
     /// (rewrite all).
-    fn refresh_some(&mut self, st: &mut crate::capidx::HeadState) -> bool {
+    fn refresh_some(&mut self, st: &mut qp_plane::capidx::HeadState) -> bool {
         let mut dirty: BTreeSet<String> = BTreeSet::new();
         // (RP3/M15) Bar series whose bars may have changed since the last refresh: those
         // a data event changed and those a log entry wrote bars of. Only their story

@@ -190,7 +190,7 @@ fn o1_capsule_made_live_again_is_evaluated_at_once() {
     );
     assert_eq!(capsule_state(&p.inc, &cap2), "invalidated");
     p.same_state();
-    let replayed = qp_session::replay(p.inc.initial_document(), p.inc.log()).unwrap();
+    let replayed = qp_ops::replay(p.inc.initial_document(), p.inc.log()).unwrap();
     assert_eq!(
         serde_json::to_string(&replayed).unwrap(),
         serde_json::to_string(p.inc.document()).unwrap()

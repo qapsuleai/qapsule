@@ -114,7 +114,7 @@ fn presenter_is_deterministic_1000_times_per_depth() {
             Depth::Capsule => SurfaceKind::Phone,
             _ => SurfaceKind::Desktop,
         };
-        let profile = qp_session::profile_for(kind, None);
+        let profile = qp_ops::profile_for(kind, None);
         let mut outs = BTreeSet::new();
         for _ in 0..1000 {
             let p = depth::present("fnd-overbought", d, &profile, &prov).unwrap();
@@ -161,9 +161,9 @@ fn median(mut v: Vec<u128>) -> (u128, u128) {
 fn presenter_timing() {
     let mut h = H::new();
     let prov = h.s.provider();
-    let desktop = qp_session::profile_for(SurfaceKind::Desktop, None);
-    let phone = qp_session::profile_for(SurfaceKind::Phone, None);
-    let watch = qp_session::profile_for(SurfaceKind::Watch, None);
+    let desktop = qp_ops::profile_for(SurfaceKind::Desktop, None);
+    let phone = qp_ops::profile_for(SurfaceKind::Phone, None);
+    let watch = qp_ops::profile_for(SurfaceKind::Watch, None);
     let mut rows = Vec::new();
     let mut bench = |name: &str, n: usize, f: &mut dyn FnMut()| {
         for _ in 0..1000 {

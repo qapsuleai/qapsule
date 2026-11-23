@@ -12,14 +12,14 @@ use qp_schema::protocol::{
 use qp_schema::{CapsuleState, Document, Mark, Series, SeriesSource, View};
 use serde_json::Value;
 
-use crate::apply::{all_ids, find_collection};
-use crate::error::{invalid, ptr, PResult, E};
-use crate::expand::{need_finding, need_series, need_view, view_bar_series};
-use crate::present::{present, profile_for};
-use crate::provider::DocProvider;
-use crate::select::{finding_about, finding_bar};
 use crate::session::{permissions, Conn, Session};
-use crate::values::values;
+use qp_ops::apply::{all_ids, find_collection};
+use qp_ops::expand::{need_finding, need_series, need_view, view_bar_series};
+use qp_ops::present::{present, profile_for};
+use qp_ops::provider::DocProvider;
+use qp_ops::select::{finding_about, finding_bar};
+use qp_plane::error::{invalid, ptr, PResult, E};
+use qp_plane::values::values;
 
 pub(crate) fn check_target_pub(doc: &Document, t: &Target, path: &str) -> PResult<()> {
     if let Some(v) = &t.view {
@@ -221,7 +221,7 @@ impl Session {
                 let role = self.conns[ci].role;
                 Ok(QueryResult::Description {
                     description: Description {
-                        thresholds: crate::canon::thresholds(),
+                        thresholds: qp_ops::canon::thresholds(),
                         protocol: PROTOCOL_VERSION.to_owned(),
                         doc: rd!(self).id.clone(),
                         ops: variant_names(&op_schema, "op"),

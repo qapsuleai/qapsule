@@ -9,27 +9,29 @@ iletisiyle gelir; rastgelelik yok.
 
 **Katman:** oturum (`docs/ENGINEERING.md` §2).
 
-**Bağımlılıklar:** `qp-schema`, `qp-calendar`, `qp-compute`, `qp-facts`, `qp-capsule`,
-`qp-grammar`, `qp-source`; `schemars`, `serde`, `serde_json`, `serde_path_to_error`, `tempfile`.
+**Bağımlılıklar:** `qp-ops` (işlemler), `qp-plane` (veri düzlemi, değer önbelleği, hata
+kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-facts`,
+`qp-capsule`, `qp-voice`, `qp-grammar`, `qp-look`, `qp-glyph`, `qp-designs`, `qp-source`;
+`schemars`, `serde`, `serde_json`, `serde_path_to_error`, `tempfile`.
 
-**Dışa açık yüzey (`lib.rs`):** `Session`, `ENGINE_PRINCIPAL`, `permissions`, `confine`;
-`replay`, `apply_all`, `apply_change`; `Replica`, `ReplicaOptions`, `document_digest`,
-`view_digest`; `ReplayHost`, `demo_init`; `DocProvider`; `hit_scene`, `screen_frame`,
-`explain_scene`; `did_you_mean`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
-`conform`, `agent`, `headparts`, `voices` (`qp_capsule::voice`).
+**Dışa açık yüzey (`lib.rs`):** `Session`, `permissions`, `confine`; `Replica`,
+`ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; `hit_scene`,
+`screen_frame`, `explain_scene`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
+`conform`, `agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
+`ENGINE_PRINCIPAL`, `DocProvider`, `profile_for`, `canon_document`, `thresholds` `qp-ops`'ta;
+`DataError`, `HostNotice`, `did_you_mean`, `edit_distance`, `headparts` `qp-plane`'de.
 
 **Düzen (`src/`; her klasörün kendi `README.md`'si var):**
 
-- `authority/` — otorite ve komut yolu: `Session` (`session/`), uygulama, hatalar, öneri.
-- `ops/` — işlem genişletme (`expand/`), kanonik biçim, seçiciler, konum bulma, özet.
-- `capsule/` — kapsül yaşamı: motor bağlama, dizin, iddialar, itiraz, yorumlar, izleme.
-- `data/` — veri düzlemi, belge sağlayıcı, canlı yol, bağ sorguları.
-- `read/` — sorgu, sunucu, anlamsal okuma, önizleme, açıklama, etkileşim.
+- `authority/` — otorite ve komut yolu: `Session` (`session/`), ajan politikası.
+- `capsule/` — kapsül yaşamı: motor bağlama, iddialar, itiraz, yorumlar, izleme eşleşmesi.
+- `data/` — canlı yol, bağ sorguları.
+- `read/` — sorgu, anlamsal okuma, önizleme, açıklama, etkileşim.
 - `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).
 - `host/` — yeniden oynatma barındırıcısı (`replayhost`) ve uygunluk koşucusu (`conform`).
 
 **Ne değildir:** kabuk, uyarlayıcı (CLI/MCP/WASM), kapsül motoru, veri kaynağı, çizici.
 
-**Bilinen borç:** crate ≈ 31,9 bin satır (`crate.lines`, bütçe 12 bin) — istisna isteği İ3
-(`rounds/RG1/PLAN.md` §4). Tek işlevlik 800 üstü `src/ops/expand/op.rs` (`expand_op`) — İ6.
+**Bilinen borç:** crate bütçenin üstünde (`crate.lines`, bütçe 12 bin) — İ3; RF1 S3
+dalgaları alt sistemlere böler (`rounds/RF1/PLAN.md` §3.3).
 `tests/` 39 dosya (`dir.files`). `qp-session → qp-source` bugün `layer.up` (İ1 ile kalkar).

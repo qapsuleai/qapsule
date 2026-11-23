@@ -1063,14 +1063,14 @@ fn an_emphasis_target_never_dangles() {
     let bad: qp_schema::protocol::ChangeOp = serde_json::from_value(json!(
         {"op":"set_emphasis","view":"main","emphasis":[{"target":{"layer":"l1"},"kind":"dim"}]}))
     .unwrap();
-    assert!(qp_session::apply_change(&mut d, &bad).is_err());
+    assert!(qp_ops::apply_change(&mut d, &bad).is_err());
     let set: qp_schema::protocol::ChangeOp = serde_json::from_value(json!(
         {"op":"set_emphasis","view":"main","emphasis":[{"target":{"layer":"l2"},"kind":"dim"}]}))
     .unwrap();
-    qp_session::apply_change(&mut d, &set).unwrap();
+    qp_ops::apply_change(&mut d, &set).unwrap();
     let del: qp_schema::protocol::ChangeOp = serde_json::from_value(json!(
         {"op":"delete_layer","view":"main","index":1,"layer":"l2"}))
     .unwrap();
-    assert!(qp_session::apply_change(&mut d, &del).is_err());
+    assert!(qp_ops::apply_change(&mut d, &del).is_err());
     h.assert_replay();
 }

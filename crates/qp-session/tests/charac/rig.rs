@@ -146,7 +146,7 @@ impl Rig {
     /// Replay of the log from the initial document, byte-equal to the document.
     pub fn replay_ok(&self) -> bool {
         let s = self.session();
-        let r = qp_session::replay(s.initial_document(), s.log()).expect("replay");
+        let r = qp_ops::replay(s.initial_document(), s.log()).expect("replay");
         serde_json::to_vec(&r).unwrap() == serde_json::to_vec(s.document()).unwrap()
     }
 

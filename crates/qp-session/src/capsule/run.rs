@@ -68,7 +68,7 @@ impl Session {
                             bars[i].t,
                             qp_capsule::pipeline::ENGINE_VERSION,
                         );
-                        f.evidence_ref = Some(crate::plane::evidence_ref(meta, bars, i));
+                        f.evidence_ref = Some(qp_plane::plane::evidence_ref(meta, bars, i));
                         facts.push(f);
                     }
                 }
@@ -371,7 +371,7 @@ impl Session {
     /// person's watch never counts.
     pub(crate) fn intents_on(&self, doc: &Document, principal: &str) -> Vec<String> {
         let mut out = Vec::new();
-        let person = crate::watch::person_of(&self.plane, principal);
+        let person = qp_ops::watch::person_of(&self.plane, principal);
         for i in doc.intents.iter().filter(|i| i.active) {
             if let Some(w) = &i.watch {
                 if w.for_ == person {
@@ -384,7 +384,7 @@ impl Session {
                 continue;
             }
             let Some(t) = &i.trigger else { continue };
-            for (_, s) in crate::values::condition_series(t) {
+            for (_, s) in qp_plane::values::condition_series(t) {
                 if let Some(sym) = bar_series(doc, s).and_then(qp_schema::Series::symbol) {
                     if !out.iter().any(|x| x == sym) {
                         out.push(sym.to_owned());

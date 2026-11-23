@@ -198,7 +198,7 @@ impl Hub {
     pub fn data_event(
         &mut self,
         ev: &qp_schema::data::DataEvent,
-    ) -> Result<(), qp_session::DataError> {
+    ) -> Result<(), qp_plane::DataError> {
         let lines = match &mut self.session {
             Authority::Plain(s) => s.data_event(ev)?,
             Authority::Replay(h) => h.data_event(ev)?,

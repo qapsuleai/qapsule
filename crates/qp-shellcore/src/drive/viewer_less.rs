@@ -160,9 +160,8 @@ impl ViewerAgent {
                     QueryResult::Replay { replay } => {
                         if self.source != Some(replay.source) {
                             self.source = Some(replay.source);
-                            self.v.set_calendar(qp_session::headparts::replay_calendar(
-                                replay.source,
-                            ));
+                            self.v
+                                .set_calendar(qp_plane::headparts::replay_calendar(replay.source));
                         }
                         self.now = Some(replay.t);
                     }

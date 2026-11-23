@@ -1,5 +1,5 @@
 # authority/
 
-Otorite ve komut yolu: `Session` (oturum, bağlantılar, abonelikler, öneriler), komut
-uygulama (`apply`), hatalar, öneri (`did_you_mean`), değer önbelleği ve ajan politikası.
-Çizim ya da sorgu cevabı kurmaz; onlar `read/` ve `ops/` altındadır.
+Otorite ve komut yolu: `Session` (oturum, bağlantılar, abonelikler, öneriler) ve ajan
+politikası. Komut uygulama, hatalar, öneri ve değer önbelleği `qp-ops` / `qp-plane`'dedir.
+Çizim ya da sorgu cevabı kurmaz; onlar `read/` altında ve `qp-ops`'tadır.

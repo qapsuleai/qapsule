@@ -26,8 +26,8 @@ use qp_schema::protocol::{
 };
 use qp_schema::{CompareOp, Condition, Document, SeriesSource};
 
-use crate::plane::DataPlane;
-use crate::values::{bar_series, condition_series, find_series, values, Cache, Delta};
+use qp_plane::plane::DataPlane;
+use qp_plane::values::{bar_series, condition_series, find_series, values, Cache, Delta};
 
 /// At most this many claims are remembered for finalisation (oldest dropped first).
 pub(crate) const MAX_CLAIMS: usize = 4096;
@@ -129,7 +129,7 @@ fn holds_on(op: CompareOp, left: &EvidenceValue, right: Option<&EvidenceValue>, 
         (Some(x), Some(y)) => Some((x, y)),
         _ => None,
     };
-    crate::values::cmp(op, prev, (a, b))
+    qp_plane::values::cmp(op, prev, (a, b))
 }
 
 /// The bar series a claim on `c` rests on (that of its first operand).

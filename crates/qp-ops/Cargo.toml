@@ -1,0 +1,21 @@
+[package]
+name = "qp-ops"
+description = "Qapsule operations: expansion of protocol ops into changes, grammar ops, selectors, locating, canonical forms, summaries, applying changes and replay, the presenter and the document provider; pure functions of the document."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
+qp-compute = { version = "0.0.0", path = "../qp-compute" }
+qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

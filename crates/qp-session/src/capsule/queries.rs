@@ -84,7 +84,7 @@ impl Session {
                 let fact_ids = story_fact_ids(story);
                 let facts: Vec<Option<&Fact>> =
                     fact_ids.iter().map(|i| self.fact_by_id(i)).collect();
-                let key = crate::capidx::ItemKeyRef {
+                let key = qp_plane::capidx::ItemKeyRef {
                     capsule: c,
                     facts: &facts,
                     series: *series,

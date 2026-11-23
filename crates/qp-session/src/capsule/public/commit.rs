@@ -34,8 +34,8 @@ impl Session {
         // the same item, byte for byte (canonical JSON) — and never an engine item or a
         // proposal.
         let alike = |id: &str| {
-            let a = crate::apply::find_collection(&self.doc, id);
-            let b = crate::apply::find_collection(&w.doc, id);
+            let a = qp_ops::apply::find_collection(&self.doc, id);
+            let b = qp_ops::apply::find_collection(&w.doc, id);
             if a != b
                 || a == Some(qp_schema::protocol::Collection::Proposals)
                 || engine_item(&self.doc, id)
@@ -57,7 +57,7 @@ impl Session {
                 ChangeOp::PutAudience { principal, .. } => {
                     self.doc.audiences.get(principal) == w.doc.audiences.get(principal)
                 }
-                _ => alike(crate::apply::touched(c)),
+                _ => alike(qp_ops::apply::touched(c)),
             };
             if !ok {
                 return None;
@@ -104,7 +104,7 @@ impl Session {
             None => {
                 let series = |c: &ChangeOp| bar_op(c) || matches!(c, ChangeOp::PutSeries { .. });
                 let data = e.changes.iter().chain(&e.inverse).all(series)
-                    && (e.author == crate::session::ENGINE_PRINCIPAL
+                    && (e.author == qp_ops::ENGINE_PRINCIPAL
                         || e.changes.iter().chain(&e.inverse).all(bar_op));
                 data.then(|| LogEntry {
                     changes: e.changes.clone(),
@@ -150,7 +150,7 @@ impl Session {
                 if s.cond_blocked(&cond) {
                     return Look::Quiet;
                 }
-                let closure = crate::live::closure_of(&s.doc, &cond);
+                let closure = qp_ops::live::closure_of(&s.doc, &cond);
                 let who = s.responsible(f, &closure);
                 if !who
                     .iter()
@@ -159,7 +159,7 @@ impl Session {
                     return Look::Quiet;
                 }
                 let rd = s.rd.as_ref().unwrap_or(&s.doc);
-                if !crate::values::holds(rd, &mut s.cache, &cond) {
+                if !qp_plane::values::holds(rd, &mut s.cache, &cond) {
                     return Look::Quiet;
                 }
                 let ev = crate::claims::evidence(rd, &mut s.cache, &s.claims, &s.plane, &cond);
@@ -175,7 +175,7 @@ impl Session {
                         reason: None,
                         seq: 0,
                         at: self.clock,
-                        author: crate::session::ENGINE_PRINCIPAL.to_owned(),
+                        author: qp_ops::ENGINE_PRINCIPAL.to_owned(),
                         approved_by: None,
                         cause: None,
                         request: Vec::new(),
@@ -228,7 +228,7 @@ impl Session {
                     continue;
                 }
                 let rd = s.rd.as_ref().unwrap_or(&s.doc);
-                let r = crate::values::eval_condition(rd, &mut s.cache, &trig);
+                let r = qp_plane::values::eval_condition(rd, &mut s.cache, &trig);
                 let now = r.is_some_and(|x| x.0);
                 if s.intent_state.get(&id) == Some(&false) && now {
                     if let Some((_, bar, t)) = r {
@@ -314,7 +314,7 @@ impl Session {
                 s.rd = reading_doc(&s.doc, &s.plane);
                 s.view_reads = None;
             } else if let Some(rd) = s.rd.as_mut() {
-                if crate::apply::apply_all(rd, &pe.changes).is_err() {
+                if qp_ops::apply::apply_all(rd, &pe.changes).is_err() {
                     s.rd = reading_doc(&s.doc, &s.plane);
                     s.head_state.dirty_all = true;
                 }

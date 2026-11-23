@@ -21,8 +21,8 @@ use qp_schema::protocol::WriteMode;
 use qp_schema::protocol::{ErrorCode, Op, ProtocolError};
 use qp_schema::{Author, Document};
 
-use crate::error::{ptr, PResult, E};
 use crate::session::Session;
+use qp_plane::error::{ptr, PResult, E};
 
 /// `forbidden` reason: a decision only a human may make (§25.2).
 pub const HUMAN_ONLY: &str = "human_only";
@@ -141,7 +141,7 @@ impl Session {
         let direct = kinds.iter().position(|k| *k == AgentOp::Direct);
         let proposal = kinds.iter().position(|k| *k == AgentOp::Proposal);
         match (direct, proposal) {
-            (Some(d), Some(_)) => Err(crate::error::invalid(
+            (Some(d), Some(_)) => Err(qp_plane::error::invalid(
                 "an agent command mixes ops applied directly (comments, watches) with ops that are only proposed (views, drawings)",
                 ptr("/ops", d),
             )),

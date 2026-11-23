@@ -35,7 +35,7 @@ impl Session {
         ci: usize,
         limit: Option<u32>,
         width: Option<u32>,
-    ) -> crate::error::PResult<()> {
+    ) -> qp_plane::error::PResult<()> {
         if self.viewers.contains_key(&self.conns[ci].id) {
             return Err(E::new(
                 ErrorCode::Duplicate,
@@ -353,7 +353,7 @@ impl Session {
     /// rests on, with bars) and when it could first know its latest transition.
     fn viewer_row(&self, principal: &str, it: &CapsuleItem) -> (bool, Option<i64>) {
         let rd = rd!(self);
-        let bars = crate::values::find_series(rd, &it.series).and_then(Series::bars);
+        let bars = qp_plane::values::find_series(rd, &it.series).and_then(Series::bars);
         let entitled = crate::claims::feeds_of(&self.doc, &[it.series.as_str()])
             .is_some_and(|ks| ks.iter().all(|k| self.plane.entitled(principal, k)));
         let face = entitled && bars.is_some_and(|b| !b.is_empty());

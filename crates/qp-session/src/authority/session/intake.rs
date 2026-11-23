@@ -321,7 +321,7 @@ impl Session {
                 continue;
             };
             let cur = scratch.as_ref().unwrap_or(&self.doc);
-            if let Ok(cs) = crate::expand::expand_op(cur, &op, &p, &mut ctx) {
+            if let Ok(cs) = qp_ops::expand::expand_op(cur, &op, &p, &mut ctx) {
                 if cs.is_empty() {
                     continue;
                 }

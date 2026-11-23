@@ -204,7 +204,7 @@ impl Session {
                         None => (None, None, Vec::new()),
                     };
                     PanelInfo {
-                        select: crate::select::Resolver {
+                        select: qp_ops::select::Resolver {
                             doc: rd!(self),
                             root: None,
                         }

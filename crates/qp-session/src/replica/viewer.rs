@@ -39,9 +39,9 @@ use qp_schema::{Bar, Capsule, Document, Fact, Finding, Point, Series, SeriesSour
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::error::E;
 use crate::replica::{document_digest, fnv1a64, Replica, Shown};
 use crate::session::{out, Session};
+use qp_plane::error::E;
 
 /// Feed length of a `viewer` subscription without `limit`.
 pub const DEFAULT_LIMIT: u32 = 40;
@@ -67,7 +67,7 @@ pub fn scene_digest(scene: &SceneDesc) -> String {
 /// language and entitlement). (R4/H-FP) On a face, it also gives the headline pieces of
 /// that capsule for the same reader (`Session::item_headline_parts`).
 struct Reader<'a> {
-    inner: crate::DocProvider<'a>,
+    inner: qp_ops::DocProvider<'a>,
     heads: &'a BTreeMap<String, String>,
     parts: Option<(&'a str, qp_grammar::HeadlineParts)>,
     /// (R5/m17-int) The voice surfaces the authority wrote for this reader (the item's
@@ -397,7 +397,7 @@ pub fn check_story(doc: &Document, capsule: &str, bars: Option<&[Bar]>) -> Story
     else {
         return StoryCheck::Server;
     };
-    let want: Vec<&Fact> = crate::capsule::story_fact_ids(story)
+    let want: Vec<&Fact> = qp_plane::sentences::story_fact_ids(story)
         .iter()
         .filter_map(|id| doc.facts.iter().find(|f| &f.id == id))
         .filter(|f| !f.meaning.as_ref().is_some_and(|m| m.server))
@@ -611,7 +611,7 @@ pub fn story_series(s: &Session, o: &Opening) -> Option<String> {
     let f = doc.findings.iter().find(|f| f.id == o.finding)?;
     let fid = f.facts.first()?;
     let fact = doc.facts.iter().find(|x| &x.id == fid)?;
-    crate::values::bar_series(doc, &fact.series).map(|b| b.id.clone())
+    qp_plane::values::bar_series(doc, &fact.series).map(|b| b.id.clone())
 }
 
 #[cfg(test)]

@@ -41,9 +41,9 @@ use qp_schema::{Author, Bar, Condition, Document, Series};
 use serde::Serialize;
 
 use crate::claims::{anchor_of, closed, eval_at};
-use crate::plane::{reading_doc, DataError, DataPlane, Provider};
 use crate::session::Session;
-use crate::values::{bar_series, Delta};
+use qp_plane::plane::{reading_doc, DataError, DataPlane, Provider};
+use qp_plane::values::{bar_series, Delta};
 
 /// At most this many claims are remembered (oldest dropped first).
 const MAX_CLAIMS: usize = 4096;
@@ -355,7 +355,7 @@ impl Replica {
     #[must_use]
     pub fn bars(&self, series: &str) -> Option<&[Bar]> {
         let s = self.s.as_ref()?;
-        crate::values::find_series(rd!(s), series).and_then(qp_schema::Series::bars)
+        qp_plane::values::find_series(rd!(s), series).and_then(qp_schema::Series::bars)
     }
 
     /// (R3, K28, §20) Capsule candidates on the open (last) bar of bar series `series`,
@@ -368,7 +368,7 @@ impl Replica {
         let Some(s) = self.s.as_ref() else {
             return Vec::new();
         };
-        let Some(bs) = crate::values::find_series(rd!(s), series) else {
+        let Some(bs) = qp_plane::values::find_series(rd!(s), series) else {
             return Vec::new();
         };
         let (Some(bars), Some(symbol)) = (bs.bars(), bs.symbol()) else {

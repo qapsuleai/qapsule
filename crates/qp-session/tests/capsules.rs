@@ -14,10 +14,11 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
+use qp_ops::replay;
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::{OutboundLine, SessionInit};
 use qp_schema::Bar;
-use qp_session::{replay, Session};
+use qp_session::Session;
 use serde_json::{json, Value};
 
 fn root() -> PathBuf {

@@ -39,7 +39,7 @@ impl ReplayHost {
     ///
     /// # Errors
     /// The authority rejected it.
-    pub fn data_event(&mut self, ev: &DataEvent) -> Result<Vec<OutboundLine>, crate::DataError> {
+    pub fn data_event(&mut self, ev: &DataEvent) -> Result<Vec<OutboundLine>, qp_plane::DataError> {
         let mut lines = self.session.data_event(ev)?;
         lines.extend(self.session.viewer_flush());
         Ok(lines)
@@ -264,7 +264,7 @@ impl ReplayHost {
         init.epoch += self.resets;
         self.session = Session::new(init, &self.root)?;
         self.session
-            .set_headline_calendar(crate::headparts::replay_calendar(self.info.kind));
+            .set_headline_calendar(qp_plane::headparts::replay_calendar(self.info.kind));
         self.session.set_viewer_batch(true);
         for (p, r) in &self.principal_rules {
             self.session.set_principal_coin_flip_rule(p, *r);

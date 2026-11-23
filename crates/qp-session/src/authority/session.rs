@@ -24,20 +24,17 @@ use qp_schema::protocol::{
 use qp_schema::{Author, CapsuleState, Document};
 use serde_json::Value;
 
-use crate::apply::{apply_all, first_overlap, touched_ids, touched_key, touched_keys};
-use crate::error::{invalid, ptr, PResult, E};
-use crate::expand::{
+use crate::public::{PubNext, PubPending};
+use qp_ops::apply::{apply_all, first_overlap, touched_ids, touched_key, touched_keys};
+use qp_ops::expand::{
     check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
 };
-use crate::locate::locate;
-use crate::plane::{reading_doc, DataError, DataOutcome, DataPlane, Provider, Reader};
-use crate::present::profile_for;
-use crate::public::{PubNext, PubPending};
-use crate::select;
-use crate::values::{eval_condition, holds, Cache};
-
-/// Principal id of the engine when it writes log entries itself.
-pub const ENGINE_PRINCIPAL: &str = "qp";
+use qp_ops::locate::locate;
+use qp_ops::present::profile_for;
+use qp_ops::{select, ENGINE_PRINCIPAL};
+use qp_plane::error::{invalid, ptr, PResult, E};
+use qp_plane::plane::{reading_doc, DataError, DataOutcome, DataPlane, Provider, Reader};
+use qp_plane::values::{eval_condition, holds, Cache};
 
 /// Features this authority grants when asked.
 const FEATURES: [&str; 2] = ["attention", "narrative"];
@@ -155,7 +152,7 @@ pub struct Session {
     /// for tests and measurements).
     pub(crate) incremental: bool,
     /// Bar changes not yet announced to `view` subscribers: (bar series, delta, seq).
-    pub(crate) pending_views: Vec<(String, crate::values::Delta, Seq)>,
+    pub(crate) pending_views: Vec<(String, qp_plane::values::Delta, Seq)>,
     /// View id -> every series it reads, with the inputs of studies among them
     /// (transitively); built on demand, dropped on structure changes.
     pub(crate) view_reads: Option<BTreeMap<String, BTreeSet<String>>>,
@@ -182,23 +179,23 @@ pub struct Session {
     /// Host-supplied mühür keys (R3, `new_with_trust_keys`, `with_provider_and_trust_keys`, `set_trust_keys`).
     pub(crate) trust_keys: Option<(Vec<u8>, Vec<u8>)>,
     /// (R3, §20) Inside [`Session::as_reader`]: the reader's projection.
-    pub(crate) proj: Option<std::rc::Rc<crate::capsule::Proj>>,
+    pub(crate) proj: Option<std::rc::Rc<qp_plane::proj::Proj>>,
     /// (R3/perf) Fact positions by id, over the facts sentences read
     /// ([`Session::all_facts`]).
-    pub(crate) fact_ix: std::cell::RefCell<crate::capidx::IdIndex>,
+    pub(crate) fact_ix: std::cell::RefCell<qp_plane::capidx::IdIndex>,
     /// (R3/perf) Capsule positions by id and finding (the stored document only).
-    pub(crate) cap_ix: std::cell::RefCell<crate::capidx::IdIndex>,
+    pub(crate) cap_ix: std::cell::RefCell<qp_plane::capidx::IdIndex>,
     /// (R3/perf) Capsule sentences by exact realizer input.
-    pub(crate) sentences: std::cell::RefCell<crate::capidx::SentenceMemo>,
+    pub(crate) sentences: std::cell::RefCell<qp_plane::capidx::SentenceMemo>,
     /// (RP4/T6) `capsules` items by exact input (entitled readers).
-    pub(crate) item_memo: std::cell::RefCell<crate::capidx::ItemMemo>,
+    pub(crate) item_memo: std::cell::RefCell<qp_plane::capidx::ItemMemo>,
     /// (R3/perf) Readers' projections, kept per capsule.
     pub(crate) projs:
-        std::cell::RefCell<std::collections::HashMap<String, crate::capidx::ReaderProj>>,
+        std::cell::RefCell<std::collections::HashMap<String, qp_plane::capidx::ReaderProj>>,
     /// (R3/perf) What [`Session::as_reader`] last gave the most recent readers.
-    pub(crate) views: Vec<crate::capidx::ReaderView>,
+    pub(crate) views: Vec<qp_plane::capidx::ReaderView>,
     /// (R3/perf) What [`Session::headlines`] were last written from.
-    pub(crate) head_state: crate::capidx::HeadState,
+    pub(crate) head_state: qp_plane::capidx::HeadState,
     /// (R3, §20) Inside [`Session::as_reader`]: the real document's facts.
     pub(crate) real_facts: Vec<qp_schema::Fact>,
     /// (R3, §20) Finding id → the capsule sentence the grammar provider speaks with
@@ -538,11 +535,11 @@ impl Session {
 fn apply_or_roll_back(doc: &mut Document, changes: &[ChangeOp]) {
     let mut inverses = Vec::with_capacity(changes.len());
     for c in changes {
-        match crate::apply::apply_change(doc, c) {
+        match qp_ops::apply::apply_change(doc, c) {
             Ok(inv) => inverses.push(inv),
             Err(_) => {
                 for inv in inverses.iter().rev() {
-                    let _ = crate::apply::apply_change(doc, inv);
+                    let _ = qp_ops::apply::apply_change(doc, inv);
                 }
                 return;
             }

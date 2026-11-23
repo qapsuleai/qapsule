@@ -1,0 +1,22 @@
+[package]
+name = "qp-plane"
+description = "Qapsule data plane of the authority: the plane (bindings, bound bars, reading document), the values cache, protocol error building and suggestions, and the pure capsule indices (reader projection, item and sentence memos, headline pieces)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
+qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
+qp-compute = { version = "0.0.0", path = "../qp-compute" }
+qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
+qp-voice = { version = "0.0.0", path = "../qp-voice" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

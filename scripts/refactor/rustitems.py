@@ -8,7 +8,8 @@
   block's header, so a method that changes impl (other bounds, other `#[cfg]`) changes;
 - `impl` headers (attributes + `impl<…> Trait for Type where …`), as a set: an impl may be
   split or merged, but every header must survive unchanged;
-- `mod` declarations with their `#[cfg(…)]` attributes;
+- `mod` declarations with their `#[cfg(…)]` attributes; an item inside an inline
+  `#[cfg(…)] mod x { … }` is prefixed with that cfg;
 - inner attributes (`#![cfg(…)]`, `#![allow(…)]`, …) at file or module level;
 - `use` / `extern crate` declarations outside fn bodies, expanded to one leaf per name,
   with their `#[cfg]` / `#[macro_use]` attributes.
@@ -52,22 +53,25 @@ class File:
         self.code = rs.strip(src)
         self.free = _not_in_fn_body(self.code)
         self.impls, self.impl_spans = self._impls()
+        self.mods, self.mod_spans = self._mods()
         items, covered = self._items()
         macros, spans = self._macros(covered)
         # an item written inside a macro's arguments (`thread_local!(static N: …)`) is part
         # of the macro, not an item of its own
         self.items = [it for it, (a, _) in zip(items, covered)
                       if not any(x <= a <= z for x, z in spans)] + macros
-        self.mods = self._mods()
         self.inner = self._inner()
         self.uses = self._uses()
 
     def _in_impl(self, pos, text):
-        """`text` prefixed with the header of the impl block around `pos` (if any)."""
+        """`text` prefixed with the header of the impl block around `pos` (if any) and the
+        `#[cfg]`s of the inline `mod x { … }` blocks around it (R6), outermost first."""
         for a, z, hdr in self.impl_spans:
             if a < pos < z:
-                return hdr + "{" + text
-        return text
+                text = hdr + "{" + text
+                break
+        cfgs = [c for a, z, c in self.mod_spans if a < pos < z]
+        return "".join(c + "§" for c in cfgs) + text
 
     def _attrs(self, pos):
         start = _attr_start(self.src, _line_start(self.code, pos))
@@ -122,14 +126,19 @@ class File:
         return out, spans
 
     def _mods(self):
-        out = []
+        """([(name, [cfg attrs], text, is_file_module)], [(open, close, cfg text)] of inline
+        `mod x { … }` blocks that carry a cfg)."""
+        out, spans = [], []
         for m in MOD.finditer(self.code):
             if not self.free[m.start(1)]:
                 continue
             _, attrs = self._attrs(m.start(1))
             cfgs = [norm(c) for c in re.findall(r"#\[cfg\b.*", attrs)]
-            out.append((m.group(1), cfgs, norm(attrs + "mod " + m.group(1))))
-        return out
+            brace = m.end() - 1 if self.code[m.end() - 1] == "{" else None
+            out.append((m.group(1), cfgs, norm(attrs + "mod " + m.group(1)), brace is None))
+            if brace is not None and cfgs:
+                spans.append((brace, rs.match_brace(self.code, brace), " ".join(cfgs)))
+        return out, spans
 
     def _inner(self):
         out = []

@@ -37,7 +37,17 @@ In addition (K-8; RG1 denetim B8):
   FLAG lines do not fail by default (a split adds `use super::*;` routinely); the reviewer
   must read every one: a `use` CAN change behaviour unseen — a redirected import compiles
   when the other item has the same signature, and a glob can shadow a prelude name.
-  `--strict-use` makes FLAG fail.
+  `--strict-use` makes FLAG fail. A name whose import path changes a primitive-type
+  segment (`std::f32::consts::PI` -> `std::f64::consts::PI`) is CHANGED (R4).
+- Items inside an inline `#[cfg(…)] mod x { … }`, and items of a file module whose
+  `mod x;` (in a file of the change) carries a `#[cfg]`, are fingerprinted with that cfg:
+  an item that leaves a cfg-gated module for an ungated one is CHANGED (R6).
+
+Known limits (RF1/A yeniden denetim R5): the redirect heuristic is wide — a plain import
+whose module path is empty (`crate::round` -> `crate::fast::round`), only deepens
+(`a::round` -> `a::b::round`) or keeps the module name across crates (`qp_a::util::round`
+-> `qp_b::util::round`) is not flagged. A file module's cfg is seen only when the file
+declaring it is part of the change. This is a lexer, not a parser (K-10).
 """
 
 import collections
@@ -112,19 +122,23 @@ def compare(pairs, strict_use=False):
     hdr_a, hdr_b, mods_a, mods_b = {}, {}, collections.Counter(), collections.Counter()
     use_a, use_b = [], []
     inner = {False: collections.Counter(), True: collections.Counter()}
-    for old, osrc, new, nsrc in pairs:
-        fa = File(osrc) if old else None
-        fb = File(nsrc) if new else None
-        for f, path, cnt, where, hdr, mods, uses in ((fa, old, before, where_a, hdr_a, mods_a, use_a),
-                                                     (fb, new, after, where_b, hdr_b, mods_b, use_b)):
+    files = [(old, File(osrc) if old else None, new, File(nsrc) if new else None)
+             for old, osrc, new, nsrc in pairs]
+    pre_a = _module_cfgs({o: fa for o, fa, _, _ in files if fa})
+    pre_b = _module_cfgs({n: fb for _, _, n, fb in files if fb})
+    for old, fa, new, fb in files:
+        for f, path, cnt, where, hdr, mods, uses, pre in (
+                (fa, old, before, where_a, hdr_a, mods_a, use_a, pre_a),
+                (fb, new, after, where_b, hdr_b, mods_b, use_b, pre_b)):
             if f is None:
                 continue
             for kind, name, text in f.items:
+                text = pre.get(path, "") + text
                 cnt[text] += 1
                 where.setdefault(text, (path, kind, name))
             for h in f.impls:
                 hdr.setdefault(h, path)
-            for name, cfgs, text in f.mods:
+            for name, cfgs, text, _ in f.mods:
                 if cfgs and cfgs != ["#[cfg(test)]"]:
                     mods[text] += 1
                     where.setdefault(text, (path, "mod", name))
@@ -134,7 +148,7 @@ def compare(pairs, strict_use=False):
                 where.setdefault(text, (path, key[0], text))
             uses += [(path, *u) for u in f.uses]
         _file_uses(res, old, new, fa, fb)
-        _test_mods(res, new or old, fa, fb)
+    _test_mods(res, files)
     _items(res, before, after, where_a, where_b)
     _headers(res, hdr_a, hdr_b)
     for t, n in (mods_a - mods_b).items():
@@ -152,14 +166,44 @@ def compare(pairs, strict_use=False):
     return res
 
 
-def _test_mods(res, path, fa, fb):
-    """D3: a `mod x;` that was `#[cfg(test)]` (in the same file) or a new plain `mod tests`
-    brings test code into the product."""
-    tests_a = {n for n, c, _ in (fa.mods if fa else []) if "#[cfg(test)]" in c}
-    plain_a = {n for n, c, _ in (fa.mods if fa else []) if not c}
-    for n, c, t in (fb.mods if fb else []):
-        if not c and (n in tests_a or (n == "tests" and n not in plain_a)):
-            res.changed.append(("+", (path, "mod", n), t + "  (without #[cfg(test)])"))
+def _test_mods(res, files):
+    """D3, R6: a new plain `mod x;` where some file of the change declared `x` under
+    `#[cfg(test)]`, or a new plain `mod tests`, brings test code into the product."""
+    tests_a = {n for _, fa, _, _ in files if fa for n, c, _, _ in fa.mods if "#[cfg(test)]" in c}
+    plain_a = {(o, n) for o, fa, _, _ in files if fa for n, c, _, _ in fa.mods if not c}
+    old_of = {n: o for o, _, n, _ in files}
+    for _, _, new, fb in files:
+        for n, c, t, _ in (fb.mods if fb else []):
+            if not c and (old_of.get(new), n) not in plain_a and (n in tests_a or n == "tests"):
+                res.changed.append(("+", (new, "mod", n), t + "  (without #[cfg(test)])"))
+
+
+def _module_cfgs(side):
+    """{file: prefix}: the `#[cfg]`s of the `mod x;` declarations (in files of the change)
+    that make each file a module, outermost first (R6: an item that leaves a cfg-gated
+    file module for an ungated one changes)."""
+    decl = {}
+    for path, f in side.items():
+        d = os.path.dirname(path)
+        stem = os.path.basename(path)[:-3]
+        base = d if stem in ("mod", "lib", "main") else os.path.join(d, stem)
+        for name, cfgs, _, is_file in f.mods:
+            if is_file:
+                decl[(base, name)] = (path, " ".join(cfgs))
+
+    def prefix(path, seen=()):
+        stem = os.path.basename(path)[:-3]
+        if stem in ("lib", "main") or path in seen:
+            return ""
+        d = os.path.dirname(path)
+        name, parent = (os.path.basename(d), os.path.dirname(d)) if stem == "mod" else (stem, d)
+        hit = decl.get((parent, name))
+        if hit is None:
+            return ""
+        up = prefix(hit[0], seen + (path,))
+        return up + (hit[1] + "§" if hit[1] else "")
+
+    return {p: prefix(p) for p in side}
 
 
 def _items(res, before, after, where_a, where_b):
@@ -239,6 +283,10 @@ def _parent(leaf):
     return [p for p in path if p not in ("crate", "self", "super")]
 
 
+def _prims(leaf):
+    return [p for p in leaf.partition(" as ")[0].split("::") if re.fullmatch(PRIM[:-2], p)]
+
+
 def _same_source(a, b):
     """Two import paths of one name point to the same source when the module right before
     the name is the same (a crate or folder rename), or one module path extends the other
@@ -260,6 +308,11 @@ def _redirects(res, use_a, use_b):
     where = {(u[2], u[3]): u[0] for u in use_b}
     for name, leaf in sorted((b - a).elements()):
         olds = gone.get(name, [])
+        prim = [o for o in olds if _prims(o) != _prims(leaf)]
+        if prim:  # R4: `std::f32::consts::PI` -> `std::f64::consts::PI` changes the value
+            res.changed.append(("~", (where[(name, leaf)], "use", name),
+                                f"{' | '.join(sorted(set(prim)))} -> {leaf}"))
+            continue
         if olds and not any(_same_source(o, leaf) for o in olds):
             res.flags.append(("~", where[(name, leaf)], "redirected", f"{' | '.join(sorted(set(olds)))} -> {leaf}"))
 

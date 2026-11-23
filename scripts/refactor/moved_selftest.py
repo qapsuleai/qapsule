@@ -144,6 +144,28 @@ CASES2 = [
      "use crate::exact::round;\npub fn r() {}\n", "use crate::fast::round;\npub fn r() {}\n", "flag"),
     ("D4: a crate rename keeping the module (`x::query::Q` -> `y::query::Q`) passes",
      "use qp_session::read::query::Q;\npub fn q() {}\n", "use qp_read::query::Q;\npub fn q() {}\n", "noflag"),
+    ("R4: `use std::f32::consts::PI` -> `std::f64::consts::PI` is CHANGED",
+     "use std::f32::consts::PI;\npub fn p() {}\n", "use std::f64::consts::PI;\npub fn p() {}\n", "use"),
+    ("R6: a fn leaving an inline `#[cfg(feature)] mod gated {}` is CHANGED",
+     '#[cfg(feature = "x")]\nmod gated {\n    fn g() {}\n}\nmod plain {\n}\n',
+     '#[cfg(feature = "x")]\nmod gated {\n}\nmod plain {\n    fn g() {}\n}\n', "fn"),
+    ("R6: a helper leaving an inline `#[cfg(test)] mod tests {}` is CHANGED",
+     "pub fn p() {}\n#[cfg(test)]\nmod tests {\n    fn h() {}\n}\n",
+     "pub fn p() {}\nfn h() {}\n#[cfg(test)]\nmod tests {\n}\n", "fn"),
+]
+
+# (label, pairs, expected) for changes across files
+TESTS_INLINE = "pub fn p() {}\n#[cfg(test)]\nmod tests {\n    fn h() {}\n}\n"
+CASES3 = [
+    ("R6: inline `#[cfg(test)] mod tests {}` -> `#[cfg(test)] mod tests;` + tests.rs passes",
+     [("src/a.rs", TESTS_INLINE, "src/a.rs", "pub fn p() {}\n#[cfg(test)]\nmod tests;\n"),
+      (None, "", "src/a/tests.rs", "fn h() {}\n")], None),
+    ("R6: the same with `mod tests;` without cfg is CHANGED",
+     [("src/a.rs", TESTS_INLINE, "src/a.rs", "pub fn p() {}\nmod tests;\n"),
+      (None, "", "src/a/tests.rs", "fn h() {}\n")], "fn"),
+    ("R6/D3c: `#[cfg(test)] mod checks;` moved to another file without cfg is CHANGED",
+     [("src/a.rs", "#[cfg(test)]\nmod checks;\n", "src/a.rs", ""),
+      ("src/b.rs", "pub fn b() {}\n", "src/b.rs", "pub fn b() {}\nmod checks;\n")], "mod"),
 ]
 
 
@@ -174,6 +196,14 @@ def run(compare):
             hit = (not res.failed) if want is None else (want in kinds)
         if want == "flag":  # a FLAG is for the reviewer; it fails only with --strict-use
             hit = hit and not res.failed and compare([("a.rs", before, "a.rs", after)], True).failed
+        print(f"moved self-test: {label:66} {'ok' if hit else 'MISSED'}")
+        if not hit:
+            from moved import report
+            report(res, True)
+        ok &= hit
+    for label, pairs, want in CASES3:
+        res = compare(pairs)
+        hit = (not res.failed) if want is None else (want in _kinds(res))
         print(f"moved self-test: {label:66} {'ok' if hit else 'MISSED'}")
         if not hit:
             from moved import report

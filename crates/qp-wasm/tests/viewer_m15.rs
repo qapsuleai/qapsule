@@ -115,9 +115,14 @@ fn traffic(n: u32) -> (usize, usize, usize, usize) {
         &mut host,
         json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}}),
     );
+    // (RD2, K2) The bounds below were set on the presentation's look then (`oltan` and its
+    // face); the gesture names it.
+    let mut gesture = qp_wasm::shell::ShellCore::presented_look();
+    gesture["look"] = json!("oltan");
+    gesture["face"] = json!("oltan");
     let _ = send(
         &mut host,
-        json!({"type":"input","id":"s","gesture":qp_wasm::shell::ShellCore::presented_look()}),
+        json!({"type":"input","id":"s","gesture":gesture}),
     );
     let _ = send(
         &mut host,

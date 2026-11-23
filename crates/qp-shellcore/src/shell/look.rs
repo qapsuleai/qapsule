@@ -44,18 +44,22 @@ impl ShellCore {
     /// companion face (M16, `look::PRESENTED_LOOK`), the voice (M17), the story chart
     /// (M18, `stories::PRESENTED_STORY`) and the open capsule design (M20,
     /// `open::PRESENTED_OPEN`). The protocol's own defaults (a bare connection) stay `r3`
-    /// / `r4`.
+    /// / `r4`. (RD2, K2) The presentation is a phone surface: the presented look's touch
+    /// profile (`look::phone_profile`, `tavek-tel`) and its companion face.
     #[must_use]
     pub fn presented_look() -> Value {
+        let look = qp_grammar::look::phone_profile(qp_grammar::look::PRESENTED_LOOK);
+        let face =
+            qp_grammar::look::companion_face(look).unwrap_or(qp_grammar::faces::PRESENTED_FACE);
         json!({"kind":"style",
-               "face": qp_grammar::faces::PRESENTED_FACE,
+               "face": face,
                "feed": qp_grammar::feeds::PRESENTED_FEED,
                // (R5/S) The presented motion design's opening (M21, `surek`).
                "transition": qp_grammar::motion::by_name(Some(qp_grammar::motion::PRESENTED_MOTION)).transition,
                "outcome": qp_grammar::glyph::outcome::PRESENTED_OUTCOME,
                // (R5/m17-int) M17's voice (`qp_session::voices::PRESENTED_VOICE`).
                "voice": qp_session::voices::PRESENTED_VOICE,
-               "look": qp_grammar::look::PRESENTED_LOOK,
+               "look": look,
                "story": qp_grammar::stories::PRESENTED_STORY,
                "open": qp_grammar::open::PRESENTED_OPEN,
                // (RP4/T7) Rows carry the event's time (`?clock=0`: as before).

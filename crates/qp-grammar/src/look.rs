@@ -48,8 +48,8 @@ pub use oltan::OLTAN;
 pub use ornek::ORNEK;
 pub use r4::R4;
 pub use registry::{
-    by_name, companion_face, is_look, names, or_default, COMPANION_FACES, DEFAULT_LOOK, LOOKS,
-    PRESENTED_LOOK,
+    by_name, companion_face, is_look, names, or_default, phone_profile, COMPANION_FACES,
+    DEFAULT_LOOK, LOOKS, PRESENTED_LOOK,
 };
 pub use tavek::{TAVEK, TAVEK_TEL};
 pub use zemre::ZEMRE;

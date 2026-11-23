@@ -47,9 +47,16 @@ fn look(core: &ShellCore) -> Value {
 #[test]
 fn the_presentation_asks_for_the_r5_picks() {
     let l = look(&page(&mut parity_host(), |_| {}));
-    assert_eq!(l["look"], qp_grammar::look::PRESENTED_LOOK, "{l}");
-    assert_eq!(l["look"], "oltan");
-    assert_eq!(l["face"], "oltan", "{l}");
+    // (RD2, K2) `tavek`; the presentation is a phone surface: its touch profile, and
+    // `tavek`'s companion face.
+    assert_eq!(qp_grammar::look::PRESENTED_LOOK, "tavek");
+    assert_eq!(
+        l["look"],
+        qp_grammar::look::phone_profile(qp_grammar::look::PRESENTED_LOOK),
+        "{l}"
+    );
+    assert_eq!(l["look"], "tavek-tel");
+    assert_eq!(l["face"], "zemre", "{l}");
     assert_eq!(l["voice"], "marla", "{l}");
     assert_eq!(l["story"], qp_grammar::stories::PRESENTED_STORY, "{l}");
     // (R6/T0, K57) Arkin's pick.
@@ -68,8 +75,8 @@ fn a_look_brings_its_companion_face_unless_a_face_is_named() {
         (json!({"look": "zemre", "face": ""}), Some("zemre")),
         // `r4`'s companion is R4's presented face.
         (json!({"look": "r4"}), Some("vadrel")),
-        // A look without a companion keeps the face (the presented one).
-        (json!({"look": "ornek"}), Some("oltan")),
+        // A look without a companion keeps the face (the presented one, RD2: `zemre`).
+        (json!({"look": "ornek"}), Some("zemre")),
         // The protocol default face (`r3`) is absent from the view state.
         (json!({"look": "oltan", "face": "r3"}), None),
     ] {

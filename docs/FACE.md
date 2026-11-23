@@ -14,7 +14,11 @@ Kanıt (R5): `rounds/R5/experiments/M16/RESULTS.md` (kör ölçüm, seçim), `ru
 
 ## Seçilen (R5): `oltan` — işaret önde / saat yüzeyi
 
-Gösterimin varsayılanı (R5/S): görünüş **`oltan`** + yüz **`oltan`**, kapsül dili **`marla`**.
+> **Bugün (RD2, K2, 2026-11-23):** gösterim varsayılanı görünüş **`tavek`** (telefonda
+> `tavek-tel`) + yüz **`zemre`** (aşağıda "RD2: `tavek`'in yüzü `zemre`"). `oltan` K57'de
+> reddedildi; `?look=oltan` ile seçilebilir kalır (eşlik eden yüzüyle). Bu bölüm R5'in kaydıdır.
+
+Gösterimin varsayılanıydı (R5/S): görünüş **`oltan`** + yüz **`oltan`**, kapsül dili **`marla`**.
 `?look=oltan` eşlik eden yüzünü de getirir (`look::COMPANION_FACES`; `r4` → `vadrel`, `zemre` →
 `zemre`); bir yüz adlandırılırsa o kalır. Protokolün varsayılanları değişmedi (yüz `r3`, dil `r4`):
 çıplak bağlantılar, dökümler ve v1 altınlar bayt eşit. Kod: yüz `crates/qp-grammar/src/faces/oltan.rs`,
@@ -99,7 +103,9 @@ zaman, son değer etiketi) sakin bir izleme listesi satırı gibi okunur. `oltan
 işareti profesyonel görünüme uymadı (K57); `vadrel` `tavek` altında grafiksiz kalıyor ve
 yüzün altında boş alan ile tek başına bir "Tem" etiketi bırakıyor (ekran görüntüsüyle
 karşılaştırıldı). Değerler görünüşten (`glyph.face_px` 24, tip ölçeği). Gösterim varsayılanı
-(`PRESENTED_LOOK`) Arkin'in son kabulüne kadar `oltan` kalır.
+(`PRESENTED_LOOK`) Arkin'in son kabulüyle `tavek` oldu (RD2, K2, 2026-11-23): gösterim bir
+telefon yüzeyi olduğu için `tavek-tel` (`look::phone_profile`) ve yüz `zemre` ile açılır.
+Altınlar: `fixtures/golden/demo/rd2-*`; `p4-*` ve `v2/*` `?look=oltan` ile çizilir.
 
 ## İkinci (R5): `zemre` — zaman şeridi
 

@@ -12,7 +12,9 @@ pub const DEFAULT_LOOK: &str = "r4";
 /// (R5/S) The look the presentation shell asks for when the reader chose none (M16's pick,
 /// `rounds/R5/experiments/M16/RESULTS.md`); the protocol default ([`DEFAULT_LOOK`]) does
 /// not change, so bare connections, transcripts and the `v1` goldens stay byte-identical.
-pub const PRESENTED_LOOK: &str = "oltan";
+/// (RD2, K2, 2026-11-23) `tavek` (was `oltan`, rejected in K57; still selectable). A phone
+/// surface shows its touch profile ([`phone_profile`]: `tavek-tel`).
+pub const PRESENTED_LOOK: &str = "tavek";
 
 /// (R5/S) Each look's companion face design (`qp_grammar::faces`): choosing a look in the
 /// presentation chooses its face too, unless the reader names a face (`?face=`). `r4`:
@@ -33,6 +35,17 @@ pub fn companion_face(look: &str) -> Option<&'static str> {
         .iter()
         .find(|(l, _)| *l == look)
         .map(|(_, f)| *f)
+}
+
+/// (RD2) The touch (phone) profile of look `look`: `<look>-tel` when that look is
+/// registered, else `look` itself (`look.rs` "Profiles").
+#[must_use]
+pub fn phone_profile(look: &'static str) -> &'static str {
+    let tel = format!("{look}-tel");
+    LOOKS
+        .iter()
+        .find(|l| l.name == tel)
+        .map_or(look, |l| l.name)
 }
 
 /// Registered names, in registry order.

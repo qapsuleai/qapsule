@@ -67,6 +67,11 @@ akışı 10 sn kaydır → grafiği 10 sn sürükle/kıstır → **Özeti kopyal
   yüz `vadrel`, akış `elikov`, geçiş `zumlak`, sonuç işareti `tg5`. Öteki kayıtlı tasarımlar
   (yüz: `r3`, `fotolay`, `tavrik`) Ayarlar'dan ya da URL'den seçilir; R3 görünümü:
   `?face=r3&feed=r3&transition=r3&outcome=r3`.
+  (RD2, K2, 2026-11-23) Bugün görünüş **`tavek`**: gösterim bir telefon yüzeyi olduğundan
+  dokunma profili `tavek-tel` ve eşlik eden yüz `zemre` ile açılır (çekirdekte:
+  `look::PRESENTED_LOOK`, `look::phone_profile`, `ShellCore::presented_look`). `oltan` (R5)
+  K57'de reddedildi; `?look=oltan` ile seçilebilir. Protokol varsayılanı `r4` değişmedi.
+  Altınlar: `rd2-*` bugünkü açılış; `p4-*` ve `v2/*` `?look=oltan` ile çizilir.
 - **İnsan testi için URL (R4/S1):** `?seen=now` (açılışta son bakış o anki oynatma saati) ya da
   `?seen=600` (oynatma 600. adımda ya da ötesinde **ilk durduğu** anın saatiyle: doğrudan 609'a
   atlanırsa son bakış 609 olur, bu yüzden önce `600`'e gidin); `?watch=SYN02,SYN03&long=SYN09&short=SYN12`

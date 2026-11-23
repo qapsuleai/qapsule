@@ -14,6 +14,12 @@ kaynaklardan aynen alındı:
 
 Kaydın yapısı `docs/GRAMMAR.md` §9a'da, kapsülün dili (`marla`) `docs/LANGUAGE.md`'de.
 
+> **Gösterim varsayılanı bugün `tavek` (RD2, K2, 2026-11-23):** telefon yüzeyinde dokunma
+> profili `tavek-tel`, eşlik eden yüz `zemre` (`look::PRESENTED_LOOK`, `look::phone_profile`;
+> yön ve kurallar `docs/design/CONTRACT.md`, `rounds/RD2/DECISION.md`). `oltan` K57'de
+> reddedildi; `?look=oltan` ile seçilebilir kalır. Protokol varsayılanı `r4` değişmedi. Bu
+> belgenin geri kalanı R5'in seçiminin kaydıdır.
+
 > Ajan okuyucu insan değildir. Buradaki seçim bir ön elemedir (SPEC §G0). Son söz Arkin'in
 > telefondaki karşılaştırmasında ve insan testi v3'tedir (`rounds/R5/human-test/`).
 

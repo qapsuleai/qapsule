@@ -64,8 +64,12 @@ fn the_presentation_asks_for_the_m8_m11_picks_and_the_page_overrides_them() {
         look["outcome"],
         qp_grammar::glyph::outcome::PRESENTED_OUTCOME
     );
-    // (R4/S2) the face is M8's pick.
-    assert_eq!(look["face"], qp_grammar::faces::PRESENTED_FACE, "{look}");
+    // (R4/S2) the face is M8's pick; (RD2, K2) the presented look's companion face when it
+    // has one (`tavek-tel` → `zemre`).
+    let presented = qp_grammar::look::phone_profile(qp_grammar::look::PRESENTED_LOOK);
+    let face =
+        qp_grammar::look::companion_face(presented).unwrap_or(qp_grammar::faces::PRESENTED_FACE);
+    assert_eq!(look["face"], face, "{look}");
     // The page's own choice (URL) is sent after the defaults and wins; `r3` is the
     // protocol default, so the fields are absent again.
     let core = page(&mut parity_host(), |c| {

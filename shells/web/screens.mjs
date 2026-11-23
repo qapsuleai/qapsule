@@ -17,7 +17,9 @@
 // stay byte-identical;
 // the `v2` shots (fixtures/golden/demo/v2/*.png, written under <out dir>/v2/) are the
 // presentation as R5 opened it (R5's picks; `V2_PIN` names the one that has since changed,
-// so the v2 goldens stay byte-identical).
+// so the v2 goldens stay byte-identical);
+// (RD2, K2) the `p4` shots name the look they were drawn with (`?look=oltan`); the `rd2`
+// shots are the presentation as it opens now (`tavek`, phone profile `tavek-tel`).
 // Synthetic data by default (the goldens in fixtures/golden/demo are the canvas PNGs of
 // the synthetic run at step 120). With --data (real local data) the output must be under
 // fixtures/local/: real data and its images never enter the repository.
@@ -57,7 +59,10 @@ const V1 = { look: 'r4', voice: 'r4', face: 'vadrel', story: 'r4', open: 'r4', m
 // (R6/T0, K57) The presentation's story chart is now `korda`; the v2 goldens were drawn
 // with `pavka`, so the v2 shots name it (`?story=pavka`) and stay byte-identical.
 // (RP4/T7) The rows' time (`clock`) came after them: the v2 shots name it off.
-const V2_PIN = { story: 'pavka', clock: '0' };
+// (RD2, K2) The presentation's look is now `tavek` (`tavek-tel` on the phone): the v2 and p4
+// goldens were drawn with `oltan` (and its companion face), so they name it.
+const V2_PIN = { story: 'pavka', clock: '0', look: 'oltan' };
+const P4_PIN = { look: 'oltan' };
 const V2 = [];
 for (const lang of ['tr', 'en']) {
   for (const theme of ['dark', 'light']) {
@@ -85,11 +90,20 @@ export const SHOTS = [
   ...V2,
   // (RP4/T7) The presentation as it opens now (no design setting in the URL): the rows
   // carry the event's time (`clock`). New goldens (`p4-*`); the v1/v2 ones stay as they were.
-  { present: true, name: 'p4-feed-tr-dark', canvases: ['face-0', 'face-1', 'face-2'] },
-  { present: true, name: 'p4-feed-en-light', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
-  { present: true, name: 'p4-closed-tr-light', theme: 'light', canvases: ['closed-0'] },
-  { present: true, name: 'p4-chart-tr-dark', open: 'chart', canvases: ['scene'] },
-  { present: true, name: 'p4-chart-en-light', lang: 'en', theme: 'light', open: 'chart', canvases: ['scene'] },
+  // (RD2, K2) They name the look they were drawn with (`P4_PIN`).
+  { present: true, pin: P4_PIN, name: 'p4-feed-tr-dark', canvases: ['face-0', 'face-1', 'face-2'] },
+  { present: true, pin: P4_PIN, name: 'p4-feed-en-light', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
+  { present: true, pin: P4_PIN, name: 'p4-closed-tr-light', theme: 'light', canvases: ['closed-0'] },
+  { present: true, pin: P4_PIN, name: 'p4-chart-tr-dark', open: 'chart', canvases: ['scene'] },
+  { present: true, pin: P4_PIN, name: 'p4-chart-en-light', lang: 'en', theme: 'light', open: 'chart', canvases: ['scene'] },
+  // (RD2, K2) The presentation as it opens now: look `tavek` (phone profile `tavek-tel`) and
+  // its companion face `zemre`. New goldens (`rd2-*`).
+  { present: true, name: 'rd2-feed-tr-dark', canvases: ['face-0', 'face-1', 'face-2'] },
+  { present: true, name: 'rd2-feed-en-light', lang: 'en', theme: 'light', canvases: ['face-0', 'face-1'] },
+  { present: true, name: 'rd2-closed-tr-light', theme: 'light', canvases: ['closed-0'] },
+  { present: true, name: 'rd2-capsule-tr-dark', open: 'capsule', canvases: ['scene'] },
+  { present: true, name: 'rd2-chart-tr-dark', open: 'chart', canvases: ['scene'] },
+  { present: true, name: 'rd2-chart-en-light', lang: 'en', theme: 'light', open: 'chart', canvases: ['scene'] },
 ];
 
 const extra = data ? ['--data', data] : [];
@@ -107,8 +121,8 @@ try {
     if (s.principal) q.set('principal', s.principal);
     // (R5/m17-int, R5/S) The v1 goldens predate R5's designs: they are drawn with the
     // designs before it (`V1`, today's text `?voice=r4`); the v2 shots name none.
-    // (RP4/T7) `present`: the presentation's own defaults, nothing pinned.
-    if (s.present) { /* as the page opens */ } else if (!s.v2) for (const [k, v] of Object.entries(V1)) q.set(k, v);
+    // (RP4/T7) `present`: the presentation's own defaults, nothing pinned but `pin`.
+    if (s.present) { for (const [k, v] of Object.entries(s.pin || {})) q.set(k, v); } else if (!s.v2) for (const [k, v] of Object.entries(V1)) q.set(k, v);
     else for (const [k, v] of Object.entries(V2_PIN)) q.set(k, v);
     if (s.face) q.set('face', s.face);
     for (const [k, v] of Object.entries(s.look || {})) q.set(k, v);

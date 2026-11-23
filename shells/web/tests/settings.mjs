@@ -12,9 +12,11 @@
 //    `PRESENTED_VOICE`), `?voice=selvi` wins, Settings → Dil switches to `r4` (no voice);
 //    a tap on a glossary term of a face (its box from the scene the core holds) shows the
 //    explanation the core gives and opens no capsule; a tap on it closes it.
-//  - (R5/S) the presentation opens with R5's picks (look and face `oltan`, story chart
-//    `korda` — R6/T0, K57: Arkin's pick —, open capsule `tesir`); `?look=zemre` brings its
-//    face, `?face=` wins over it; the other candidates (`pavka`, `nobra`) are offered.
+//  - (R5/S) the presentation opens with R5's picks (story chart `korda` — R6/T0, K57:
+//    Arkin's pick —, open capsule `tesir`) and (RD2, K2) the look `tavek` in its phone
+//    profile `tavek-tel` with its companion face `zemre`; `?look=zemre` brings its face,
+//    `?face=` wins over it; the other candidates (`pavka`, `nobra`) are offered. The voice,
+//    glossary and open-capsule checks (4, 5) were written on `oltan` and name it.
 // Usage: node tests/settings.mjs <qp binary>
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,11 +40,13 @@ try {
     await settle(page);
     const l = await look(page);
     // (R5/S) The opening is the presented motion design's (`surek`, M21 provisional).
-    check(l.face === 'oltan' && l.feed === 'elikov' && l.transition === 'surek' && l.outcome === 'tg5',
-      `defaults oltan/elikov/surek/tg5 (${JSON.stringify(l)})`);
+    // (RD2, K2) The face is the presented look's companion (`zemre`).
+    check(l.face === 'zemre' && l.feed === 'elikov' && l.transition === 'surek' && l.outcome === 'tg5',
+      `defaults zemre/elikov/surek/tg5 (${JSON.stringify(l)})`);
     // (R6/T0, K57) The story chart Arkin picked: `korda`.
-    check(l.look === 'oltan' && l.story === 'korda' && l.open === 'tesir' && l.voice === 'marla',
-      `R5 defaults oltan/korda/tesir/marla (${JSON.stringify(l)})`);
+    // (RD2, K2) The look: `tavek`, on the phone surface its touch profile.
+    check(l.look === 'tavek-tel' && l.story === 'korda' && l.open === 'tesir' && l.voice === 'marla',
+      `defaults tavek-tel/korda/tesir/marla (${JSON.stringify(l)})`);
     await page.click('#tabs button[data-tab="settings"]');
     const ch = await page.evaluate(() => JSON.parse(window.qp.choices ? window.qp.choices() : '{}'));
     const opts = async (sel) => page.$$eval(`${sel} option`, (os) => os.map((o) => o.value));
@@ -54,7 +58,8 @@ try {
     // (R4/S2) M8's first two faces are offered; r3 and tavrik stay registered.
     const fo = await opts('#s_face');
     check(['r3', 'vadrel', 'fotolay', 'tavrik'].every((f) => fo.includes(f)), `faces offered: ${fo.join(' ')}`);
-    check(await page.$eval('#s_face', (e) => e.value) === 'oltan', 'face select shows oltan');
+    check(await page.$eval('#s_face', (e) => e.value) === 'zemre', 'face select shows zemre');
+    check(await page.$eval('#s_look', (e) => e.value) === 'tavek-tel', 'look select shows tavek-tel');
     await page.selectOption('#s_face', 'fotolay');
     await settle(page);
     check((await look(page)).face === 'fotolay', 'face change reaches the view state');
@@ -163,7 +168,8 @@ try {
   // 4. (R5/m17-int) The capsule voice and the glossary (K49).
   {
     const { ctx, page, errors } = await phonePage(browser);
-    await page.goto(`${origin}/?anim=0&paint=ref`);
+    // (RD2) Written on `oltan` (the presentation's look then): named.
+    await page.goto(`${origin}/?anim=0&paint=ref&look=oltan`);
     await settle(page);
     let l = await look(page);
     check(l.voice === 'marla', `presented voice (${JSON.stringify(l)})`);
@@ -212,7 +218,8 @@ try {
   //    Açılmış kapsül switches back to today's card.
   {
     const { ctx, page, errors } = await phonePage(browser);
-    await page.goto(`${origin}/?anim=0&paint=ref&open=tesir`);
+    // (RD2) Written on `oltan` (the presentation's look then): named.
+    await page.goto(`${origin}/?anim=0&paint=ref&open=tesir&look=oltan`);
     await settle(page);
     let l = await look(page);
     check(l.open === 'tesir', `URL open design (${JSON.stringify(l)})`);

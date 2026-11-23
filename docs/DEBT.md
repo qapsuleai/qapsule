@@ -14,7 +14,6 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 | İ1 | katman | `qp-source` → `alan` | §2 qp-source'u uyarlayıcıya koyar; içeriği veri düzlemidir (FeedStore §18.4, SourceProvider, MemoryProvider, sentetik piyasa, yeniden oynatma takvimi, canlı bar kurma) ve oturum onu otoritenin parçası olarak kullanır. Dış dünyaya bakan kısım yerel dosya okuma (local.rs, file.rs). Saf taşımayla ayrılamaz: Session::new_inner gövdesi MemoryProvider::from_init'i çağırır (RG1/PLAN §3.1). | onaylandı (K85, 2026-11-22) |
 | İ3 | `crate.lines` | `qp-session` | 23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4). | onaylandı (K85, 2026-11-22); tavan 31999 |
 | İ6 | `file.hard` | `crates/qp-session/src/ops/expand/op.rs` | Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 910 |
-| İ6 | `file.hard` | `crates/qp-grammar/src/compile/layer/prepare.rs` | Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 891 |
 
 ## Özet
 
@@ -23,7 +22,7 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 | `dir.files` | Klasörde 15'ten çok kaynak dosya | konu klasörleri; ≤ 15 | 3 |
 | `doc.size` | Belge 1.500 satır ya da 60 KB'ı aşıyor | konuya göre böl, dizin bırak | 2 |
 | `file.soft` | Dosya 600 satırı aşıyor (kesin sınır 800 değil) | konuya göre alt modül; ≤ 600 | 36 |
-| `fn.lines` | Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi) | adlandırılmış adımlara böl; ≤ 80 | 177 |
+| `fn.lines` | Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi) | adlandırılmış adımlara böl; ≤ 80 | 176 |
 | `lint.allow` | Mevcut lint ihlali öğe başına `#[allow]` ile susturuldu (RG1/L) | ihlali düzelt, izni kaldır | 16 |
 | `test.file` | Test dosyası 800 satırı aşıyor (M5 kesildi) | konuya göre böl; ≤ 800 | 6 |
 
@@ -96,7 +95,6 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | Kalem | Değer |
 |---|---|
 | `crates/qp-session/src/ops/expand/op.rs::expand_op` | 903 |
-| `crates/qp-grammar/src/compile/layer/prepare.rs::prepare` | 883 |
 | `crates/qp-designs/src/stories/pavka/extend.rs::extend` | 592 |
 | `crates/qp-session/src/ops/gops.rs::expand_grammar` | 571 |
 | `crates/qp-grammar/src/compile/scene.rs::compile` | 562 |
@@ -287,8 +285,8 @@ Hedef: ihlali düzelt, izni kaldır.
 | `qp-shellcore` | 17 |
 | `qp-capsule` | 14 |
 | `qp-designs` | 14 |
-| `qp-grammar` | 13 |
 | `qp-voice` | 12 |
+| `qp-grammar` | 11 |
 | `qp-facts` | 9 |
 | `qp-source` | 5 |
 | `qp-glyph` | 3 |

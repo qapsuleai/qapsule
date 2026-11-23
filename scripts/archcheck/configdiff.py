@@ -222,7 +222,10 @@ def main(root, rev=None):
     if base is None:
         print(f"config-diff: {how}")
         return 2
-    short = _git(root, "rev-parse", "--short", base) or base
+    short = _git(root, "rev-parse", "--short", "--verify", f"{base}^{{commit}}")
+    if not short:
+        print(f"config-diff: base {base} ({how}) is not a commit here")
+        return 1
     print(f"config-diff: base {short} ({how})")
     diff = _git(root, "diff", "--no-color", base, "--", *FILES)
     print(diff if diff else "(no change in arch-config.json / arch-baseline.json)")

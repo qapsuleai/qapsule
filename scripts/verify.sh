@@ -59,7 +59,8 @@
 #                reference with tolerance (tests/paint-canvas.mjs, Chromium, DPR 1)
 #  19 arch       RG1 (docs/ENGINEERING.md): scripts/arch-check --self-test (known violations
 #                are caught, the ratchet works) and scripts/arch-check (layers, size budgets,
-#                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json)
+#                names, READMEs, lib.rs/mod.rs; debt only within scripts/arch-baseline.json);
+#                scripts/refactor/moved.py --self-test (the move check's fingerprints, K-8)
 #  20 config     RF1/A2 (K-9): scripts/arch-check --config-diff prints the diff of
 #                scripts/arch-config.json and scripts/arch-baseline.json against main (merge
 #                base; on main $QP_CONFIG_BASE or the round's baseline commit) and fails on a
@@ -573,7 +574,8 @@ step_arch() {
   command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/arch-check needs it)"
   scripts/arch-check --self-test || fail "arch-check self-test failed"
   scripts/arch-check || fail "architecture rules broken (scripts/arch-check)"
-  note "self-test passes; no error outside the debt baseline"
+  python3 scripts/refactor/moved.py --self-test || fail "moved.py self-test failed"
+  note "self-tests pass (arch-check, moved.py); no error outside the debt baseline"
 }
 
 step_config() {
@@ -581,7 +583,7 @@ step_config() {
   local rc=0
   scripts/arch-check --config-diff || rc=$?
   [ "$rc" -ne 2 ] || skip "no base revision for the config diff (shallow clone?)"
-  [ "$rc" -eq 0 ] || fail "a loosening in arch-config.json / arch-baseline.json cites no decision"
+  [ "$rc" -eq 0 ] || fail "config diff: a loosening cites no decision, or the base is not a commit (see above)"
   note "config/baseline diff against main printed; only tightening or cited loosening"
 }
 

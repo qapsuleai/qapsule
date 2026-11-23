@@ -79,7 +79,17 @@ def main(argv):
         # The ratchet: an existing baseline may only shrink. A first baseline (empty file)
         # or new debt needs `--allow-new <reason>` and is then a reviewed change.
         allow_new = "--allow-new" in argv
+        # A crate split spreads per-crate counts (`lint.allow`) onto the new crate: the
+        # rule's item count grows while its total does not. That is not new debt; whether
+        # the new items sit on new crates only is judged by `--config-diff` (D1).
+        spread_ok = set()
+        for r in ("lint.allow",):
+            old_total = sum(bl._value(v) for v in base.get("rules", {}).get(r, {}).get("items", {}).values())
+            if sum(f["value"] for f in findings if f["rule"] == r) <= old_total:
+                spread_ok.add(r)
         bad = [e for e in errors if e["rule"] not in hard and e["rule"] != "baseline"
+               and not (e["rule"] in spread_ok and allow_new
+                        and e.get("why", "").startswith(("rule count", "not in the baseline")))
                and (e.get("why", "").startswith(("above", "rule count")) or not allow_new)]
         if bad and base.get("rules") is not None and (base.get("rules") or not allow_new):
             for e in bad:

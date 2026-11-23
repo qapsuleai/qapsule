@@ -538,19 +538,19 @@ fn charac_session_ops_people() {
         "add_comment.err.both",
         &[],
         json!([{"op":"add_comment","about":{"capsule":"cap-overbought","instrument":"THYAO"},
-        "lang":"tr","text":"t","cites":[]}]),
+        "lang":"tr","text":"t","cites":["fnd-overbought"]}]),
     );
     case(
         &mut b,
         "add_comment.err.capsule",
         &[],
-        json!([{"op":"add_comment","about":{"capsule":"cap-overbougt"},"lang":"tr","text":"t","cites":[]}]),
+        json!([{"op":"add_comment","about":{"capsule":"cap-overbougt"},"lang":"tr","text":"t","cites":["fnd-overbought"]}]),
     );
     case(
         &mut b,
         "add_comment.err.instrument",
         &[],
-        json!([{"op":"add_comment","about":{"instrument":"GARAN"},"lang":"tr","text":"t","cites":[]}]),
+        json!([{"op":"add_comment","about":{"instrument":"GARAN"},"lang":"tr","text":"t","cites":["fnd-overbought"]}]),
     );
     case(
         &mut b,

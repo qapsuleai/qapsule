@@ -174,6 +174,18 @@ impl Book {
         let want_lines: Vec<&str> = want.lines().collect();
         let got_lines: Vec<&str> = text.lines().collect();
         let mut diff = String::new();
+        // The first differing line by position (catches pure reorderings too).
+        if let Some(i) = (0..want_lines.len().max(got_lines.len()))
+            .find(|&i| want_lines.get(i) != got_lines.get(i))
+        {
+            let _ = writeln!(
+                diff,
+                "first difference at line {}:\n  want {}\n  got  {}",
+                i + 1,
+                want_lines.get(i).unwrap_or(&"<none>"),
+                got_lines.get(i).unwrap_or(&"<none>")
+            );
+        }
         for l in &want_lines {
             if !got_lines.contains(l) {
                 let _ = writeln!(diff, "- {l}");

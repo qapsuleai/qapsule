@@ -17,6 +17,7 @@
 )]
 
 mod agent;
+mod extra;
 mod opcase;
 mod ops_doc;
 mod ops_flow;

@@ -22,8 +22,6 @@ pub fn is_face(name: &str) -> bool {
 /// (`None`: the default, `r3` = the §18.4 capsule card [`capsule_view`] at `max_points`).
 /// The designs are registered in [`crate::faces::FACES`].
 ///
-/// [`capsule_view`]: qp_grammar::depth::capsule_view
-///
 /// # Errors
 /// An unknown face name (`invalid`, `/face`) or the design's own errors.
 pub fn face_view(

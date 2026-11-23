@@ -1,9 +1,12 @@
 {
-  "_doc": "scripts/arch-check configuration: the machine form of docs/ENGINEERING.md §2 (layers) and §3 (budgets). Changing a budget or a layer is a rule change (docs/ENGINEERING.md, DECISIONS.md), not a fix.",
+  "_doc": "scripts/arch-check configuration: the machine form of docs/ENGINEERING.md §2 (layers) and §3 (budgets). Changing a budget or a layer is a rule change (docs/ENGINEERING.md, DECISIONS.md), not a fix. Each layer's `order` lists its crates (after layer_overrides) bottom first: a same-layer dependency a -> b is allowed only when b comes before a (K87, K-2; acyclic by construction).",
   "layers": [
     {
       "name": "şema",
       "crates": [
+        "qp-schema"
+      ],
+      "order": [
         "qp-schema"
       ]
     },
@@ -13,6 +16,11 @@
         "qp-compute",
         "qp-calendar",
         "qp-render"
+      ],
+      "order": [
+        "qp-calendar",
+        "qp-compute",
+        "qp-render"
       ]
     },
     {
@@ -21,11 +29,20 @@
         "qp-capsule",
         "qp-grammar",
         "qp-facts"
+      ],
+      "order": [
+        "qp-source",
+        "qp-facts",
+        "qp-grammar",
+        "qp-capsule"
       ]
     },
     {
       "name": "oturum",
       "crates": [
+        "qp-session"
+      ],
+      "order": [
         "qp-session"
       ]
     },
@@ -38,6 +55,13 @@
         "qp-source",
         "qp-shellcore",
         "qp-host"
+      ],
+      "order": [
+        "qp-live",
+        "qp-matriks",
+        "qp-mcp",
+        "qp-shellcore",
+        "qp-host"
       ]
     },
     {
@@ -45,6 +69,10 @@
       "crates": [
         "qp-cli",
         "qp-wasm"
+      ],
+      "order": [
+        "qp-wasm",
+        "qp-cli"
       ]
     }
   ],
@@ -87,6 +115,7 @@
   "hard_rules": [
     "layer.up",
     "layer.lateral",
+    "layer.order",
     "layer.unknown",
     "file.hard",
     "name.forbidden",
@@ -101,41 +130,6 @@
     "crates/qp-grammar/src/advances.rs"
   ],
   "exceptions": [
-    {
-      "id": "İ2",
-      "rule": "layer.lateral",
-      "item": "qp-capsule -> qp-facts",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Kapsül olgudan kurulur (alan katmanı içinde zincir). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
-    },
-    {
-      "id": "İ2",
-      "rule": "layer.lateral",
-      "item": "qp-host -> qp-live",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
-    },
-    {
-      "id": "İ2",
-      "rule": "layer.lateral",
-      "item": "qp-host -> qp-matriks",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
-    },
-    {
-      "id": "İ2",
-      "rule": "layer.lateral",
-      "item": "qp-host -> qp-mcp",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
-    },
-    {
-      "id": "İ2",
-      "rule": "layer.lateral",
-      "item": "qp-host -> qp-shellcore",
-      "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3)."
-    },
     {
       "id": "İ3",
       "rule": "crate.lines",
@@ -168,14 +162,18 @@
       "rule": "file.hard",
       "item": "crates/qp-session/src/ops/expand/op.rs",
       "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var."
+      "reason": "Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var.",
+      "max": 910,
+      "max_note": "RG1 sonu satır sayısı (RF1/A2: tek fonksiyonlu dosyaya tavan)"
     },
     {
       "id": "İ6",
       "rule": "file.hard",
       "item": "crates/qp-grammar/src/compile/layer/prepare.rs",
       "status": "onaylandı (K85, 2026-11-22)",
-      "reason": "Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var."
+      "reason": "Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var.",
+      "max": 891,
+      "max_note": "RG1 sonu satır sayısı (RF1/A2: tek fonksiyonlu dosyaya tavan)"
     }
   ],
   "_exceptions_doc": "Named exceptions approved by Arkin (DECISIONS K85; reasons in rounds/RG1/REPORT.md §4). A finding matching rule+item is printed as an exception on every run instead of failing. `max` is a latch (K89): a value above it fails; a crate.lines exception must carry one; it may only go down except by a decision row. Adding or removing one needs a decision row."

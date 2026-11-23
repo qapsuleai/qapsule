@@ -12,16 +12,11 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 | No | Kural | Kalem | Gerekçe | Durum |
 |---|---|---|---|---|
 | İ1 | katman | `qp-source` → `alan` | §2 qp-source'u uyarlayıcıya koyar; içeriği veri düzlemidir (FeedStore §18.4, SourceProvider, MemoryProvider, sentetik piyasa, yeniden oynatma takvimi, canlı bar kurma) ve oturum onu otoritenin parçası olarak kullanır. Dış dünyaya bakan kısım yerel dosya okuma (local.rs, file.rs). Saf taşımayla ayrılamaz: Session::new_inner gövdesi MemoryProvider::from_init'i çağırır (RG1/PLAN §3.1). | onaylandı (K85, 2026-11-22) |
-| İ2 | `layer.lateral` | `qp-capsule -> qp-facts` | Kapsül olgudan kurulur (alan katmanı içinde zincir). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3). | onaylandı (K85, 2026-11-22) |
-| İ2 | `layer.lateral` | `qp-host -> qp-live` | Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3). | onaylandı (K85, 2026-11-22) |
-| İ2 | `layer.lateral` | `qp-host -> qp-matriks` | Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3). | onaylandı (K85, 2026-11-22) |
-| İ2 | `layer.lateral` | `qp-host -> qp-mcp` | Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3). | onaylandı (K85, 2026-11-22) |
-| İ2 | `layer.lateral` | `qp-host -> qp-shellcore` | Barındırma uyarlayıcıları birleştirir (kabuk inceltmesi, PLAN §5). §2 aynı katmanda bağımlılığı yasaklar; saf taşımayla kaldırılamaz. Öneri K-2: katman içinde bildirilmiş, döngüsüz sıra (RG1/PLAN §3.3). | onaylandı (K85, 2026-11-22) |
 | İ3 | `crate.lines` | `qp-session` | 23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4). | onaylandı (K85, 2026-11-22); tavan 31999 |
 | İ4 | `crate.lines` | `qp-grammar` | Çekirdek ↔ tasarım klasörleri (faces, open, stories, glyph) adla kayıt üstünden döngüsel; döngüsüz kesimlerle bile ≈14,7 bin kalır. Gerçek bölme kaydın enjeksiyona çevrilmesini ister (M4a ölçümü). | onaylandı (K85, 2026-11-22); tavan 21000 |
 | İ5 | `crate.lines` | `qp-capsule` | 13,2 bin. voice/ (4,75 bin) saf taşımayla qp-voice crate'ine ayrılabilir, ama alanda iki yeni yan bağımlılık açar (qp-voice → qp-capsule, qp-facts); İ2 kararına bağlı bırakıldı (M4b ölçümü). | onaylandı (K85, 2026-11-22); tavan 13230 |
-| İ6 | `file.hard` | `crates/qp-session/src/ops/expand/op.rs` | Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22) |
-| İ6 | `file.hard` | `crates/qp-grammar/src/compile/layer/prepare.rs` | Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22) |
+| İ6 | `file.hard` | `crates/qp-session/src/ops/expand/op.rs` | Tek fonksiyon expand_op ≈905 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 910 |
+| İ6 | `file.hard` | `crates/qp-grammar/src/compile/layer/prepare.rs` | Tek fonksiyon prepare ≈885 satır; fonksiyon bölmek bu round'da yasak. Dosyada yalnız o var. | onaylandı (K85, 2026-11-22); tavan 891 |
 
 ## Özet
 
@@ -29,7 +24,7 @@ Kural `docs/ENGINEERING.md` §1.4: borç görünürdür ve büyümez. `scripts/a
 |---|---|---|---|
 | `dir.files` | Klasörde 15'ten çok kaynak dosya | konu klasörleri; ≤ 15 | 3 |
 | `doc.size` | Belge 1.500 satır ya da 60 KB'ı aşıyor | konuya göre böl, dizin bırak | 2 |
-| `file.soft` | Dosya 600 satırı aşıyor (kesin sınır 800 değil) | konuya göre alt modül; ≤ 600 | 37 |
+| `file.soft` | Dosya 600 satırı aşıyor (kesin sınır 800 değil) | konuya göre alt modül; ≤ 600 | 36 |
 | `fn.lines` | Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi) | adlandırılmış adımlara böl; ≤ 80 | 177 |
 | `lint.allow` | Mevcut lint ihlali öğe başına `#[allow]` ile susturuldu (RG1/L) | ihlali düzelt, izni kaldır | 13 |
 | `test.file` | Test dosyası 800 satırı aşıyor (M5 kesildi) | konuya göre böl; ≤ 800 | 6 |
@@ -73,7 +68,6 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-session/src/replica/viewer.rs` | 673 |
 | `crates/qp-session/src/capsule/comments.rs` | 672 |
 | `crates/qp-capsule/src/voice/marla.rs` | 669 |
-| `crates/qp-grammar/src/compile/scene.rs` | 667 |
 | `crates/qp-live/src/config.rs` | 660 |
 | `crates/qp-session/src/capsule.rs` | 658 |
 | `crates/qp-wasm/src/bind/shell.rs` | 658 |
@@ -105,9 +99,9 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 |---|---|
 | `crates/qp-session/src/ops/expand/op.rs::expand_op` | 903 |
 | `crates/qp-grammar/src/compile/layer/prepare.rs::prepare` | 883 |
-| `crates/qp-grammar/src/compile/scene.rs::compile` | 654 |
 | `crates/qp-grammar/src/stories/pavka/extend.rs::extend` | 592 |
 | `crates/qp-session/src/ops/gops.rs::expand_grammar` | 571 |
+| `crates/qp-grammar/src/compile/scene.rs::compile` | 564 |
 | `crates/qp-session/src/read/query.rs::query` | 372 |
 | `crates/qp-session/src/authority/session/command.rs::command` | 300 |
 | `crates/qp-host/src/live_trades/compare.rs::compare_trades` | 294 |

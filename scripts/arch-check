@@ -8,12 +8,18 @@
   scripts/arch-check --table         crate line table (non-test / test lines)
   scripts/arch-check --debt-md       write docs/DEBT.md from the baseline and exceptions
   scripts/arch-check --root <dir>    measure another tree (a worktree) with this config
+  scripts/arch-check --config-diff [<rev>]  K-9: print the diff of arch-config.json and
+                                     arch-baseline.json against <rev> (default: merge-base
+                                     with main; on main $QP_CONFIG_BASE or the round's
+                                     baseline commit); fails on a loosening that cites no
+                                     decision (K<n> / DECISION.md). Exit 2: no base found.
   scripts/arch-check --write-baseline [--allow-new]  write scripts/arch-baseline.json from
                                      the current findings; refuses any value or count above
                                      the existing baseline, and new items without --allow-new
 
-Rules: layer.up / layer.lateral / layer.unknown (cargo metadata, normal and build
-dependencies; dev-dependencies are not layered), file.hard / file.soft (src files, raw
+Rules: layer.up / layer.lateral / layer.unknown / layer.order (cargo metadata, normal and build
+dependencies; dev-dependencies are not layered; inside a layer only along its declared
+`order`, bottom first, K-2), file.hard / file.soft (src files, raw
 lines; files whose first lines say "üretilmiştir" or "@generated" are exempt), test.file,
 fn.lines (non-test functions), dir.files, crate.lines / shell.lines (non-test src lines),
 name.forbidden, readme.crate / readme.module, root.logic (lib.rs / mod.rs hold only
@@ -39,6 +45,11 @@ BASE_PATH = os.path.join(HERE, "arch-baseline.json")
 def main(argv):
     if "--self-test" in argv:
         return 0 if selftest.run() else 1
+    if "--config-diff" in argv:
+        from archcheck import configdiff
+        i = argv.index("--config-diff")
+        rev = argv[i + 1] if len(argv) > i + 1 and not argv[i + 1].startswith("-") else None
+        return configdiff.main(ROOT, rev)
     root = ROOT
     if "--root" in argv:  # measure another tree (e.g. a worktree) with this config/baseline
         root = os.path.abspath(argv[argv.index("--root") + 1])
@@ -80,6 +91,8 @@ def main(argv):
             fh.write("\n")
         print(f"baseline written: {sum(r['count'] for r in new['rules'].values())} items")
         return 0
+    for name, order in rules.layer_orders(cfg).items():
+        print(f"layer order `{name}`: {rules.order_text(order)}")
     for o, v in sorted(cfg.get("layer_overrides", {}).items()):
         print(f"EXCEPTION layer: {o} placed in `{v['layer']}` ({v.get('status', '')}): {v.get('reason', '')}")
     for f in excepted:
@@ -95,7 +108,7 @@ def main(argv):
     if "--list" in argv:
         for f in tolerated:
             print("baseline:", f["message"])
-    for g in cfg.get("generated_files", []):
+    for g in rules.generated_paths(cfg):
         print(f"generated (exempt from size budgets): {g}")
     for s in stale:
         # The ratchet only goes down: a smaller value must be written into the baseline at

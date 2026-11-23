@@ -1,19 +1,20 @@
 """`arch-check --self-test`: builds a small fake workspace with one known violation per
 rule (and a clean twin), runs the rules on it and checks that every violation is caught,
-the clean twin passes, and the ratchet rejects a value above the baseline."""
+the clean twin passes, and the ratchet rejects a value above the baseline. Also: layer
+orders (K-2), size-exception ceilings and `--config-diff` (K-9)."""
 
 import copy
 import os
 import tempfile
 
 from . import baseline as bl
-from . import rules
+from . import configdiff, rules
 
 CFG = {
     "layers": [
-        {"name": "base", "crates": ["qp-a"]},
-        {"name": "mid", "crates": ["qp-b", "qp-c"]},
-        {"name": "shell", "crates": ["qp-s"]},
+        {"name": "base", "crates": ["qp-a"], "order": ["qp-a"]},
+        {"name": "mid", "crates": ["qp-b", "qp-c"], "order": ["qp-c", "qp-b"]},
+        {"name": "shell", "crates": ["qp-s"], "order": ["qp-s"]},
     ],
     "layer_overrides": {},
     "shell_layer": "shell",
@@ -22,7 +23,7 @@ CFG = {
                 "doc_lines": 20, "doc_bytes": 4000},
     "forbidden_names": ["util", "common", "misc", "helpers"],
     "doc_globs": ["*.md", "docs/**/*.md"],
-    "hard_rules": ["layer.up", "layer.lateral", "layer.unknown", "file.hard",
+    "hard_rules": ["layer.up", "layer.lateral", "layer.order", "layer.unknown", "file.hard",
                    "name.forbidden", "readme.crate", "root.logic", "path.outside",
                    "lint.inner", "lints.workspace", "lint.flags"],
     "generated_files": [],
@@ -61,13 +62,15 @@ def _clean(root):
        'let _r = r#"} fn y() {"#; /* } { */ \'{\' }\n'
        "pub fn g<'a>(x: &'a str) -> &'a str { x }\n"
        "#[cfg(test)]\nmod tests {\n" + "".join(f"    // filler {i}\n" for i in range(20)) + "}\n")
-    edges = [("qp-b", "qp-a", "normal"), ("qp-s", "qp-b", "normal"), ("qp-a", "qp-s", "dev")]
+    # qp-b -> qp-c is sideways but along the declared order of `mid` (qp-c below qp-b)
+    edges = [("qp-b", "qp-a", "normal"), ("qp-s", "qp-b", "normal"), ("qp-a", "qp-s", "dev"),
+             ("qp-b", "qp-c", "normal")]
     return edges, ["qp-a", "qp-b", "qp-c", "qp-s"]
 
 
 EXPECT = {
     "layer.up": "qp-a -> qp-b",
-    "layer.lateral": "qp-b -> qp-c",
+    "layer.lateral": "qp-c -> qp-b",  # against the declared order
     "layer.unknown": "qp-x",
     "file.hard": "crates/qp-b/src/big.rs",
     "file.soft": "crates/qp-b/src/mid.rs",
@@ -101,7 +104,7 @@ def _dirty(root):
     edges, names = _clean(root)
     _crate(root, "qp-x", readme=False)
     names.append("qp-x")
-    edges += [("qp-a", "qp-b", "normal"), ("qp-b", "qp-c", "normal")]
+    edges += [("qp-a", "qp-b", "normal"), ("qp-c", "qp-b", "normal")]
     _w(root, "crates/qp-b/src/big.rs", "".join(f"// {i}\n" for i in range(45)))
     _w(root, "crates/qp-b/src/mid.rs", "".join(f"// {i}\n" for i in range(35)))
     _w(root, "crates/qp-b/src/long.rs", _fn("long", 12))
@@ -148,7 +151,8 @@ def run():
                 print("  ", f["message"])
         else:
             print("self-test: clean workspace passes (tricky strings, raw strings, chars, "
-                  "lifetimes, comments, test module; dev-dependency upward ignored)")
+                  "lifetimes, comments, test module; dev-dependency upward ignored; a sideways "
+                  "dependency along the declared order)")
     with tempfile.TemporaryDirectory() as root:
         edges, names = _dirty(root)
         fs, _ = rules.all_findings(root, CFG, edges, names)
@@ -202,5 +206,87 @@ def run():
             {"rule": "crate.lines", "item": "qp-b", "id": "T"}])))
         print(f"self-test: latch: crate.lines exception without max       {'caught' if hit else 'MISSED'}")
         ok &= hit
+    ok &= _orders()
+    ok &= _ceilings()
+    ok &= _config_diff()
     print("self-test:", "PASS" if ok else "FAIL")
+    return ok
+
+
+def _check(label, hit):
+    print(f"self-test: {label:58} {'ok' if hit else 'MISSED'}")
+    return bool(hit)
+
+
+def _orders():
+    """K-2: the layer orders themselves are validated."""
+    ok = True
+    for order, item, label in ((["qp-b"], "mid: qp-c", "order misses a crate of its layer"),
+                               (["qp-c", "qp-b", "qp-c"], "mid: qp-c twice", "order names a crate twice"),
+                               (["qp-c", "qp-b", "qp-a"], "mid: qp-a foreign", "order names a crate of another layer")):
+        cfg = copy.deepcopy(CFG)
+        cfg["layers"][1]["order"] = order
+        got = {f["item"] for f in rules.rule_layer_orders(cfg)}
+        ok &= _check(f"layer.order: {label}", item in got)
+    cfg = copy.deepcopy(CFG)
+    cfg["layers"][1]["order"] = ["qp-b"]
+    got = {f["item"] for f in rules.rule_layers(cfg, [("qp-b", "qp-c", "normal")], ["qp-b", "qp-c"])}
+    ok &= _check("layer.lateral: edge to a crate missing from the order", "qp-b -> qp-c" in got)
+    ok &= _check("layer.order: the clean config has none", not list(rules.rule_layer_orders(CFG)))
+    return ok
+
+
+def _ceilings():
+    """İ6 / fn: a size exception holds up to its `max`, fails above; it must carry one; a
+    fn.lines baseline value cannot grow."""
+    ok = True
+    f = rules.finding("file.hard", "crates/qp-b/src/one_fn.rs", 45, 40, "one_fn.rs: 45 lines")
+    for cap, want in ((45, False), (44, True)):
+        ex = {"rule": "file.hard", "item": f["item"], "id": "T", "max": cap}
+        kept, _, _ = bl.split_exceptions([f], dict(CFG, exceptions=[ex]))
+        errs, _, _ = bl.judge(kept, {"rules": {}}, CFG["hard_rules"])
+        ok &= _check(f"ceiling: file.hard 45 vs max {cap} {'fails' if want else 'holds'}",
+                     any("ceiling" in e["why"] for e in errs) == want)
+    ok &= _check("ceiling: file.hard / fn.lines exception without max", all(bl.missing_ceilings(
+        dict(CFG, exceptions=[{"rule": r, "item": "x", "id": "T"}])) for r in ("file.hard", "fn.lines")))
+    g = rules.finding("fn.lines", "crates/qp-b/src/one_fn.rs::one", 31, 10, "fn one: 31 lines")
+    for v, want in ((31, False), (32, True)):
+        errs, _, _ = bl.judge([dict(g, value=v)], {"rules": {"fn.lines": {"count": 1, "items": {
+            g["item"]: 31}}}}, CFG["hard_rules"])
+        ok &= _check(f"ceiling: fn.lines {v} vs baseline 31 {'fails' if want else 'holds'}",
+                     bool(errs) == want)
+    return ok
+
+
+def _config_diff():
+    """K-9: a loosening must cite a decision; tightening and removals pass."""
+    ok = True
+    ex = {"id": "T", "rule": "file.hard", "item": "crates/qp-b/src/x.rs", "max": 50,
+          "status": "istek", "reason": "tek fonksiyon"}
+    base = {"rules": {"fn.lines": {"count": 1, "items": {"crates/qp-b/src/a.rs::f": 90}}}}
+
+    def run(old_cfg, new_cfg, old_b=base, new_b=base):
+        return configdiff.judge(old_cfg, new_cfg, old_b, new_b).fails
+
+    ok &= _check("config-diff: new exception without a decision fails",
+                 run(CFG, dict(CFG, exceptions=[ex])) == 1)
+    ok &= _check("config-diff: new exception citing K93 passes",
+                 run(CFG, dict(CFG, exceptions=[dict(ex, status="onaylandı (K93)")])) == 0)
+    ok &= _check("config-diff: removing an exception passes", run(dict(CFG, exceptions=[ex]), CFG) == 0)
+    ok &= _check("config-diff: raising a max without a new decision fails", run(
+        dict(CFG, exceptions=[dict(ex, status="K85")]),
+        dict(CFG, exceptions=[dict(ex, status="K85", max=60)])) == 1)
+    loose = copy.deepcopy(CFG)
+    loose["budgets"]["fn_lines"] = 12
+    ok &= _check("config-diff: a raised budget without rule_changes fails", run(CFG, loose) == 1)
+    ok &= _check("config-diff: new generated file without a decision fails",
+                 run(CFG, dict(CFG, generated_files=["crates/qp-b/src/t.rs"])) == 1)
+    swap = copy.deepcopy(CFG)
+    swap["layers"][1]["order"] = ["qp-b", "qp-c"]
+    ok &= _check("config-diff: swapping a layer order fails", run(CFG, swap) == 1)
+    raised = {"rules": {"fn.lines": {"count": 1, "items": {"crates/qp-b/src/a.rs::f": 95}}}}
+    moved = {"rules": {"fn.lines": {"count": 1, "items": {"crates/qp-d/src/a.rs::f": 90}}}}
+    ok &= _check("config-diff: a raised baseline value fails", run(CFG, CFG, base, raised) == 1)
+    ok &= _check("config-diff: a moved baseline item (same fn, not larger) passes",
+                 run(CFG, CFG, base, moved) == 0)
     return ok

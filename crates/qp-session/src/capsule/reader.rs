@@ -527,7 +527,7 @@ impl Session {
         clock: bool,
         memo: &mut StudyMemo,
     ) -> Option<qp_schema::protocol::CapsuleVoice> {
-        if !qp_capsule::voice::is_voice(voice) || voice == qp_capsule::voice::DEFAULT_VOICE {
+        if !qp_voice::is_voice(voice) || voice == qp_voice::DEFAULT_VOICE {
             return None;
         }
         let story = p.and_then(|p| p.stories.get(&c.id)).or(c.story.as_ref())?;

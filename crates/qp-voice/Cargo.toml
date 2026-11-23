@@ -1,0 +1,20 @@
+[package]
+name = "qp-voice"
+description = "Qapsule capsule voices: the languages that write a capsule's headline, detail, track-record line and glossary from engine data. Deterministic."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-schema = { path = "../qp-schema" }
+qp-calendar = { path = "../qp-calendar" }
+qp-facts = { path = "../qp-facts" }
+qp-capsule = { path = "../qp-capsule" }
+
+[dev-dependencies]
+qp-source = { path = "../qp-source" }
+
+[lints]
+workspace = true

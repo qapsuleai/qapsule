@@ -7,12 +7,12 @@ use qp_schema::capsule::Validity;
 use qp_schema::Fact;
 
 use super::{speak, Surfaces, Voice, VoiceInput, MAX_DETAIL, MAX_GLOSS, MAX_HEADLINE, MAX_LEDGER};
-use crate::engine::EngineConfig;
-use crate::pipeline::simulate_engine;
-use crate::realize::elapsed::Period;
-use crate::realize::parts::parts;
-use crate::sentence::{closed_override, condition_now, sentence_lead, validity_now, Reader};
-use crate::{InstrumentInput, Lang, SentenceInput};
+use qp_capsule::engine::EngineConfig;
+use qp_capsule::pipeline::simulate_engine;
+use qp_capsule::realize::elapsed::Period;
+use qp_capsule::realize::parts::parts;
+use qp_capsule::sentence::{closed_override, condition_now, sentence_lead, validity_now, Reader};
+use qp_capsule::{InstrumentInput, Lang, SentenceInput};
 
 fn inputs(hourly: bool) -> Vec<InstrumentInput> {
     let insts = if hourly {

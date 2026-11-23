@@ -61,7 +61,7 @@ impl<'a> Cx<'a> {
                     .find(|c| "aıoueiöü".contains(*c))
                     .unwrap_or('e')
             };
-            let a = crate::realize::morph::a2(last);
+            let a = qp_capsule::realize::morph::a2(last);
             format!(" d{a}")
         };
         let ae = if also { " also" } else { "" };

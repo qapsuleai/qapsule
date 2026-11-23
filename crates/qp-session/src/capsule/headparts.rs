@@ -146,9 +146,9 @@ pub(crate) fn story_voice(
         });
     let [tr, en] =
         crate::capsule::with_sentence_input(story, facts, bars, now, redacted, memo, |s| {
-            qp_capsule::voice::speak(
+            qp_voice::speak(
                 voice,
-                &qp_capsule::voice::Input {
+                &qp_voice::Input {
                     sentence: s,
                     parts: &p,
                     calendar: &calendar,
@@ -163,7 +163,7 @@ pub(crate) fn story_voice(
     };
     Some(CapsuleVoice {
         voice: voice.to_owned(),
-        face: qp_capsule::voice::text_face(&s),
+        face: qp_voice::text_face(&s),
         headline: s.headline,
         detail: s.detail,
         ledger: s.ledger,

@@ -1,4 +1,4 @@
-# voice/selvi/
+# selvi/
 
 Selvi sesinin yüzeyleri (`selvi.rs` giriş noktası, iki dilli dizgiler, süre birimleri ve
 `Cx` bağlamı): `headline.rs` başlık, `detail.rs` ayrıntının ilk cümlesi (güven, eşik),

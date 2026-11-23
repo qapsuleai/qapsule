@@ -1,7 +1,7 @@
 //! Tests of the voice registry and the licence guard (moved out of `voice/mod.rs`).
 
 use super::*;
-use crate::Lang;
+use qp_capsule::Lang;
 
 #[test]
 fn registry_is_well_formed() {

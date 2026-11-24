@@ -95,3 +95,12 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   13.000 sınırı S3.2/S3.3 dalgaları (okuma, yansı, görüntüleyici, barındırma) çıkınca
   uygulanır; o zamana kadar tavan yalnız aşağı iner. Bu bir gevşetme değil, aynı istisnanın
   crate adı değişen öğeye taşınmasıdır.
+- **S3.0, araç izni (Arkin'in kararı, 2026-11-24).** Round oturumu sordu:
+  (A) taban çizgisi yazımı (`conform.rs` kalemi `crates/qp-session/src/conform.rs`'e taşınır;
+  `committed`, `build_with_keys` ve eski `conform.rs` kalemleri sıkılaşır; yeni borç yok);
+  (B) İ3 istisnasının `qp-session` → `qp-authority` yer değiştirmesi (aynı kural, aynı tavan
+  20.437). Arkin'in cevabı: **"İkisine de onay."** (B) için `config-diff`'e "yeni crate'e taşınan
+  istisna" tanıması eklenir: aynı kural, aynı tavan, eski crate artık yok, yeni crate bu
+  değişiklikte yapılandırmaya girmiş. Öz-sınamasıyla gelir. Bu round'un kalan taşımalarında
+  (S3.1–S3.3) aynı türden taban çizgisi yazımları yapılabilir: yalnız taşıma ve sıkılaşma, yeni
+  borç yok.

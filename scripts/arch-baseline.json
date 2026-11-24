@@ -24,7 +24,6 @@
     "crates/qp-authority/src/capsule/comments.rs": 672,
     "crates/qp-authority/src/capsule/dispute.rs": 758,
     "crates/qp-authority/src/capsule/reader.rs": 639,
-    "crates/qp-authority/src/host/conform.rs": 645,
     "crates/qp-authority/src/read/interact.rs": 703,
     "crates/qp-authority/src/read/query.rs": 651,
     "crates/qp-authority/src/replica/tape.rs": 695,
@@ -44,6 +43,7 @@
     "crates/qp-plane/src/plane.rs": 753,
     "crates/qp-plane/src/values.rs": 603,
     "crates/qp-schema/src/protocol/ops.rs": 712,
+    "crates/qp-session/src/conform.rs": 645,
     "crates/qp-shellcore/src/gallery.rs": 631,
     "crates/qp-shellcore/src/shell.rs": 610,
     "crates/qp-shellcore/src/shell/bench.rs": 708,
@@ -58,11 +58,10 @@
    }
   },
   "fn.lines": {
-   "count": 176,
+   "count": 175,
    "items": {
-    "crates/qp-authority/src/authority/session/accept.rs::committed": 86,
     "crates/qp-authority/src/authority/session/command.rs::command": 300,
-    "crates/qp-authority/src/authority/session/create.rs::build_with_keys": 175,
+    "crates/qp-authority/src/authority/session/create.rs::build_with_keys": 173,
     "crates/qp-authority/src/authority/session/dispatch.rs::handle_resolved": 196,
     "crates/qp-authority/src/authority/session/dispatch.rs::hello": 83,
     "crates/qp-authority/src/authority/session/events.rs::entry_events_in": 151,

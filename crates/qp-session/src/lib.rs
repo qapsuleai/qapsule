@@ -27,6 +27,6 @@ pub use qp_authority::{
     CoinFlipRule, CommentAudit, CompileOptions, ReplicaOptions, SettleRequest,
     MAX_DISPUTES_PER_CONN, MAX_DISPUTE_DIGESTS, MAX_OPEN_DISPUTES,
 };
-pub use qp_read::{explain_scene, hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 /// The authority alone (no subsystem), and the subsystem list type.
 pub use qp_authority::{Session as Authority, Subsystems};
+pub use qp_read::{explain_scene, hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};

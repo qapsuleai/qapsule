@@ -228,8 +228,7 @@ impl Rd<'_> {
                         .saturating_sub(i64::try_from(w).unwrap_or(i64::MAX))
                 });
                 let mut entries: Vec<_> = self
-                    .v
-                    .log()
+                    .log
                     .iter()
                     .filter(|e| after_seq.is_none_or(|s| e.seq > s))
                     .filter(|e| since_t.is_none_or(|t| e.at >= t))

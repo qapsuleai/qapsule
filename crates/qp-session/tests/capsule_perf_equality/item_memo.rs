@@ -1,4 +1,6 @@
-//! Tests of the reader item memo (`qp_plane::capidx::ItemMemo`) through the session (RP4/T6).
+// Tests of the reader item memo (`qp_plane::capidx::ItemMemo`) through the session (RP4/T6).
+// (RF1 S3.2: moved from `qp-authority`'s `capsule/tests`: the `capsules` query is the
+// reading subsystem's, so the test runs on the composition.)
 
 use std::collections::BTreeMap;
 
@@ -6,7 +8,7 @@ use qp_schema::market::{MarketSource, MarketStatus, PhaseCode};
 use qp_schema::protocol::{OutboundLine, ReplayInit, ReplaySourceKind};
 use serde_json::json;
 
-use crate::{demo_init, ReplayHost};
+use qp_session::{demo_init, ReplayHost};
 
 /// The demo world (synthetic, as `qp demo`), small; `visitor` reads without data.
 fn host() -> ReplayHost {
@@ -30,13 +32,7 @@ fn host() -> ReplayHost {
         .expect("visitor"),
     );
     let none = std::env::temp_dir().join("qp-t6-no-local-data");
-    ReplayHost::with_local_dir(
-        init,
-        std::path::Path::new("."),
-        &none,
-        crate::Subsystems::NONE,
-    )
-    .expect("demo host")
+    ReplayHost::with_local_dir(init, std::path::Path::new("."), &none).expect("demo host")
 }
 
 fn text(lines: &[OutboundLine]) -> String {
@@ -169,13 +165,11 @@ fn incremental_items_equal_from_scratch() {
         }
     }
     assert!(steps > 100, "the replay ran ({steps} steps)");
-    let m = a.session().item_memo.borrow();
+    let (hits, misses) = a.session().item_memo_counts();
     // Every step moves every instrument's bars here (all 8 step together), so most
     // lookups miss; the reuse is between steps' messages and the queries.
     assert!(
-        m.hits > 1000 && m.misses > 0,
-        "the memo was used: {} / {}",
-        m.hits,
-        m.misses
+        hits > 1000 && misses > 0,
+        "the memo was used: {hits} / {misses}"
     );
 }

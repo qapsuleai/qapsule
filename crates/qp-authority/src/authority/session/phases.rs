@@ -221,7 +221,7 @@ impl SessionView for Session {
         Session::is_current(self, it)
     }
     fn item_series<'d>(&'d self, doc: &'d Document, series: &str) -> Option<&'d qp_schema::Series> {
-        Session::item_series(self, doc, series)
+        self.reader_item_series(doc, series)
     }
     fn fact_by_id(&self, id: &str) -> Option<&qp_schema::Fact> {
         Session::fact_by_id(self, id)

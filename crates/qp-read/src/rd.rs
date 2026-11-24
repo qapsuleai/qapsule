@@ -75,6 +75,7 @@ pub(crate) struct Rd<'a> {
     pub v: &'a dyn SessionView,
     pub doc: &'a Document,
     pub rdoc: &'a Document,
+    pub log: &'a [LogEntry],
     pub plane: &'a DataPlane,
     pub headlines: &'a BTreeMap<String, String>,
     pub principals: &'a [Principal],
@@ -152,6 +153,7 @@ impl<'a> Rd<'a> {
             v,
             doc: v.document(),
             rdoc: v.reading(),
+            log: v.log(),
             plane: v.plane(),
             headlines: v.headlines(),
             principals: v.principals(),
@@ -296,4 +298,9 @@ impl<'a> Rd<'a> {
     pub(crate) fn comments_for(&self, principal: &str) -> Vec<ServerComment> {
         self.v.comments_for(principal)
     }
+}
+
+/// The connection's look (`ViewState.look`; absent or unknown: `r4`): the viewer's rule.
+pub(crate) fn look_of(look: &qp_schema::protocol::ViewState) -> &'static qp_look::look::Look {
+    qp_look::look::or_default(look.look.as_deref())
 }

@@ -52,6 +52,7 @@
         "qp-ops",
         "qp-subsystem",
         "qp-watch",
+        "qp-read",
         "qp-authority",
         "qp-session"
       ],
@@ -60,6 +61,7 @@
         "qp-ops",
         "qp-subsystem",
         "qp-watch",
+        "qp-read",
         "qp-authority",
         "qp-session"
       ]

@@ -60,7 +60,6 @@
 mod detail;
 mod headsource;
 mod project;
-
 mod reader;
 mod run;
 mod settled;
@@ -437,11 +436,7 @@ impl Session {
     /// (RP4/T6) The bar series "now" is read on for a story on `series` (as
     /// [`Session::now_bar`] chooses it: the reading document's when it has bars, else
     /// `doc`'s).
-    pub(crate) fn item_series<'d>(
-        &'d self,
-        doc: &'d Document,
-        series: &str,
-    ) -> Option<&'d qp_schema::Series> {
+    fn item_series<'d>(&'d self, doc: &'d Document, series: &str) -> Option<&'d qp_schema::Series> {
         let has = |s: &&qp_schema::Series| s.bars().is_some_and(|b| !b.is_empty());
         bar_series(rd!(self), series)
             .filter(has)

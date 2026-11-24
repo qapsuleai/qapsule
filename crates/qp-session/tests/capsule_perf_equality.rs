@@ -15,6 +15,10 @@
     clippy::cognitive_complexity
 )]
 
+/// (RP4/T6) The reader item memo: incremental = from scratch (RF1 S3.2: moved here from
+/// `qp-authority`'s `capsule/tests`).
+mod item_memo;
+
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 

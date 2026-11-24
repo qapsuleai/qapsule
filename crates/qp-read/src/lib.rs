@@ -35,76 +35,10 @@ mod preview;
 mod query;
 mod rd;
 mod reading;
-
-/// The connection's look (`ViewState.look`; absent or unknown: `r4`): the viewer's rule.
-pub(crate) fn look_of(look: &qp_schema::protocol::ViewState) -> &'static qp_look::look::Look {
-    qp_look::look::or_default(look.look.as_deref())
-}
+mod subsystem;
 
 pub use explain::explain_scene;
+pub(crate) use rd::look_of;
 pub use rd::{scene_for_range, ReadState};
 pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
-
-use qp_schema::protocol::{Gesture, OutboundLine, ProtocolError, Query, QueryResult};
-use qp_subsystem::{InputHandler, QueryHandler, SessionCtx, Subsystem, ANY};
-
-/// The reading subsystem: register it with the authority.
-pub struct Read;
-
-/// The reading subsystem, as the composition registers it.
-pub static READ: Read = Read;
-
-/// Answers every query kind no other subsystem registered.
-struct Queries;
-/// Handles every gesture kind no other subsystem registered.
-struct Inputs;
-
-static QUERIES: &[&dyn QueryHandler] = &[&Queries];
-static INPUTS: &[&dyn InputHandler] = &[&Inputs];
-
-impl QueryHandler for Queries {
-    fn kind(&self) -> &'static str {
-        ANY
-    }
-    fn answer(
-        &self,
-        conn: &str,
-        q: &Query,
-        ctx: &mut SessionCtx<'_>,
-    ) -> Result<QueryResult, ProtocolError> {
-        rd::reading(conn, ctx, |r, ci| r.query(ci, q))
-    }
-}
-
-impl InputHandler for Inputs {
-    fn kind(&self) -> &'static str {
-        ANY
-    }
-    fn input(
-        &self,
-        conn: &str,
-        g: &Gesture,
-        ctx: &mut SessionCtx<'_>,
-    ) -> Result<(QueryResult, Vec<OutboundLine>), ProtocolError> {
-        rd::reading(conn, ctx, |r, ci| {
-            let got = r.input(ci, g);
-            r.keep(ci);
-            got
-        })
-    }
-}
-
-impl Subsystem for Read {
-    fn name(&self) -> &'static str {
-        "read"
-    }
-    fn init(&self, ctx: &mut SessionCtx<'_>) {
-        ctx.slots.put(ReadState::default());
-    }
-    fn queries(&self) -> &'static [&'static dyn QueryHandler] {
-        QUERIES
-    }
-    fn inputs(&self) -> &'static [&'static dyn InputHandler] {
-        INPUTS
-    }
-}
+pub use subsystem::{Read, READ};

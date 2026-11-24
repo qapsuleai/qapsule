@@ -169,4 +169,13 @@ impl Session {
             rests_on,
         }
     }
+
+    /// [`Session::item_series`] for the reading subsystem (`SessionView::item_series`).
+    pub(crate) fn reader_item_series<'d>(
+        &'d self,
+        doc: &'d Document,
+        series: &str,
+    ) -> Option<&'d qp_schema::Series> {
+        self.item_series(doc, series)
+    }
 }

@@ -35,9 +35,9 @@ impl Rd<'_> {
             let lang = self.lang_of(ci);
             let (w, h) = self.frame(ci, depth_key(d));
             let ask = self.looks[ci].ask.clone();
-            warm(rd!(self), &mut self.cache);
-            let p = DocProvider::new(rd!(self), &self.cache)
-                .with_headlines(&self.headlines)
+            warm(rd!(self), self.cache);
+            let p = DocProvider::new(rd!(self), self.cache)
+                .with_headlines(self.headlines)
                 .with_parts(self.v.headline_source(), lang)
                 .with_voice(voice.as_deref())
                 .with_clock(self.looks[ci].clock);
@@ -67,9 +67,9 @@ impl Rd<'_> {
             let name = self.looks[ci].face.clone();
             let max_points = self.conns[ci].profile.max_points;
             let lang = self.lang_of(ci);
-            warm(rd!(self), &mut self.cache);
-            let p = DocProvider::new(rd!(self), &self.cache)
-                .with_headlines(&self.headlines)
+            warm(rd!(self), self.cache);
+            let p = DocProvider::new(rd!(self), self.cache)
+                .with_headlines(self.headlines)
                 .with_parts(self.v.headline_source(), lang)
                 .with_voice(voice.as_deref())
                 .with_clock(self.looks[ci].clock);
@@ -98,9 +98,8 @@ impl Rd<'_> {
                         .view
                         .clone()
                         .unwrap_or_else(|| given.id.clone());
-                    warm(rd!(self), &mut self.cache);
-                    let p =
-                        DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines);
+                    warm(rd!(self), self.cache);
+                    let p = DocProvider::new(rd!(self), self.cache).with_headlines(self.headlines);
                     if let Ok(v) = depth::chart_view_in(look, finding, &p, &id) {
                         return Ok(Some(v));
                     }
@@ -129,15 +128,15 @@ impl Rd<'_> {
         face: Option<String>,
         story: Option<StoryCompiled<'_>>,
     ) -> PResult<(SceneDesc, Vec<i64>)> {
-        warm(rd!(self), &mut self.cache);
+        warm(rd!(self), self.cache);
         let asker = self.conns[ci].principal.clone();
         let blocked = self.blocked_layers(view, &asker);
         let filtered;
         let view = if blocked.is_empty() {
             view
         } else {
-            if let Some(bs) = view_bar_series_any(&self.doc, view) {
-                if let Some(b) = self.plane.gate(&self.doc, Some(&asker), &bs.id) {
+            if let Some(bs) = view_bar_series_any(self.doc, view) {
+                if let Some(b) = self.plane.gate(self.doc, Some(&asker), &bs.id) {
                     return Err(b.error(&bs.id, GP));
                 }
             }
@@ -154,8 +153,8 @@ impl Rd<'_> {
         opts.face = face;
         let lang = self.lang_of(ci);
         let voice = self.looks[ci].voice.clone();
-        let p = DocProvider::new(rd!(self), &self.cache)
-            .with_headlines(&self.headlines)
+        let p = DocProvider::new(rd!(self), self.cache)
+            .with_headlines(self.headlines)
             .with_parts(self.v.headline_source(), lang)
             .with_voice(voice.as_deref())
             .with_clock(self.looks[ci].clock);

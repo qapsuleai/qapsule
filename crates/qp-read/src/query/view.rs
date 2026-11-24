@@ -22,7 +22,7 @@ impl Rd<'_> {
             .collect();
         let mut studies = BTreeMap::new();
         for d in deps {
-            if let Ok(v) = values(rd!(self), &mut self.cache, &d) {
+            if let Ok(v) = values(rd!(self), self.cache, &d) {
                 let m: BTreeMap<String, Option<f64>> = v
                     .outputs
                     .iter()
@@ -42,7 +42,7 @@ impl Rd<'_> {
     /// Times of the view's future slots (after its last bar; point series such as a
     /// forecast fan, `docs/GRAMMAR.md` §3). A viewport may reach them (K25).
     pub(crate) fn future_times(&self, view: &View) -> Vec<i64> {
-        qp_grammar::compile::future_times(view, &DocProvider::new(rd!(self), &self.cache))
+        qp_grammar::compile::future_times(view, &DocProvider::new(rd!(self), self.cache))
     }
 
     /// Initial visible range of a view for a surface (§4.6): the slots whose time falls
@@ -168,7 +168,7 @@ impl Rd<'_> {
         // The viewport may end in a future slot (K25): the last close shown is the
         // close of the last bar in it.
         let last_close = bs
-            .filter(|s| self.plane.gate(&self.doc, Some(asker), &s.id).is_none())
+            .filter(|s| self.plane.gate(self.doc, Some(asker), &s.id).is_none())
             .and_then(Series::bars)
             .and_then(|b| {
                 b.get(

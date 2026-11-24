@@ -27,7 +27,7 @@ impl Rd<'_> {
         pid: &str,
         path: &str,
     ) -> PResult<(Document, Document, Vec<ChangeOp>)> {
-        let pr = need_proposal(&self.doc, pid, path)?;
+        let pr = need_proposal(self.doc, pid, path)?;
         if pr.state != ProposalState::Pending {
             return Err(E::new(
                 ErrorCode::NotPending,
@@ -90,7 +90,7 @@ impl Rd<'_> {
                 ),
                 Ok(gv) => match compile(
                     &gv,
-                    &DocProvider::new(&rd, &cache).with_headlines(&self.headlines),
+                    &DocProvider::new(&rd, &cache).with_headlines(self.headlines),
                     &opts,
                 ) {
                     Ok(scene) => crate::explain::explain_scene(&gv, &scene),

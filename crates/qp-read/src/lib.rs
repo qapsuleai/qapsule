@@ -19,10 +19,6 @@
 // agent (message, path, expected, suggestions, hint); boxing them buys nothing here
 // (the same allowance as `qp-authority`, `qp-ops`, `qp-plane`).
 #![allow(clippy::result_large_err)]
-// The reading code moved from `impl Session` (RF1 S3.2) and kept its bodies: `&self.doc`,
-// `&mut self.cache` were field borrows there and are borrows of `Rd`'s references here
-// (auto-dereferenced, the same value).
-#![allow(clippy::needless_borrow)]
 
 /// The reading document of a reading (`Rd::rdoc`: the document with ready bound bars).
 macro_rules! rd {

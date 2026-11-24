@@ -154,7 +154,7 @@ impl Rd<'_> {
     /// view (its last viewport, else the document's first view).
     pub(crate) fn view_of(&self, ci: usize, view_id: Option<&str>, path: &str) -> PResult<String> {
         if let Some(v) = view_id {
-            return Ok(need_view(&self.doc, v, path)?.id.clone());
+            return Ok(need_view(self.doc, v, path)?.id.clone());
         }
         self.conn_viewport(&self.conns[ci])
             .map(|vp| vp.view)
@@ -194,7 +194,7 @@ impl Rd<'_> {
         let mut opts =
             qp_designs::options(size.0.unwrap_or(HIT_WIDTH), size.1.unwrap_or(HIT_HEIGHT));
         opts.range = self.hit_range(&self.conns[ci], &vid);
-        warm(rd!(self), &mut self.cache);
+        warm(rd!(self), self.cache);
         let view = need_view(rd!(self), &vid, &format!("{qp}/view"))?;
         // Layers whose data the asker may not read are not drawn (§18.3); a view whose
         // bar series is among them cannot be read at all.
@@ -204,8 +204,8 @@ impl Rd<'_> {
         let view = if blocked.is_empty() {
             view
         } else {
-            if let Some(bs) = qp_ops::expand::view_bar_series_any(&self.doc, view) {
-                if let Some(b) = self.plane.gate(&self.doc, Some(&asker), &bs.id) {
+            if let Some(bs) = qp_ops::expand::view_bar_series_any(self.doc, view) {
+                if let Some(b) = self.plane.gate(self.doc, Some(&asker), &bs.id) {
                     return Err(b.error(&bs.id, &format!("{qp}/view")));
                 }
             }
@@ -214,7 +214,7 @@ impl Rd<'_> {
         };
         let scene = compile(
             view,
-            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &DocProvider::new(rd!(self), self.cache).with_headlines(self.headlines),
             &opts,
         )
         .map_err(|e| grammar_error(&e, qp))?;
@@ -309,7 +309,7 @@ impl Rd<'_> {
             return out;
         }
         for (i, l) in view.layers.iter().enumerate() {
-            if let Some(b) = self.plane.gate_layer(&self.doc, Some(asker), l) {
+            if let Some(b) = self.plane.gate_layer(self.doc, Some(asker), l) {
                 // The layer's data source (what `screen` names), not the series that
                 // blocked it.
                 let series = l.series.clone().unwrap_or(b.series);
@@ -333,7 +333,7 @@ impl Rd<'_> {
         }
         let Ok(scene) = compile(
             view,
-            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &DocProvider::new(rd!(self), self.cache).with_headlines(self.headlines),
             &opts,
         ) else {
             return BTreeMap::new();
@@ -356,6 +356,6 @@ impl Rd<'_> {
     }
 
     pub(crate) fn warm_values(&mut self) {
-        warm(rd!(self), &mut self.cache);
+        warm(rd!(self), self.cache);
     }
 }

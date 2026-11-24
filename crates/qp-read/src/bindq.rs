@@ -21,7 +21,7 @@ impl Rd<'_> {
     pub(crate) fn gate_read(&self, ci: usize, series: &str, path: &str) -> PResult<()> {
         match self
             .plane
-            .gate(&self.doc, Some(&self.conns[ci].principal), series)
+            .gate(self.doc, Some(&self.conns[ci].principal), series)
         {
             Some(b) => Err(b.error(series, path)),
             None => Ok(()),
@@ -44,7 +44,7 @@ impl Rd<'_> {
             .collect();
         let ids = match series {
             Some(id) => {
-                need_series(&self.doc, id, path)?;
+                need_series(self.doc, id, path)?;
                 if !bound.iter().any(|b| b == id) {
                     return Err(E::new(
                         ErrorCode::Invalid,
@@ -60,7 +60,7 @@ impl Rd<'_> {
         };
         let mut out = Vec::with_capacity(ids.len());
         for id in ids {
-            let Some(binding) = find_series(&self.doc, &id).and_then(binding_of) else {
+            let Some(binding) = find_series(self.doc, &id).and_then(binding_of) else {
                 continue;
             };
             let (state, reason) = self
@@ -151,7 +151,7 @@ impl Rd<'_> {
             c.message = "the fact has no evidence reference (written before RP2)".to_owned();
             return c;
         };
-        if let Some(b) = self.plane.gate(&self.doc, Some(asker), &stored.series) {
+        if let Some(b) = self.plane.gate(self.doc, Some(asker), &stored.series) {
             c.status = if b.state == BindingState::NoEntitlement {
                 EvidenceStatus::NoEntitlement
             } else {
@@ -201,7 +201,7 @@ impl Rd<'_> {
             .is_some_and(|s| matches!(s.source, SeriesSource::Study { .. }));
         let mut value_diff: Option<String> = None;
         if is_study {
-            let v = values(rd!(self), &mut self.cache, &f.series).ok();
+            let v = values(rd!(self), self.cache, &f.series).ok();
             let idx = v.as_ref().and_then(|v| v.t.binary_search(&f.t).ok());
             for (key, back) in [("value", 0usize), ("prev", 1usize)] {
                 let Some(then) = f.evidence.get(key).copied() else {

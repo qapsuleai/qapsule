@@ -157,15 +157,15 @@ impl Rd<'_> {
                 })
             }
             Query::Get { id } => {
-                let Some(c) = find_collection(&self.doc, id) else {
+                let Some(c) = find_collection(self.doc, id) else {
                     return Err(
                         E::new(ErrorCode::NotFound, format!("item `{id}` does not exist"))
                             .at(ptr(qp, "id"))
-                            .dym(id, all_ids(&self.doc))
+                            .dym(id, all_ids(self.doc))
                             .build(),
                     );
                 };
-                let item = collection_items(&self.doc, c)
+                let item = collection_items(self.doc, c)
                     .into_iter()
                     .find(|v| v.get("id").and_then(Value::as_str) == Some(id))
                     .unwrap_or(Value::Null);
@@ -190,7 +190,7 @@ impl Rd<'_> {
                         .map(item_json)
                         .collect()
                 } else {
-                    collection_items(&self.doc, *collection)
+                    collection_items(self.doc, *collection)
                 };
                 let items = if full.unwrap_or(false) || *collection != Collection::Series {
                     items
@@ -269,7 +269,7 @@ impl Rd<'_> {
             } => {
                 need_series(rd!(self), series, &ptr(qp, "series"))?;
                 self.gate_read(ci, series, &ptr(qp, "series"))?;
-                let v = values(rd!(self), &mut self.cache, series)
+                let v = values(rd!(self), self.cache, series)
                     .map_err(|m| invalid(m, ptr(qp, "series")))?;
                 let (a, b) = resolve_range(range.as_ref(), &v.t, qp)?;
                 let mut outputs: BTreeMap<String, Vec<Option<f64>>> = BTreeMap::new();
@@ -460,7 +460,7 @@ impl Rd<'_> {
                             .iter()
                             .find(|x| &x.id == id)
                             .is_some_and(|x| {
-                                self.plane.gate(&self.doc, Some(asker), &x.series).is_some()
+                                self.plane.gate(self.doc, Some(asker), &x.series).is_some()
                             })
                     });
                     let view_blocked = self
@@ -473,21 +473,14 @@ impl Rd<'_> {
                         .is_some_and(|v| {
                             v.layers
                                 .iter()
-                                .any(|l| self.plane.gate_layer(&self.doc, Some(asker), l).is_some())
+                                .any(|l| self.plane.gate_layer(self.doc, Some(asker), l).is_some())
                         });
                     facts_blocked || view_blocked
                 };
                 // (R3, §20) A capsule with a story speaks with the realizer's sentence for
                 // the asker (its language and entitlement) when the authority runs the
                 // engine or the asker reads another language (`Session::headlines`).
-                let mut pr = present(
-                    rd!(self),
-                    &mut self.cache,
-                    &f,
-                    kind,
-                    &profile,
-                    &self.headlines,
-                );
+                let mut pr = present(rd!(self), self.cache, &f, kind, &profile, self.headlines);
                 if blocked {
                     pr.spark = None;
                     pr.view = None;

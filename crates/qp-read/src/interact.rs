@@ -365,11 +365,7 @@ impl Rd<'_> {
                 .facts
                 .iter()
                 .find(|x| &x.id == id)
-                .is_some_and(|x| {
-                    self.plane
-                        .gate(&self.doc, Some(&asker), &x.series)
-                        .is_some()
-                })
+                .is_some_and(|x| self.plane.gate(self.doc, Some(&asker), &x.series).is_some())
         });
         let view_blocked = self
             .doc
@@ -381,16 +377,9 @@ impl Rd<'_> {
             .is_some_and(|v| {
                 v.layers
                     .iter()
-                    .any(|l| self.plane.gate_layer(&self.doc, Some(&asker), l).is_some())
+                    .any(|l| self.plane.gate_layer(self.doc, Some(&asker), l).is_some())
             });
-        let mut pr = present(
-            rd!(self),
-            &mut self.cache,
-            &f,
-            kind,
-            &profile,
-            &self.headlines,
-        );
+        let mut pr = present(rd!(self), self.cache, &f, kind, &profile, self.headlines);
         if facts_blocked || view_blocked {
             pr.spark = None;
             pr.view = None;

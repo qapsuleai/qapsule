@@ -216,6 +216,8 @@ yerlerine, `qp-read` `lib.rs` iç `#![allow(clippy::result_large_err)]`ı — ot
 | `withheld_for`, `evidence_access` | `capsule/queries.rs` → `capsule/run.rs`, `capsule/detail.rs` | yer (gövde aynı) |
 | `ledger_now`, `ledger_rows` (+ yeni `ledger_rows_of`) | `capsule/queries.rs` → `capsule/run.rs`; `capsule.rs` | otoritede kaldı (motoru okur); motor dalı `Document { … }` değişmezi kurmadan `ledger_rows_of(&[], &engine.ledger())` (boş kapsül listesi: aynı satırlar); `ledger_rows(doc)` = `ledger_rows_of(&doc.capsules, &doc.ledger.entries)` (D2: otoritede bir doküman değişmezi az) |
 | `scene_for`, `explain` (bileşim), `capsule_query_with` | `qp-session` `compose.rs` | `#[allow(clippy::result_large_err)]` (otoritenin hata tipi) |
+| needless_borrow düzeltmeleri, 7 dosya (`bindq.rs`, `interact.rs`, `interact/scenes.rs`, `preview.rs`, `query.rs`, `query/view.rs`, `reading.rs`) | `qp-read` | `&self.doc`, `&mut self.cache`, `&self.headlines` … → `self.doc`, `self.cache`, … (`Rd`'nin alanları zaten başvuru; aynı değer). Crate düzeyi `#![allow(clippy::needless_borrow)]` kaldırıldı (audit-s32 B4) |
+| `tape::{run, run_with, run_viewer}` | `qp-authority` `replica/tape.rs`, `qp-session` `tape.rs` | liste parametresi `(subs, follower)`: otorite `STANDARD`, yansı ve açık taraf `FOLLOWER` (ürün yolu; audit-s32 B2); `Replica::session_mut`, `OpenSide::replica_mut` belgesi (B3) |
 | `scene_as_reader`, `preview_doc` (çekirdek kopyası), `gated_view` | `read/preview.rs` → `qp-authority` `read.rs`; `gated_view` → `qp_ops::bounds` | barındırıcının derlemesi çekirdekte; `gated_view` serbest fonksiyon (`plane` parametresi) |
 | `provider`, `scene`, `grammar_error`, `surface_kind` | `read/reading.rs`, `read/interact.rs` → `qp-authority` `read.rs` | yer (gövde aynı) |
 | `scene_for`, `explain` | `qp-authority` → `qp-session` `compose.rs` | bileşimin yöntemleri: `scene_for` = `qp_read::scene_for_range` (görünüm, aralık) + otoritenin `scene`'i; `explain` = otoritenin `scene`'i + `explain_scene` |
@@ -240,5 +242,5 @@ yerlerine, `qp-read` `lib.rs` iç `#![allow(clippy::result_large_err)]`ı — ot
 `ConnView::{hello, profile}`; `SessionView` okuma ve kapsül yaşamı yöntemleri;
 `qp_authority::Session::{with_subsystems, reader_item_series}`, `looks`; `qp_ops::{bounds, firsts}`;
 `qp_session::Session::{scene_for, explain}`. Sınamalar: `qp-subsystem` `tests/contract.rs`
-`any_answers_every_kind_no_other_handler_took`; `qp-authority` `tests/subsystems.rs`
+`any_answers_every_kind_no_other_handler_took`; `qp-session` `compose.rs` `the_follower_list_is_the_standard_list_without_reading` (audit-s32 B2); `qp-authority` `tests/subsystems.rs`
 `without_the_reading_subsystem_queries_and_inputs_are_unsupported`.

@@ -54,6 +54,28 @@ impl OpHandler for WatchOp {
     fn agent(&self, _doc: &Document, _op: &Op) -> AgentOp {
         AgentOp::Direct
     }
+    /// The same op in the public world (cloned field by field: no clone of every op kind).
+    fn to_public(&self, op: &Op) -> Option<Op> {
+        match op {
+            Op::AddWatch {
+                for_,
+                text,
+                match_,
+                expires_t,
+                max_matches,
+            } => Some(Op::AddWatch {
+                for_: for_.clone(),
+                text: text.clone(),
+                match_: match_.clone(),
+                expires_t: *expires_t,
+                max_matches: *max_matches,
+            }),
+            Op::RemoveWatch { intent } => Some(Op::RemoveWatch {
+                intent: intent.clone(),
+            }),
+            _ => None,
+        }
+    }
     /// (§25.5) Another person's watch requests stay out of a reader's log.
     fn reader_private(&self) -> bool {
         true

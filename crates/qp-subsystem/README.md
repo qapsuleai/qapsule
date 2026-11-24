@@ -39,4 +39,4 @@ okuyucu izdüşümü `Proj`), `qp-ops` (işlem açılımı: `Ctx`, `expand_op`, 
 sistem değildir; işlemlerin kendisi değildir (`qp-ops`). Bileşim (`qp-session`) değildir.
 
 **Kurallar:** `dyn` trait'lerinde jenerik yöntem yok; alt sistem yalnız `Outbox` ya da açılım
-üstünden yazar; kayıt sırası belirlenimcidir (`BTreeMap`, kayıt sırası).
+üstünden yazar; kayıt sırası belirlenimcidir (tablolar kayıt sırasıyla vektör, her tel etiketi bir kez).

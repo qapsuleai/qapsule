@@ -158,6 +158,7 @@ aynı sonucu verir.
 | `expand_ops` | `qp-ops` `expand.rs` | gövde `expand_ops_with`'e (B6); `expand_ops` = `expand_ops_with(…, expand_op)` |
 | `Registry::expand_ops` | `qp-subsystem` `registry.rs` | kopya gövde silindi → `expand_ops_with` (B6) |
 | `Registry::op` | `qp-subsystem` `registry.rs` | `op_name` serileştirmesi yerine `OpHandler::owns` |
+| `struct Registry`, `Registry::{add, query, input, topic, claim, eval_condition}`, `claim` | `qp-subsystem` `registry.rs` | tablolar `BTreeMap` yerine kayıt sıralı vektör (`Table<V>`, `find`): kabuk paketinde tablo başına `BTreeMap` örneklemesi ≈ 15 KB tutuyordu (WASM ±%2 kapısı); arama sonucu aynı (her etiket bir kez) |
 | `OpHandler`, `SessionView`, `Phase`, `Moment`, `Outbox` (+`is_empty`, `drain`) | `qp-subsystem` | `owns`; `conn_ids`, `subs`, `public_view`, `reader_proj`; belge (`AfterData`, `Close`, `Command`); `Look`, `Written`; `changes`/`lines` |
 | `emit` | `authority/session/phases.rs` | derinlik sınırı `MAX_EMIT_DEPTH` (B3) |
 | `dispatch_dispute` | `authority/session/phases.rs` | kayıtlı iddia türünde yerleşik korumalar: `dispute_guard` (B5) |
@@ -176,7 +177,7 @@ aynı sonucu verir.
 | sınama yardımcıları: `host` ×2, `fast_hints_equal_the_resolvers`, `session`, `the_settled_phase_follows_a_settled_answer`, `Rig::{session, session_mut}`, `open_scene_in` | `qp-authority` `capsule/tests`, `read/tests.rs`, `tests/subsystems.rs`; `qp-session` `tests/charac/rig.rs`, `tests/open_nobra.rs` | `Subsystems::NONE` / `&Authority` (kitaplar aynı) |
 
 **Yeni öğeler:** `qp-watch` (crate: `Watch`, `WATCH`, `Pending`, `WatchOp`, `ADD_WATCH`,
-`REMOVE_WATCH`, `OPS`); `qp-session` `compose.rs` (`STANDARD`, `LIST`, `wraps!`, `Session`,
+`REMOVE_WATCH`, `OPS`; `WatchOp::to_public` yalnız izleme kollarını alan alan kopyalar: varsayılan `op.clone()` bütün `Op` klonunu kabuk paketine ≈ 18 KB katıyordu); `qp-session` `compose.rs` (`STANDARD`, `LIST`, `wraps!`, `Session`,
 `ReplayHost`, `Replica`, `OpenSide`), `agent.rs` (`agent_op`), `tape.rs` (`run`, `run_with`,
 `run_viewer`), `replayhost.rs`, `replica.rs`, `viewer.rs` (yeniden dışa aktarım);
 `qp_authority::Subsystems`, `Session::{subsystems, slots, slots_mut, look_phase, written_phase,

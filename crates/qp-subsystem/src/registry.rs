@@ -1,7 +1,5 @@
 //! The registry: registered subsystems and their dispatch tables, in registration order.
 
-use std::collections::BTreeMap;
-
 use qp_ops::expand::{expand_op, expand_ops, expand_ops_with, Ctx, Expanded};
 use qp_plane::values::{eval_condition, eval_on, values, Cache, Computed};
 use qp_schema::protocol::{ChangeOp, ClaimRef, Gesture, Op, ProtocolError, Query, Topic};
@@ -19,18 +17,23 @@ fn kind_of<T: Serialize>(v: &T) -> Option<String> {
     v.get("kind")?.as_str().map(str::to_owned)
 }
 
-/// Inserts `v` under `k`, refusing a kind another subsystem owns.
-fn claim<V>(
-    t: &mut BTreeMap<&'static str, V>,
-    k: &'static str,
-    v: V,
-    who: &str,
-) -> Result<(), String> {
-    if t.contains_key(k) {
+/// A dispatch table: (wire tag, handler) in registration order, each tag once. A table
+/// holds a handful of kinds: a vector keeps the WASM build small (one `BTreeMap` per
+/// handler type would not; RF1 S3.1).
+type Table<V> = Vec<(&'static str, V)>;
+
+/// Adds `v` under `k`, refusing a kind another subsystem owns.
+fn claim<V>(t: &mut Table<V>, k: &'static str, v: V, who: &str) -> Result<(), String> {
+    if t.iter().any(|(n, _)| *n == k) {
         return Err(format!("`{k}` is registered twice (second: {who})"));
     }
-    t.insert(k, v);
+    t.push((k, v));
     Ok(())
+}
+
+/// The handler under `k`.
+fn find<V: Copy>(t: &Table<V>, k: &str) -> Option<V> {
+    t.iter().find(|(n, _)| *n == k).map(|(_, v)| *v)
 }
 
 /// The subsystems an authority calls, in registration order (deterministic), with their
@@ -39,13 +42,13 @@ fn claim<V>(
 #[derive(Default, Clone)]
 pub struct Registry {
     subs: Vec<&'static dyn Subsystem>,
-    ops: BTreeMap<&'static str, &'static dyn OpHandler>,
-    queries: BTreeMap<&'static str, &'static dyn QueryHandler>,
-    inputs: BTreeMap<&'static str, &'static dyn InputHandler>,
-    topics: BTreeMap<&'static str, &'static dyn TopicHandler>,
-    conditions: BTreeMap<&'static str, &'static dyn ConditionKind>,
+    ops: Table<&'static dyn OpHandler>,
+    queries: Table<&'static dyn QueryHandler>,
+    inputs: Table<&'static dyn InputHandler>,
+    topics: Table<&'static dyn TopicHandler>,
+    conditions: Table<&'static dyn ConditionKind>,
     sources: Vec<&'static dyn ValueSource>,
-    claims: BTreeMap<&'static str, &'static dyn ClaimKind>,
+    claims: Table<&'static dyn ClaimKind>,
 }
 
 impl std::fmt::Debug for Registry {
@@ -140,7 +143,7 @@ impl Registry {
         if self.ops.is_empty() {
             return None;
         }
-        self.ops.values().copied().find(|h| h.owns(op))
+        self.ops.iter().map(|(_, h)| *h).find(|h| h.owns(op))
     }
 
     /// The handler of `q`'s kind.
@@ -149,7 +152,7 @@ impl Registry {
         if self.queries.is_empty() {
             return None;
         }
-        self.queries.get(kind_of(q)?.as_str()).copied()
+        find(&self.queries, &kind_of(q)?)
     }
 
     /// The handler of `g`'s kind.
@@ -158,7 +161,7 @@ impl Registry {
         if self.inputs.is_empty() {
             return None;
         }
-        self.inputs.get(kind_of(g)?.as_str()).copied()
+        find(&self.inputs, &kind_of(g)?)
     }
 
     /// The handler of `t`'s kind.
@@ -167,7 +170,7 @@ impl Registry {
         if self.topics.is_empty() {
             return None;
         }
-        self.topics.get(kind_of(t)?.as_str()).copied()
+        find(&self.topics, &kind_of(t)?)
     }
 
     /// The kind of claim `c`, if a subsystem owns it.
@@ -176,7 +179,7 @@ impl Registry {
         if self.claims.is_empty() {
             return None;
         }
-        self.claims.get(kind_of(c)?.as_str()).copied()
+        find(&self.claims, &kind_of(c)?)
     }
 
     /// [`Phase::Expand`] for one op: its handler's expansion, else the built-in one.
@@ -240,7 +243,7 @@ impl Registry {
         if self.conditions.is_empty() && self.sources.is_empty() {
             return eval_condition(rd, cache, c);
         }
-        if let Some(k) = kind_of(c).and_then(|k| self.conditions.get(k.as_str()).copied()) {
+        if let Some(k) = kind_of(c).and_then(|k| find(&self.conditions, &k)) {
             return k.eval(rd, cache, c);
         }
         let owned = |id: &str| self.sources.iter().find(|s| s.owns(id)).copied();

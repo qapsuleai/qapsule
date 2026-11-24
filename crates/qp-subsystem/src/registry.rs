@@ -244,6 +244,11 @@ impl Registry {
         })
     }
 
+    /// Whether condition `c` holds now ([`Registry::eval_condition`]).
+    pub fn holds(&self, rd: &Document, cache: &mut Cache, c: &Condition) -> bool {
+        self.eval_condition(rd, cache, c).is_some_and(|(b, _, _)| b)
+    }
+
     /// Evaluates condition `c` on the live path: a registered condition kind first, then
     /// value sources for the series they own, else the data plane's evaluation.
     pub fn eval_condition(

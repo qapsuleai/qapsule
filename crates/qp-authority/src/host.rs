@@ -1,4 +1,4 @@
-//! Replay host and conformance runner.
+//! Replay host (the conformance runner moved to the composition, `qp-session`, in RF1
+//! S3.0).
 
-pub mod conform;
 pub mod replayhost;

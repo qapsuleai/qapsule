@@ -42,17 +42,19 @@ impl Session {
             data: self.reader(),
             plane: &self.plane,
         };
-        let ex = expand_ops(&self.doc, &pr.ops, "/ops", &mut ctx).map_err(|mut e| {
-            e.message = format!(
-                "proposal `{pid}` cannot be applied now: {} (at {} of the proposal)",
-                e.message,
-                e.path.as_deref().unwrap_or("/ops")
-            );
-            e.path = Some("/ops/0".to_owned());
-            e.hint =
-                Some("The proposal stays pending; reject it or fix the document first.".to_owned());
-            e
-        })?;
+        let ex =
+            expand_ops(&self.registry, &self.doc, &pr.ops, "/ops", &mut ctx).map_err(|mut e| {
+                e.message = format!(
+                    "proposal `{pid}` cannot be applied now: {} (at {} of the proposal)",
+                    e.message,
+                    e.path.as_deref().unwrap_or("/ops")
+                );
+                e.path = Some("/ops/0".to_owned());
+                e.hint = Some(
+                    "The proposal stays pending; reject it or fix the document first.".to_owned(),
+                );
+                e
+            })?;
         let created = ctx.created;
         let mut decided = pr.clone();
         decided.state = ProposalState::Accepted;
@@ -210,17 +212,7 @@ impl Session {
             self.struct_gen += 1;
         }
         self.note_writers(&entry);
-        for c in entry.changes.iter().chain(&entry.inverse) {
-            if let ChangeOp::PutAudience { principal, .. } = c {
-                self.audience_seen.insert(principal.clone());
-            }
-            // (R5B, §25.5) A watch is personal too: other readers get projections.
-            if let ChangeOp::PutIntent { intent, .. } = c {
-                if let Some(w) = &intent.watch {
-                    self.audience_seen.insert(w.for_.clone());
-                }
-            }
-        }
+        self.note_audiences(&entry);
         // (R3/K1) The public world takes its own version of the entry (same seq).
         debug_assert!(
             !self.in_public,
@@ -232,6 +224,23 @@ impl Session {
             let p = pe.and_then(|pe| self.commit_public(pe));
             self.full_to_pub.push(p);
             self.note_pub_len();
+        }
+        self.phase(Phase::AfterCommit, Moment::Entry { seq: self.seq() });
+    }
+
+    /// Notes the principals whose capsule preferences or watches `entry` writes (other
+    /// readers get projections, §20, §25.5).
+    fn note_audiences(&mut self, entry: &LogEntry) {
+        for c in entry.changes.iter().chain(&entry.inverse) {
+            if let ChangeOp::PutAudience { principal, .. } = c {
+                self.audience_seen.insert(principal.clone());
+            }
+            // (R5B, §25.5) A watch is personal too: other readers get projections.
+            if let ChangeOp::PutIntent { intent, .. } = c {
+                if let Some(w) = &intent.watch {
+                    self.audience_seen.insert(w.for_.clone());
+                }
+            }
         }
     }
 

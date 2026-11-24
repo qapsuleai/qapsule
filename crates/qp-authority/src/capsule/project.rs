@@ -398,11 +398,11 @@ impl Session {
                 .is_some_and(|q| q.role == qp_schema::protocol::Role::Owner);
         x.request.retain(|op| {
             reader_ok
-                || !matches!(
+                || !(matches!(
                     op,
                     qp_schema::protocol::Op::AddWatch { .. }
                         | qp_schema::protocol::Op::RemoveWatch { .. }
-                )
+                ) || self.registry.op(op).is_some_and(|h| h.reader_private()))
         });
         // (R5B, §25.4; audit B1, fail-closed) A restricted reader (hidden, redacted or
         // rewritten items) never gets an `add_comment` request: the stored comment, which

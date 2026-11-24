@@ -159,7 +159,7 @@ impl Session {
                     return Look::Quiet;
                 }
                 let rd = s.rd.as_ref().unwrap_or(&s.doc);
-                if !qp_plane::values::holds(rd, &mut s.cache, &cond) {
+                if !s.registry.holds(rd, &mut s.cache, &cond) {
                     return Look::Quiet;
                 }
                 let ev = crate::claims::evidence(rd, &mut s.cache, &s.claims, &s.plane, &cond);
@@ -228,7 +228,7 @@ impl Session {
                     continue;
                 }
                 let rd = s.rd.as_ref().unwrap_or(&s.doc);
-                let r = qp_plane::values::eval_condition(rd, &mut s.cache, &trig);
+                let r = s.registry.eval_condition(rd, &mut s.cache, &trig);
                 let now = r.is_some_and(|x| x.0);
                 if s.intent_state.get(&id) == Some(&false) && now {
                     if let Some((_, bar, t)) = r {

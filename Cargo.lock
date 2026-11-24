@@ -1885,12 +1885,12 @@ dependencies = [
  "qp-plane",
  "qp-schema",
  "qp-source",
+ "qp-subsystem",
  "qp-voice",
  "schemars",
  "serde",
  "serde_json",
  "serde_path_to_error",
- "tempfile",
 ]
 
 [[package]]
@@ -2149,6 +2149,7 @@ dependencies = [
  "qp-plane",
  "qp-schema",
  "qp-source",
+ "schemars",
  "serde",
  "serde_json",
  "tempfile",

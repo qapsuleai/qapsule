@@ -26,7 +26,7 @@ impl Session {
                 data: s.reader(),
                 plane: &s.plane,
             };
-            let ex = expand_ops(&s.doc, ops, "/ops", &mut ctx)?;
+            let ex = expand_ops(&s.registry, &s.doc, ops, "/ops", &mut ctx)?;
             s.base_check(base, &ex.changes, &ex.origin)?;
             Ok(PubEx {
                 seq,
@@ -122,7 +122,7 @@ impl Session {
             data: self.reader(),
             plane: &self.plane,
         };
-        let full = expand_ops(&self.doc, ops, "/ops", &mut ctx)
+        let full = expand_ops(&self.registry, &self.doc, ops, "/ops", &mut ctx)
             .map(|ex| (ex, ctx.created, ctx.undoes))
             .and_then(|(ex, c, u)| {
                 self.base_check(base, &ex.changes, &ex.origin)?;
@@ -253,7 +253,7 @@ impl Session {
             data: self.reader(),
             plane: &self.plane,
         };
-        let full = expand_ops(&self.doc, ops, "/ops", &mut ctx)
+        let full = expand_ops(&self.registry, &self.doc, ops, "/ops", &mut ctx)
             .map(|ex| (ex, ctx.created))
             .and_then(|(ex, c)| {
                 self.base_check(base, &ex.changes, &ex.origin)?;

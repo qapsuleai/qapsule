@@ -23,6 +23,7 @@ use qp_schema::{Author, Document};
 
 use crate::session::Session;
 use qp_plane::error::{ptr, PResult, E};
+use qp_subsystem::op_name;
 
 /// `forbidden` reason: a decision only a human may make (§25.2).
 pub const HUMAN_ONLY: &str = "human_only";
@@ -31,16 +32,7 @@ pub const AGENT_CANNOT_WRITE: &str = "agent_cannot_write";
 /// `forbidden` reason: an op an agent may send only as a proposal, sent `direct` (§25.3).
 pub const PROPOSAL_ONLY: &str = "proposal_only";
 
-/// How an agent-origin command may carry an op (§25.3).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AgentOp {
-    /// Applied directly (comments, watches).
-    Direct,
-    /// Only as a proposal a person decides (views and drawings).
-    Proposal,
-    /// Never.
-    Deny,
-}
+pub use qp_subsystem::AgentOp;
 /// The agent policy name of `init.agent_policy` (§25.3).
 pub const AGENT_POLICY_R5B: &str = "r5b";
 
@@ -134,7 +126,12 @@ impl Session {
         if !self.agent_rule_holds(ci) {
             return Ok(mode);
         }
-        let kinds: Vec<AgentOp> = ops.iter().map(|o| agent_op(&self.doc, o)).collect();
+        let kind = |o| {
+            self.registry
+                .op(o)
+                .map_or_else(|| agent_op(&self.doc, o), |h| h.agent(&self.doc, o))
+        };
+        let kinds: Vec<AgentOp> = ops.iter().map(kind).collect();
         if let Some(i) = kinds.iter().position(|k| *k == AgentOp::Deny) {
             return Err(cannot_write(i, &ops[i]));
         }
@@ -198,13 +195,6 @@ pub fn agent_op(doc: &Document, op: &Op) -> AgentOp {
         }
         _ => AgentOp::Deny,
     }
-}
-
-fn op_name(op: &Op) -> String {
-    serde_json::to_value(op)
-        .ok()
-        .and_then(|v| v.get("op").and_then(|o| o.as_str()).map(str::to_owned))
-        .unwrap_or_default()
 }
 
 fn cannot_write(i: usize, op: &Op) -> ProtocolError {

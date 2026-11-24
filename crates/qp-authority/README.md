@@ -15,12 +15,13 @@ yeniden dışa aktardığı yolları kullanır (`rounds/RF1/PLAN.md` §3.3).
 **Bağımlılıklar:** `qp-ops` (işlemler), `qp-plane` (veri düzlemi, değer önbelleği, hata
 kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-facts`,
 `qp-capsule`, `qp-voice`, `qp-grammar`, `qp-look`, `qp-glyph`, `qp-designs`, `qp-source`;
-`schemars`, `serde`, `serde_json`, `serde_path_to_error`, `tempfile`.
+`qp-subsystem` (alt sistem sözleşmesi); `schemars`, `serde`, `serde_json`,
+`serde_path_to_error`.
 
 **Dışa açık yüzey (`lib.rs`; `qp-session` bunları aynı adlarla yeniden dışa aktarır):** `Session`, `permissions`, `confine`; `Replica`,
 `ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; `hit_scene`,
 `screen_frame`, `explain_scene`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
-`conform`, `agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
+`agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
 `ENGINE_PRINCIPAL`, `DocProvider`, `profile_for`, `canon_document`, `thresholds` `qp-ops`'ta;
 `DataError`, `HostNotice`, `did_you_mean`, `edit_distance`, `headparts` `qp-plane`'de.
 
@@ -31,7 +32,8 @@ kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-
 - `data/` — canlı yol, bağ sorguları.
 - `read/` — sorgu, anlamsal okuma, önizleme, açıklama, etkileşim.
 - `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).
-- `host/` — yeniden oynatma barındırıcısı (`replayhost`) ve uygunluk koşucusu (`conform`).
+- `host/` — yeniden oynatma barındırıcısı (`replayhost`); uygunluk koşucusu (`conform`) S3.0'da
+  bileşime (`qp-session`) taşındı.
 
 **Ne değildir:** kabuk, uyarlayıcı (CLI/MCP/WASM), kapsül motoru, veri kaynağı, çizici.
 

@@ -144,6 +144,7 @@ impl Session {
             .build());
         }
         self.clock = now;
+        self.phase(Phase::Proposals, Moment::Clock { now });
         let due: Vec<Proposal> = self
             .doc
             .proposals
@@ -167,6 +168,7 @@ impl Session {
                 lines.extend(self.settle(s));
             }
         }
+        lines.extend(self.emit());
         Ok(lines)
     }
 }

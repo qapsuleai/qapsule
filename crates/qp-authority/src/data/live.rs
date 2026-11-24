@@ -36,11 +36,11 @@ use qp_schema::{Condition, Document, SeriesData, SeriesSource};
 
 use crate::session::{out, permissions, Session};
 use qp_ops::apply::apply_change;
-use qp_ops::expand::{expand_op, summarize_ops, Ctx};
+use qp_ops::expand::{summarize_ops, Ctx};
 use qp_ops::live::cond_ids;
 use qp_plane::error::{ptr, PResult, E};
 use qp_plane::plane::{inject, layer_reads, DataPlane, Reader};
-use qp_plane::values::{eval_condition, find_series, Delta};
+use qp_plane::values::{find_series, Delta};
 
 /// Bars of a series in `doc` (inline or injected bound bars).
 fn bars_len(doc: &Document, id: &str) -> usize {
@@ -494,6 +494,7 @@ fn eval_memo(
     cache: &mut qp_plane::values::Cache,
     c: &Condition,
     memo: &mut Option<(u64, [Option<usize>; 2])>,
+    reg: &qp_subsystem::Registry,
 ) -> Option<(bool, u64, i64)> {
     if let Some(r) = memo
         .filter(|(g, _)| *g == cache.gen())
@@ -501,7 +502,7 @@ fn eval_memo(
     {
         return r;
     }
-    let r = eval_condition(rd, cache, c);
+    let r = reg.eval_condition(rd, cache, c);
     let ids = cond_ids(c);
     *memo = Some((
         cache.gen(),

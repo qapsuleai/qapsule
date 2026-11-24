@@ -6,7 +6,7 @@ impl Session {
     /// Handles a parsed message (its id fields hold ids; selectors are resolved by
     /// [`Session::handle_raw`]).
     pub fn handle(&mut self, conn: &str, msg: ClientMsg) -> Vec<OutboundLine> {
-        self.handle_resolved(conn, msg, BTreeMap::new())
+        self.handle_msg(conn, msg, BTreeMap::new())
     }
 
     #[allow(clippy::too_many_lines)]
@@ -25,7 +25,7 @@ impl Session {
             features,
         } = msg
         {
-            return self.hello(conn, ci, &protocol, &principal, surface, &features);
+            return self.dispatch_hello(conn, ci, &protocol, &principal, surface, &features);
         }
         let Some(ci) = ci else {
             let id = msg_id(&msg);
@@ -63,7 +63,7 @@ impl Session {
                     return vec![err_line(conn, Some(id), forbidden_read())];
                 }
                 let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
-                match self.as_reader(&principal, lang, |s| s.query(ci, &query)) {
+                match self.as_reader(&principal, lang, |s| s.dispatch_query(ci, &query)) {
                     Ok(data) => vec![out(
                         conn,
                         ServerMsg::Result {
@@ -84,7 +84,7 @@ impl Session {
                     _ => None,
                 };
                 let stories = matches!(topic, Topic::Stories { .. });
-                let r = self.as_reader(&principal, lang, |s| s.subscribe(ci, &id, topic));
+                let r = self.as_reader(&principal, lang, |s| s.dispatch_subscribe(ci, &id, topic));
                 match r {
                     Ok(()) => {
                         let mut a = ack(id.clone(), AckStatus::Subscribed);
@@ -107,7 +107,7 @@ impl Session {
                 let c = &mut self.conns[ci];
                 if let Some(i) = c.subs.iter().position(|s| s.id == sub) {
                     c.subs.remove(i);
-                    self.viewer_unsubscribed(conn, &sub);
+                    self.unsubscribed(conn, &sub);
                     vec![out(conn, ack(id, AckStatus::Unsubscribed))]
                 } else {
                     let e = E::new(ErrorCode::NotFound, format!("no subscription `{sub}`"))
@@ -122,7 +122,7 @@ impl Session {
                     return vec![err_line(conn, Some(id), forbidden_read())];
                 }
                 let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
-                match self.as_reader(&principal, lang, |s| s.input(ci, &gesture)) {
+                match self.as_reader(&principal, lang, |s| s.dispatch_input(ci, &gesture)) {
                     Ok((data, mut events)) => {
                         let mut v = vec![out(
                             conn,
@@ -185,7 +185,7 @@ impl Session {
                     anchor_t,
                     digest,
                 };
-                match self.dispute(ci, &id, d) {
+                match self.dispatch_dispute(ci, &id, d) {
                     Ok(lines) => lines,
                     Err(e) => vec![err_line(conn, Some(id), e)],
                 }
@@ -212,7 +212,7 @@ impl Session {
         self.log.len() as Seq
     }
 
-    fn hello(
+    pub(super) fn hello(
         &mut self,
         conn: &str,
         ci: Option<usize>,

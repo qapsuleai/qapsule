@@ -20,8 +20,8 @@ use qp_schema::protocol::{Expect, FinalCheck, InitRef, LogEntry, RawLine, Role, 
 use qp_schema::Document;
 use serde_json::{json, Value};
 
-use crate::replayhost::ReplayHost;
-use crate::session::{confine, permissions, read_json, Session};
+use qp_authority::replayhost::ReplayHost;
+use qp_authority::{confine, permissions, read_json, Session};
 use qp_ops::apply::replay;
 
 /// A message to send, kept as raw JSON (`send` of a transcript step).

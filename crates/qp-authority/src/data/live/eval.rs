@@ -62,7 +62,7 @@ impl Session {
             let doc = &mut self.doc;
             for (i, op) in ops.iter().enumerate() {
                 let p = ptr("/ops", i);
-                let cs = match expand_op(doc, op, &p, &mut ctx) {
+                let cs = match self.registry.expand_op(doc, op, &p, &mut ctx) {
                     Ok(cs) => cs,
                     Err(e) => {
                         roll_back(doc, &groups, restore);
@@ -176,6 +176,7 @@ impl Session {
         lines.extend(self.intent_lines(fired));
         lines.extend(self.eval_intents_public());
         lines.extend(claims);
+        lines.extend(self.emit());
         lines
     }
 
@@ -309,7 +310,7 @@ impl Session {
                     // Not evaluated; the edge state is kept (§18.3).
                     continue;
                 }
-                let r = eval_memo(rd, cache, condition, &mut s.memo);
+                let r = eval_memo(rd, cache, condition, &mut s.memo, &self.registry);
                 let now = r.is_some_and(|x| x.0);
                 let prev = s.last.replace(now);
                 if prev == Some(false) && now {
@@ -368,7 +369,7 @@ impl Session {
             if !w.info.rests_on_any(changed) || w.info.blocked(&self.plane, ready) {
                 continue;
             }
-            let r = eval_memo(rd, &mut self.cache, &w.trigger, &mut w.memo);
+            let r = eval_memo(rd, &mut self.cache, &w.trigger, &mut w.memo, &self.registry);
             let now = r.is_some_and(|x| x.0);
             let prev = if w.stamp == self.intent_epoch {
                 w.last
@@ -429,7 +430,15 @@ impl Session {
             if !w.who.iter().all(|&k| ents.hears(Ok(k), &w.info)) {
                 continue;
             }
-            if eval_memo(rd, &mut self.cache, &w.invalidation, &mut w.memo).is_some_and(|r| r.0) {
+            if eval_memo(
+                rd,
+                &mut self.cache,
+                &w.invalidation,
+                &mut w.memo,
+                &self.registry,
+            )
+            .is_some_and(|r| r.0)
+            {
                 holding.push((w.capsule.clone(), w.finding.clone()));
             }
         }

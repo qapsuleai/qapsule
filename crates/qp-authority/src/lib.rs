@@ -5,7 +5,6 @@
 //!   (size limit, parse, schema with JSON pointer, then handling).
 //! - [`replay`]: rebuilds a document from the initial document and a log, applying
 //!   only the recorded changes (no study code, no presenter, no clock).
-//! - [`conform`]: the conformance transcript runner, in-process and over `qp serve`.
 //! - Semantic reading (R2): [`Session::scene`] compiles a view with `qp-grammar` over
 //!   the document ([`DocProvider`]); `screen` and `hit` answer from that scene; the
 //!   presenter applies the grammar's depth rules.
@@ -32,7 +31,7 @@ pub(crate) use authority::session;
 pub(crate) use capsule::{claims, comments, dispute, public, story};
 pub use comments::CommentAudit;
 pub(crate) use data::live;
-pub use host::{conform, replayhost};
+pub use host::replayhost;
 pub(crate) use read::{explain, query, reading};
 #[doc(hidden)]
 pub use replica::tape;

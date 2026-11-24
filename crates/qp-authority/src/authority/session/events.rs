@@ -107,7 +107,7 @@ impl Session {
             {
                 continue;
             }
-            if holds(rd!(self), &mut self.cache, &cond) {
+            if self.registry.holds(rd!(self), &mut self.cache, &cond) {
                 let changes = vec![ChangeOp::SetCapsuleState {
                     capsule: cap.clone(),
                     state: CapsuleState::Invalidated,
@@ -164,7 +164,9 @@ impl Session {
                     // Not evaluated; the edge state is kept (§18.3).
                     continue;
                 }
-                let r = eval_condition(rd!(self), &mut self.cache, &condition);
+                let r = self
+                    .registry
+                    .eval_condition(rd!(self), &mut self.cache, &condition);
                 let now = r.is_some_and(|x| x.0);
                 let prev = self.conns[ci].subs[si].last.replace(now);
                 if prev == Some(false) && now {
@@ -271,7 +273,9 @@ impl Session {
                 }
                 continue;
             }
-            let r = eval_condition(rd!(self), &mut self.cache, &trig);
+            let r = self
+                .registry
+                .eval_condition(rd!(self), &mut self.cache, &trig);
             let now = r.is_some_and(|x| x.0);
             if self.intent_state.get(&id) == Some(&false) && now {
                 if let Some((_, bar, t)) = r {

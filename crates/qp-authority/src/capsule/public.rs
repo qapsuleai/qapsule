@@ -190,6 +190,7 @@ impl Session {
         std::mem::swap(&mut self.invalidation_writer, &mut w.invalidation_writer);
         std::mem::swap(&mut self.intent_state, &mut w.intent_state);
         std::mem::swap(&mut self.intent_epoch, &mut w.intent_epoch);
+        self.slots.swap_world();
         self.other = Some(w);
         self.in_public = !self.in_public;
     }
@@ -284,7 +285,10 @@ impl Session {
                         note: note.clone(),
                     })
                 }
-                other => Some(other.clone()),
+                other => self
+                    .registry
+                    .op(other)
+                    .map_or_else(|| Some(other.clone()), |h| h.to_public(other)),
             })
             .collect()
     }

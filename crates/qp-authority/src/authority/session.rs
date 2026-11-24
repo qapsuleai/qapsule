@@ -7,13 +7,18 @@ mod command;
 mod create;
 mod dispatch;
 mod events;
+mod files;
 mod intake;
+mod phases;
 mod presence;
 mod settle;
 mod worlds;
 
+pub use files::{confine, read_json};
+pub(crate) use phases::expand_ops;
+
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::{Component, Path, PathBuf};
+use std::path::Path;
 
 use qp_schema::protocol::{
     AckStatus, AttentionDirective, ChangeOp, ClientMsg, DocumentRef, ErrorCode, Event, Limits,
@@ -27,14 +32,15 @@ use serde_json::Value;
 use crate::public::{PubNext, PubPending};
 use qp_ops::apply::{apply_all, first_overlap, touched_ids, touched_key, touched_keys};
 use qp_ops::expand::{
-    check_condition, expand_ops, need_finding, need_proposal, summarize_ops, undone_set, Ctx,
+    check_condition, need_finding, need_proposal, summarize_ops, undone_set, Ctx, Expanded,
 };
 use qp_ops::locate::locate;
 use qp_ops::present::profile_for;
 use qp_ops::{select, ENGINE_PRINCIPAL};
 use qp_plane::error::{invalid, ptr, PResult, E};
 use qp_plane::plane::{reading_doc, DataError, DataOutcome, DataPlane, Provider, Reader};
-use qp_plane::values::{eval_condition, holds, Cache};
+use qp_plane::values::Cache;
+use qp_subsystem::{op_name, Moment, Phase, Registry};
 
 /// Features this authority grants when asked.
 const FEATURES: [&str; 2] = ["attention", "narrative"];
@@ -247,6 +253,12 @@ pub struct Session {
     /// (R5B, §25.4) The comment validator's real verdicts (host-side, for measurement;
     /// never sent): [`Session::comment_audit`].
     pub(crate) comment_audit: Vec<crate::comments::CommentAudit>,
+    /// (RF1 S3.0) Registered subsystems, their state and their outbox (`qp-subsystem`).
+    pub(crate) registry: qp_subsystem::Registry,
+    pub(crate) slots: qp_subsystem::Slots,
+    pub(crate) outbox: qp_subsystem::Outbox,
+    /// The earliest clock a subsystem asked to be woken at ([`Session::next_wake`]).
+    pub(crate) wake: Option<i64>,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -280,42 +292,6 @@ pub(crate) struct Accepted {
     ops: Vec<Op>,
 }
 
-/// Resolves `rel` under `root`, refusing absolute paths and paths that leave `root`.
-///
-/// # Errors
-/// The path escapes the root or does not exist.
-pub fn confine(root: &Path, rel: &str) -> Result<PathBuf, String> {
-    let p = Path::new(rel);
-    if p.is_absolute()
-        || p.components()
-            .any(|c| matches!(c, Component::ParentDir | Component::Prefix(_)))
-    {
-        return Err(format!(
-            "path `{rel}` must be relative and stay inside the root"
-        ));
-    }
-    let root_c = root
-        .canonicalize()
-        .map_err(|e| format!("root {}: {e}", root.display()))?;
-    let full = root_c
-        .join(p)
-        .canonicalize()
-        .map_err(|e| format!("{rel}: {e}"))?;
-    if !full.starts_with(&root_c) {
-        return Err(format!("path `{rel}` leaves the root"));
-    }
-    Ok(full)
-}
-
-/// Reads a JSON file into `T`.
-///
-/// # Errors
-/// I/O or JSON errors.
-pub fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T, String> {
-    let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
-    serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
-}
-
 pub(crate) fn out(conn: &str, msg: ServerMsg) -> OutboundLine {
     OutboundLine {
         conn: conn.to_owned(),
@@ -327,8 +303,12 @@ pub(crate) fn err_line(conn: &str, id: Option<String>, error: ProtocolError) -> 
     out(conn, ServerMsg::Error { id, error })
 }
 
-/// Ops that cannot become proposals (`docs/PROTOCOL.md` §4.7).
-fn proposable(op: &Op) -> bool {
+/// Ops that cannot become proposals (`docs/PROTOCOL.md` §4.7); a subsystem's op: its
+/// handler's answer.
+fn proposable(op: &Op, reg: &Registry) -> bool {
+    if let Some(h) = reg.op(op) {
+        return h.proposable();
+    }
     !matches!(
         op,
         Op::AcceptProposal { .. }
@@ -347,15 +327,11 @@ fn proposable(op: &Op) -> bool {
     )
 }
 
-fn op_name(op: &Op) -> String {
-    serde_json::to_value(op)
-        .ok()
-        .and_then(|v| v.get("op").and_then(Value::as_str).map(str::to_owned))
-        .unwrap_or_default()
-}
-
-/// Whether `perms` allow writing `op` directly.
-fn allowed(op: &Op, perms: &Permissions) -> bool {
+/// Whether `perms` allow writing `op` directly (a subsystem's op: its handler's answer).
+fn allowed(op: &Op, perms: &Permissions, reg: &Registry) -> bool {
+    if let Some(h) = reg.op(op) {
+        return h.allowed(perms);
+    }
     match op {
         Op::AppendBars { .. } | Op::UpdateLastBar { .. } => perms.feed || perms.write,
         Op::ApproveFinding { .. }

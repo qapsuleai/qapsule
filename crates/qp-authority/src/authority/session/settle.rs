@@ -126,6 +126,13 @@ impl Session {
         self.claims_after_bars(&changed);
         self.note_closed(&changed);
         let seq = self.seq();
+        self.phase(
+            Phase::AfterData,
+            Moment::Data {
+                seq,
+                changed: &changed,
+            },
+        );
         for (id, d) in changed {
             self.pending_views.push((id, d, seq));
         }
@@ -157,6 +164,7 @@ impl Session {
         lines.extend(conds);
         lines.extend(intents);
         lines.extend(self.claim_events());
+        lines.extend(self.emit());
         lines
     }
 
@@ -240,6 +248,7 @@ impl Session {
         lines.extend(conds);
         lines.extend(intents);
         lines.extend(self.claim_events());
+        lines.extend(self.emit());
         lines
     }
 }

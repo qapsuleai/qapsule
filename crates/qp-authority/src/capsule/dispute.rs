@@ -143,7 +143,7 @@ impl Settle {
     }
 }
 
-fn verdict_line(
+pub(crate) fn verdict_line(
     conn: &str,
     id: &str,
     seq: u64,
@@ -250,7 +250,7 @@ impl Session {
         }
         // (R3, §20) Engine stories resting on corrected bars are retracted; capsule
         // disputes the answer covers are decided.
-        lines.extend(self.capsule_settled(series, lo, hi, first.is_some()));
+        lines.extend(self.settled_phase(series, lo, hi, first.is_some()));
         lines.extend(self.settle_data());
         lines
     }

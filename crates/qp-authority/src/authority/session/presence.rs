@@ -53,7 +53,7 @@ impl Session {
                     condition,
                     "/topic/condition",
                 )?;
-                last = Some(holds(rd!(self), &mut self.cache, condition));
+                last = Some(self.registry.holds(rd!(self), &mut self.cache, condition));
             }
             Topic::Attention { principal: Some(p) } => {
                 if self.principal(p).is_none() {

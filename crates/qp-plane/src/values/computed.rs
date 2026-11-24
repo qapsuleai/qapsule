@@ -17,11 +17,7 @@ pub struct Computed {
 }
 
 impl Computed {
-    pub(super) fn new(
-        t: Vec<i64>,
-        outputs: BTreeMap<String, Vec<Option<f64>>>,
-        main: String,
-    ) -> Self {
+    pub fn new(t: Vec<i64>, outputs: BTreeMap<String, Vec<Option<f64>>>, main: String) -> Self {
         let main_ix = outputs.keys().position(|k| *k == main);
         Self {
             t,

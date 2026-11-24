@@ -150,14 +150,12 @@ impl Session {
                 ..crate::agent::AgentState::default()
             },
             comment_audit: Vec::new(),
+            registry: qp_subsystem::Registry::default(),
+            slots: qp_subsystem::Slots::default(),
+            outbox: qp_subsystem::Outbox::default(),
+            wake: None,
         };
-        s.audience_seen = s.doc.audiences.keys().cloned().collect();
-        s.audience_seen.extend(
-            s.doc
-                .intents
-                .iter()
-                .filter_map(|i| i.watch.as_ref().map(|w| w.for_.clone())),
-        );
+        s.audience_seen = initial_audiences(&s.doc);
         s.start_capsules(capsules.as_ref());
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
@@ -179,4 +177,16 @@ impl Session {
         let _ = s.claims.take();
         Ok(s)
     }
+}
+
+/// The principals whose capsule preferences or watches the initial document holds (other
+/// readers get projections, §20, §25.5).
+fn initial_audiences(doc: &Document) -> BTreeSet<String> {
+    let mut seen: BTreeSet<String> = doc.audiences.keys().cloned().collect();
+    seen.extend(
+        doc.intents
+            .iter()
+            .filter_map(|i| i.watch.as_ref().map(|w| w.for_.clone())),
+    );
+    seen
 }

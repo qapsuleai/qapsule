@@ -43,12 +43,12 @@ impl Session {
                 .build()
         };
         let role_name = role_str(role);
-        let first_denied = ops.iter().position(|o| !allowed(o, &perms));
-        let first_unproposable = ops.iter().position(|o| !proposable(o));
+        let first_denied = ops.iter().position(|o| !allowed(o, &perms, &self.registry));
+        let first_unproposable = ops.iter().position(|o| !proposable(o, &self.registry));
         let direct = match mode {
             WriteMode::Direct => {
                 if let Some(i) = first_denied {
-                    let hint = if perms.propose && proposable(&ops[i]) {
+                    let hint = if perms.propose && proposable(&ops[i], &self.registry) {
                         "Use mode auto (or propose) to create a proposal instead."
                     } else {
                         "Ask a principal with the required role."
@@ -142,13 +142,13 @@ impl Session {
                 {
                     return Ok(());
                 }
-                expand_ops(&s.doc, ops, "/ops", &mut ctx).map(|_| ())
+                expand_ops(&s.registry, &s.doc, ops, "/ops", &mut ctx).map(|_| ())
             })?;
         }
         // (R5B, §25.4) Comments are validated against what the writer may read: after
         // the role and mode checks and after the dry run in the writer's own document (a
         // hidden capsule is `not_found` like a missing one).
-        self.check_comments(ci, ops)?;
+        self.check_command(ci, ops)?;
 
         if direct {
             if self.incremental
@@ -197,7 +197,7 @@ impl Session {
                 data: self.reader(),
                 plane: &self.plane,
             };
-            let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
+            let ex = expand_ops(&self.registry, &self.doc, ops, "/ops", &mut ctx)?;
             let created = ctx.created;
             let undoes = ctx.undoes;
             self.base_check(base, &ex.changes, &ex.origin)?;
@@ -264,7 +264,7 @@ impl Session {
             data: self.reader(),
             plane: &self.plane,
         };
-        let ex = expand_ops(&self.doc, ops, "/ops", &mut ctx)?;
+        let ex = expand_ops(&self.registry, &self.doc, ops, "/ops", &mut ctx)?;
         let created = ctx.created;
         self.base_check(base, &ex.changes, &ex.origin)?;
         let pid = format!("prop-{seq}");

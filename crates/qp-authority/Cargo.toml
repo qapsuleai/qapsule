@@ -15,6 +15,7 @@ qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
 qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
 qp-ops = { version = "0.0.0", path = "../qp-ops" }
 qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-facts = { version = "0.0.0", path = "../qp-facts" }
 qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
@@ -25,11 +26,6 @@ schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 serde_path_to_error = "0.1.20"
-# Inline transcript inits handed to `qp serve` (securely created temp files).
-tempfile = "3.27.0"
-
-[dev-dependencies]
-tempfile = "3.27.0"
 
 [lints]
 workspace = true

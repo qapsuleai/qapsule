@@ -106,7 +106,7 @@ impl Session {
         }
         if let Some(msg) = self.bar_fast_parse(line) {
             let mut lines = match self.check_counts(&msg) {
-                Ok(()) => self.handle_resolved(conn, msg, BTreeMap::new()),
+                Ok(()) => self.handle_msg(conn, msg, BTreeMap::new()),
                 Err(e) => vec![err_line(conn, msg_id(&msg), e)],
             };
             if self.has_pushers() {
@@ -163,7 +163,7 @@ impl Session {
         if let Err(e) = self.check_limits(&value, &msg) {
             return vec![err_line(conn, id, e)];
         }
-        let mut lines = self.handle_resolved(conn, msg, resolved);
+        let mut lines = self.handle_msg(conn, msg, resolved);
         // (RP3/M15, §22) What the message changed for viewers (their feed, faces, slice).
         if self.has_pushers() {
             lines.extend(self.viewer_flush());
@@ -321,7 +321,7 @@ impl Session {
                 continue;
             };
             let cur = scratch.as_ref().unwrap_or(&self.doc);
-            if let Ok(cs) = qp_ops::expand::expand_op(cur, &op, &p, &mut ctx) {
+            if let Ok(cs) = self.registry.expand_op(cur, &op, &p, &mut ctx) {
                 if cs.is_empty() {
                     continue;
                 }

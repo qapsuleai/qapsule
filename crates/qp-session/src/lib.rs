@@ -21,9 +21,6 @@ pub mod tape;
 pub mod viewer;
 
 pub use compose::{OpenSide, ReplayHost, Replica, Session, STANDARD};
-/// A replica built with a subsystem list of the caller's (`qp_session::Replica`: [`STANDARD`]);
-/// the extension test composes `STANDARD` + its own subsystem with it (RF1 E).
-pub use qp_authority::Replica as AuthorityReplica;
 pub use qp_authority::{capsule, voices};
 pub use qp_authority::{
     confine, default_limits, demo_init, document_digest, explain_scene, hit_scene, permissions,

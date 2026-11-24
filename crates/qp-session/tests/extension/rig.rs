@@ -3,8 +3,9 @@
 use std::collections::VecDeque;
 use std::path::PathBuf;
 
+use qp_authority::Replica;
 use qp_schema::protocol::{OutboundLine, SessionInit};
-use qp_session::{Authority, AuthorityReplica, Subsystems, STANDARD};
+use qp_session::{Authority, Subsystems, STANDARD};
 use qp_subsystem::Subsystem;
 use serde_json::{json, Value};
 
@@ -46,7 +47,7 @@ pub fn hello(s: &mut Authority, conn: &str, principal: &str) {
 
 /// Delivers the authority's lines for connection `r` to the replica, and the replica's
 /// requests back, until both are quiet.
-pub fn deliver(a: &mut Authority, r: &mut AuthorityReplica, lines: Vec<OutboundLine>) {
+pub fn deliver(a: &mut Authority, r: &mut Replica, lines: Vec<OutboundLine>) {
     let mut q: VecDeque<OutboundLine> = lines.into();
     while let Some(l) = q.pop_front() {
         if l.conn != "r" {

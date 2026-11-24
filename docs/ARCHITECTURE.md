@@ -159,7 +159,7 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
 8. **Barındırıcı API'si.** Alt sistemin durumu `session.sub::<T>()` / `sub_mut::<T>()`
    (yuva tipiyle); `Deref` üstünden değil. Standart dışı bir liste (sınama):
    `qp_session::Authority::new(init, root, Subsystems::new(list))` ve
-   `qp_session::AuthorityReplica::with_memory(.., list)`; durum `slots().get::<T>()`.
+   `qp_authority::Replica::with_memory(.., list)`; durum `slots().get::<T>()`.
 
 **Bilinen sınırlar.** (B-e) `amend`/`say` yanlış anda sessizce düşer; `Look`'tan önceki bir
 `amend` o bakışın girdisine karışır. (B-f) `qp_session` `Authority` ve `Subsystems`'i (ve

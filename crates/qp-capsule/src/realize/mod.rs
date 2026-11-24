@@ -16,7 +16,7 @@
 //!
 //! Original description of the measured realizer follows.
 //!
-//! A sentence is a pure function of [`SentenceInput`]: no LLM, no clock, no randomness.
+//! A sentence is a pure function of [`SentenceInput`](crate::SentenceInput): no LLM, no clock, no randomness.
 //! Two steps:
 //!
 //! 1. [`Plan::new`] reads the input into a language-independent frame: the **time class**

@@ -4,7 +4,7 @@
 //! randomness, no LLM. The same bars and the same detector output always give the same
 //! stories, transitions, ledger and sentences.
 //!
-//! This file is the **contract** written in R3/T1; the measured design questions are
+//! The **contract** written in R3/T1 (`contract.rs`, re-exported here): the measured design questions are
 //! traits so that alternatives (R3 M2–M6) plug in without seeing each other:
 //!
 //! | Trait | Question | Experiment |

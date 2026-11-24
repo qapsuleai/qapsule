@@ -14,8 +14,9 @@
 //!
 //! - **Reference price** `P0` = close of the birth bar.
 //! - **Yardstick** `A` = Wilder ATR at the birth bar, computed with `qp_compute::Atr`
-//!   from `bars[..=born]` only (no look-ahead). Directional stories use ATR(14);
-//!   neutral stories use ATR(100) ("normal" volatility, see below).
+//!   from `bars[..=born]` only (no look-ahead). Directional stories use ATR([`ATR_FAST`])
+//!   (parameter `outcome.atr_fast`, default 14); neutral stories use ATR([`ATR_SLOW`])
+//!   (parameter `outcome.atr_slow`, default 100: "normal" volatility, see below).
 //! - **Directional story** (`up` / `down`): signed move `d = ±(close − P0)`. The first
 //!   bar in `(born, now]` with `d ≥ k·A` → `realized` (`barrier.target`); with
 //!   `d ≤ −k·A` → `invalidated` (`barrier.stop`). Symmetric (`k` up = `k` down), so a
@@ -59,13 +60,13 @@ pub const ATR_SLOW: usize = qp_schema::params::system::OUTCOME_ATR_SLOW_DEFAULT;
 pub struct KindParams {
     /// Horizon in bars.
     pub horizon: u32,
-    /// Directional barrier: target = stop = `k · ATR(14)`.
+    /// Directional barrier: target = stop = `k · ATR(ATR_FAST)` (parameter `outcome.atr_fast`).
     pub k: f64,
     /// Neutral barrier: `k_n · ATR(100)`.
     pub k_neutral: f64,
 }
 
-/// Directional barrier constant: `k = C_DIR · √h` (ATR(14) units).
+/// Directional barrier constant: `k = C_DIR · √h` (ATR units of period [`ATR_FAST`], parameter `outcome.atr_fast`).
 pub const C_DIR: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_DIR_DEFAULT;
 /// Neutral barrier constant: `k_n = C_NEUTRAL · √h` (ATR(100) units).
 pub const C_NEUTRAL: f64 = qp_schema::params::system::OUTCOME_BARRIER_C_NEUTRAL_DEFAULT;
@@ -244,7 +245,7 @@ impl Barrier {
 // ---------------------------------------------------------------------------------------
 
 /// (RP4) Scale on the directional barrier of [`Barrier`] for [`HighLow`]
-/// (`k = HL_S_DIR · 0.3·√h`, ATR(14)). Tuned on the calibration range only
+/// (`k = HL_S_DIR · 0.3·√h`, ATR of period [`ATR_FAST`]). Tuned on the calibration range only
 /// (`rounds/RP4/experiments/M25/yukdus/NOTES.md`).
 pub const HL_S_DIR: f64 = 2.0;
 /// (RP4) Scale on the neutral barrier of [`Barrier`] for [`HighLow`]

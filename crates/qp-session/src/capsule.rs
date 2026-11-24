@@ -57,20 +57,19 @@
 //!
 //! Pre-R3 items (facts without `meaning`, capsules without a story) are never projected.
 
+mod headsource;
 mod project;
 mod queries;
 mod reader;
 mod run;
-mod sentences;
 mod settled;
 
-pub(crate) use sentences::{sentence_pair_memo, story_validity, with_sentence_input};
+#[cfg(test)]
+mod tests;
 
-pub(crate) mod capidx;
 pub(crate) mod claims;
 pub(crate) mod comments;
 pub(crate) mod dispute;
-pub mod headparts;
 pub(crate) mod public;
 pub(crate) mod story;
 pub(crate) mod watch;
@@ -78,9 +77,8 @@ pub(crate) mod watch;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
-use qp_capsule::realize::Template;
-use qp_capsule::sentence::{condition_now_memo, StudyMemo};
-use qp_capsule::{Engine, EngineConfig, FlowObservation, Lang, Realizer, SentenceInput, TrustPath};
+use qp_capsule::sentence::StudyMemo;
+use qp_capsule::{Engine, EngineConfig, FlowObservation, Lang, TrustPath};
 use qp_facts::{Detector, FlowPoint};
 use qp_schema::capsule::{Audience, EvidenceFamily, LicenseClass, Stage, Story, UserGroup};
 use qp_schema::data::FeedKey;
@@ -94,9 +92,12 @@ use qp_schema::{
     SeriesSource,
 };
 
-use crate::error::{ptr, PResult, E};
+use qp_plane::error::{ptr, PResult, E};
+use qp_plane::proj::Proj;
+use qp_plane::sentences::{sentence_pair_memo, story_fact_ids, story_validity};
+use qp_plane::values::{bar_series, find_series};
+
 use crate::session::{out, Session};
-use crate::values::{bar_series, find_series};
 
 /// Engine component name in provenance.
 const ENGINE_NAME: &str = "qp-capsule";
@@ -329,62 +330,6 @@ fn is_licensed(f: &Fact) -> bool {
     f.meaning
         .as_ref()
         .is_some_and(|m| m.license.class == LicenseClass::Licensed)
-}
-
-/// Fact ids of a story in join order (transitions' facts, first occurrence).
-pub(crate) fn story_fact_ids(story: &Story) -> Vec<String> {
-    let mut out: Vec<String> = Vec::new();
-    for t in &story.history {
-        for f in &t.facts {
-            if !out.contains(f) {
-                out.push(f.clone());
-            }
-        }
-    }
-    out
-}
-
-/// What a principal may receive (see the module docs).
-#[derive(Debug, Clone, Default, PartialEq)]
-pub(crate) struct Proj {
-    /// The principal it is for: only its own capsule preferences (audience) go to it
-    /// (empty: the host, which receives every audience).
-    pub principal: String,
-    /// Fact, finding and capsule ids that never go.
-    pub hidden: BTreeSet<String>,
-    /// Fact ids sent without evidence values and `evidence_ref`.
-    pub redact: BTreeSet<String>,
-    /// Capsule id → its story as the principal sees it (licensed joins removed), when
-    /// that differs from the stored one.
-    pub stories: BTreeMap<String, Story>,
-    /// Capsules whose sentence must be written for this principal (redacted or with
-    /// hidden facts).
-    pub rewrite: BTreeSet<String>,
-}
-
-impl Proj {
-    /// Whether the JSON of `v` holds a hidden id as a string (`"id"`).
-    pub(crate) fn mentions_hidden(&self, v: &impl serde::Serialize) -> bool {
-        if self.hidden.is_empty() {
-            return false;
-        }
-        let s = serde_json::to_string(v).unwrap_or_default();
-        // An id without a quote occurs as `"id"` exactly when it is the text between two
-        // consecutive quotes of the JSON: look those up instead of searching every id.
-        let mut quotes = s.match_indices('"').map(|(i, _)| i);
-        if let Some(mut a) = quotes.next() {
-            for b in quotes {
-                if self.hidden.contains(&s[a + 1..b]) {
-                    return true;
-                }
-                a = b;
-            }
-        }
-        self.hidden
-            .iter()
-            .filter(|h| h.contains('"'))
-            .any(|h| s.contains(&format!("\"{h}\"")))
-    }
 }
 
 /// The story as seen without the transitions caused only by `hidden` facts: families of

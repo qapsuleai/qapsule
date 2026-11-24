@@ -11,6 +11,7 @@ publish.workspace = true
 qp-designs = { version = "0.0.0", path = "../qp-designs" }
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
 qp-render = { version = "0.0.0", path = "../qp-render" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
 qp-session = { version = "0.0.0", path = "../qp-session" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }

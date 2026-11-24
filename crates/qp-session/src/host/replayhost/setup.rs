@@ -239,7 +239,7 @@ impl ReplayHost {
         let init = expand_init(init, root, &r, &replay)?;
         let mut session = Session::new(init.clone(), root)?;
         // (R4/H-FP) The headline pieces' elapsed phrases on the replay's own calendar.
-        session.set_headline_calendar(crate::headparts::replay_calendar(info.kind));
+        session.set_headline_calendar(qp_plane::headparts::replay_calendar(info.kind));
         // (RP3/M15, §22) Viewers are told once per step, not after every event of it.
         session.set_viewer_batch(true);
         Ok(Self {
@@ -303,7 +303,9 @@ impl ReplayHost {
         session_init.data = None;
         let mut session =
             Session::with_provider(session_init, root, Box::new(SharedProvider(shared.clone())))?;
-        session.set_headline_calendar(crate::headparts::replay_calendar(ReplaySourceKind::Local));
+        session.set_headline_calendar(qp_plane::headparts::replay_calendar(
+            ReplaySourceKind::Local,
+        ));
         session.set_viewer_batch(true);
         Ok(Self {
             init,

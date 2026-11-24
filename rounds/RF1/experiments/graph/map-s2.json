@@ -1,0 +1,3 @@
+{"qp-plane":["authority/error","authority/suggest","authority/values","data/plane","capsule/capidx","capsule/headparts","capsule/sentences"],
+ "qp-ops":["authority/apply","ops/","ops.rs","read/present","data/provider"],
+ "qp-session":["authority","capsule","data","read","replica","host","lib.rs","macros"]}

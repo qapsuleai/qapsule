@@ -46,7 +46,7 @@ impl Session {
                     ));
                 }
                 check_condition(&self.doc, condition, "/topic/condition")?;
-                crate::expand::condition_entitled(
+                qp_ops::expand::condition_entitled(
                     &self.plane,
                     &self.doc,
                     &self.conns[ci].principal,
@@ -66,7 +66,7 @@ impl Session {
                 }
             }
             Topic::View { view } => {
-                crate::expand::need_view(&self.doc, view, "/topic/view")?;
+                qp_ops::expand::need_view(&self.doc, view, "/topic/view")?;
             }
             Topic::Viewer { limit, width } => {
                 self.viewer_check(ci, *limit, *width)?;
@@ -104,7 +104,7 @@ impl Session {
     /// number of bars the authority holds), each bound series with its binding state for
     /// that principal (§18.2).
     pub(crate) fn summary_for(&self, principal: &str) -> qp_schema::protocol::DocSummary {
-        let mut sum = crate::summary::summarize_doc(rd!(self));
+        let mut sum = qp_ops::summary::summarize_doc(rd!(self));
         for s in &mut sum.series {
             if let Some((state, _)) = self.plane.state_for(&s.id, Some(principal)) {
                 s.binding = Some(state);
@@ -175,7 +175,7 @@ impl Session {
             )?;
         }
         if let Some(i) = &d.id {
-            if !crate::expand::valid_id(i) {
+            if !qp_ops::expand::valid_id(i) {
                 return Err(invalid(format!("invalid id `{i}`"), "/directive/id"));
             }
         }

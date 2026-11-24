@@ -89,7 +89,7 @@ impl Agent {
                         if self.source != Some(replay.source) {
                             self.source = Some(replay.source);
                             self.replica.set_headline_calendar(
-                                qp_session::headparts::replay_calendar(replay.source),
+                                qp_plane::headparts::replay_calendar(replay.source),
                             );
                         }
                         self.now = Some(replay.t);

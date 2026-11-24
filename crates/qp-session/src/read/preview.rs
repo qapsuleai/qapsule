@@ -13,13 +13,13 @@ use qp_schema::protocol::{
 use qp_schema::scene::SceneDesc;
 use qp_schema::{Document, View};
 
-use crate::error::{PResult, E};
-use crate::expand::{need_proposal, need_view};
-use crate::plane::reading_doc;
-use crate::provider::{warm, DocProvider};
 use crate::reading::{HIT_HEIGHT, HIT_WIDTH};
 use crate::session::Session;
-use crate::values::Cache;
+use qp_ops::expand::{need_proposal, need_view};
+use qp_ops::provider::{warm, DocProvider};
+use qp_plane::error::{PResult, E};
+use qp_plane::plane::reading_doc;
+use qp_plane::values::Cache;
 
 impl Session {
     /// (§18.3) View `view` of `doc` as `asker` may draw it: layers whose data it may not
@@ -34,7 +34,7 @@ impl Session {
         if blocked.is_empty() {
             return Ok(view.clone());
         }
-        if let Some(bs) = crate::expand::view_bar_series_any(doc, view) {
+        if let Some(bs) = qp_ops::expand::view_bar_series_any(doc, view) {
             if let Some(b) = self.plane.gate(doc, Some(asker), &bs.id) {
                 return Err(b.error(&bs.id, path));
             }

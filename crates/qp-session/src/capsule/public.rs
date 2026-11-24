@@ -53,10 +53,10 @@ use qp_schema::data::FeedKey;
 use qp_schema::protocol::{ChangeOp, ClaimEvidence, LogEntry, Seq};
 use qp_schema::{Author, Document};
 
-use crate::capidx::{HeadState, IdIndex, ReaderProj, ReaderView, SentenceMemo};
-use crate::capsule::Proj;
-use crate::plane::reading_doc;
 use crate::session::Session;
+use qp_plane::capidx::{HeadState, IdIndex, ReaderProj, ReaderView, SentenceMemo};
+use qp_plane::plane::reading_doc;
+use qp_plane::proj::Proj;
 
 /// The fields of one capsule world that [`Session`] holds for the world it is in.
 pub(crate) struct World {

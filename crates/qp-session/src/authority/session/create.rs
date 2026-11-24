@@ -56,10 +56,10 @@ impl Session {
             DocumentRef::Path(p) => read_json(&confine(repo_root, &p)?)?,
         };
         // Canonical form of every view (GRAMMAR.md §11); the log replays from it.
-        let doc = crate::canon::canon_document_owned(doc)?;
+        let doc = qp_ops::canon::canon_document_owned(doc)?;
         let mut limits = default_limits();
         if agent_policy {
-            limits.max_watches = Some(crate::watch::MAX_WATCHES);
+            limits.max_watches = Some(qp_ops::watch::MAX_WATCHES);
         }
         let host = init
             .principals
@@ -127,7 +127,7 @@ impl Session {
             sentences: std::cell::RefCell::default(),
             item_memo: std::cell::RefCell::default(),
             projs: std::cell::RefCell::default(),
-            head_state: crate::capidx::HeadState::default(),
+            head_state: qp_plane::capidx::HeadState::default(),
             views: Vec::new(),
             real_facts: Vec::new(),
             headlines: BTreeMap::new(),

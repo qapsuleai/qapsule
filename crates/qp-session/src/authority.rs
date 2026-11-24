@@ -1,9 +1,5 @@
-//! Authority and command path: the session, command application, errors, suggestions,
-//! the values cache and the agent policy.
+//! Authority and command path: the session and the agent policy (command application is
+//! `qp_ops::apply`; errors, suggestions and the values cache are in `qp-plane`).
 
 pub mod agent;
-pub(crate) mod apply;
-pub(crate) mod error;
 pub(crate) mod session;
-pub(crate) mod suggest;
-pub(crate) mod values;

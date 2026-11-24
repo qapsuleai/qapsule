@@ -99,7 +99,7 @@ impl Session {
             // author, whoever last wrote the invalidation, whoever last wrote a series it
             // rests on) is entitled (e.g. its series was rebound after it was written, an
             // undo brought a binding back, an editor rewrote the invalidation).
-            let closure = crate::live::closure_of(&self.doc, &cond);
+            let closure = qp_ops::live::closure_of(&self.doc, &cond);
             let who = self.responsible(f, &closure);
             if !who
                 .iter()

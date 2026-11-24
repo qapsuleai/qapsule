@@ -14,10 +14,10 @@ use qp_schema::protocol::{
 use qp_schema::scene::{SceneDesc, ScenePanel};
 use qp_schema::{Series, View};
 
-use crate::error::{PResult, E};
-use crate::expand::{need_view, view_bar_series};
-use crate::provider::{warm, DocProvider};
 use crate::session::{Conn, Session};
+use qp_ops::expand::{need_view, view_bar_series};
+use qp_ops::provider::{warm, DocProvider};
+use qp_plane::error::{PResult, E};
 
 /// Panel id → (name, scale if compiled, layers) of a screen.
 pub(crate) type ScreenPanels = BTreeMap<u32, (Option<String>, Option<ScaleInfo>, Vec<LayerInfo>)>;
@@ -258,7 +258,7 @@ impl Session {
         let view = if blocked.is_empty() {
             view
         } else {
-            if let Some(bs) = crate::expand::view_bar_series_any(&self.doc, view) {
+            if let Some(bs) = qp_ops::expand::view_bar_series_any(&self.doc, view) {
                 if let Some(b) = self.plane.gate(&self.doc, Some(&asker), &bs.id) {
                     return Err(b.error(&bs.id, &format!("{qp}/view")));
                 }
@@ -397,7 +397,7 @@ impl Session {
             .iter()
             .map(|p| {
                 let (scale, mut layers) = panel_layers(view, p);
-                let r = crate::select::Resolver {
+                let r = qp_ops::select::Resolver {
                     doc: rd!(self),
                     root: None,
                 };

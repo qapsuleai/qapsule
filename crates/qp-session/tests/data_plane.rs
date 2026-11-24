@@ -12,9 +12,11 @@
 
 use std::path::{Path, PathBuf};
 
+use qp_ops::replay;
+use qp_plane::DataError;
 use qp_schema::data::{BindingState, DataEvent};
 use qp_schema::protocol::SessionInit;
-use qp_session::{replay, DataError, Session};
+use qp_session::Session;
 use serde_json::{json, Value};
 
 fn root() -> PathBuf {

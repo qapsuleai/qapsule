@@ -73,7 +73,8 @@ impl Replica {
             return;
         };
         let rd = rd!(s);
-        let Some(bars) = crate::values::find_series(rd, &ev.series).and_then(Series::bars) else {
+        let Some(bars) = qp_plane::values::find_series(rd, &ev.series).and_then(Series::bars)
+        else {
             return;
         };
         let Ok(i) = bars.binary_search_by_key(&ev.t, |b| b.t) else {
@@ -145,7 +146,7 @@ impl Replica {
             let rd = rd!(s);
             let bs = bar_series(rd, &v.series)
                 .map(|x| x.id.clone())
-                .or_else(|| crate::plane::bar_root(&s.doc, &v.series).map(|x| x.id.clone()))
+                .or_else(|| qp_plane::plane::bar_root(&s.doc, &v.series).map(|x| x.id.clone()))
                 .unwrap_or_else(|| v.series.clone());
             bss.push(bs);
         }

@@ -30,7 +30,7 @@ impl Session {
 
     /// What `principal` may receive of the engine's items; `None` when everything.
     ///
-    /// (R3/perf) Kept per reader and capsule ([`crate::capidx::ReaderProj`]): brought up to
+    /// (R3/perf) Kept per reader and capsule ([`qp_plane::capidx::ReaderProj`]): brought up to
     /// date from the log entries since the last call (the capsules they put, and those
     /// naming the facts they put), rebuilt when a series is put, anything is deleted or an
     /// entitlement answer it was made with changed. Inside [`Session::as_reader`] (a
@@ -44,14 +44,14 @@ impl Session {
         let mut all = self.projs.borrow_mut();
         let rp = all
             .entry(principal.to_owned())
-            .or_insert_with(|| crate::capidx::ReaderProj::new(principal));
+            .or_insert_with(|| qp_plane::capidx::ReaderProj::new(principal));
         let fresh = rp.built
             && !rp.degenerate
             && rp.log_len <= self.log.len()
-            && !crate::capidx::proj_breaks(&self.log[rp.log_len..])
+            && !qp_plane::capidx::proj_breaks(&self.log[rp.log_len..])
             && self.entitlements_hold(principal, rp);
         if !fresh {
-            *rp = crate::capidx::ReaderProj::new(principal);
+            *rp = qp_plane::capidx::ReaderProj::new(principal);
             for c in &self.doc.capsules {
                 if c.story.is_none() {
                     continue;
@@ -96,7 +96,7 @@ impl Session {
     }
 
     /// Whether the entitlement answers `rp` was made with still hold.
-    fn entitlements_hold(&self, principal: &str, rp: &crate::capidx::ReaderProj) -> bool {
+    fn entitlements_hold(&self, principal: &str, rp: &qp_plane::capidx::ReaderProj) -> bool {
         rp.flow
             .values()
             .chain(rp.bars.values())
@@ -108,7 +108,7 @@ impl Session {
         &self,
         principal: &str,
         instrument: &str,
-        rp: &mut crate::capidx::ReaderProj,
+        rp: &mut qp_plane::capidx::ReaderProj,
     ) -> bool {
         if let Some((_, a)) = rp.flow.get(instrument) {
             return *a;
@@ -120,7 +120,7 @@ impl Session {
     }
 
     /// [`Session::bars_ok`], recorded in `rp`.
-    fn bars_ok_in(&self, principal: &str, id: &str, rp: &mut crate::capidx::ReaderProj) -> bool {
+    fn bars_ok_in(&self, principal: &str, id: &str, rp: &mut qp_plane::capidx::ReaderProj) -> bool {
         if let Some((_, a)) = rp.bars.get(id) {
             return *a;
         }
@@ -140,9 +140,9 @@ impl Session {
         &self,
         principal: &str,
         c: &Capsule,
-        rp: &mut crate::capidx::ReaderProj,
-    ) -> crate::capidx::Contrib {
-        let mut x = crate::capidx::Contrib::default();
+        rp: &mut qp_plane::capidx::ReaderProj,
+    ) -> qp_plane::capidx::Contrib {
+        let mut x = qp_plane::capidx::Contrib::default();
         let Some(story) = c.story.as_ref() else {
             return x;
         };
@@ -502,7 +502,7 @@ impl Session {
         let (now, bars, bs) =
             Self::now_series(rd!(self), story).or_else(|| Self::now_series(doc, story))?;
         let validity = story_validity(story, &facts, bars, now, memo);
-        crate::headparts::story_parts(
+        qp_plane::headparts::story_parts(
             story,
             (bs, bars, now),
             validity,
@@ -541,7 +541,7 @@ impl Session {
         let (now, bars, bs) =
             Self::now_series(rd!(self), story).or_else(|| Self::now_series(doc, story))?;
         let validity = story_validity(story, &facts, bars, now, memo);
-        crate::headparts::story_voice(
+        qp_plane::headparts::story_voice(
             voice,
             story,
             &facts,
@@ -567,7 +567,7 @@ impl Session {
         let (doc, bs) = [rd!(self), &self.doc]
             .into_iter()
             .find_map(|d| bar_series(d, &row.series).map(|bs| (d, bs)))?;
-        crate::headparts::event_stamp(
+        qp_plane::headparts::event_stamp(
             row.closed_t.unwrap_or(row.born_t),
             bs,
             bs.bars()?,
@@ -620,7 +620,7 @@ impl Session {
         let story = c.story.as_ref()?;
         let (now, bars, bs) =
             Self::now_series(rd!(self), story).or_else(|| Self::now_series(&self.doc, story))?;
-        crate::headparts::story_parts(
+        qp_plane::headparts::story_parts(
             story,
             (bs, bars, now),
             item.validity,
@@ -632,7 +632,7 @@ impl Session {
 
     /// (R4/H-FP) The exchange calendar of headline pieces for bar series whose instrument
     /// names none (`None`: the built-in `XIST`); see [`crate::headparts`]. A replay host
-    /// sets [`crate::headparts::replay_calendar`] of its source.
+    /// sets [`qp_plane::headparts::replay_calendar`] of its source.
     pub fn set_headline_calendar(&mut self, cal: Option<qp_schema::Calendar>) {
         self.headline_cal = cal;
     }

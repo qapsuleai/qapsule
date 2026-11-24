@@ -66,7 +66,7 @@ impl H {
 
     /// Replay of the log equals the session's document byte for byte.
     pub fn assert_replay(&self) {
-        let r = qp_session::replay(self.s.initial_document(), self.s.log()).unwrap();
+        let r = qp_ops::replay(self.s.initial_document(), self.s.log()).unwrap();
         assert_eq!(
             serde_json::to_vec(&r).unwrap(),
             serde_json::to_vec(self.s.document()).unwrap()

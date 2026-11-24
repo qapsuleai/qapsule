@@ -539,7 +539,7 @@ impl ShellCore {
     /// (R4/H-FP) The replica's headline-piece calendar: the replay source's.
     fn set_calendar(&mut self, st: &ReplayState) {
         if self.replay.as_ref().map(|r| r.source) != Some(st.source) {
-            let cal = qp_session::headparts::replay_calendar(st.source);
+            let cal = qp_plane::headparts::replay_calendar(st.source);
             if let Some(v) = self.viewer.as_mut() {
                 v.set_calendar(cal.clone());
             }

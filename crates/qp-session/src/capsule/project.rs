@@ -207,7 +207,7 @@ impl Session {
         if !p.principal.is_empty() {
             // (R5B, §25.7) An agent that works for a person keeps the person's audience
             // (its holdings and watchlist make capsules relevant to it); nobody else's.
-            let person = crate::watch::person_of(&self.plane, &p.principal);
+            let person = qp_ops::watch::person_of(&self.plane, &p.principal);
             d.audiences
                 .retain(|k, _| k == &p.principal || k.as_str() == person);
         }
@@ -390,9 +390,9 @@ impl Session {
         x.inverse = self.project_changes(&e.inverse, p, lang);
         x.request.retain(|op| !p.mentions_hidden(op));
         // (R5B, §25.5) Another person's watch requests stay out.
-        let author_person = crate::watch::person_of(&self.plane, &e.author).to_owned();
+        let author_person = qp_ops::watch::person_of(&self.plane, &e.author).to_owned();
         let reader_ok = p.principal.is_empty()
-            || crate::watch::person_of(&self.plane, &p.principal) == author_person
+            || qp_ops::watch::person_of(&self.plane, &p.principal) == author_person
             || self
                 .principal(&p.principal)
                 .is_some_and(|q| q.role == qp_schema::protocol::Role::Owner);
@@ -447,7 +447,7 @@ impl Session {
     /// what the principal may see. Nothing written inside `f` may touch the document.
     ///
     /// (R3/perf) What it gives a reader (headlines, projected documents) is kept per
-    /// reader and language ([`crate::capidx::ReaderView`]) and given again while the log
+    /// reader and language ([`qp_plane::capidx::ReaderView`]) and given again while the log
     /// position, the projection and the reading document's bars are the same.
     pub(crate) fn as_reader<R>(
         &mut self,
@@ -496,7 +496,7 @@ impl Session {
                 ),
                 None => (None, None),
             };
-            crate::capidx::ReaderView {
+            qp_plane::capidx::ReaderView {
                 principal: principal.to_owned(),
                 lang,
                 log_len: self.log.len(),
@@ -505,7 +505,7 @@ impl Session {
                 rd: if nested {
                     None
                 } else {
-                    crate::capidx::rd_snap(self.rd.as_ref())
+                    qp_plane::capidx::rd_snap(self.rd.as_ref())
                 },
                 heads: Some(heads),
                 doc,
@@ -539,7 +539,7 @@ impl Session {
         view.heads = Some(std::mem::replace(&mut self.headlines, saved_heads));
         if !nested {
             self.views.push(view);
-            if self.views.len() > crate::capidx::VIEWS {
+            if self.views.len() > qp_plane::capidx::VIEWS {
                 self.views.remove(0);
             }
         }
@@ -547,7 +547,12 @@ impl Session {
     }
 
     /// Whether `v` is what [`Session::as_reader`] would make now for projection `p`.
-    fn view_valid(&self, v: &crate::capidx::ReaderView, p: Option<&Rc<Proj>>, lines: bool) -> bool {
+    fn view_valid(
+        &self,
+        v: &qp_plane::capidx::ReaderView,
+        p: Option<&Rc<Proj>>,
+        lines: bool,
+    ) -> bool {
         v.log_len == self.log.len()
             && v.lines == lines
             && v.heads.is_some()
@@ -557,6 +562,6 @@ impl Session {
                 _ => false,
             }
             && (p.is_none() || (v.doc.is_some() && v.rdp.is_some() == self.rd.is_some()))
-            && crate::capidx::rd_same(&v.rd, self.rd.as_ref())
+            && qp_plane::capidx::rd_same(&v.rd, self.rd.as_ref())
     }
 }

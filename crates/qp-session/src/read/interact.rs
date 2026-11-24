@@ -21,12 +21,12 @@ use qp_schema::protocol::{
 use qp_schema::scene::SceneDesc;
 use qp_schema::{Depth, Series, View};
 
-use crate::error::{invalid, ptr, PResult, E};
-use crate::expand::{need_view, view_bar_series, view_bar_series_any};
-use crate::present::present;
-use crate::provider::{warm, DocProvider};
 use crate::reading::{hit_scene, screen_frame, without_layers};
 use crate::session::Session;
+use qp_ops::expand::{need_view, view_bar_series, view_bar_series_any};
+use qp_ops::present::present;
+use qp_ops::provider::{warm, DocProvider};
+use qp_plane::error::{invalid, ptr, PResult, E};
 
 const GP: &str = "/gesture";
 
@@ -353,7 +353,7 @@ impl Session {
     /// `present` query's rules (the connection's profile at that depth; a finding whose
     /// data the reader may not read gets no spark and no view, §18.3).
     fn present_at(&mut self, ci: usize, finding: &str, d: OpenDepth) -> PResult<Presentation> {
-        let f = crate::expand::need_finding(rd!(self), finding, GP)?.clone();
+        let f = qp_ops::expand::need_finding(rd!(self), finding, GP)?.clone();
         let mut profile = self.conns[ci].profile.clone();
         profile.depth = depth::presenter_depth(d);
         let kind = self.conns[ci].surface.kind;

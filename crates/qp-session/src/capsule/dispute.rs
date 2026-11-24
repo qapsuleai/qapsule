@@ -37,10 +37,10 @@ use qp_schema::protocol::{
 use qp_schema::{Bar, TimestampMs};
 
 use crate::claims::{assemble, closed, eval_at, ClaimKey, Owner, Pending};
-use crate::error::E;
-use crate::plane::Provider;
 use crate::session::{out, Session};
-use crate::values::{bar_series, condition_series, Delta};
+use qp_plane::error::E;
+use qp_plane::plane::Provider;
+use qp_plane::values::{bar_series, condition_series, Delta};
 
 /// At most this many open disputes per connection (further ones: `limited`).
 pub const MAX_OPEN: usize = qp_schema::params::system::DISPUTE_MAX_OPEN_PER_CONN_DEFAULT;

@@ -2038,10 +2038,40 @@ name = "qp-mcp"
 version = "0.0.0"
 dependencies = [
  "qp-designs",
+ "qp-plane",
  "qp-render",
  "qp-schema",
  "qp-session",
  "schemars",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "qp-ops"
+version = "0.0.0"
+dependencies = [
+ "qp-capsule",
+ "qp-compute",
+ "qp-grammar",
+ "qp-plane",
+ "qp-schema",
+ "qp-source",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "qp-plane"
+version = "0.0.0"
+dependencies = [
+ "qp-calendar",
+ "qp-capsule",
+ "qp-compute",
+ "qp-grammar",
+ "qp-schema",
+ "qp-source",
+ "qp-voice",
  "serde",
  "serde_json",
 ]
@@ -2093,6 +2123,8 @@ dependencies = [
  "qp-glyph",
  "qp-grammar",
  "qp-look",
+ "qp-ops",
+ "qp-plane",
  "qp-schema",
  "qp-source",
  "qp-voice",
@@ -2113,6 +2145,7 @@ dependencies = [
  "qp-designs",
  "qp-glyph",
  "qp-look",
+ "qp-plane",
  "qp-render",
  "qp-schema",
  "qp-session",

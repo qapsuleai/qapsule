@@ -9,11 +9,11 @@ use qp_schema::protocol::{
 };
 use qp_schema::{Fact, SeriesSource};
 
-use crate::error::{PResult, E};
-use crate::expand::need_series;
-use crate::plane::binding_of;
 use crate::session::Session;
-use crate::values::{find_series, values};
+use qp_ops::expand::need_series;
+use qp_plane::error::{PResult, E};
+use qp_plane::plane::binding_of;
+use qp_plane::values::{find_series, values};
 
 impl Session {
     /// `no_entitlement` / `no_data` at `path` if connection `ci`'s principal may not read
@@ -151,7 +151,7 @@ impl Session {
             c.message = format!(
                 "bound series `{}` is `{}`: {}",
                 b.series,
-                crate::plane::state_str(b.state),
+                qp_plane::plane::state_str(b.state),
                 b.reason
             );
             return c;

@@ -18,6 +18,7 @@ qp-calendar = { path = "../qp-calendar" }
 qp-capsule = { path = "../qp-capsule" }
 qp-render = { path = "../qp-render" }
 qp-schema = { path = "../qp-schema" }
+qp-plane = { path = "../qp-plane" }
 qp-session = { path = "../qp-session" }
 qp-source = { path = "../qp-source" }
 # RP3/T4: typed parsing of the large frames (start, data) without a JSON tree.

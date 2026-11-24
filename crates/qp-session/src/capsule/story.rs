@@ -23,10 +23,10 @@ use qp_schema::protocol::{
 };
 use qp_schema::{Capsule, Document, Series, SeriesData, SeriesSource};
 
-use crate::capsule::Proj;
-use crate::error::{ptr, PResult, E};
 use crate::session::{out, Session};
 use qp_capsule::sentence::StudyMemo;
+use qp_plane::error::{ptr, PResult, E};
+use qp_plane::proj::Proj;
 
 /// (K53; R5/M19) A host's coin-flip rule (`qp_capsule::feedrule`, `docs/CAPSULE.md`
 /// §9.10): whether a story's ledger at birth is near a coin flip, and the K42 exemption.
@@ -197,8 +197,8 @@ impl Session {
     /// final bar (`None`: no bars).
     fn series_times(&self, series: &str) -> (Vec<i64>, Option<u64>) {
         let rd = rd!(self);
-        let Some(bs) = crate::values::bar_series(rd, series)
-            .or_else(|| crate::values::bar_series(&self.doc, series))
+        let Some(bs) = qp_plane::values::bar_series(rd, series)
+            .or_else(|| qp_plane::values::bar_series(&self.doc, series))
         else {
             return (Vec::new(), None);
         };
@@ -253,7 +253,7 @@ impl Session {
         let validity = self.reader_validity(doc, c, p, memo)?;
         let (in_feed, hidden) = self.feed_place(doc, principal, story, story.stage);
         let redacted = p.is_some_and(|p| {
-            crate::capsule::story_fact_ids(story)
+            qp_plane::sentences::story_fact_ids(story)
                 .iter()
                 .filter(|i| !p.hidden.contains(*i))
                 .any(|i| p.redact.contains(i))

@@ -80,3 +80,10 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   (`QP_BLESS=1 cargo test -p qp-render --test fonts`), yalnız yazdığı yol değişti;
   `arch-config.json` `generated_files` girdisi yeni yolu gösterir. Bu bir gevşetme değil,
   aynı istisnanın yer değiştirmesidir.
+- **S4, `expand_op` dağıtıcısı (Arkin'in kararı, 2026-11-24).** `expand_op` 903 satırdan
+  23 kol fonksiyonuna bölündü (her biri ≤ 80). Kalan dağıtıcı `match`, alanları açılmış 23 kolla
+  `rustfmt` biçiminde 101 satır. Round oturumu üç seçenek sundu: (a) taban çizgisi kalemi,
+  (b) `rustfmt::skip`, (c) ölü kollu iki katmanlı dağıtım. Arkin'in seçimi: **(a) taban
+  çizgisine al.** `arch-baseline.json`'a `crates/qp-ops/src/expand/op.rs::expand_op` 101 kalemi
+  ve `lint.allow` `qp-ops` 21 girer (dağıtıcının `too_many_lines` izni). `main`'e göre borç
+  küçülüyor: `expand_op` 903 → 101, `lint.allow` toplamı azalıyor. Kalem mandallıdır.

@@ -14,9 +14,9 @@
 
 mod support;
 
+use qp_plane::HostNotice;
 use qp_schema::data::DataEvent;
 use qp_schema::protocol::SessionInit;
-use qp_session::HostNotice;
 use serde_json::{json, Value};
 use support::{code, root, H};
 

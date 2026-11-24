@@ -30,8 +30,8 @@ use qp_schema::protocol::{
 };
 use qp_schema::Document;
 
-use crate::error::{ptr, PResult, E};
 use crate::session::{out, Session};
+use qp_plane::error::{ptr, PResult, E};
 
 /// Decimals of a value as the engine would print it (shortest form, at most 6).
 fn decimals_of(v: f64) -> u8 {
@@ -187,7 +187,7 @@ impl Session {
                 }
             }
         }
-        let ids = crate::apply::all_ids(doc)
+        let ids = qp_ops::apply::all_ids(doc)
             .into_iter()
             .map(str::to_owned)
             .chain(doc.findings.iter().map(|f| f.id.clone()))
@@ -404,7 +404,7 @@ impl Session {
 
     /// Whether comment `c` touches an instrument (its own, its cited items') on which the
     /// projected reader `p` has redacted facts or rewritten capsules (inside `as_reader`).
-    pub(crate) fn comment_touches_withheld(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
+    pub(crate) fn comment_touches_withheld(&self, c: &Comment, p: &qp_plane::proj::Proj) -> bool {
         // (No exemption for the reader's own person: its licence may have changed since
         // the comment was written.)
         let doc = &self.doc;
@@ -646,7 +646,7 @@ impl Session {
     /// document, a log entry or a change: [`projected_keeps_with`] and, for a reader whose
     /// view is redacted or rewritten, the structural rule of `comment_visible` (no
     /// comment touching such an instrument). Every projected path calls this.
-    pub(crate) fn projected_comment_ok(&self, c: &Comment, p: &crate::capsule::Proj) -> bool {
+    pub(crate) fn projected_comment_ok(&self, c: &Comment, p: &qp_plane::proj::Proj) -> bool {
         // (audit B13) A projection that only strips other people's audiences restricts
         // nothing: the comment goes as it is (before, the symbols' digits — `SYN02` —
         // counted as numbers and every comment naming an instrument was dropped).

@@ -20,9 +20,9 @@ use qp_schema::protocol::{Expect, FinalCheck, InitRef, LogEntry, RawLine, Role, 
 use qp_schema::Document;
 use serde_json::{json, Value};
 
-use crate::apply::replay;
 use crate::replayhost::ReplayHost;
 use crate::session::{confine, permissions, read_json, Session};
+use qp_ops::apply::replay;
 
 /// A message to send, kept as raw JSON (`send` of a transcript step).
 #[derive(Debug, Clone, PartialEq, serde::Deserialize)]
@@ -349,7 +349,7 @@ pub fn subset(expected: &Value, actual: &Value, path: &str) -> Result<(), (Strin
     match (expected, actual) {
         (Value::Object(e), Value::Object(a)) => {
             for (k, ev) in e {
-                let p = crate::error::ptr(path, k);
+                let p = qp_plane::error::ptr(path, k);
                 if ev.as_str() == Some("$absent") {
                     if let Some(av) = a.get(k) {
                         return Err((p, format!("key must be absent, got {}", trunc(av))));
@@ -378,7 +378,7 @@ pub fn subset(expected: &Value, actual: &Value, path: &str) -> Result<(), (Strin
                 ));
             }
             for (i, (ev, av)) in e.iter().zip(a).enumerate() {
-                subset(ev, av, &crate::error::ptr(path, i))?;
+                subset(ev, av, &qp_plane::error::ptr(path, i))?;
             }
             Ok(())
         }

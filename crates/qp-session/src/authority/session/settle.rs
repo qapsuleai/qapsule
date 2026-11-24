@@ -65,7 +65,7 @@ impl Session {
         self.pending_stamps = stamps;
         let changed = changed
             .into_iter()
-            .map(|id| (id, crate::values::Delta::Rebuild { from: 0 }))
+            .map(|id| (id, qp_plane::values::Delta::Rebuild { from: 0 }))
             .collect();
         self.data_changed(changed);
         match self.stamp_anchors() {
@@ -85,7 +85,7 @@ impl Session {
     /// a state change re-injects or removes the bars), the values cache follows
     /// incrementally (or is cleared on the reference path), and the change waits for
     /// `view` subscribers.
-    pub(crate) fn data_changed(&mut self, changed: Vec<(String, crate::values::Delta)>) {
+    pub(crate) fn data_changed(&mut self, changed: Vec<(String, qp_plane::values::Delta)>) {
         // (RP3/M15) The headlines' refresh compares the bars of these series only.
         self.head_state
             .dirty

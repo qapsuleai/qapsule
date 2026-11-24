@@ -10,7 +10,7 @@
 //! - the values cache advances the streaming state of every study series on the ticked
 //!   series (`push` for a new bar, `update_last` for a live revision; a correction or a
 //!   truncation recomputes those studies) and leaves every other series alone
-//!   ([`crate::values::Cache::apply_delta`]);
+//!   ([`qp_plane::values::Cache::apply_delta`]);
 //! - only the `condition` subscriptions, intents and live capsules whose condition reads
 //!   a series resting on the ticked series are evaluated; only the `view` subscriptions
 //!   of views reading such a series are told (`view_changed`).
@@ -34,12 +34,13 @@ use qp_schema::protocol::{
 };
 use qp_schema::{Condition, Document, SeriesData, SeriesSource};
 
-use crate::apply::apply_change;
-use crate::error::{ptr, PResult, E};
-use crate::expand::{expand_op, summarize_ops, Ctx};
-use crate::plane::{inject, layer_reads, DataPlane, Reader};
 use crate::session::{out, permissions, Session};
-use crate::values::{eval_condition, find_series, Delta};
+use qp_ops::apply::apply_change;
+use qp_ops::expand::{expand_op, summarize_ops, Ctx};
+use qp_ops::live::cond_ids;
+use qp_plane::error::{ptr, PResult, E};
+use qp_plane::plane::{inject, layer_reads, DataPlane, Reader};
+use qp_plane::values::{eval_condition, find_series, Delta};
 
 /// Bars of a series in `doc` (inline or injected bound bars).
 fn bars_len(doc: &Document, id: &str) -> usize {
@@ -127,7 +128,7 @@ impl Restore<'_> {
     fn rebuild(self) -> Option<Document> {
         let mut doc = self.initial.clone();
         for e in self.log {
-            crate::apply::apply_all(&mut doc, &e.changes).ok()?;
+            qp_ops::apply::apply_all(&mut doc, &e.changes).ok()?;
         }
         Some(doc)
     }
@@ -219,7 +220,7 @@ pub(crate) fn cond_blocked(plane: &DataPlane, doc: &Document, c: &Condition) -> 
     if plane.series.is_empty() || all_ready(plane) {
         return false;
     }
-    crate::values::condition_series(c)
+    qp_plane::values::condition_series(c)
         .iter()
         .any(|(_, s)| plane.gate(doc, None, s).is_some())
 }
@@ -230,7 +231,7 @@ pub(crate) fn cond_blocked(plane: &DataPlane, doc: &Document, c: &Condition) -> 
 /// edge by edge it tells the values.
 pub(crate) fn hears(plane: &DataPlane, doc: &Document, principal: &str, c: &Condition) -> bool {
     plane.series.is_empty()
-        || crate::values::condition_series(c)
+        || qp_plane::values::condition_series(c)
             .iter()
             .all(|(_, s)| plane.unentitled(doc, principal, s).is_none())
 }
@@ -244,54 +245,24 @@ fn all_ready(plane: &DataPlane) -> bool {
         .all(|bs| bs.bound.current_state() == BindingState::Ready)
 }
 
-/// Every series `c` rests on (its series and, through every study input, theirs), as
-/// [`LiveIndex::cond_info`] finds them, by lookup in `doc`.
-pub(crate) fn closure_of(doc: &Document, c: &Condition) -> Vec<String> {
-    let mut closure: Vec<String> = Vec::new();
-    for id in cond_ids(c).into_iter().flatten() {
-        let mut stack = vec![id];
-        while let Some(cur) = stack.pop() {
-            if closure.len() > 4096 || closure.iter().any(|x| x == cur) {
-                continue;
-            }
-            closure.push(cur.to_owned());
-            if let Some(SeriesSource::Study { inputs, .. }) =
-                find_series(doc, cur).map(|s| &s.source)
-            {
-                stack.extend(inputs.iter().rev().map(String::as_str));
-            }
-        }
-    }
-    closure
-}
-
-/// The series ids a condition reads (at most two).
-fn cond_ids(c: &Condition) -> [Option<&str>; 2] {
-    match c {
-        Condition::Threshold { series, .. } => [Some(series), None],
-        Condition::Compare { left, right, .. } => [Some(left), Some(right)],
-        Condition::Text { .. } => [None, None],
-    }
-}
-
 /// [`eval_condition`] from known cache slots (no lookups); `None` when a slot is
 /// missing (then the caller evaluates by id).
 #[allow(clippy::option_option)]
 #[inline]
 fn eval_slots(
-    cache: &crate::values::Cache,
+    cache: &qp_plane::values::Cache,
     c: &Condition,
     slots: [Option<usize>; 2],
 ) -> Option<Option<(bool, u64, i64)>> {
     match c {
         Condition::Threshold { op, value, .. } => {
             let l = cache.val(slots[0]?)?;
-            Some(crate::values::eval_on(*op, l, None, *value))
+            Some(qp_plane::values::eval_on(*op, l, None, *value))
         }
         Condition::Compare { op, .. } => {
             let l = cache.val(slots[0]?)?;
             let r = cache.val(slots[1]?)?;
-            Some(crate::values::eval_on(*op, l, Some(r), 0.0))
+            Some(qp_plane::values::eval_on(*op, l, Some(r), 0.0))
         }
         Condition::Text { .. } => Some(None),
     }
@@ -520,7 +491,7 @@ impl<'a> Ents<'a> {
 #[inline]
 fn eval_memo(
     rd: &Document,
-    cache: &mut crate::values::Cache,
+    cache: &mut qp_plane::values::Cache,
     c: &Condition,
     memo: &mut Option<(u64, [Option<usize>; 2])>,
 ) -> Option<(bool, u64, i64)> {

@@ -143,7 +143,7 @@ adlı sarıcılardır ve `STANDARD`'ı verir. Yansı/barındırıcıyı yukarı 
 iç alanlara yazdıkları için yeniden yazma ister; liste parametresi otoriteyi alt sistemsiz bırakıp
 aynı sonucu verir.
 
-**Yeniden yazılan öğeler (moved.py `CHANGED -`, 64; sınama yardımcıları dahil):**
+**Yeniden yazılan öğeler (moved.py `main HEAD`: `CHANGED -` 71, taşınan 565; sınama yardımcıları dahil; tek FLAG `tests/subsystems.rs` iç `#![allow]`ı — dosyanın eski satırı, `use` değişti):**
 
 | Öğe | Dosya | Ne değişti |
 |---|---|---|

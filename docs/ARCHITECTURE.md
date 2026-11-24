@@ -115,6 +115,56 @@ da aynıdır.
 - Bir değer hem akıştan hem yerel hesaptan gelebiliyorsa, tanım tektir ve sonuçlar
   test ile karşılaştırılır.
 
+## Yeni alt sistem nasıl eklenir (RF1)
+
+Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem` sözleşmesidir.
+Örnek: `qp-watch` (izleme). Sınama: `crates/qp-session/tests/extension/` (`Tally`).
+
+1. **Crate.** Oturum katmanında yeni crate; `scripts/arch-config.json` sırasında
+   `qp-subsystem`'den sonra, `qp-authority`'den önce. Bağımlılıkları `qp-subsystem`, `qp-ops`,
+   `qp-schema` ve gerekiyorsa sırada önceki alt sistemler; otoriteye bağımlı olmaz.
+2. **Durum.** Davranış durumsuz bir `static` nesnedir (`&'static dyn Subsystem`). Durum
+   otoritenin yuvalarında: `init`'te `ctx.slots.put(T)`; iki dünyada ayrı tutulacaksa
+   `put_world(PerWorld<T>)` (otorite dünya değiştirirken yuvayı da değiştirir); bağlantı başına
+   `put_conn`.
+3. **`impl Subsystem`.** Her şeyin varsayılanı vardır; alt sistem yalnız yaptığını söyler:
+   - `ops()` → `OpHandler`: işlemin açılımı (`expand` → `ChangeOp`'lar) ve politikası
+     (`allowed`, `proposable`, `agent`, `to_public`, `reader_private`). Kayıtlı işlem
+     yerleşik açılımdan önce sorulur.
+   - `phases()` + `collect` (ve `check`). Fazlar ve çağrıldıkları otorite dosyası
+     (`crates/qp-authority/src/`): `Check`, `Expand`, `Connect`, `Subscribe`, `Unsubscribe`,
+     `Adjust` → `authority/session/phases.rs`; `AfterCommit` → `authority/session/accept.rs`;
+     `AfterData` → `authority/session/settle.rs` (`Data`) ve `capsule/run.rs` (`Look`,
+     `Written`); `Proposals` → `authority/session/clock.rs`; `Settled` → `capsule/dispute.rs`;
+     `Close` çağrılmaz (protokolde kapanış iletisi yok).
+   - `queries()`, `inputs()`, `topics()`: `kind` etiketiyle kayıt; kayıtlı olan yerleşikten
+     önce sorulur (konu: yerleşik abonelikten sonra kabul/ret).
+   - `conditions()` (`ConditionKind`, canlı yol), `value_sources()` (`ValueSource`, veri
+     düzlemi), `claims()` (`ClaimKind`, itiraz hükmü).
+   - Aynı `op`/`kind`'i iki alt sistem kaydedemez (`Registry::add` hata verir).
+4. **Okuma ve yazma.** Alt sistem `ctx.view` (`SessionView`) üstünden okur. Günlüğe yalnız
+   iki yoldan yazar: işlemin açılımı ya da `ctx.out.entry(..)` (motor girdisi, yazar `qp`;
+   fazın emit adımında, istek sırasıyla, en çok `MAX_EMIT_DEPTH` derinlik). Bildirim
+   `ctx.out.notify`; o anın girdisine ek `amend` (`Moment::Look`), o satırdaki bildirim `say`
+   (`Moment::Written`).
+5. **Yeniden oynatma.** Değişimlerden çalışır: `qp_ops::apply::replay(initial, log)` alt sistem
+   kodu istemez. Alt sistemin durumu yeniden oynatmada kurulmaz; dokümanda yaşaması gereken
+   her şey değişimle yazılır.
+6. **Yansı.** Yansıya giden protokol mesajıdır. Bileşimin kurduğu her otorite (oturum,
+   yeniden oynatma barındırıcısı, yansı, görüntüleyicinin açık tarafı) aynı listeyle kurulur;
+   otoritenin doğurduğu otorite listeyi ondan devralır.
+7. **Kayıt.** `crates/qp-session/src/compose.rs` `LIST`'ine **bir satır**, ve
+   `crates/qp-session/Cargo.toml`'a bir bağımlılık satırı. Otorite crate'i değişmez.
+8. **Barındırıcı API'si.** Alt sistemin durumu `session.sub::<T>()` / `sub_mut::<T>()`
+   (yuva tipiyle); `Deref` üstünden değil.
+
+**Bilinen sınırlar.** (B-e) `amend`/`say` yanlış anda sessizce düşer; `Look`'tan önceki bir
+`amend` o bakışın girdisine karışır. (B-f) `qp_session` `Authority` ve `Subsystems`'i (ve
+`Subsystems::NONE`) dışa açar; boş listeyle kurulumu engelleyen bir kural yok. Ayrıca
+`Query`, `Topic`, `Gesture`, `Event` kapalı `qp-schema` enum'larıdır: yeni bir tür şema
+değişikliği ister (alt sistem var olan bir türü üstlenebilir). Kayıtsız alt sistem işlemi
+yazma yetkili kişiye `unsupported`, izleyiciye `forbidden` döner (B-a).
+
 ## Kod düzeni (hedef)
 
 ```

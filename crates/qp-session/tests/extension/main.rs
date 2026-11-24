@@ -19,7 +19,7 @@ use qp_session::{document_digest, Session, Subsystems, STANDARD};
 use serde_json::json;
 
 use rig::{hello, list, send, with_list};
-use tally::{TallyState, SUMMARY, TALLY};
+use tally::{is_mark, TallyState, SUMMARY, TALLY};
 
 #[test]
 fn ext_tally_counts_its_op_through_an_engine_entry() {
@@ -54,6 +54,16 @@ fn ext_tally_counts_its_op_through_an_engine_entry() {
         json!({"type":"command","id":"e","ops":[{"op":"set_emphasis","view":"main","emphasis":[]}]}),
     );
     assert_eq!(r[0]["msg"]["status"], "applied", "{r:?}");
+
+    // The registry called Tally's handler: each command entry carries its expansion's mark
+    // (the built-in expansion alone would not).
+    let marked = s
+        .log()
+        .iter()
+        .filter(|e| !e.request.is_empty())
+        .map(|e| e.changes.iter().filter(|c| is_mark(c)).count())
+        .collect::<Vec<_>>();
+    assert_eq!(marked, [1, 1, 1, 0], "set_view_range ×3, set_emphasis");
 
     // Its state (host API: the slot by type), the log, the document.
     let t = s.slots().get::<TallyState>().unwrap();

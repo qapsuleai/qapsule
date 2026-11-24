@@ -1,8 +1,9 @@
 //! `Tally`: a subsystem that lives only in this test (RF1 E, `rounds/RF1/PLAN.md` §7b).
 //!
 //! - Owns one existing op kind (`set_view_range`) through an [`OpHandler`]; its expansion is
-//!   the built-in one (`qp_ops::expand::expand_op`).
-//! - [`Phase::AfterCommit`]: counts the entries that carried its op, and writes the count
+//!   the built-in one (`qp_ops::expand::expand_op`) followed by its mark (a narrative
+//!   [`MARK`]): the mark is in the log only if the registry called Tally's handler.
+//! - [`Phase::AfterCommit`]: counts the marks in the entry (not the request), and writes the count
 //!   into the document with an engine entry (`Outbox::entry`): a narrative `tally` whose
 //!   `based_on` lists the counted seqs.
 //! - [`Phase::AfterCommit`] of its own entry: pushes it on its topic (`proposals`, which it
@@ -17,6 +18,14 @@ use qp_schema::protocol::{
 use qp_schema::Document;
 use qp_subsystem::{Moment, OpHandler, Phase, QueryHandler, SessionCtx, Subsystem, TopicHandler};
 use serde_json::json;
+
+/// The id of the narrative Tally's expansion adds (its mark).
+pub const MARK: &str = "tally-op";
+
+/// Whether `c` is Tally's mark.
+pub fn is_mark(c: &ChangeOp) -> bool {
+    matches!(c, ChangeOp::PutNarrative { narrative, .. } if narrative.id == MARK)
+}
 
 /// The summary prefix of Tally's engine entries.
 pub const SUMMARY: &str = "tally ";
@@ -55,7 +64,9 @@ impl OpHandler for SetViewRange {
         at: &str,
         ctx: &mut Ctx<'_>,
     ) -> Result<Vec<ChangeOp>, ProtocolError> {
-        qp_ops::expand::expand_op(doc, op, at, ctx)
+        let mut changes = qp_ops::expand::expand_op(doc, op, at, ctx)?;
+        changes.push(narrative(MARK, &[]));
+        Ok(changes)
     }
 }
 
@@ -103,9 +114,14 @@ impl TopicHandler for Feed {
 
 /// The narrative that carries the count.
 fn tally_item(seen: &[u64]) -> ChangeOp {
+    narrative("tally", seen)
+}
+
+/// A narrative `id` of Tally's whose `based_on` lists `seen`.
+fn narrative(id: &str, seen: &[u64]) -> ChangeOp {
     let based_on: Vec<String> = seen.iter().map(|s| format!("seq {s}")).collect();
     let narrative = serde_json::from_value(json!({
-        "id": "tally",
+        "id": id,
         "about": "main",
         "steps": [],
         "provenance": {
@@ -174,11 +190,8 @@ impl Subsystem for Tally {
             }
             return;
         }
-        let n = entry
-            .request
-            .iter()
-            .filter(|op| SET_VIEW_RANGE.owns(op))
-            .count() as u64;
+        // The marks its expansion left (none if the registry did not call its handler).
+        let n = entry.changes.iter().filter(|c| is_mark(c)).count() as u64;
         if n == 0 {
             return;
         }

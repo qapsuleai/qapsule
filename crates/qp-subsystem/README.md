@@ -11,7 +11,8 @@ qp-authority < qp-session`).
 
 **Bağımlılıklar:** `qp-schema`, `qp-plane` (veri düzlemi, değer önbelleği, hata kurucusu,
 okuyucu izdüşümü `Proj`), `qp-ops` (işlem açılımı: `Ctx`, `expand_op`, `expand_ops_with`),
-`qp-capsule` (`StoryEvent`: motorun bakışı); `serde`, `serde_json` (tel etiketleri).
+`qp-capsule` (`StoryEvent`: motorun bakışı), `qp-grammar` (`HeadlineParts`); `serde`,
+`serde_json` (tel etiketleri).
 
 **Dışa açık yüzey (`lib.rs`):**
 
@@ -21,9 +22,12 @@ okuyucu izdüşümü `Proj`), `qp-ops` (işlem açılımı: `Ctx`, `expand_op`, 
   izdüşümü `reader_proj`, veri düzlemi, piyasa, dünya, `entitled`, `param` K78, `run_kind`
   `RunKind`, yeniden oynatma konumu), `ReadView` (`SessionView`'ın okuma eki, RF1 S3.2: başlıklar,
   izdüşüm, günlük girdisinin izdüşümü, öneri önizlemesi, kapsül yaşamının okuma fonksiyonları;
-  yalnız sorgu ve girdi çağrısında), `SessionCtx { view, slots, out, cache, looks, read }`
-  (bölünmüş ödünç: değer önbelleği ve bağlantıların görünüm durumu da ödünç gelir).
-- `Slots` (`TypeId` → kutu; tek, `PerWorld<T>`, bağlantı anahtarlı), `PerWorld`.
+  yalnız sorgu, girdi ve itme çağrısında; RF1 S3.3: `item_headline_parts`, `market_for`),
+  `SessionCtx { view, slots, out, cache, looks, read, registry }` (bölünmüş ödünç: değer
+  önbelleği ve bağlantıların görünüm durumu da ödünç gelir; `registry`: itilen bir konu bir
+  sorguyu onu yanıtlayan alt sisteme otoritenin soracağı gibi sorar, RF1 S3.3).
+- `Slots` (`TypeId` → kutu; tek, `PerWorld<T>`, bağlantı anahtarlı: `put_conn`, `conn`,
+  `conn_mut`, `take_conn`, `any_conn`, `drop_conn`), `PerWorld`.
 - `Outbox` (motor girdisi `EngineEntry`, bildirim, uyandırma; fazın kendi satırında alınanlar:
   bakışın girdisine değişim `amend`, o satırda bildirim `say`). Yazma sırası derinlik
   önceliklidir; istenen girdiler en çok `MAX_EMIT_DEPTH` düzey derine yazılır.
@@ -32,11 +36,14 @@ okuyucu izdüşümü `Proj`), `qp-ops` (işlem açılımı: `Ctx`, `expand_op`, 
   `AfterData` için `Data`, `Look`, `Written`). `Close`'un çağrı noktası yok: `qp/0`'da
   kapanış iletisi yok; gelince otorite fazı, sonra `Slots::drop_conn`'u çağırır.
 - Kayıt kolları: `OpHandler` (tür `owns`, açılım + politika: `allowed`, `proposable`, `agent`
-  `AgentOp`, `to_public`, `reader_private`), `QueryHandler`, `InputHandler`, `TopicHandler`,
+  `AgentOp`, `to_public`, `reader_private`), `QueryHandler`, `InputHandler`, `TopicHandler`
+  (abonelik; RF1 S3.3 itilen konu: `pushing`, `pushes`, `push` her girdiden sonra okuyucunun
+  dünyasında, `visible`/`visible_result`, `claim_sub`, `data`; hepsinin varsayılanı var),
   `ConditionKind` (canlı yol), `ValueSource` (D3), `ClaimKind` (D1).
 - `ANY`: sorgu/girdi işleyicisinin "başkasının almadığı her tür" etiketi (okuma alt sistemi).
 - `Registry`: kayıt sırasıyla alt sistemler ve tel etiketine göre tablolar; boşken her arama
-  ıskalar, hiçbir faz çağrılmaz; `evaluates_conditions` (canlı yolun belleği atlanır).
+  ıskalar, hiçbir faz çağrılmaz; `evaluates_conditions` (canlı yolun belleği atlanır),
+  `topic_handlers` (itilen konular).
   `op_name` (işlemin tel adı).
 
 **Ne değildir:** otorite değildir (komut yolu, günlük, iki dünya `qp-authority`'de); bir alt

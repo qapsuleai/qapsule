@@ -2186,6 +2186,7 @@ dependencies = [
  "qp-schema",
  "qp-source",
  "qp-subsystem",
+ "qp-viewer",
  "qp-watch",
  "schemars",
  "serde",
@@ -2228,9 +2229,30 @@ name = "qp-subsystem"
 version = "0.0.0"
 dependencies = [
  "qp-capsule",
+ "qp-grammar",
  "qp-ops",
  "qp-plane",
  "qp-schema",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "qp-viewer"
+version = "0.0.0"
+dependencies = [
+ "qp-authority",
+ "qp-capsule",
+ "qp-compute",
+ "qp-designs",
+ "qp-facts",
+ "qp-grammar",
+ "qp-look",
+ "qp-ops",
+ "qp-plane",
+ "qp-schema",
+ "qp-source",
+ "qp-subsystem",
  "serde",
  "serde_json",
 ]

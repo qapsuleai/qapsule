@@ -3,14 +3,15 @@
 
 use qp_ops::expand::Ctx;
 use qp_plane::values::{Cache, Computed};
+use qp_schema::data::FeedKey;
 use qp_schema::protocol::{
-    ChangeOp, ClaimRef, DisputeVerdict, Gesture, Op, OutboundLine, Permissions, ProtocolError,
-    Query, QueryResult, Topic,
+    ChangeOp, ClaimRef, DisputeVerdict, Event, Gesture, Op, OutboundLine, Permissions,
+    ProtocolError, Query, QueryResult, Seq, Topic,
 };
 use qp_schema::{Condition, Document};
 use serde_json::Value;
 
-use crate::SessionCtx;
+use crate::{SessionCtx, Slots};
 
 /// How an agent-origin command may carry an op (§25.3).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -120,6 +121,62 @@ pub trait TopicHandler: Sync {
         t: &Topic,
         ctx: &mut SessionCtx<'_>,
     ) -> Result<(), ProtocolError>;
+
+    // ---- A pushed topic (RF1 S3.3; the viewer, §22): after every input the authority
+    // asks every connection it pushes to what changed. Everything has a default (a topic
+    // that only accepts subscriptions pushes nothing).
+
+    /// Whether it pushes to any connection (cheap; its state in `slots`).
+    fn pushing(&self, _slots: &Slots) -> bool {
+        false
+    }
+    /// Whether it pushes to connection `conn`.
+    fn pushes(&self, _conn: &str, _slots: &Slots) -> bool {
+        false
+    }
+    /// What changed for connection `conn` since it was last told (`all`: its first event,
+    /// right after the subscription's ack), as one event on one of its subscriptions:
+    /// `(sub, event)`; `None`: nothing to tell. Called in the connection's reader world
+    /// with the read view (`SessionCtx::read`); `seq`: the log position as that reader
+    /// receives it.
+    fn push(
+        &self,
+        _conn: &str,
+        _all: bool,
+        _seq: Seq,
+        _ctx: &mut SessionCtx<'_>,
+    ) -> Option<(String, Event)> {
+        None
+    }
+    /// A `visible` message of connection `conn` for subscription `sub` (§22.2): records
+    /// what is on screen. `None`: not its message (the authority asks the next handler).
+    ///
+    /// # Errors
+    /// `sub` is not its subscription of `conn`.
+    fn visible(
+        &self,
+        _conn: &str,
+        _sub: &str,
+        _visible: &[String],
+        _slots: &mut Slots,
+    ) -> Option<Result<(), ProtocolError>> {
+        None
+    }
+    /// The answer to the `visible` message it took: what changed for `conn` (in its reader
+    /// world, as [`TopicHandler::push`]).
+    fn visible_result(&self, _conn: &str, _ctx: &mut SessionCtx<'_>) -> Option<QueryResult> {
+        None
+    }
+    /// The subscription of `conn` that also gets a claim resting on `feeds` (besides
+    /// `claims`).
+    fn claim_sub<'s>(&self, _conn: &str, _feeds: &[FeedKey], _slots: &'s Slots) -> Option<&'s str> {
+        None
+    }
+    /// The feeds a host serves connection `conn` (its data subscriptions, §22.5; `None`:
+    /// the whole data plane).
+    fn data<'s>(&self, _conn: &str, _slots: &'s Slots) -> Option<&'s [FeedKey]> {
+        None
+    }
 }
 
 /// A condition kind the live path evaluates (RL1's programs plug in here).

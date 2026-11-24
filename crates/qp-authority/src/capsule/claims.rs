@@ -518,9 +518,7 @@ impl crate::session::Session {
                 }
                 // (RP3/M15, §22) A viewer gets the claims about its open instrument on
                 // its `viewer` subscription (it subscribes to no `claims`).
-                let viewer = self
-                    .viewer_claim_sub(&c.id, &p.evidence.feeds)
-                    .map(str::to_owned);
+                let viewer = self.push_claim_sub(&c.id, &p.evidence.feeds);
                 for s in &c.subs {
                     let to_viewer = viewer.as_deref() == Some(s.id.as_str());
                     if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) && !to_viewer {
@@ -553,8 +551,9 @@ impl crate::session::Session {
 
 /// The bound feeds series `ids` rest on in `doc` (through study inputs), sorted and
 /// unique; `None` if a series cannot be resolved (then no evidence is made: a claim whose
-/// data dependencies are unknown cannot be gated, §19.7).
-pub(crate) fn feeds_of(doc: &Document, ids: &[&str]) -> Option<Vec<qp_schema::data::FeedKey>> {
+/// data dependencies are unknown cannot be gated, §19.7); the viewer's faces too.
+#[doc(hidden)]
+pub fn feeds_of(doc: &Document, ids: &[&str]) -> Option<Vec<qp_schema::data::FeedKey>> {
     let mut out: Vec<qp_schema::data::FeedKey> = Vec::new();
     let mut stack: Vec<&str> = ids.to_vec();
     let mut seen = 0usize;

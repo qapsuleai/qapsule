@@ -104,6 +104,27 @@ impl Slots {
         self.conns
             .insert((TypeId::of::<T>(), conn.to_owned()), Box::new(v));
     }
+    /// The state of type `T` of connection `conn`.
+    #[must_use]
+    pub fn conn<T: 'static>(&self, conn: &str) -> Option<&T> {
+        self.conns
+            .get(&(TypeId::of::<T>(), conn.to_owned()))?
+            .downcast_ref()
+    }
+    /// Whether any connection holds a state of type `T`.
+    #[must_use]
+    pub fn any_conn<T: 'static>(&self) -> bool {
+        let t = TypeId::of::<T>();
+        self.conns
+            .range((t, String::new())..)
+            .next()
+            .is_some_and(|((k, _), _)| *k == t)
+    }
+    /// Takes the state of type `T` of connection `conn` out.
+    pub fn take_conn<T: 'static>(&mut self, conn: &str) -> Option<T> {
+        let b = self.conns.remove(&(TypeId::of::<T>(), conn.to_owned()))?;
+        b.downcast().ok().map(|b| *b)
+    }
     /// The state of type `T` of connection `conn`, to change.
     pub fn conn_mut<T: 'static>(&mut self, conn: &str) -> Option<&mut T> {
         self.conns

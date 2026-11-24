@@ -17,13 +17,12 @@
    }
   },
   "file.soft": {
-   "count": 33,
+   "count": 32,
    "items": {
-    "crates/qp-authority/src/capsule/claims.rs": 632,
+    "crates/qp-authority/src/capsule/claims.rs": 631,
     "crates/qp-authority/src/capsule/comments.rs": 672,
     "crates/qp-authority/src/capsule/dispute.rs": 758,
     "crates/qp-authority/src/capsule/reader.rs": 639,
-    "crates/qp-authority/src/replica/tape.rs": 691,
     "crates/qp-capsule/src/engine.rs": 624,
     "crates/qp-capsule/src/outcome.rs": 762,
     "crates/qp-capsule/src/realize/en.rs": 641,
@@ -58,12 +57,12 @@
    "count": 173,
    "items": {
     "crates/qp-authority/src/authority/session/command.rs::command": 300,
-    "crates/qp-authority/src/authority/session/create.rs::build_with_keys": 155,
-    "crates/qp-authority/src/authority/session/dispatch.rs::handle_resolved": 196,
+    "crates/qp-authority/src/authority/session/create.rs::build_with_keys": 154,
+    "crates/qp-authority/src/authority/session/dispatch.rs::handle_resolved": 193,
     "crates/qp-authority/src/authority/session/events.rs::entry_events_in": 151,
     "crates/qp-authority/src/authority/session/intake.rs::handle_raw": 94,
     "crates/qp-authority/src/authority/session/intake.rs::resolve_selectors": 115,
-    "crates/qp-authority/src/authority/session/presence.rs::subscribe": 85,
+    "crates/qp-authority/src/authority/session/presence.rs::subscribe": 84,
     "crates/qp-authority/src/authority/session/worlds.rs::accept": 105,
     "crates/qp-authority/src/authority/session/worlds.rs::direct_two_worlds": 130,
     "crates/qp-authority/src/authority/session/worlds.rs::propose_two_worlds": 157,
@@ -84,11 +83,7 @@
     "crates/qp-authority/src/data/live/eval.rs::bar_command": 121,
     "crates/qp-authority/src/data/live/eval.rs::eval_conditions_live": 104,
     "crates/qp-authority/src/replica/judge.rs::judge": 134,
-    "crates/qp-authority/src/replica/tape.rs::run_viewer": 178,
     "crates/qp-authority/src/replica/tape.rs::run_with": 157,
-    "crates/qp-authority/src/replica/viewer.rs::slice": 87,
-    "crates/qp-authority/src/replica/viewer/open.rs::open_scene_with": 98,
-    "crates/qp-authority/src/replica/viewer/updates.rs::viewer_compute": 149,
     "crates/qp-capsule/src/comment/check.rs::validate": 239,
     "crates/qp-capsule/src/engine/run.rs::run_bar": 240,
     "crates/qp-capsule/src/realize/en.rs::event_clause": 92,
@@ -220,6 +215,10 @@
     "crates/qp-source/src/livebar/push.rs::push": 159,
     "crates/qp-source/src/livebar/push.rs::push_trade": 105,
     "crates/qp-source/src/replay.rs::new": 92,
+    "crates/qp-viewer/src/tape.rs::run_viewer": 178,
+    "crates/qp-viewer/src/viewer.rs::slice": 87,
+    "crates/qp-viewer/src/viewer/open.rs::open_scene_with": 98,
+    "crates/qp-viewer/src/viewer/updates.rs::viewer_compute": 123,
     "crates/qp-voice/src/marla/head.rs::core": 260,
     "crates/qp-voice/src/marla/since.rs::latest_clause": 175,
     "crates/qp-voice/src/marla/why.rs::why_numbers": 190,
@@ -233,9 +232,9 @@
    }
   },
   "lint.allow": {
-   "count": 20,
+   "count": 21,
    "items": {
-    "qp-authority": 33,
+    "qp-authority": 29,
     "qp-capsule": 14,
     "qp-cli": 2,
     "qp-compute": 27,
@@ -254,6 +253,7 @@
     "qp-replayhost": 3,
     "qp-shellcore": 17,
     "qp-source": 5,
+    "qp-viewer": 4,
     "qp-voice": 12
    }
   },

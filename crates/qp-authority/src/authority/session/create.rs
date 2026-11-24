@@ -140,7 +140,6 @@ impl Session {
             full_to_pub: Vec::new(),
             pub_at: Vec::new(),
             prop_map: BTreeMap::new(),
-            viewers: BTreeMap::new(),
             viewer_batch: false,
             coin_flip,
             coin_flip_for: BTreeMap::new(),

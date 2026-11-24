@@ -3,6 +3,7 @@
 //! them; RF1 S3.2, audit-s32 B2).
 
 pub use qp_authority::tape::*;
+pub use qp_viewer::tape::ViewerOutcome;
 
 /// Runs the scenario with the replica's data `lag` events behind the authority's.
 ///
@@ -25,5 +26,5 @@ pub fn run_with(lag: usize, provider: &serde_json::Value) -> Result<Outcome, Str
 /// # Errors
 /// The scenario cannot be set up.
 pub fn run_viewer(lag: usize) -> Result<ViewerOutcome, String> {
-    qp_authority::tape::run_viewer(lag, (crate::STANDARD, crate::FOLLOWER))
+    qp_viewer::tape::run_viewer(lag, (crate::STANDARD, crate::FOLLOWER))
 }

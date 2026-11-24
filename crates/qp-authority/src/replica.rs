@@ -27,7 +27,6 @@ mod judge;
 
 #[doc(hidden)]
 pub mod tape;
-pub mod viewer;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -313,6 +312,13 @@ impl Replica {
     pub fn start(&mut self, doc: Document, seq: Seq) {
         self.load(doc, seq);
         self.reconcile();
+    }
+
+    /// [`Replica::start`] from a borrowed document (cloned here: one clone instance for
+    /// every caller, RF1 S3.3; the viewer's open side starts from its slice).
+    #[doc(hidden)]
+    pub fn start_from(&mut self, doc: &Document, seq: Seq) {
+        self.start(doc.clone(), seq);
     }
 
     /// Sets the display policy.

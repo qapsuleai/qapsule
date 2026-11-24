@@ -28,11 +28,12 @@ pub mod replica;
 pub use authority::agent;
 pub(crate) use authority::session;
 pub(crate) use capsule::{claims, comments, dispute, public, story};
+#[doc(hidden)]
+pub use claims::feeds_of;
 pub use comments::CommentAudit;
 pub(crate) use data::live;
 #[doc(hidden)]
 pub use replica::tape;
-pub use replica::viewer;
 
 pub use story::CoinFlipRule;
 

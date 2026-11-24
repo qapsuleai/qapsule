@@ -68,10 +68,9 @@ impl Session {
             Topic::View { view } => {
                 qp_ops::expand::need_view(&self.doc, view, "/topic/view")?;
             }
-            Topic::Viewer { limit, width } => {
-                self.viewer_check(ci, *limit, *width)?;
-            }
-            Topic::Changes { .. }
+            // (RF1 S3.3) The viewer subsystem checks its topic (`qp-viewer`).
+            Topic::Viewer { .. }
+            | Topic::Changes { .. }
             | Topic::Proposals {}
             | Topic::Attention { principal: None }
             | Topic::Intents {}

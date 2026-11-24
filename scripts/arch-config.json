@@ -54,6 +54,7 @@
         "qp-watch",
         "qp-read",
         "qp-authority",
+        "qp-viewer",
         "qp-replayhost",
         "qp-session"
       ],
@@ -64,6 +65,7 @@
         "qp-watch",
         "qp-read",
         "qp-authority",
+        "qp-viewer",
         "qp-replayhost",
         "qp-session"
       ]

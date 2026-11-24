@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 
 use qp_capsule::sentence::StudyMemo;
+use qp_grammar::HeadlineParts;
 use qp_ops::HeadlineSource;
 use qp_plane::capidx::ItemMemo;
 use qp_plane::error::PResult;
@@ -221,4 +222,12 @@ pub trait ReadView: SessionView {
     /// The ledger rows with a key, retracted capsules left out (key, meaning, time,
     /// realized): the engine's when the authority runs one, else the document's.
     fn ledger_now(&self) -> Vec<(String, MeaningKind, i64, bool)>;
+
+    // ---- The viewer's pushes (RF1 S3.3, `qp-viewer`).
+
+    /// The headline pieces of the capsule of a listed item, in `lang` (a face design's
+    /// headline template).
+    fn item_headline_parts(&self, item: &CapsuleItem, lang: Language) -> Option<HeadlineParts>;
+    /// The market status as `principal` gets it (§24, §20.5).
+    fn market_for(&self, principal: &str) -> Option<MarketStatus>;
 }

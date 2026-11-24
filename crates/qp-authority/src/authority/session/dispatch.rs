@@ -79,21 +79,18 @@ impl Session {
             }
             ClientMsg::Subscribe { id, topic } => {
                 let (principal, lang) = (self.conns[ci].principal.clone(), self.lang_of(ci));
-                let viewer = match &topic {
-                    Topic::Viewer { limit, width } => Some((*limit, *width)),
-                    _ => None,
-                };
                 let stories = matches!(topic, Topic::Stories { .. });
                 let r = self.as_reader(&principal, lang, |s| s.dispatch_subscribe(ci, &id, topic));
                 match r {
-                    Ok(()) => {
+                    Ok(pushed) => {
                         let mut a = ack(id.clone(), AckStatus::Subscribed);
                         if let ServerMsg::Ack { resolved: r, .. } = &mut a {
                             *r = resolved;
                         }
                         let mut v = vec![out(conn, a)];
-                        if let Some((limit, width)) = viewer {
-                            v.extend(self.viewer_start(ci, &id, limit, width));
+                        // (§22) A pushed topic's first event (the viewer's feed).
+                        if let Some(h) = pushed.filter(|h| h.pushes(conn, &self.slots)) {
+                            v.extend(self.push_lines(h, ci, true));
                         }
                         if stories {
                             self.stories_start(ci, &id);
@@ -194,7 +191,7 @@ impl Session {
                 if !permissions(self.conns[ci].role).read {
                     return vec![err_line(conn, Some(id), forbidden_read())];
                 }
-                self.visible_msg(ci, id, &sub, visible)
+                self.dispatch_visible(ci, id, &sub, &visible)
             }
             // (R4, §21) Answered by a replay host (`crate::replayhost`) before it gets
             // here; a bare authority has no replay source.

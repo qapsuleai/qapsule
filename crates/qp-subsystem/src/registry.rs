@@ -184,6 +184,11 @@ impl Registry {
         find(&self.topics, &kind_of(t)?)
     }
 
+    /// The topic handlers, in registration order (pushed topics, §22: RF1 S3.3).
+    pub fn topic_handlers(&self) -> impl Iterator<Item = &'static dyn TopicHandler> + '_ {
+        self.topics.iter().map(|(_, h)| *h)
+    }
+
     /// The kind of claim `c`, if a subsystem owns it.
     #[must_use]
     pub fn claim(&self, c: &ClaimRef) -> Option<&'static dyn ClaimKind> {

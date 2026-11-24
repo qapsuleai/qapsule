@@ -1,7 +1,8 @@
 //! The viewer (RP3/M15, K48; `docs/PROTOCOL.md` §22): the device is a viewer, not a
 //! compute site.
 //!
-//! - **Authority side** ([`Session`]): a `viewer` subscription and the `visible` message.
+//! - **Authority side** (the viewer subsystem, [`VIEWER`]; RF1 S3.3): a `viewer`
+//!   subscription and the `visible` message, as a pushed topic of the authority.
 //!   For every viewer connection the authority keeps what the device has been sent and,
 //!   after every input (message, data step), pushes only what changed: the reader's feed
 //!   (its audience, at most `limit`), the **ready faces** of the capsules on screen (the
@@ -24,6 +25,7 @@ mod open;
 mod updates;
 
 pub use open::*;
+pub use updates::{Viewer, VIEWER};
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -31,16 +33,16 @@ use qp_grammar::{compile, depth, CompileOptions, DataProvider, SeriesKind};
 use qp_schema::capsule::GlyphSpec;
 use qp_schema::data::{DataEvent, FeedKey};
 use qp_schema::protocol::{
-    CapsuleItem, ErrorCode, Event, Language, OpenDepth, Opening, OutboundLine, Query, QueryResult,
-    ServerMsg, TrustMark, ViewState, ViewerFace, ViewerItem, ViewerOpen, ViewerUpdate,
+    CapsuleItem, ErrorCode, Event, Language, OpenDepth, Opening, Query, QueryResult, ServerMsg,
+    TrustMark, ViewState, ViewerFace, ViewerItem, ViewerOpen, ViewerUpdate,
 };
 use qp_schema::scene::SceneDesc;
 use qp_schema::{Bar, Capsule, Document, Fact, Finding, Point, Series, SeriesSource, View};
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::replica::{document_digest, fnv1a64, Replica, Shown};
-use crate::session::{out, Session};
+use qp_authority::replica::{document_digest, fnv1a64, Replica, Shown};
+use qp_authority::Session;
 use qp_plane::error::E;
 
 /// Feed length of a `viewer` subscription without `limit`.

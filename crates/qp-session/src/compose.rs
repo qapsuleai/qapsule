@@ -13,18 +13,20 @@ use qp_subsystem::Subsystem;
 
 /// The standard subsystems, in registration order: one line per subsystem.
 static LIST: &[&dyn Subsystem] = &[
-    &qp_watch::WATCH, // izleme niyeti (RF1 S3.1)
-    &qp_read::READ,   // okuma ve sunum (RF1 S3.2)
+    &qp_watch::WATCH,   // izleme niyeti (RF1 S3.1)
+    &qp_read::READ,     // okuma ve sunum (RF1 S3.2)
+    &qp_viewer::VIEWER, // görüntüleyici bağlantıları (RF1 S3.3)
 ];
 
 /// The standard subsystems every authority of the composition is built with.
 pub const STANDARD: qp_authority::Subsystems = qp_authority::Subsystems::new(LIST);
 
 /// The standard subsystems of a follower (a replica's authority, a viewer's open side):
-/// [`STANDARD`] without the reading subsystem. A follower takes no `query` or `input` (no
-/// connection talks to it; it follows a host's log and is read through its own methods),
-/// so the reading subsystem would never be called there; leaving it out keeps its code out
-/// of the shell's WASM package (RF1 S3.2: +1.38 MB otherwise; the WASM ±2 % gate).
+/// [`STANDARD`] without the reading and the viewer subsystems. A follower takes no `query`,
+/// `input` or `subscribe` (no connection talks to it; it follows a host's log and is read
+/// through its own methods), so neither would ever be called there; leaving them out keeps
+/// their code out of the shell's WASM package (RF1 S3.2: +1.38 MB otherwise; the WASM ±2 %
+/// gate; RF1 S3.3 measured the viewer's share: `rounds/RF1/experiments/rewritten.md`).
 pub const FOLLOWER: qp_authority::Subsystems = qp_authority::Subsystems::new(FOLLOWER_LIST);
 
 /// [`FOLLOWER`]'s list.
@@ -250,8 +252,8 @@ impl Replica {
 /// The device's side of the open capsule, its replica with the follower's subsystems
 /// ([`FOLLOWER`]).
 #[derive(Debug)]
-pub struct OpenSide(qp_authority::viewer::OpenSide);
-wraps!(OpenSide, qp_authority::viewer::OpenSide);
+pub struct OpenSide(qp_viewer::OpenSide);
+wraps!(OpenSide, qp_viewer::OpenSide);
 
 impl OpenSide {
     /// The open side of `open` at log position `seq`, its replica's own data from
@@ -264,7 +266,7 @@ impl OpenSide {
         provider: qp_source::MemoryProvider,
         calendar: Option<qp_schema::Calendar>,
     ) -> Self {
-        Self(qp_authority::viewer::OpenSide::new(
+        Self(qp_viewer::OpenSide::new(
             principal, open, seq, provider, calendar, FOLLOWER,
         ))
     }
@@ -275,17 +277,19 @@ mod lists {
     use super::{FOLLOWER, STANDARD};
     use qp_subsystem::Subsystem as _;
 
-    /// (RF1 S3.2, audit-s32 B2) The follower's list is the standard list without the
-    /// reading subsystem, in the same order: a subsystem added to `LIST` is added to
-    /// `FOLLOWER_LIST` too unless it is a reading of a connection (queries, gestures).
+    /// (RF1 S3.2, audit-s32 B2; S3.3) The follower's list is the standard list without the
+    /// reading and the viewer subsystems, in the same order: a subsystem added to `LIST` is
+    /// added to `FOLLOWER_LIST` too unless it serves a connection (queries, gestures, a
+    /// pushed topic).
     #[test]
-    fn the_follower_list_is_the_standard_list_without_reading() {
+    fn the_follower_list_is_the_standard_list_without_reading_and_viewers() {
         let names = |l: qp_authority::Subsystems| -> Vec<&str> {
             l.list().iter().map(|s| s.name()).collect()
         };
         let mut want = names(STANDARD);
-        want.retain(|n| *n != qp_read::READ.name());
+        want.retain(|n| *n != qp_read::READ.name() && *n != qp_viewer::VIEWER.name());
         assert_eq!(names(FOLLOWER), want);
         assert!(names(STANDARD).contains(&"read"));
+        assert!(names(STANDARD).contains(&"viewer"));
     }
 }

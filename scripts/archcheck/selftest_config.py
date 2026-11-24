@@ -101,6 +101,19 @@ def run(CFG, check):
 
     cases += [("lint.allow spread onto a new crate passes", spread("qp-n", newc) == 0),
               ("D1: lint.allow spread onto an existing crate fails", spread("qp-a") >= 1)]
+    # S3.0: an exception moved onto a crate this change introduces (same id, rule, max)
+    exc = {"id": "X", "rule": "crate.lines", "item": "qp-a", "max": 100, "status": "onaylandı (K85)"}
+    old_x = dict(base_cfg, exceptions=[exc])
+    newcr = dict(base_cfg, layers=[dict(l, crates=l["crates"] + ["qp-n"]) if i == 0 else l
+                                   for i, l in enumerate(base_cfg["layers"])])
+    cases += [
+        ("an exception moved to a new crate (same id, rule, max) passes",
+         fails(dict(newcr, exceptions=[dict(exc, item="qp-n")]), old_cfg=old_x) == 0),
+        ("an exception moved to an existing crate fails",
+         fails(dict(base_cfg, exceptions=[dict(exc, item="qp-b")]), old_cfg=old_x) == 1),
+        ("an exception moved to a new crate with a raised max fails",
+         fails(dict(newcr, exceptions=[dict(exc, item="qp-n", max=101)]), old_cfg=old_x) == 1),
+    ]
     for label, hit in cases:
         ok &= check(f"config-diff: {label}", hit)
     ok &= check("config-diff: D5: base = HEAD is refused, HEAD~1 accepted", _base_check())

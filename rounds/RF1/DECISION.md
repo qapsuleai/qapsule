@@ -87,3 +87,20 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   çizgisine al.** `arch-baseline.json`'a `crates/qp-ops/src/expand/op.rs::expand_op` 101 kalemi
   ve `lint.allow` `qp-ops` 21 girer (dağıtıcının `too_many_lines` izni). `main`'e göre borç
   küçülüyor: `expand_op` 903 → 101, `lint.allow` toplamı azalıyor. Kalem mandallıdır.
+- **S3.0, İ3'ün yeri.** `qp-session`'ın içeriği saf taşımayla `qp-authority` oldu (otorite
+  çekirdeği, `PLAN.md` §3.3 satır 5); `qp-session` artık ince bileşim (satır 8). Arkin'in
+  karar noktasındaki 1. cevabı (`qp-authority` için tek adlı istisna; tavan ölçülen değer,
+  13.000'i geçemez, mandallı) gereği `crate.lines` istisnası İ3 aynı içerikle
+  `qp-authority`'ye taşındı. Tavan gevşemedi: ölçülen değer 20.437 (S2 sonu), tavan aynı.
+  13.000 sınırı S3.2/S3.3 dalgaları (okuma, yansı, görüntüleyici, barındırma) çıkınca
+  uygulanır; o zamana kadar tavan yalnız aşağı iner. Bu bir gevşetme değil, aynı istisnanın
+  crate adı değişen öğeye taşınmasıdır.
+- **S3.0, araç izni (Arkin'in kararı, 2026-11-24).** Round oturumu sordu:
+  (A) taban çizgisi yazımı (`conform.rs` kalemi `crates/qp-session/src/conform.rs`'e taşınır;
+  `committed`, `build_with_keys` ve eski `conform.rs` kalemleri sıkılaşır; yeni borç yok);
+  (B) İ3 istisnasının `qp-session` → `qp-authority` yer değiştirmesi (aynı kural, aynı tavan
+  20.437). Arkin'in cevabı: **"İkisine de onay."** (B) için `config-diff`'e "yeni crate'e taşınan
+  istisna" tanıması eklenir: aynı kural, aynı tavan, eski crate artık yok, yeni crate bu
+  değişiklikte yapılandırmaya girmiş. Öz-sınamasıyla gelir. Bu round'un kalan taşımalarında
+  (S3.1–S3.3) aynı türden taban çizgisi yazımları yapılabilir: yalnız taşıma ve sıkılaşma, yeni
+  borç yok.

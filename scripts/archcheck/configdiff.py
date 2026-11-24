@@ -136,10 +136,20 @@ def judge_config(old, new, v):
 def _judge_exceptions(old, new, v):
     oe = {(e["rule"], e["item"]): e for e in old.get("exceptions", [])}
     ne = {(e["rule"], e["item"]): e for e in new.get("exceptions", [])}
-    for k in sorted(oe.keys() - ne.keys()):
-        v.ok("removed", f"exception {oe[k].get('id', '')} [{k[0]}] {k[1]}")
+    gone = oe.keys() - ne.keys()
+    fresh = crates_of(new) - crates_of(old)
+    moved_from = set()
     for k in sorted(ne.keys() - oe.keys()):
+        src = _moved_exception(oe, gone - moved_from, ne[k], fresh)
+        if src is not None:
+            # A crate split moves an exception onto a crate this change introduces: same
+            # id, same rule, the old item gone, ceiling not raised (RF1 DECISION.md, S3.0).
+            moved_from.add(src)
+            v.ok("moved", f"exception {ne[k].get('id', '')} [{k[0]}] {src[1]} -> {k[1]} (new crate; max {ne[k].get('max', 'none')})")
+            continue
         v.loosen(k[1], f"new exception {ne[k].get('id', '')} [{k[0]}] {k[1]}", *_entry_text(ne[k]))
+    for k in sorted(gone - moved_from):
+        v.ok("removed", f"exception {oe[k].get('id', '')} [{k[0]}] {k[1]}")
     for k in sorted(ne.keys() & oe.keys()):
         a, b = oe[k], ne[k]
         if "max" in a and ("max" not in b or b["max"] > a["max"]):
@@ -154,6 +164,21 @@ def _judge_exceptions(old, new, v):
     for c in sorted(no.keys() & oo.keys()):
         if no[c].get("layer") != oo[c].get("layer"):
             v.loosen(c, f"layer override {c}: {oo[c].get('layer')} -> {no[c].get('layer')}", *_entry_text(no[c]))
+
+
+def _moved_exception(oe, gone, e, fresh):
+    """The old exception key `e` moved from: same id and rule, the old one gone, `e`'s item
+    on a crate this change introduces, and its `max` not above the old one's."""
+    if _crate(e["item"]) not in fresh:
+        return None
+    for k in sorted(gone):
+        a = oe[k]
+        if a.get("id") != e.get("id") or a["rule"] != e["rule"]:
+            continue
+        if "max" in a and ("max" not in e or e["max"] > a["max"]):
+            continue
+        return k
+    return None
 
 
 def crates_of(cfg):

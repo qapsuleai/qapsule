@@ -1,0 +1,18 @@
+[package]
+name = "qp-subsystem"
+description = "Qapsule subsystem contract: the one interface between the authority and its subsystems (Subsystem, SessionView, SessionCtx, phases, state slots, op handlers, query/input/topic/condition/value-source/claim-kind registration, the registry)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-ops = { version = "0.0.0", path = "../qp-ops" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

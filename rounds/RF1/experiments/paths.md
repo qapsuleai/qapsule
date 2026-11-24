@@ -97,3 +97,25 @@ Satır sayımıyla ≈ 160 bildirim (modül başına; `x::*` glob yeniden dışa
 - `qp-plane::sentences` (3): `sentence_pair_memo`, `story_validity`, `story_fact_ids`
 - `qp-plane::values` (23): `Delta`, `first_bar`, `Cache`, `clear`, `get`, `slot_of`, `val`, `touched_now`, `gen`, `forget`, `begin_tick`, `apply_delta`, `find_series`, `bar_series`, `bars_of`, `main_output`, `study_outputs`, `values`, `condition_series`, `cmp`, `eval_condition`, `eval_on`, `holds`
 - `qp-plane::values::computed` (3): `Computed`, `len`, `main_values`
+
+## S3.0 — `qp-authority`, `qp-subsystem`, `qp-session` bileşimi
+
+Çağıranların yolu değişmedi: `qp-session` artık bileşimdir ve `qp-authority`'nin kök yüzeyini aynı
+adlarla bilerek yeniden dışa aktarır (`crates/qp-session/src/lib.rs`). `qp-host`, `qp-mcp`,
+`qp-shellcore`, `qp-cli`, `qp-wasm`, `qp-render` dokunulmadı.
+
+| Eski | Yeni |
+|---|---|
+| `qp_session::…` (crate `crates/qp-session`, otorite) | `qp_authority::…` (crate `crates/qp-authority`); `qp_session::…` aynı adla yeniden dışa aktarım |
+| `qp_session::{Session, permissions, confine, default_limits, read_json, Replica, ReplicaOptions, document_digest, view_digest, ReplayHost, demo_init, hit_scene, screen_frame, explain_scene, HIT_WIDTH, HIT_HEIGHT, CoinFlipRule, CommentAudit, CompileOptions, SettleRequest, MAX_DISPUTE_DIGESTS, MAX_OPEN_DISPUTES, MAX_DISPUTES_PER_CONN}` ve modüller `capsule`, `replica`, `viewer`, `replayhost`, `agent`, `voices`, `tape` (gizli) | aynı yol; tanım `qp_authority::…`'da |
+| `qp_session::conform` (otorite crate'inde `host/conform.rs`) | aynı yol; tanım bileşimde (`crates/qp-session/src/conform.rs`, saf taşıma). `qp_authority::conform` yok |
+| `qp_session::agent::AgentOp` | aynı yol; tanım `qp_subsystem::AgentOp` (`agent.rs`'te `pub use`) |
+| (crate içi) `session::{confine, read_json}` (`authority/session.rs`) | `authority/session/files.rs`; `session.rs`'te `pub use files::{confine, read_json}` (dış yol aynı) |
+| (crate içi) iki `op_name` kopyası (`authority/session.rs`, `authority/agent.rs`) | `qp_subsystem::op_name` (tek kopya) |
+| `qp_plane::values::Computed::new` (`pub(super)`) | `pub` (değer kaynağı `ValueSource` kurabilsin) |
+
+**Yeni yollar:**
+
+- `qp_subsystem::{Subsystem, SessionView, ConnView, RunKind, SessionCtx, Slots, PerWorld, Outbox, EngineEntry, Phase, Moment, OpHandler, AgentOp, QueryHandler, InputHandler, TopicHandler, ConditionKind, ValueSource, ClaimKind, Registry, op_name}`
+- `qp_authority::Session::{register (gizli), next_wake, host_adjust (gizli)}`; `impl qp_subsystem::SessionView for Session`
+- `qp_session::conform` modülü bileşimin kendi modülü (`pub mod conform`)

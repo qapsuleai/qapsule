@@ -1,37 +1,35 @@
 # qp-session
 
-**Başvuru otoritesi** `qp/0` alan protokolü için (`docs/PROTOCOL.md`). `Session` bir belgeyi,
-günlüğünü, bağlantıları, abonelikleri, önerileri ve varlığı tutar; her gelen ileti
-`Session::handle_raw` sınırından geçer (boyut sınırı, ayrıştırma, JSON işaretçili şema
-denetimi, işleme). Belgeyi değiştiren her şey komut yolundan geçer. Hesapları `qp-compute`
-ile koşar, kapsül motorunu bağlar, görünümü `qp-grammar` ile sahneye derler. Saat `clock`
-iletisiyle gelir; rastgelelik yok.
+**Bileşim** (`docs/CONCEPTS.md` "Bileşim"): `qp/0` otoritesinin dışa açık yüzü. Otorite
+çekirdeği `qp-authority`'dedir ve hiçbir alt sistemi tanımaz; standart alt sistemler
+(izleme, okuma, görüntüleyici) buraya birer kayıt satırıyla girer (`rounds/RF1/PLAN.md`
+§3.3 satır 8, §7). RF1 S3.0'da kayıt boştur; ilk kayıt satırı S3.1'de (`qp-watch`) gelir.
 
-**Katman:** oturum (`docs/ENGINEERING.md` §2).
+**Katman:** oturum (`docs/ENGINEERING.md` §2); katman içi sırada en üstte
+(`qp-plane < qp-ops < qp-subsystem < qp-authority < qp-session`).
 
-**Bağımlılıklar:** `qp-ops` (işlemler), `qp-plane` (veri düzlemi, değer önbelleği, hata
-kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-facts`,
-`qp-capsule`, `qp-voice`, `qp-grammar`, `qp-look`, `qp-glyph`, `qp-designs`, `qp-source`;
-`schemars`, `serde`, `serde_json`, `serde_path_to_error`, `tempfile`.
+**Bağımlılıklar:** `qp-authority`. Sınamalar ve örnekler için (`dev-dependencies`):
+`qp-schema`, `qp-source`, `qp-capsule`, `qp-compute`, `qp-grammar`, `qp-look`, `qp-designs`,
+`qp-ops`, `qp-plane`; `serde`, `serde_json`, `tempfile`.
 
-**Dışa açık yüzey (`lib.rs`):** `Session`, `permissions`, `confine`; `Replica`,
-`ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; `hit_scene`,
-`screen_frame`, `explain_scene`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
-`conform`, `agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
-`ENGINE_PRINCIPAL`, `DocProvider`, `profile_for`, `canon_document`, `thresholds` `qp-ops`'ta;
-`DataError`, `HostNotice`, `did_you_mean`, `edit_distance`, `headparts` `qp-plane`'de.
+**Dışa açık yüzey (`lib.rs`):** `qp-authority`'nin kök yüzeyinin bilerek yapılmış yeniden
+dışa aktarımı, aynı adlarla: `Session`, `permissions`, `confine`, `default_limits`,
+`read_json`; `Replica`, `ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`,
+`demo_init`; `hit_scene`, `screen_frame`, `explain_scene`, `HIT_WIDTH`, `HIT_HEIGHT`;
+`CoinFlipRule`, `CommentAudit`, `CompileOptions`, `SettleRequest`, `MAX_DISPUTE_DIGESTS`,
+`MAX_OPEN_DISPUTES`, `MAX_DISPUTES_PER_CONN`; modüller `capsule`, `replica`, `viewer`,
+`replayhost`, `conform`, `agent`, `voices`, `tape` (gizli). Çağıranlar (`qp-host`, `qp-mcp`,
+`qp-shellcore`, `qp-cli`, `qp-wasm`, `qp-render`) yollarını değiştirmez.
 
-**Düzen (`src/`; her klasörün kendi `README.md`'si var):**
+**Kural:** `Deref` (S3.1'de `Session(Authority)` yeni tipiyle gelecek) yalnız bugünkü çağrı
+yerlerini korumak içindir. **Yeni kod `Deref`'e yaslanmaz, `sub::<T>()` / `sub_mut::<T>()`
+kullanır** (`rounds/RF1/DECISION.md`, küçük notlar).
 
-- `authority/` — otorite ve komut yolu: `Session` (`session/`), ajan politikası.
-- `capsule/` — kapsül yaşamı: motor bağlama, iddialar, itiraz, yorumlar, izleme eşleşmesi.
-- `data/` — canlı yol, bağ sorguları.
-- `read/` — sorgu, anlamsal okuma, önizleme, açıklama, etkileşim.
-- `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).
-- `host/` — yeniden oynatma barındırıcısı (`replayhost`) ve uygunluk koşucusu (`conform`).
+**Düzen:** `src/lib.rs` (yalnız yeniden dışa aktarımlar); `tests/` otoritenin bütünleşme
+sınamaları (S1 karakterizasyonu `tests/charac`), `examples/` yazı dökümü üreticileri. İkisi
+de dışa açık yolu (`qp_session::…`) sınar.
 
-**Ne değildir:** kabuk, uyarlayıcı (CLI/MCP/WASM), kapsül motoru, veri kaynağı, çizici.
+**Ne değildir:** otorite değildir (komut yolu, günlük, iki dünya `qp-authority`'de); alt
+sistem değildir; alt sistem sözleşmesi değildir (`qp-subsystem`).
 
-**Bilinen borç:** crate bütçenin üstünde (`crate.lines`, bütçe 12 bin) — İ3; RF1 S3
-dalgaları alt sistemlere böler (`rounds/RF1/PLAN.md` §3.3).
-`tests/` 39 dosya (`dir.files`). `qp-session → qp-source` bugün `layer.up` (İ1 ile kalkar).
+**Bilinen borç:** `tests/` 39 dosya (`dir.files`).

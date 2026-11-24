@@ -50,11 +50,13 @@
       "crates": [
         "qp-plane",
         "qp-ops",
+        "qp-authority",
         "qp-session"
       ],
       "order": [
         "qp-plane",
         "qp-ops",
+        "qp-authority",
         "qp-session"
       ]
     },
@@ -148,7 +150,7 @@
     {
       "id": "İ3",
       "rule": "crate.lines",
-      "item": "qp-session",
+      "item": "qp-authority",
       "max": 20437,
       "max_note": "RF1 S2 sonu değeri (qp-ops, qp-plane ayrıldı; K89: net satır eklenmez)",
       "status": "onaylandı (K85, 2026-11-22)",

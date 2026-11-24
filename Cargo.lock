@@ -1870,6 +1870,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-authority"
+version = "0.0.0"
+dependencies = [
+ "qp-calendar",
+ "qp-capsule",
+ "qp-compute",
+ "qp-designs",
+ "qp-facts",
+ "qp-glyph",
+ "qp-grammar",
+ "qp-look",
+ "qp-ops",
+ "qp-plane",
+ "qp-schema",
+ "qp-source",
+ "qp-voice",
+ "schemars",
+ "serde",
+ "serde_json",
+ "serde_path_to_error",
+ "tempfile",
+]
+
+[[package]]
 name = "qp-calendar"
 version = "0.0.0"
 dependencies = [
@@ -2115,23 +2139,18 @@ dependencies = [
 name = "qp-session"
 version = "0.0.0"
 dependencies = [
- "qp-calendar",
+ "qp-authority",
  "qp-capsule",
  "qp-compute",
  "qp-designs",
- "qp-facts",
- "qp-glyph",
  "qp-grammar",
  "qp-look",
  "qp-ops",
  "qp-plane",
  "qp-schema",
  "qp-source",
- "qp-voice",
- "schemars",
  "serde",
  "serde_json",
- "serde_path_to_error",
  "tempfile",
 ]
 

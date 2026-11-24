@@ -84,8 +84,8 @@ use qp_schema::capsule::{Audience, EvidenceFamily, LicenseClass, Stage, Story, U
 use qp_schema::data::FeedKey;
 use qp_schema::protocol::{
     CapsuleDetail, CapsuleInit, CapsuleItem, CapsuleSentence, ChangeOp, ClaimEvidence, ClaimRef,
-    DisputeVerdict, ErrorCode, Event, EvidenceAccess, Language, LogEntry, Maturity,
-    OutboundLine, QueryResult, Seq, ServerComment, ServerMsg, Topic,
+    DisputeVerdict, ErrorCode, Event, EvidenceAccess, Language, LogEntry, Maturity, OutboundLine,
+    QueryResult, Seq, ServerComment, ServerMsg, Topic,
 };
 use qp_schema::{
     Author, Bar, Capsule, CapsuleState, Condition, Depth, Document, Fact, Finding, Provenance,
@@ -437,7 +437,11 @@ impl Session {
     /// (RP4/T6) The bar series "now" is read on for a story on `series` (as
     /// [`Session::now_bar`] chooses it: the reading document's when it has bars, else
     /// `doc`'s).
-    pub(crate) fn item_series<'d>(&'d self, doc: &'d Document, series: &str) -> Option<&'d qp_schema::Series> {
+    pub(crate) fn item_series<'d>(
+        &'d self,
+        doc: &'d Document,
+        series: &str,
+    ) -> Option<&'d qp_schema::Series> {
         let has = |s: &&qp_schema::Series| s.bars().is_some_and(|b| !b.is_empty());
         bar_series(rd!(self), series)
             .filter(has)

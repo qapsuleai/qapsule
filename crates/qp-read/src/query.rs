@@ -6,18 +6,18 @@ use std::collections::BTreeMap;
 
 use qp_schema::protocol::{
     AtBar, AttentionState, Candidate, Collection, Description, ErrorCode, Gesture, Op,
-    OutboundLine, PanelInfo, Query, QueryResult, Range, Reduce, Reduced, ScreenInfo, SeriesValues,
-    Target, Topic, Viewport, PROTOCOL_VERSION,
+    OutboundLine, PanelInfo, Query, QueryResult, Reduce, Reduced, ScreenInfo, SeriesValues, Target,
+    Topic, Viewport, PROTOCOL_VERSION,
 };
 use qp_schema::{CapsuleState, Document, Mark, Series, SeriesSource, View};
 use serde_json::Value;
 
 use crate::rd::{Conn, Rd};
 use qp_ops::apply::{all_ids, find_collection};
+use qp_ops::bounds::resolve_range;
 use qp_ops::expand::{need_finding, need_series, need_view, view_bar_series};
 use qp_ops::present::{present, profile_for};
 use qp_ops::provider::DocProvider;
-use qp_ops::bounds::resolve_range;
 use qp_ops::select::{finding_about, finding_bar};
 use qp_plane::error::{invalid, ptr, PResult, E};
 use qp_plane::values::values;
@@ -152,7 +152,7 @@ impl Rd<'_> {
                             .collect(),
                         principals: self.principals.to_vec(),
                         role,
-                        permissions: permissions(role),
+                        permissions: self.conns[ci].permissions.clone(),
                     },
                 })
             }
@@ -228,7 +228,8 @@ impl Rd<'_> {
                         .saturating_sub(i64::try_from(w).unwrap_or(i64::MAX))
                 });
                 let mut entries: Vec<_> = self
-                    .log
+                    .v
+                    .log()
                     .iter()
                     .filter(|e| after_seq.is_none_or(|s| e.seq > s))
                     .filter(|e| since_t.is_none_or(|t| e.at >= t))
@@ -382,7 +383,7 @@ impl Rd<'_> {
                         viewport,
                         focus: self.st.focus.get(principal).cloned(),
                         at: conn.and_then(|c| c.last_at),
-                        directives: self.directives.get(principal).cloned().unwrap_or_default(),
+                        directives: self.v.directives(principal).cloned().unwrap_or_default(),
                     },
                 })
             }

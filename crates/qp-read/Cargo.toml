@@ -11,12 +11,15 @@ publish.workspace = true
 qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-designs = { version = "0.0.0", path = "../qp-designs" }
+qp-glyph = { version = "0.0.0", path = "../qp-glyph" }
 qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
 qp-look = { version = "0.0.0", path = "../qp-look" }
 qp-ops = { version = "0.0.0", path = "../qp-ops" }
 qp-plane = { version = "0.0.0", path = "../qp-plane" }
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
 qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
+qp-voice = { version = "0.0.0", path = "../qp-voice" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }

@@ -287,6 +287,13 @@ impl Session {
         &mut self.slots
     }
 
+    /// (RF1 S3.2) Runs `f` with a call context (the composition's façade methods that read
+    /// through a subsystem: `qp_session::Session::scene_for`).
+    #[doc(hidden)]
+    pub fn with_subsystems<R>(&mut self, f: impl FnOnce(&mut SessionCtx<'_>) -> R) -> R {
+        self.with_ctx(|_, ctx| f(ctx))
+    }
+
     /// Runs `f` with the registry and a call context: a split borrow of the authority
     /// (the read view; the slots, the outbox, the values cache and the connections' view
     /// state taken out for the call and put back).

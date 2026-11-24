@@ -14,8 +14,8 @@ use qp_schema::capsule::{MeaningKind, Story};
 use qp_schema::data::FeedKey;
 use qp_schema::market::MarketStatus;
 use qp_schema::protocol::{
-    AttentionDirective, CapsuleItem, CapsuleVoice, ChangeOp, ClaimEvidence, Language,
-    LogEntry, OutboundLine, Permissions, Principal, Profile, Query, QueryResult, Range, Role, Seq,
+    AttentionDirective, CapsuleItem, CapsuleVoice, ChangeOp, ClaimEvidence, Language, LogEntry,
+    OutboundLine, Permissions, Principal, Profile, Query, QueryResult, Range, Role, Seq,
     ServerComment, StoryRow, Surface, SurfaceKind, Topic, Viewport,
 };
 use qp_schema::{Calendar, Capsule, Document, Fact, Series};

@@ -24,8 +24,8 @@ use std::path::Path;
 use qp_schema::protocol::{
     AckStatus, AttentionDirective, ChangeOp, ClientMsg, DocumentRef, ErrorCode, Event, Limits,
     LogEntry, Op, OutboundLine, Permissions, Principal, Profile, Proposal, ProposalState,
-    ProtocolError, Role, Seq, ServerMsg, SessionInit, Surface, Topic,
-    Viewport, WriteMode, PROTOCOL_VERSION,
+    ProtocolError, Role, Seq, ServerMsg, SessionInit, Surface, Topic, Viewport, WriteMode,
+    PROTOCOL_VERSION,
 };
 use qp_schema::{Author, CapsuleState, Document};
 use serde_json::Value;

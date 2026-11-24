@@ -13,6 +13,7 @@ use qp_subsystem::Subsystem;
 /// The standard subsystems, in registration order: one line per subsystem.
 static LIST: &[&dyn Subsystem] = &[
     &qp_watch::WATCH, // izleme niyeti (RF1 S3.1)
+    &qp_read::READ,   // okuma ve sunum (RF1 S3.2)
 ];
 
 /// The standard subsystems every authority of the composition is built with.
@@ -119,6 +120,42 @@ impl Session {
     #[must_use]
     pub fn into_inner(self) -> qp_authority::Session {
         self.0
+    }
+
+    /// Compiles a view as connection `conn` sees it: `view_id` (default: the connection's
+    /// current view) at the connection's visible range of that view, unless `opts.range`
+    /// is set (the reading subsystem's `hit` range).
+    ///
+    /// # Errors
+    /// Unknown connection or view; compile errors as in `Session::scene`.
+    pub fn scene_for(
+        &mut self,
+        conn: &str,
+        view_id: Option<&str>,
+        opts: &qp_authority::CompileOptions,
+    ) -> Result<qp_schema::scene::SceneDesc, qp_schema::protocol::ProtocolError> {
+        let (vid, range) = self
+            .0
+            .with_subsystems(|ctx| qp_read::scene_for_range(ctx, conn, view_id))?;
+        let mut o = opts.clone();
+        if o.range.is_none() {
+            o.range = range;
+        }
+        self.0.scene(&vid, &o)
+    }
+
+    /// [`qp_read::explain_scene`] of view `view_id` compiled with `opts`.
+    ///
+    /// # Errors
+    /// As `Session::scene`.
+    pub fn explain(
+        &mut self,
+        view_id: &str,
+        opts: &qp_authority::CompileOptions,
+    ) -> Result<String, qp_schema::protocol::ProtocolError> {
+        let view = qp_ops::expand::need_view(self.0.document(), view_id, "/view")?.clone();
+        let scene = self.0.scene(view_id, opts)?;
+        Ok(qp_read::explain_scene(&view, &scene))
     }
 }
 

@@ -16,13 +16,15 @@ use qp_grammar::compile::{MAX_DIM, MIN_HEIGHT, MIN_WIDTH};
 use qp_grammar::{compile, depth, gesture};
 use qp_schema::protocol::{
     ErrorCode, Gesture, Interaction, OpenDepth, Opening, OutboundLine, Presentation, QueryResult,
-    SurfaceKind, SurfaceTarget, Target, Viewport,
+    SurfaceTarget, Target, Viewport,
 };
 use qp_schema::scene::SceneDesc;
 use qp_schema::{Depth, Series, View};
 
-use crate::reading::{hit_scene, screen_frame, without_layers};
+use crate::look_of;
 use crate::rd::Rd;
+use crate::reading::{hit_scene, screen_frame};
+use qp_ops::bounds::without_layers;
 use qp_ops::expand::{need_view, view_bar_series, view_bar_series_any};
 use qp_ops::present::present;
 use qp_ops::provider::{warm, DocProvider};
@@ -273,7 +275,7 @@ impl Rd<'_> {
             at: out.at,
             viewport: out.viewport,
             opening: out.opening.map(|o| *o),
-            state: c.look.clone(),
+            state: self.looks[ci].clone(),
         };
         Ok((
             QueryResult::Interaction {
@@ -667,15 +669,6 @@ impl Rd<'_> {
                 ))
             }
         }
-    }
-
-    /// The surface kind of connection `ci` (for tests and benchmarks).
-    #[doc(hidden)]
-    pub fn surface_kind(&self, conn: &str) -> Option<SurfaceKind> {
-        self.conns
-            .iter()
-            .find(|c| c.id == conn)
-            .map(|c| c.surface.kind)
     }
 }
 

@@ -5,16 +5,14 @@
 //! (`Session::scene_as_reader`, the host's compile of a view or a proposal's preview as a
 //! reader reads, stays in the authority: it is not a query.)
 
-use qp_grammar::{compile, CompileOptions};
-use qp_schema::protocol::{
-    ChangeOp, ErrorCode, PreviewView, ProposalState, ProtocolError, QueryResult,
-};
-use qp_schema::scene::SceneDesc;
-use qp_schema::{Document, View};
+use qp_grammar::compile;
+use qp_schema::protocol::{ChangeOp, ErrorCode, PreviewView, ProposalState, QueryResult};
+use qp_schema::Document;
 
-use crate::reading::{HIT_HEIGHT, HIT_WIDTH};
 use crate::rd::Rd;
-use qp_ops::expand::{need_proposal, need_view};
+use crate::reading::{HIT_HEIGHT, HIT_WIDTH};
+use qp_ops::bounds::gated_view;
+use qp_ops::expand::need_proposal;
 use qp_ops::provider::{warm, DocProvider};
 use qp_plane::error::{PResult, E};
 use qp_plane::plane::reading_doc;

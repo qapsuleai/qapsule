@@ -33,8 +33,8 @@ mod explain;
 mod interact;
 mod preview;
 mod query;
-mod reading;
 mod rd;
+mod reading;
 
 /// The connection's look (`ViewState.look`; absent or unknown: `r4`): the viewer's rule.
 pub(crate) fn look_of(look: &qp_schema::protocol::ViewState) -> &'static qp_look::look::Look {
@@ -42,8 +42,8 @@ pub(crate) fn look_of(look: &qp_schema::protocol::ViewState) -> &'static qp_look
 }
 
 pub use explain::explain_scene;
-pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 pub use rd::{scene_for_range, ReadState};
+pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 
 use qp_schema::protocol::{Gesture, OutboundLine, ProtocolError, Query, QueryResult};
 use qp_subsystem::{InputHandler, QueryHandler, SessionCtx, Subsystem, ANY};

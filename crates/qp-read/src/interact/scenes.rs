@@ -20,9 +20,8 @@ impl Rd<'_> {
         // its sizes (the replica's `viewer::face_scene` / `open_scene` do the same).
         // (R5/m17-int) So is a voice other than `r4`: the face and the card speak from it.
         let voice = self.looks[ci].voice.clone();
-        let styled = self.looks[ci].face.is_some()
-            || self.looks[ci].look.is_some()
-            || voice.is_some();
+        let styled =
+            self.looks[ci].face.is_some() || self.looks[ci].look.is_some() || voice.is_some();
         let look = look_of(&self.looks[ci]);
         // (R5/M20) An open capsule design other than `r4` builds the capsule depth.
         let open = self.looks[ci].open.clone();
@@ -95,8 +94,7 @@ impl Rd<'_> {
         {
             if let Some(given) = pr.view.as_ref() {
                 if !rd!(self).views.iter().any(|x| x.id == given.id) {
-                    let id = self.conns[ci]
-                        .look
+                    let id = self.looks[ci]
                         .view
                         .clone()
                         .unwrap_or_else(|| given.id.clone());
@@ -286,8 +284,7 @@ impl Rd<'_> {
     /// else the surface's initial range (§4.6), clamped to the current slots.
     pub(super) fn chart_range(&self, ci: usize, view: &View) -> Option<(u64, u64)> {
         let c = &self.conns[ci];
-        let saved = c
-            .look
+        let saved = self.looks[ci]
             .range
             .as_ref()
             .filter(|r| r.view == view.id)
@@ -411,8 +408,7 @@ impl Rd<'_> {
                     marked_bar: s.and_then(|x| x.2),
                 }
             }
-            let design =
-                qp_designs::transitions::by_name(self.looks[ci].transition.as_deref());
+            let design = qp_designs::transitions::by_name(self.looks[ci].transition.as_deref());
             (design.shared)(&side(from, before.as_ref()), &side(to, after.as_ref()))
         };
         let frame = after.is_some().then(|| {

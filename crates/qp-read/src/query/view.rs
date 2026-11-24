@@ -220,8 +220,8 @@ impl Rd<'_> {
                 .collect(),
             capsules,
             last_close,
-            view_state: (c.look != qp_schema::protocol::ViewState::default())
-                .then(|| c.look.clone()),
+            view_state: (self.look_at(c) != &qp_schema::protocol::ViewState::default())
+                .then(|| self.look_at(c).clone()),
         })
     }
 

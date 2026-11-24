@@ -10,9 +10,9 @@ use qp_plane::plane::DataPlane;
 use qp_plane::proj::Proj;
 use qp_plane::values::Cache;
 use qp_schema::protocol::{
-    CapsuleItem, CapsuleVoice, ErrorCode, Language, LogEntry, OutboundLine, Principal, Profile,
-    Query, QueryResult, Range, Role, ServerComment, StoryRow, Surface, SurfaceKind, Target,
-    ViewState, Viewport,
+    CapsuleItem, CapsuleVoice, ErrorCode, Language, LogEntry, OutboundLine, Permissions, Principal,
+    Profile, Query, QueryResult, Range, Role, ServerComment, StoryRow, Surface, SurfaceKind,
+    Target, ViewState, Viewport,
 };
 use qp_schema::{Capsule, Document, Fact, Series};
 use qp_subsystem::{SessionCtx, SessionView};
@@ -51,6 +51,7 @@ pub(crate) struct Conn {
     pub id: String,
     pub principal: String,
     pub role: Role,
+    pub permissions: Permissions,
     pub surface: Surface,
     pub profile: Profile,
     pub viewports: BTreeMap<String, (u64, u64)>,
@@ -97,11 +98,9 @@ pub(crate) fn reading<R>(
         None => &mut own,
     };
     let mut r = Rd::new(ctx.view, ctx.cache, ctx.looks, st);
-    let ci = r
-        .conns
-        .iter()
-        .position(|c| c.id == conn)
-        .ok_or_else(|| E::new(ErrorCode::NotFound, format!("unknown connection `{conn}`")).build())?;
+    let ci = r.conns.iter().position(|c| c.id == conn).ok_or_else(|| {
+        E::new(ErrorCode::NotFound, format!("unknown connection `{conn}`")).build()
+    })?;
     f(&mut r, ci)
 }
 
@@ -139,6 +138,7 @@ impl<'a> Rd<'a> {
                     id: c.id.to_owned(),
                     principal: c.principal.to_owned(),
                     role: c.role,
+                    permissions: c.permissions,
                     surface: c.hello.clone(),
                     profile: c.profile.clone(),
                     viewports: r.viewports,
@@ -178,6 +178,12 @@ impl<'a> Rd<'a> {
         );
     }
 
+    /// The view state of connection `c`.
+    pub(crate) fn look_at(&self, c: &Conn) -> &ViewState {
+        let ci = self.conns.iter().position(|x| x.id == c.id).unwrap_or(0);
+        &self.looks[ci]
+    }
+
     // The authority's functions a reading calls (through the view).
 
     /// The language of connection `ci`'s capsule sentences.
@@ -186,9 +192,6 @@ impl<'a> Rd<'a> {
     }
     pub(crate) fn principal(&self, id: &str) -> Option<&Principal> {
         self.v.principal(id)
-    }
-    pub(crate) fn seq(&self) -> u64 {
-        self.v.seq()
     }
     pub(crate) fn project_entry(&self, e: &LogEntry, p: &Proj, lang: Language) -> LogEntry {
         self.v.project_entry(e, p, lang)
@@ -208,7 +211,12 @@ impl<'a> Rd<'a> {
         self.v
             .stories_query(ci, instrument, series, range, page, path)
     }
-    pub(crate) fn story_rows(&self, series: &str, principal: &str, lang: Language) -> Vec<StoryRow> {
+    pub(crate) fn story_rows(
+        &self,
+        series: &str,
+        principal: &str,
+        lang: Language,
+    ) -> Vec<StoryRow> {
         self.v.story_rows(series, principal, lang)
     }
     pub(crate) fn row_stamp(&self, row: &StoryRow, lang: Language) -> Option<String> {
@@ -281,6 +289,9 @@ impl<'a> Rd<'a> {
     pub(crate) fn fact_by_id(&self, id: &str) -> Option<&'a Fact> {
         let v: &'a dyn SessionView = self.v;
         v.fact_by_id(id)
+    }
+    pub(crate) fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+        self.v.ledger_now()
     }
     pub(crate) fn comments_for(&self, principal: &str) -> Vec<ServerComment> {
         self.v.comments_for(principal)

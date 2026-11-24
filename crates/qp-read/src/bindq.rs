@@ -71,11 +71,20 @@ impl Rd<'_> {
                 .anchor_t
                 .or_else(|| self.plane.series.get(&id).and_then(|bs| bs.bound.anchor_t));
             let position = if state == BindingState::Ready {
+                // (RF1 S3.2) The store's position read without its prefix-digest memo
+                // (the plane is the authority's, read through the view): the same digest
+                // (`FeedStore::digest_u64` is `data_digest_u64` of all bars).
                 self.plane
                     .series
-                    .get_mut(&id)
-                    .and_then(|bs| bs.bound.store.as_mut())
-                    .map(qp_source::FeedStore::position)
+                    .get(&id)
+                    .and_then(|bs| bs.bound.store.as_ref())
+                    .map(|s| qp_schema::data::DataPosition {
+                        feed: s.feed().clone(),
+                        bars: s.bars().len() as u64,
+                        last_t: s.bars().last().map(|b| b.t),
+                        seq: s.seq(),
+                        digest: qp_schema::data::data_digest(s.bars()),
+                    })
             } else {
                 None
             };

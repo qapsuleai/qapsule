@@ -1,6 +1,14 @@
 //! Capsule, evidence and ledger queries.
 
-use super::*;
+use std::collections::BTreeMap;
+
+use qp_capsule::sentence::StudyMemo;
+use qp_plane::error::PResult;
+use qp_plane::sentences::story_fact_ids;
+use qp_schema::protocol::{CapsuleItem, LedgerRow, QueryResult};
+use qp_schema::Fact;
+
+use crate::rd::Rd;
 
 impl Rd<'_> {
     #[allow(clippy::too_many_lines)]

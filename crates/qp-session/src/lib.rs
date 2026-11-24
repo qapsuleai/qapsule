@@ -23,10 +23,10 @@ pub mod viewer;
 pub use compose::{OpenSide, ReplayHost, Replica, Session, STANDARD};
 pub use qp_authority::{capsule, voices};
 pub use qp_authority::{
-    confine, default_limits, demo_init, document_digest, explain_scene, hit_scene, permissions,
-    read_json, screen_frame, view_digest, CoinFlipRule, CommentAudit, CompileOptions,
-    ReplicaOptions, SettleRequest, HIT_HEIGHT, HIT_WIDTH, MAX_DISPUTES_PER_CONN,
-    MAX_DISPUTE_DIGESTS, MAX_OPEN_DISPUTES,
+    confine, default_limits, demo_init, document_digest, permissions, read_json, view_digest,
+    CoinFlipRule, CommentAudit, CompileOptions, ReplicaOptions, SettleRequest,
+    MAX_DISPUTES_PER_CONN, MAX_DISPUTE_DIGESTS, MAX_OPEN_DISPUTES,
 };
+pub use qp_read::{explain_scene, hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 /// The authority alone (no subsystem), and the subsystem list type.
 pub use qp_authority::{Session as Authority, Subsystems};

@@ -9,13 +9,13 @@ use qp_schema::protocol::{
 };
 use qp_schema::{Fact, SeriesSource};
 
-use crate::session::Session;
+use crate::rd::Rd;
 use qp_ops::expand::need_series;
 use qp_plane::error::{PResult, E};
 use qp_plane::plane::binding_of;
 use qp_plane::values::{find_series, values};
 
-impl Session {
+impl Rd<'_> {
     /// `no_entitlement` / `no_data` at `path` if connection `ci`'s principal may not read
     /// the data of `series` now (§18.3).
     pub(crate) fn gate_read(&self, ci: usize, series: &str, path: &str) -> PResult<()> {

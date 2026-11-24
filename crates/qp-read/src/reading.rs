@@ -14,7 +14,7 @@ use qp_schema::protocol::{
 use qp_schema::scene::{SceneDesc, ScenePanel};
 use qp_schema::{Series, View};
 
-use crate::session::{Conn, Session};
+use crate::rd::{Conn, Rd};
 use qp_ops::expand::{need_view, view_bar_series};
 use qp_ops::provider::{warm, DocProvider};
 use qp_plane::error::{PResult, E};
@@ -148,7 +148,7 @@ pub fn hit_scene(scene: &SceneDesc, x: f64, y: f64, times: &[i64]) -> HitInfo {
     out
 }
 
-impl Session {
+impl Rd<'_> {
     /// The grammar compiler's data source over this session's document and values cache
     /// (study values computed with `qp-compute` and cached first).
     pub fn provider(&mut self) -> DocProvider<'_> {
@@ -412,17 +412,4 @@ impl Session {
     pub(crate) fn warm_values(&mut self) {
         warm(rd!(self), &mut self.cache);
     }
-}
-
-/// `view` without the layers at `skip` (indexes).
-pub(crate) fn without_layers<T>(view: &View, skip: &BTreeMap<usize, T>) -> View {
-    let mut v = view.clone();
-    v.layers = view
-        .layers
-        .iter()
-        .enumerate()
-        .filter(|(i, _)| !skip.contains_key(i))
-        .map(|(_, l)| l.clone())
-        .collect();
-    v
 }

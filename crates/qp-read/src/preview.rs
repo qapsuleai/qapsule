@@ -2,9 +2,8 @@
 //! copy of the asker's document, as its acceptance would expand it now; the changes and a
 //! scene summary of every view it adds or changes. Nothing is written.
 //!
-//! [`Session::scene_as_reader`] (host side, the MCP `render` tool) compiles a view — or a
-//! proposal's preview of it — as a connection's reader reads (its projection, its
-//! world).
+//! (`Session::scene_as_reader`, the host's compile of a view or a proposal's preview as a
+//! reader reads, stays in the authority: it is not a query.)
 
 use qp_grammar::{compile, CompileOptions};
 use qp_schema::protocol::{
@@ -14,34 +13,14 @@ use qp_schema::scene::SceneDesc;
 use qp_schema::{Document, View};
 
 use crate::reading::{HIT_HEIGHT, HIT_WIDTH};
-use crate::session::Session;
+use crate::rd::Rd;
 use qp_ops::expand::{need_proposal, need_view};
 use qp_ops::provider::{warm, DocProvider};
 use qp_plane::error::{PResult, E};
 use qp_plane::plane::reading_doc;
 use qp_plane::values::Cache;
 
-impl Session {
-    /// (§18.3) View `view` of `doc` as `asker` may draw it: layers whose data it may not
-    /// read left out; a view whose bar series it may not read refused (as `hit`).
-    fn gated_view(&self, doc: &Document, view: &View, asker: &str, path: &str) -> PResult<View> {
-        let mut blocked = std::collections::BTreeMap::new();
-        for (i, l) in view.layers.iter().enumerate() {
-            if self.plane.gate_layer(doc, Some(asker), l).is_some() {
-                blocked.insert(i, ());
-            }
-        }
-        if blocked.is_empty() {
-            return Ok(view.clone());
-        }
-        if let Some(bs) = qp_ops::expand::view_bar_series_any(doc, view) {
-            if let Some(b) = self.plane.gate(doc, Some(asker), &bs.id) {
-                return Err(b.error(&bs.id, path));
-            }
-        }
-        Ok(crate::reading::without_layers(view, &blocked))
-    }
-
+impl Rd<'_> {
     /// The document after accepting pending proposal `pid` now (as connection `ci`'s
     /// reader would), its reading document and the changes. Nothing is written.
     fn preview_doc(
@@ -60,9 +39,9 @@ impl Session {
             .build());
         }
         let asker = self.conns[ci].principal.clone();
-        let acc = self.accept_expand(pid, None, &asker, None, self.seq() + 1)?;
-        let rd = reading_doc(&acc.doc, &self.plane).unwrap_or_else(|| acc.doc.clone());
-        Ok((acc.doc, rd, acc.changes))
+        let (doc, changes) = self.v.accept_preview(pid, &asker)?;
+        let rd = reading_doc(&doc, self.plane).unwrap_or_else(|| doc.clone());
+        Ok((doc, rd, changes))
     }
 
     pub(crate) fn preview(
@@ -102,7 +81,7 @@ impl Session {
             }
             let asker = self.conns[ci].principal.clone();
             // (§18.3) Only what the asker may read is drawn and described.
-            let explain = match self.gated_view(&doc, v, &asker, "/query/proposal") {
+            let explain = match gated_view(self.plane, &doc, v, &asker, "/query/proposal") {
                 Err(e) => format!(
                     "view {}: not readable by you ({})",
                     v.id,
@@ -116,7 +95,7 @@ impl Session {
                     &DocProvider::new(&rd, &cache).with_headlines(&self.headlines),
                     &opts,
                 ) {
-                    Ok(scene) => crate::explain_scene(&gv, &scene),
+                    Ok(scene) => crate::explain::explain_scene(&gv, &scene),
                     Err(e) => format!("view {}: does not compile: {e:?}", v.id),
                 },
             };
@@ -130,65 +109,6 @@ impl Session {
             proposal: pid.to_owned(),
             changes,
             views,
-        })
-    }
-
-    /// (R5B, §25.6) Compiles view `view_id` as connection `conn`'s reader reads it (its
-    /// projection and world, `on_behalf` for an agent); with `proposal`, on that pending
-    /// proposal's preview. For the host (the MCP `render` tool); nothing is written.
-    ///
-    /// # Errors
-    /// Unknown connection, view or proposal; a proposal that is not pending; compile
-    /// errors.
-    pub fn scene_as_reader(
-        &mut self,
-        conn: &str,
-        view_id: &str,
-        proposal: Option<&str>,
-        opts: &CompileOptions,
-    ) -> Result<SceneDesc, ProtocolError> {
-        let ci = self
-            .conns
-            .iter()
-            .position(|c| c.id == conn)
-            .ok_or_else(|| {
-                E::new(ErrorCode::NotFound, format!("unknown connection `{conn}`")).build()
-            })?;
-        let principal = self.conns[ci].principal.clone();
-        let lang = self.lang_of(ci);
-        self.as_reader(&principal, lang, |s| match proposal {
-            None => {
-                let view = need_view(&s.doc, view_id, "/view")?.clone();
-                let gv = s.gated_view(&s.doc, &view, &principal, "/view")?;
-                warm(rd!(s), &mut s.cache);
-                compile(
-                    &gv,
-                    &DocProvider::new(rd!(s), &s.cache).with_headlines(&s.headlines),
-                    opts,
-                )
-                .map_err(|e| {
-                    E::new(ErrorCode::Invalid, format!("view `{view_id}`: {e:?}"))
-                        .at("/view")
-                        .build()
-                })
-            }
-            Some(pid) => {
-                let (doc, rd, _) = s.preview_doc(ci, pid, "/proposal")?;
-                let view = need_view(&rd, view_id, "/view")?;
-                let view = s.gated_view(&doc, view, &principal, "/view")?;
-                let mut cache = Cache::default();
-                warm(&rd, &mut cache);
-                compile(
-                    &view,
-                    &DocProvider::new(&rd, &cache).with_headlines(&s.headlines),
-                    opts,
-                )
-                .map_err(|e| {
-                    E::new(ErrorCode::Invalid, format!("view `{view_id}`: {e:?}"))
-                        .at("/view")
-                        .build()
-                })
-            }
         })
     }
 }

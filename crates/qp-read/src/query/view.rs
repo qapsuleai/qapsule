@@ -3,7 +3,7 @@
 
 use super::*;
 
-impl Session {
+impl Rd<'_> {
     pub(crate) fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
         let bars = rd!(self)
             .series
@@ -350,12 +350,12 @@ impl Session {
                     )
                     .build());
                 }
-                self.input_counter += 1;
+                self.st.input_counter += 1;
                 let principal = self.conns[ci].principal.clone();
                 let c = &mut self.conns[ci];
-                c.last_input = self.input_counter;
+                c.last_input = self.st.input_counter;
                 c.last_at = Some(self.clock);
-                self.focus.insert(
+                self.st.focus.insert(
                     principal,
                     Target {
                         layer: None,
@@ -383,11 +383,11 @@ impl Session {
             from_bar: nf,
             to_bar: nt,
         };
-        self.input_counter += 1;
+        self.st.input_counter += 1;
         let c = &mut self.conns[ci];
         c.viewports.insert(view.id.clone(), (nf, nt));
         c.current = Some(vp.clone());
-        c.last_input = self.input_counter;
+        c.last_input = self.st.input_counter;
         c.last_at = Some(self.clock);
         let principal = c.principal.clone();
         let events = self.viewport_events(&principal, &vp);

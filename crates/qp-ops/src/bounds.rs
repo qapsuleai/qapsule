@@ -1,13 +1,16 @@
 //! Bounds of a reading request (RF1 S3.2: moved from the authority's `read/query.rs`, used
 //! by both the reading subsystem `qp-read` and the authority): a target's ids and bar
-//! order, a range's bar indexes.
+//! order, a range's bar indexes; a view as a reader may draw it.
+
+use std::collections::BTreeMap;
 
 use qp_schema::protocol::{ErrorCode, Range, Target};
-use qp_schema::Document;
+use qp_schema::{Document, View};
 
 use crate::apply::{all_ids, find_collection};
 use crate::expand::{need_series, need_view};
 use qp_plane::error::{invalid, ptr, PResult, E};
+use qp_plane::plane::DataPlane;
 
 /// Checks target `t` against `doc`: its view, series and item exist; its bars are in order.
 ///
@@ -101,4 +104,47 @@ pub fn resolve_range(r: Option<&Range>, t: &[i64], path: &str) -> PResult<(usize
         (Some(a), Some(b)) if a <= b => Ok((a, b)),
         _ => Err(empty()),
     }
+}
+
+/// (§18.3) View `view` of `doc` as `asker` may draw it: layers whose data it may not
+/// read left out; a view whose bar series it may not read refused (as `hit`).
+///
+/// # Errors
+/// The view's bar series is not readable by `asker`.
+pub fn gated_view(
+    plane: &DataPlane,
+    doc: &Document,
+    view: &View,
+    asker: &str,
+    path: &str,
+) -> PResult<View> {
+    let mut blocked = BTreeMap::new();
+    for (i, l) in view.layers.iter().enumerate() {
+        if plane.gate_layer(doc, Some(asker), l).is_some() {
+            blocked.insert(i, ());
+        }
+    }
+    if blocked.is_empty() {
+        return Ok(view.clone());
+    }
+    if let Some(bs) = crate::expand::view_bar_series_any(doc, view) {
+        if let Some(b) = plane.gate(doc, Some(asker), &bs.id) {
+            return Err(b.error(&bs.id, path));
+        }
+    }
+    Ok(without_layers(view, &blocked))
+}
+
+/// `view` without the layers at `skip` (indexes).
+#[must_use]
+pub fn without_layers<T>(view: &View, skip: &BTreeMap<usize, T>) -> View {
+    let mut v = view.clone();
+    v.layers = view
+        .layers
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| !skip.contains_key(i))
+        .map(|(_, l)| l.clone())
+        .collect();
+    v
 }

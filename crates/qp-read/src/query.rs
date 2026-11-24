@@ -12,7 +12,7 @@ use qp_schema::protocol::{
 use qp_schema::{CapsuleState, Document, Mark, Series, SeriesSource, View};
 use serde_json::Value;
 
-use crate::session::{permissions, Conn, Session};
+use crate::rd::{Conn, Rd};
 use qp_ops::apply::{all_ids, find_collection};
 use qp_ops::expand::{need_finding, need_series, need_view, view_bar_series};
 use qp_ops::present::{present, profile_for};
@@ -123,7 +123,7 @@ fn reduce(vals: &[Option<f64>], t: &[i64], from: usize, how: Reduce) -> Reduced 
     }
 }
 
-impl Session {
+impl Rd<'_> {
     #[allow(clippy::too_many_lines)]
     pub(crate) fn query(&mut self, ci: usize, q: &Query) -> PResult<QueryResult> {
         let qp = "/query";
@@ -150,7 +150,7 @@ impl Session {
                                 )
                             })
                             .collect(),
-                        principals: self.principals.clone(),
+                        principals: self.principals.to_vec(),
                         role,
                         permissions: permissions(role),
                     },
@@ -256,7 +256,7 @@ impl Session {
                 let asker = &self.conns[ci].principal;
                 for e in &mut entries {
                     if let Some(ev) = e.evidence.as_mut() {
-                        *ev = crate::claims::for_principal(&self.doc, &self.plane, asker, ev);
+                        *ev = self.v.evidence_for(asker, ev);
                     }
                 }
                 Ok(QueryResult::Log { entries })
@@ -380,7 +380,7 @@ impl Session {
                     attention: AttentionState {
                         principal: principal.clone(),
                         viewport,
-                        focus: self.focus.get(principal).cloned(),
+                        focus: self.st.focus.get(principal).cloned(),
                         at: conn.and_then(|c| c.last_at),
                         directives: self.directives.get(principal).cloned().unwrap_or_default(),
                     },

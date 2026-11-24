@@ -4,7 +4,7 @@
 //! The shell sends raw movement in pixels; the engine resolves it against the
 //! connection's view state and the target's scene description (the compiled view at the
 //! frame size the surface reported): pixels → bars with the scene's slot width, the
-//! point query with the `hit` code ([`crate::hit_scene`]), and the opening rule
+//! point query with the `hit` code ([`crate::reading::hit_scene`]), and the opening rule
 //! ([`qp_grammar::depth::tap_opens`]). Nothing here writes the document or the log: the
 //! view state (`Conn::look`) is presence (§7).
 
@@ -22,7 +22,7 @@ use qp_schema::scene::SceneDesc;
 use qp_schema::{Depth, Series, View};
 
 use crate::reading::{hit_scene, screen_frame, without_layers};
-use crate::session::Session;
+use crate::rd::Rd;
 use qp_ops::expand::{need_view, view_bar_series, view_bar_series_any};
 use qp_ops::present::present;
 use qp_ops::provider::{warm, DocProvider};
@@ -93,7 +93,7 @@ fn depth_name(d: OpenDepth) -> &'static str {
     }
 }
 
-impl Session {
+impl Rd<'_> {
     #[allow(clippy::too_many_lines)]
     /// Handles a pixel gesture or open/close (called from `input`).
     pub(crate) fn interact(
@@ -172,7 +172,7 @@ impl Session {
                 (o, Vec::new())
             }
             Gesture::Close { to, width, height } => {
-                let look = &self.conns[ci].look;
+                let look = &self.looks[ci];
                 let (Some(cap), Some(finding)) = (look.capsule.clone(), look.finding.clone())
                 else {
                     return Err(E::new(
@@ -263,10 +263,10 @@ impl Session {
                 unreachable!("bar-space gestures are handled by `input`")
             }
         };
-        self.input_counter += 1;
+        self.st.input_counter += 1;
         let at = self.clock;
         let c = &mut self.conns[ci];
-        c.last_input = self.input_counter;
+        c.last_input = self.st.input_counter;
         c.last_at = Some(at);
         let interaction = Interaction {
             hit: out.hit,
@@ -304,7 +304,7 @@ impl Session {
                 Ok(On::Capsule(cap, f, d))
             }
             (None, None) => {
-                let look = &self.conns[ci].look;
+                let look = &self.looks[ci];
                 if let (Some(c), Some(_)) = (&look.capsule, &look.finding) {
                     let (cap, f) = self.find_capsule(c, &tp)?;
                     return Ok(On::Capsule(cap, f, look.depth));
@@ -341,7 +341,7 @@ impl Session {
 
     /// The depth capsule `cap` has on connection `ci` (`sentence` unless it is open).
     fn depth_of(&self, ci: usize, cap: &str) -> OpenDepth {
-        let look = &self.conns[ci].look;
+        let look = &self.looks[ci];
         if look.capsule.as_deref() == Some(cap) {
             look.depth
         } else {
@@ -458,7 +458,7 @@ impl Session {
                 }
                 // (R5/M18) The story chart's own taps come first (focus, cluster, K54).
                 let story = if d >= OpenDepth::Chart {
-                    story_design(self.conns[ci].look.story.as_deref()).and_then(|sd| {
+                    story_design(self.looks[ci].story.as_deref()).and_then(|sd| {
                         (sd.tap)(
                             hit.as_ref().and_then(|h| h.item.as_ref()),
                             Some(finding.as_str()),
@@ -475,14 +475,14 @@ impl Session {
                 }
                 // (R5/M20) The open capsule design's tap rule (the reference: `tap_opens`).
                 let rule = qp_designs::open::tap(
-                    self.conns[ci].look.open.as_deref(),
+                    self.looks[ci].open.as_deref(),
                     d,
                     scene.as_ref().map(|(v, _, _)| v),
                     hit.as_ref(),
-                    self.conns[ci].look.ask.as_deref(),
+                    self.looks[ci].ask.as_deref(),
                 );
                 if let qp_designs::open::OpenTap::Ask(a) = rule {
-                    self.conns[ci].look.ask = a;
+                    self.looks[ci].ask = a;
                     out.hit = hit;
                     return Ok((out, Vec::new()));
                 }
@@ -497,7 +497,7 @@ impl Session {
                                 self.gate_read(ci, &bs, GP)?;
                                 out.at = Some(self.at_bar(&bs, i));
                                 let principal = self.conns[ci].principal.clone();
-                                self.focus.insert(
+                                self.st.focus.insert(
                                     principal,
                                     Target {
                                         layer: None,
@@ -533,17 +533,17 @@ impl Session {
         use qp_designs::stories::StoryTap;
         match t {
             StoryTap::ToggleClosed => {
-                let l = &mut self.conns[ci].look;
+                let l = &mut self.looks[ci];
                 l.hide_closed = !l.hide_closed;
                 Ok(Vec::new())
             }
             StoryTap::Focus(f) => {
                 let (cap, f) = self.find_capsule(&f, GP)?;
-                let from = self.conns[ci].look.depth;
-                let keep = self.conns[ci].look.range.clone();
+                let from = self.looks[ci].depth;
+                let keep = self.looks[ci].range.clone();
                 let pr = self.present_at(ci, &f, OpenDepth::Chart)?;
                 if let (Some(r), Some(v)) = (keep, pr.view.as_ref()) {
-                    self.conns[ci].look.range = Some(Viewport {
+                    self.looks[ci].range = Some(Viewport {
                         view: v.id.clone(),
                         ..r
                     });
@@ -570,7 +570,7 @@ impl Session {
                     from_bar: a,
                     to_bar: b,
                 };
-                self.conns[ci].look.range = Some(vp.clone());
+                self.looks[ci].range = Some(vp.clone());
                 let principal = self.conns[ci].principal.clone();
                 let events = self.viewport_events(&principal, &vp);
                 out.viewport = Some(vp);
@@ -655,7 +655,7 @@ impl Session {
                     from_bar: nf,
                     to_bar: nt,
                 };
-                self.conns[ci].look.range = Some(vp.clone());
+                self.looks[ci].range = Some(vp.clone());
                 let principal = self.conns[ci].principal.clone();
                 let events = self.viewport_events(&principal, &vp);
                 Ok((

@@ -2,7 +2,7 @@
 
 use super::*;
 
-impl Session {
+impl Rd<'_> {
     #[allow(clippy::too_many_lines)]
     /// Answer to the `capsules` query (run on the asker's projected document).
     #[allow(clippy::too_many_arguments)]
@@ -25,8 +25,8 @@ impl Session {
         };
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
-        let voice = self.conns[ci].look.voice.clone();
-        let clock = self.conns[ci].look.clock;
+        let voice = self.looks[ci].voice.clone();
+        let clock = self.looks[ci].clock;
         let p = self.proj.as_deref();
         let doc = &self.doc;
         let mut items: Vec<CapsuleItem> = Vec::new();
@@ -91,10 +91,10 @@ impl Session {
                     lang,
                     voice: voice.as_deref(),
                     clock,
-                    cal: self.headline_cal.as_ref(),
+                    cal: self.v.headline_cal(),
                     tz: doc.display_tz.as_deref(),
                 };
-                let got = self.item_memo.borrow_mut().get(&key);
+                let got = self.v.item_memo().borrow_mut().get(&key);
                 match got {
                     Some(v) => v.map(|mut it| {
                         it.relevant = self.relevant(doc, &principal, &story.instrument);
@@ -103,7 +103,7 @@ impl Session {
                     }),
                     None => {
                         let v = compute(&mut memo);
-                        self.item_memo.borrow_mut().put(&key, v.clone());
+                        self.v.item_memo().borrow_mut().put(&key, v.clone());
                         v
                     }
                 }
@@ -117,7 +117,7 @@ impl Session {
             }
         }
         if p.is_none() {
-            self.item_memo.borrow_mut().prune(
+            self.v.item_memo().borrow_mut().prune(
                 doc.capsules.iter().map(|c| c.id.as_str()),
                 doc.capsules.len(),
             );

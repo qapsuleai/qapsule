@@ -9,7 +9,7 @@ use qp_schema::grammar::{EmphasisKind, Mark, ScaleKind};
 use qp_schema::scene::{DataSource, SceneDesc, SceneLayer};
 use qp_schema::View;
 
-use crate::session::Session;
+use crate::rd::Rd;
 use qp_grammar::CompileOptions;
 use qp_ops::canon::origin_text;
 use qp_ops::expand::need_view;
@@ -194,7 +194,7 @@ pub fn explain_scene(view: &View, scene: &SceneDesc) -> String {
     out
 }
 
-impl Session {
+impl Rd<'_> {
     /// [`explain_scene`] of view `view_id` compiled with `opts`.
     ///
     /// # Errors

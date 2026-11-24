@@ -1,9 +1,11 @@
 //! The contract's own pieces: slots, per-world swap, outbox, registry tables.
 
 use qp_ops::expand::Ctx;
-use qp_schema::protocol::{ChangeOp, Op, ProtocolError, Query};
+use qp_schema::protocol::{ChangeOp, Op, ProtocolError, Query, QueryResult};
 use qp_schema::Document;
-use qp_subsystem::{OpHandler, Outbox, PerWorld, Phase, Registry, Slots, Subsystem};
+use qp_subsystem::{
+    OpHandler, Outbox, PerWorld, Phase, QueryHandler, Registry, SessionCtx, Slots, Subsystem, ANY,
+};
 
 #[derive(Debug, PartialEq)]
 struct Count(u32);
@@ -107,4 +109,70 @@ fn registry_tables_and_duplicates() {
     assert!(r.add(&B).is_err_and(|e| e.contains("`undo`")));
     let names: Vec<&str> = r.subsystems().iter().map(|s| s.name()).collect();
     assert_eq!(names, ["a"], "a refused registration leaves nothing behind");
+}
+
+/// A query handler answering under `kind` (RF1 S3.2).
+struct Q(&'static str);
+
+impl QueryHandler for Q {
+    fn kind(&self) -> &'static str {
+        self.0
+    }
+    fn answer(
+        &self,
+        _conn: &str,
+        _q: &Query,
+        _ctx: &mut SessionCtx<'_>,
+    ) -> Result<QueryResult, ProtocolError> {
+        unreachable!("not called")
+    }
+}
+
+static ALL: Q = Q(ANY);
+static DESCRIBE: Q = Q("describe");
+
+struct Reads;
+impl Subsystem for Reads {
+    fn name(&self) -> &'static str {
+        "reads"
+    }
+    fn queries(&self) -> &'static [&'static dyn QueryHandler] {
+        static L: &[&dyn QueryHandler] = &[&ALL];
+        L
+    }
+}
+
+struct Describes;
+impl Subsystem for Describes {
+    fn name(&self) -> &'static str {
+        "describes"
+    }
+    fn queries(&self) -> &'static [&'static dyn QueryHandler] {
+        static L: &[&dyn QueryHandler] = &[&DESCRIBE];
+        L
+    }
+}
+
+/// (RF1 S3.2) A handler under `ANY` answers every kind no other subsystem registered; a
+/// handler under a kind comes first, whichever was registered first; `ANY` is claimed once.
+#[test]
+fn any_answers_every_kind_no_other_handler_took() {
+    let mut r = Registry::default();
+    assert_eq!(r.add(&Reads), Ok(()));
+    let ledger = Query::Ledger {
+        key: None,
+        meaning: None,
+        detector: None,
+        direction: None,
+        by_kind: false,
+    };
+    assert_eq!(r.query(&Query::Describe {}).map(|h| h.kind()), Some(ANY));
+    assert_eq!(r.query(&ledger).map(|h| h.kind()), Some(ANY));
+    assert_eq!(r.add(&Describes), Ok(()));
+    assert_eq!(
+        r.query(&Query::Describe {}).map(|h| h.kind()),
+        Some("describe")
+    );
+    assert_eq!(r.query(&ledger).map(|h| h.kind()), Some(ANY));
+    assert!(r.add(&Reads).is_err_and(|e| e.contains("`*`")));
 }

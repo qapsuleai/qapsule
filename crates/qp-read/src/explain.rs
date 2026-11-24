@@ -9,11 +9,7 @@ use qp_schema::grammar::{EmphasisKind, Mark, ScaleKind};
 use qp_schema::scene::{DataSource, SceneDesc, SceneLayer};
 use qp_schema::View;
 
-use crate::session::Session;
-use qp_grammar::CompileOptions;
 use qp_ops::canon::origin_text;
-use qp_ops::expand::need_view;
-use qp_plane::error::PResult;
 
 /// `YYYY-MM-DD` (UTC) of an epoch-millisecond time (civil-from-days, integer only).
 fn date(t: i64) -> String {
@@ -192,18 +188,6 @@ pub fn explain_scene(view: &View, scene: &SceneDesc) -> String {
         }
     }
     out
-}
-
-impl Session {
-    /// [`explain_scene`] of view `view_id` compiled with `opts`.
-    ///
-    /// # Errors
-    /// As [`Session::scene`].
-    pub fn explain(&mut self, view_id: &str, opts: &CompileOptions) -> PResult<String> {
-        let view = need_view(&self.doc, view_id, "/view")?.clone();
-        let scene = self.scene(view_id, opts)?;
-        Ok(explain_scene(&view, &scene))
-    }
 }
 
 #[cfg(test)]

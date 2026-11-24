@@ -168,7 +168,7 @@ impl Session {
             ));
         }
         for (j, s) in d.steps.iter().enumerate() {
-            crate::query::check_target_pub(
+            qp_ops::bounds::check_target_pub(
                 &self.doc,
                 &s.target,
                 &format!("/directive/steps/{j}/target"),

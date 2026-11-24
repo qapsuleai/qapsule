@@ -106,3 +106,15 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   kalem iki kez yazılamaz (denetim `audit-s30.md` B7). Öz-sınamasıyla gelir. Bu round'un kalan taşımalarında
   (S3.1–S3.3) aynı türden taban çizgisi yazımları yapılabilir: yalnız taşıma ve sıkılaşma, yeni
   borç yok.
+- **S3.2, izleyici otoritelerin listesi (round oturumunun uygulama kararı, 2026-11-24).**
+  İzleyici otoriteler — yansı (`qp_session::Replica`) ve görüntüleyicinin açık tarafı
+  (`qp_session::viewer::OpenSide`) — `FOLLOWER` = `STANDARD` eksi okuma (`qp-read`) ile
+  kurulur; bağlantı konuşan otoriteler (oturum, barındırıcı) `STANDARD` ile. Gerekçe ölçüm:
+  okuma alt sisteminin kaydı, sorgu ve girdi işleyicilerinin tablosu üstünden bütün okuma
+  kodunu ve `schemars` şemalarını WASM kabuk paketine çekiyordu (+1,38 MB; paket +%17,6,
+  sınır +%2); `FOLLOWER` ve ayrı `ReadView` ile +%1,92. Davranış aynı: izleyiciler sorgu ya
+  da girdi almaz (`handle_raw` çağrısı yok; denetim `experiments/audit-s32.md` adım 2).
+  `PLAN.md` §3.3 satır 6'dan ("yansı kendi otoritesini `qp-read` + `qp-watch` kaydıyla
+  kurar") bu ölçüde sapılır. Kayıt şeridi (`tape`) de izleyicileri `FOLLOWER` ile kurar
+  (ürün yoluyla aynı; audit-s32 B2). Arkin itiraz ederse geri alınır (o zaman WASM kapısı
+  yeniden konuşulur).

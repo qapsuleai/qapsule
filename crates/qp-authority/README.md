@@ -21,11 +21,12 @@ kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-
 `serde_path_to_error`.
 
 **Dışa açık yüzey (`lib.rs`; `qp-session` bunları aynı adlarla yeniden dışa aktarır):** `Session`, `Subsystems`, `permissions`, `confine`; `Replica`,
-`ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; `hit_scene`,
-`screen_frame`, `explain_scene`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
+`ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
 `agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
 `ENGINE_PRINCIPAL`, `DocProvider`, `profile_for`, `canon_document`, `thresholds` `qp-ops`'ta;
 `DataError`, `HostNotice`, `did_you_mean`, `edit_distance`, `headparts` `qp-plane`'de.
+RF1 S3.2'den beri sorgular ve girdi hareketleri okuma alt sistemindedir (`qp-read`; `hit_scene`,
+`screen_frame`, `explain_scene` orada); otorite onları kayıt üstünden (`ANY` kolu) çağırır.
 
 **Düzen (`src/`; her klasörün kendi `README.md`'si var):**
 
@@ -33,14 +34,17 @@ kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-
 - `capsule/` — kapsül yaşamı: motor bağlama, iddialar, itiraz, yorumlar. İzleme eşleşmesi ve
   izleme işlemleri S3.1'de `qp-watch` alt sistemine çıktı (`AfterData` fazı, `Look`/`Written`);
   dokümandaki izleme öğelerinin gizliliği (`intent_for_reader`) izdüşümde kaldı.
-- `data/` — canlı yol, bağ sorguları.
-- `read/` — sorgu, anlamsal okuma, önizleme, açıklama, etkileşim.
+- `capsule/detail.rs` — `capsule` sorgusunun ayrıntısı (yorum doğrulayıcısı da okur);
+  okuma alt sistemi görünüm üstünden sorar.
+- `data/` — canlı yol (bağ sorguları S3.2'de `qp-read`'e çıktı).
+- `read/` — otoritenin kendi derlemesi: `provider`, `scene`, `scene_as_reader`. Sorgu,
+  anlamsal okuma, önizleme, açıklama ve etkileşim S3.2'de `qp-read` alt sistemine çıktı.
 - `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).
 - `host/` — yeniden oynatma barındırıcısı (`replayhost`); uygunluk koşucusu (`conform`) S3.0'da
   bileşime (`qp-session`) taşındı.
 
 **Ne değildir:** kabuk, uyarlayıcı (CLI/MCP/WASM), kapsül motoru, veri kaynağı, çizici.
 
-**Bilinen borç:** crate bütçenin üstünde (`crate.lines`, bütçe 12 bin) — İ3; RF1 S3
-dalgaları okuma, yansı, görüntüleyici ve barındırmayı dışarı alır (`rounds/RF1/PLAN.md` §3.3).
+**Bilinen borç:** crate bütçenin üstünde (`crate.lines`, bütçe 12 bin) — İ3; okuma S3.2'de
+çıktı, S3.3 yansı, görüntüleyici ve barındırmayı dışarı alır (`rounds/RF1/PLAN.md` §3.3).
 Bütünleşme sınamaları ve örnekler `qp-session`'da (`tests/` 39 dosya, `dir.files`).

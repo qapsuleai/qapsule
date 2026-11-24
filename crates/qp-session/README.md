@@ -14,15 +14,18 @@ için `qp-ops`, `qp-plane`, `qp-schema`, `serde`, `serde_json`, `tempfile`. Sın
 örnekler için (`dev-dependencies`): `qp-capsule`, `qp-compute`, `qp-grammar`, `qp-look`,
 `qp-designs`, `schemars`.
 
-**Bileşim (`src/compose.rs`):** `STANDARD` (standart alt sistemler, kayıt sırasıyla) ve onunla
+**Bileşim (`src/compose.rs`):** `STANDARD` (standart alt sistemler, kayıt sırasıyla),
+`FOLLOWER` (izleyicilerin listesi: `STANDARD` eksi okuma, sıra aynı; RF1 S3.2) ve onlarla
 kurulan otoriteler. Her biri `qp-authority` tipini sarar (`Deref`/`DerefMut`; bugünkü çağrı
-yerleri değişmez) ve aynı adlı kurucularla `STANDARD`'ı verir:
+yerleri değişmez) ve aynı adlı kurucularla `STANDARD`'ı (izleyicilere `FOLLOWER`'ı) verir.
+İzleyici oturumu (`Replica::session_mut`, `OpenSide::replica_mut`) sorgu ya da girdi almaz:
+`handle_raw` ile gönderilirse `unsupported` döner.
 
 - `Session` (`new`, `new_with_trust_keys`, `with_provider`, `with_provider_and_trust_keys`;
   `sub::<T>()`, `sub_mut::<T>()`, `into_inner`);
 - `ReplayHost` (`new`, `with_local_dir`, `with_window`, `live`);
-- `Replica` (`new`, `with_memory`); `OpenSide` (`viewer::OpenSide::new`);
-- `tape::{run, run_with, run_viewer}`; `agent::agent_op` (standart alt sistemlerin işlemleri
+- `Replica` (`new`, `with_memory`); `OpenSide` (`viewer::OpenSide::new`): `FOLLOWER`;
+- `tape::{run, run_with, run_viewer}` (otorite `STANDARD`, yansı ve açık taraf `FOLLOWER`); `agent::agent_op` (standart alt sistemlerin işlemleri
   kendi işleyicileriyle).
 
 Bir otoritenin doğurduğu otorite (barındırıcının yeniden kurduğu oturum, yansının izleyicisi,

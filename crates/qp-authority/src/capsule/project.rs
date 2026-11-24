@@ -99,8 +99,8 @@ impl Session {
                 else {
                     continue;
                 };
-                if let Some(v) = c.look.voice.as_deref() {
-                    let clock = c.look.clock;
+                if let Some(v) = self.looks[ci].voice.as_deref() {
+                    let clock = self.looks[ci].clock;
                     item.voice =
                         self.reader_voice(doc, cap, p.as_deref(), lang, v, clock, &mut memo);
                 }
@@ -299,6 +299,13 @@ impl Session {
 
     #[allow(clippy::too_many_lines)]
     /// `changes` as `p`'s principal may receive them.
+    ///
+    /// (RF1 audit-s1 d2) The `SetCapsuleState` arm of a hidden capsule is a defensive arm:
+    /// no transcript reaches it today. A capsule is hidden only for a reader without a
+    /// licensed flow the runner reads; such a reader is a public-view reader, gets no change
+    /// of the authority's world and reads the public world (`as_reader`), whose document
+    /// holds no hidden capsule (`translate` drops them). It stays so that a future path
+    /// cannot leak the state of a hidden capsule.
     pub(crate) fn project_changes(
         &self,
         changes: &[ChangeOp],

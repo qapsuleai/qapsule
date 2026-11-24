@@ -2,7 +2,7 @@
 
 use super::*;
 
-impl Session {
+impl Rd<'_> {
     #[allow(clippy::too_many_lines)]
     /// (R4/T5) The `style` gesture: the connection's face design, glyph alphabet and
     /// theme; (R4/H-M8910) feed layout, depth transition, outcome mark style and last look
@@ -72,7 +72,7 @@ impl Session {
                 return Err(unknown("open", o, qp_designs::open::names()));
             }
         }
-        let look = &mut self.conns[ci].look;
+        let look = &mut self.looks[ci];
         if let Some(o) = r.open {
             let next = (o != qp_designs::open::DEFAULT_OPEN).then(|| o.to_owned());
             // Another design: the capsule frame a design's height set no longer holds, nor
@@ -148,28 +148,27 @@ impl Session {
                 .build());
             }
         }
-        self.conns[ci].look.frames.insert(key.to_owned(), [w, h]);
+        self.looks[ci].frames.insert(key.to_owned(), [w, h]);
         Ok(())
     }
 
     /// The frame of `key`: as reported, else the surface's default (`screen`'s frame;
     /// a face is that wide and [`FACE_HEIGHT`] high).
     pub(super) fn frame(&self, ci: usize, key: &str) -> (u32, u32) {
-        let c = &self.conns[ci];
+        let (c, l) = (&self.conns[ci], &self.looks[ci]);
         // (R5/M20) An open capsule design that states its height opens the capsule depth
         // at it, whichever frame the surface reported (a tap on a face opens it too).
         if key == "capsule" {
-            let look = crate::viewer::look_of(&c.look);
-            if let Some(h) = qp_designs::open::height_in(look, c.look.open.as_deref()) {
-                let w = c
-                    .look
+            let look = look_of(l);
+            if let Some(h) = qp_designs::open::height_in(look, l.open.as_deref()) {
+                let w = l
                     .frames
                     .get(key)
                     .map_or_else(|| screen_frame(c.surface.kind).0, |f| f[0]);
                 return (w, h);
             }
         }
-        if let Some([w, h]) = c.look.frames.get(key) {
+        if let Some([w, h]) = l.frames.get(key) {
             return (*w, *h);
         }
         let (w, h) = screen_frame(c.surface.kind);

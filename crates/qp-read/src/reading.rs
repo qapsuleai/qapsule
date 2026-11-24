@@ -5,8 +5,8 @@
 
 use std::collections::BTreeMap;
 
+use qp_grammar::compile;
 use qp_grammar::scale::{slot_at, value_at};
-use qp_grammar::{compile, CompileOptions};
 use qp_look::{ErrorKind, GrammarError};
 use qp_schema::protocol::{
     ErrorCode, HitInfo, HitItem, LayerInfo, ProtocolError, ScaleInfo, SurfaceKind, Viewport,
@@ -14,7 +14,8 @@ use qp_schema::protocol::{
 use qp_schema::scene::{SceneDesc, ScenePanel};
 use qp_schema::{Series, View};
 
-use crate::session::{Conn, Session};
+use crate::rd::{Conn, Rd};
+use qp_ops::bounds::without_layers;
 use qp_ops::expand::{need_view, view_bar_series};
 use qp_ops::provider::{warm, DocProvider};
 use qp_plane::error::{PResult, E};
@@ -148,67 +149,12 @@ pub fn hit_scene(scene: &SceneDesc, x: f64, y: f64, times: &[i64]) -> HitInfo {
     out
 }
 
-impl Session {
-    /// The grammar compiler's data source over this session's document and values cache
-    /// (study values computed with `qp-compute` and cached first).
-    pub fn provider(&mut self) -> DocProvider<'_> {
-        warm(rd!(self), &mut self.cache);
-        DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines)
-    }
-
-    /// Compiles view `view_id` into its scene description with `opts` (frame size,
-    /// transient range and emphasis, theme). Headless; nothing is rendered.
-    ///
-    /// # Errors
-    /// `not_found` for an unknown view; the compiler's error (layer, pointer, reason) as
-    /// `invalid`, `not_found` or `no_origin`.
-    pub fn scene(
-        &mut self,
-        view_id: &str,
-        opts: &CompileOptions,
-    ) -> Result<SceneDesc, ProtocolError> {
-        warm(rd!(self), &mut self.cache);
-        let view = need_view(rd!(self), view_id, "/view")?;
-        compile(
-            view,
-            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
-            opts,
-        )
-        .map_err(|e| grammar_error(&e, "/view"))
-    }
-
-    /// Compiles a view as connection `conn` sees it: `view_id` (default: the connection's
-    /// current view) at the connection's visible range of that view, unless `opts.range`
-    /// is set (see [`Session::hit_range`]).
-    ///
-    /// # Errors
-    /// Unknown connection or view; compile errors as in [`Session::scene`].
-    pub fn scene_for(
-        &mut self,
-        conn: &str,
-        view_id: Option<&str>,
-        opts: &CompileOptions,
-    ) -> Result<SceneDesc, ProtocolError> {
-        let ci = self
-            .conns
-            .iter()
-            .position(|c| c.id == conn)
-            .ok_or_else(|| {
-                E::new(ErrorCode::NotFound, format!("unknown connection `{conn}`")).build()
-            })?;
-        let vid = self.view_of(ci, view_id, "/view")?;
-        let mut o = opts.clone();
-        if o.range.is_none() {
-            o.range = self.hit_range(&self.conns[ci], &vid);
-        }
-        self.scene(&vid, &o)
-    }
-
+impl Rd<'_> {
     /// The view a reading request is about: `view_id`, else the connection's current
     /// view (its last viewport, else the document's first view).
-    fn view_of(&self, ci: usize, view_id: Option<&str>, path: &str) -> PResult<String> {
+    pub(crate) fn view_of(&self, ci: usize, view_id: Option<&str>, path: &str) -> PResult<String> {
         if let Some(v) = view_id {
-            return Ok(need_view(&self.doc, v, path)?.id.clone());
+            return Ok(need_view(self.doc, v, path)?.id.clone());
         }
         self.conn_viewport(&self.conns[ci])
             .map(|vp| vp.view)
@@ -248,7 +194,7 @@ impl Session {
         let mut opts =
             qp_designs::options(size.0.unwrap_or(HIT_WIDTH), size.1.unwrap_or(HIT_HEIGHT));
         opts.range = self.hit_range(&self.conns[ci], &vid);
-        warm(rd!(self), &mut self.cache);
+        warm(rd!(self), self.cache);
         let view = need_view(rd!(self), &vid, &format!("{qp}/view"))?;
         // Layers whose data the asker may not read are not drawn (§18.3); a view whose
         // bar series is among them cannot be read at all.
@@ -258,8 +204,8 @@ impl Session {
         let view = if blocked.is_empty() {
             view
         } else {
-            if let Some(bs) = qp_ops::expand::view_bar_series_any(&self.doc, view) {
-                if let Some(b) = self.plane.gate(&self.doc, Some(&asker), &bs.id) {
+            if let Some(bs) = qp_ops::expand::view_bar_series_any(self.doc, view) {
+                if let Some(b) = self.plane.gate(self.doc, Some(&asker), &bs.id) {
                     return Err(b.error(&bs.id, &format!("{qp}/view")));
                 }
             }
@@ -268,7 +214,7 @@ impl Session {
         };
         let scene = compile(
             view,
-            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &DocProvider::new(rd!(self), self.cache).with_headlines(self.headlines),
             &opts,
         )
         .map_err(|e| grammar_error(&e, qp))?;
@@ -363,7 +309,7 @@ impl Session {
             return out;
         }
         for (i, l) in view.layers.iter().enumerate() {
-            if let Some(b) = self.plane.gate_layer(&self.doc, Some(asker), l) {
+            if let Some(b) = self.plane.gate_layer(self.doc, Some(asker), l) {
                 // The layer's data source (what `screen` names), not the series that
                 // blocked it.
                 let series = l.series.clone().unwrap_or(b.series);
@@ -387,7 +333,7 @@ impl Session {
         }
         let Ok(scene) = compile(
             view,
-            &DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines),
+            &DocProvider::new(rd!(self), self.cache).with_headlines(self.headlines),
             &opts,
         ) else {
             return BTreeMap::new();
@@ -410,19 +356,6 @@ impl Session {
     }
 
     pub(crate) fn warm_values(&mut self) {
-        warm(rd!(self), &mut self.cache);
+        warm(rd!(self), self.cache);
     }
-}
-
-/// `view` without the layers at `skip` (indexes).
-pub(crate) fn without_layers<T>(view: &View, skip: &BTreeMap<usize, T>) -> View {
-    let mut v = view.clone();
-    v.layers = view
-        .layers
-        .iter()
-        .enumerate()
-        .filter(|(i, _)| !skip.contains_key(i))
-        .map(|(_, l)| l.clone())
-        .collect();
-    v
 }

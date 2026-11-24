@@ -295,7 +295,8 @@ impl OpenSide {
         }
     }
 
-    /// The replica (its session compiles the open scene; its display holds the claims).
+    /// The replica (its session compiles the open scene; its display holds the claims). Its
+    /// session takes no `query` or `input` (`qp_session::FOLLOWER`: they are `unsupported`).
     pub fn replica_mut(&mut self) -> &mut Replica {
         &mut self.replica
     }

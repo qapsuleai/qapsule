@@ -188,3 +188,59 @@ take_lines}`. Sınamalar: `qp-authority/tests/contract_fixes.rs` (B2, B3, B5),
 
 **Saf taşıma:** `Matched`, `negative`, `holds`, `matches` (`capsule/watch.rs` → `qp-watch`
 `matching.rs`); `max_watches_binds_registry` sınaması (`qp-watch` `lib.rs`).
+
+## S3.2 — `qp-read` (okuma ve sunum), otoritede okuma kancaları
+
+Davranış aynı (S1 karakterizasyonu 25/25, kitaplar aynı; `compare.sh` 270/270). Sorgular ve girdi
+hareketleri çekirdekten `qp-read` alt sistemine çıktı. Otorite onları bugünkü çağrı noktasında
+(`dispatch_query` / `dispatch_input`, `as_reader` içinde) kayıt üstünden çağırır: `qp-read` sorgu ve
+girdi tablolarına `ANY` etiketiyle kaydolur (başka alt sistemin kaydetmediği her tür; Tally gibi
+bir türü kaydeden alt sistem önce gelir). Okuma kodu `impl Session` yerine `impl Rd<'_>` üstünde:
+`Rd` bölünmüş ödünçtür (critique-1 B9) — doküman, okuma dokümanı (`rd!` → `self.rdoc`), günlük,
+düzlem, başlıklar, kimlikler, saat, izdüşüm görünümden; değer önbelleği ve bağlantıların görünüm
+durumu (`look`) çağrı bağlamından (`SessionCtx::{cache, looks}`; otorite çağrı boyunca dışarı
+alır, sonra geri koyar: yuva ve giden kutusu gibi); görünüm aralıkları, son görünüm, son girdi,
+odak ve girdi sayacı alt sistemin yuvasından (`ReadState`). Kapsül yaşamı (kapsül öğesi, cümle,
+ses, piyasa notu, süzgeçler, `stories`, `capsule` ayrıntısı, sicil) otoritede kalır ve
+`SessionView` üstünden sorulur.
+
+**Yeniden yazılan öğeler (moved.py `main HEAD`: `CHANGED -` 82, `CHANGED +` 209, taşınan 435,
+yalnız yol 2; FLAG 5: `qp-read` `reading.rs`'in `Conn`/`without_layers` içe aktarımları yeni
+yerlerine, `qp-read` `lib.rs` iç `#![allow(clippy::result_large_err)]`ı — otoritenin aynısı):**
+
+| Öğe | Dosya | Ne değişti |
+|---|---|---|
+| okuma yöntemlerinin tümü (`query`, `need_principal`, `only_live_finding`, `at_bar`, `future_times`, `initial_range`, `last_slot`, `range_of`, `conn_viewport`, `screen_info`, `input`, `interact`, `resolve_target`, `find_capsule`, `depth_of`, `present_at`, `tap_at`, `story_tap`, `move_chart`, `depth_view`, `reader_scene`, `capsule_scene`, `story_extend`, `chart_range`, `side_scene`, `transition`, `set_style`, `set_frame`, `frame`, `view_of`, `hit_range`, `hit`, `screen_panels`, `blocked_layers`, `compiled_panels`, `warm_values`, `preview_doc`, `preview`, `gate_read`, `bindings`, `verify_evidence`, `check_fact`, `capsules_query`, `ledger_query`) | `qp-authority` `read/**`, `data/bindq.rs`, `capsule/queries.rs` → `qp-read` | `impl Session` → `impl Rd<'_>` (gövde aynı); `self.conns[ci].look` → `self.looks[ci]`; `self.input_counter`/`self.focus` → `self.st.…`; `.with_parts(self, …)` → `.with_parts(self.v.headline_source(), …)`; `crate::viewer::look_of` → `crate::look_of`; `crate::claims::for_principal(…)` → `self.v.evidence_for(…)`; `self.headline_cal`/`self.item_memo` → `self.v.…()`; `self.directives.get` → `self.v.directives`; `principals.clone()` → `to_vec()`; `permissions(role)` → bağlantının `permissions`'ı; `screen_info` `c.look` → `self.look_at(c)`; `frame` `c.look` → `l`; `preview_doc` `accept_expand` → `self.v.accept_preview`; `capsule_query` (dönüşte `transition`) → görünümün `capsule_query`'si (bağlantının sesi ve saati ile) |
+| `bindings` | `qp-read` `bindq.rs` | veri konumu `FeedStore::position` (`&mut`, önek özeti belleği) yerine `feed()`, `bars()`, `seq()`, `data_digest(bars)` ile (aynı değer: `digest_u64` = bütün çubukların `data_digest_u64`'ü); düzlem görünümden salt okunur |
+| `capsule_query`, `capsule_query_with` | `capsule/queries.rs` → `qp-authority` `capsule/detail.rs` | çekirdekte kaldı (yorum doğrulayıcısı aynı ayrıntıyı okur, okuma alt sistemi görünümle sorar); ses ve saat `(voice, clock)` parametresi (okuma çağrısı sırasında `looks` alt sistemde); doğrulayıcı `(None, false)` verir (yalnız öğenin `voice`'unu etkiler, doğrulayıcı okumaz) |
+| `withheld_for`, `evidence_access` | `capsule/queries.rs` → `capsule/run.rs`, `capsule/detail.rs` | yer (gövde aynı) |
+| `ledger_now`, `ledger_rows` (+ yeni `ledger_rows_of`) | `capsule/queries.rs` → `capsule/run.rs`; `capsule.rs` | otoritede kaldı (motoru okur); motor dalı `Document { … }` değişmezi kurmadan `ledger_rows_of(&[], &engine.ledger())` (boş kapsül listesi: aynı satırlar); `ledger_rows(doc)` = `ledger_rows_of(&doc.capsules, &doc.ledger.entries)` (D2: otoritede bir doküman değişmezi az) |
+| `scene_for`, `explain` (bileşim), `capsule_query_with` | `qp-session` `compose.rs` | `#[allow(clippy::result_large_err)]` (otoritenin hata tipi) |
+| needless_borrow düzeltmeleri, 7 dosya (`bindq.rs`, `interact.rs`, `interact/scenes.rs`, `preview.rs`, `query.rs`, `query/view.rs`, `reading.rs`) | `qp-read` | `&self.doc`, `&mut self.cache`, `&self.headlines` … → `self.doc`, `self.cache`, … (`Rd`'nin alanları zaten başvuru; aynı değer). Crate düzeyi `#![allow(clippy::needless_borrow)]` kaldırıldı (audit-s32 B4) |
+| `tape::{run, run_with, run_viewer}` | `qp-authority` `replica/tape.rs`, `qp-session` `tape.rs` | liste parametresi `Lists` (`subs.0`, `subs.1`): otorite `STANDARD`, yansı ve açık taraf `FOLLOWER` (ürün yolu; audit-s32 B2); `Replica::session_mut`, `OpenSide::replica_mut` belgesi (B3) |
+| `scene_as_reader`, `preview_doc` (çekirdek kopyası), `gated_view` | `read/preview.rs` → `qp-authority` `read.rs`; `gated_view` → `qp_ops::bounds` | barındırıcının derlemesi çekirdekte; `gated_view` serbest fonksiyon (`plane` parametresi) |
+| `provider`, `scene`, `grammar_error`, `surface_kind` | `read/reading.rs`, `read/interact.rs` → `qp-authority` `read.rs` | yer (gövde aynı) |
+| `scene_for`, `explain` | `qp-authority` → `qp-session` `compose.rs` | bileşimin yöntemleri: `scene_for` = `qp_read::scene_for_range` (görünüm, aralık) + otoritenin `scene`'i; `explain` = otoritenin `scene`'i + `explain_scene` |
+| `check_target_pub`, `resolve_range`, `without_layers` | `read/query.rs`, `read/reading.rs` → `qp_ops::bounds` | yer ve görünürlük (`pub`) |
+| `first_facts`, `FirstFacts`, `FnvHasher`, `Fnv` (+ sınaması) | `replica/viewer.rs` → `qp_ops::firsts` | yer; eski yolda `pub use` |
+| `dispatch_query`, `dispatch_input` | `authority/session/phases.rs` | yerleşik yol yerine kayıt; kayıtsızsa `unsupported` (`unserved`) |
+| `with_ctx` | `phases.rs` | önbellek ve `looks` da çağrı süresince dışarı alınıp geri konur |
+| `impl SessionView for Session`, yeni `impl ReadView for Session` | `phases.rs` | `ConnView::{hello, profile}`; okuma eki 27 yöntem ayrı trait `ReadView`'da (`paths.md` S3.2) — her biri otoritenin aynı adlı fonksiyonunu çağırır. Ayrı trait, çünkü `SessionView` tablosu her faz çağrısında kurulur ve yöntemlerinin arkasındaki kodu (öneri açılımı `accept_expand` → `expand_op`, `stories`, kapsül ayrıntısı) kabuk paketine çeker (+≈ 250 KB); `ReadView` yalnız `dispatch_query`/`dispatch_input`/`with_subsystems`'te verilir |
+| `with_ctx` → `with_ctx`, `with_read_ctx`, `with_ctx_as::<READ>` | `phases.rs` | `READ` sabit: faz çağrısı okuma tablosunu adlandırmaz |
+| `Replica::{new, with_memory}`, `OpenSide::new` (bileşim) | `qp-session` `compose.rs` | `STANDARD` yerine `FOLLOWER` (`STANDARD` eksi okuma). İzleyici otoriteye bağlantı konuşmaz, sorgu ya da girdi almaz (`handle_raw` çağrısı yok: `replica.rs`, `replica/*`); okuma alt sistemi orada hiç çağrılmazdı. Kaydı, sorgu işleyicisinin tablosu üstünden bütün okuma kodunu (+ `schemars` şemaları) kabuk paketine çekiyordu (+1,38 MB) |
+| `struct Conn`, `struct Session`, `hello`, `build_with_keys` | `authority/session.rs`, `dispatch.rs`, `create.rs` | `viewports`, `current`, `last_input`, `last_at`, `has_screen`, `focus`, `input_counter` → `qp-read` `ReadState`/`rd::Conn`; `look` → `Session::looks` |
+| `capsule_topic_lines_in`, `viewer_update` | `capsule/project.rs`, `replica/viewer/updates.rs` | `c.look` → `self.looks[ci]` |
+| `viewer_compute` | `replica/viewer/updates.rs` | `self.query` → `self.dispatch_query` (aynı `capsules` cevabı) |
+| `seen` | `capsule/comments.rs` | `capsule_query_with(…, (None, false))` |
+| `project_changes` | `capsule/project.rs` | yalnız belge yorumu (audit-s1 d2: savunma kolu) |
+| `presence.rs` `attend` yolu, `story.rs` `stories_query` | `authority/session/presence.rs`, `capsule/story.rs` | `crate::query::…` → `qp_ops::bounds::…` (yol) |
+| `incremental_items_equal_from_scratch` | `qp-authority` `capsule/tests/item_memo.rs` → `qp-session` `tests/capsule_perf_equality/item_memo.rs` | bileşimle kurulur (`Subsystems::NONE` yerine `STANDARD`); bellek sayısı `item_memo_counts()` |
+
+**Yeni öğeler:** `qp-read` (crate: `Read`, `READ`, `Queries`, `Inputs`, `ReadState`, `ConnRead`,
+`rd::Conn`, `Rd` ve görünüme giden ince sarmalayıcıları, `reading`, `scene_for_range`, `look_at`,
+`keep`, `look_of`); `qp_subsystem::ANY`, `find_kind`; `SessionCtx::{cache, looks}`;
+`ConnView::{hello, profile}`; `SessionView` okuma ve kapsül yaşamı yöntemleri;
+`qp_authority::Session::{with_subsystems, reader_item_series}`, `looks`; `qp_ops::{bounds, firsts}`;
+`qp_session::Session::{scene_for, explain}`. Sınamalar: `qp-subsystem` `tests/contract.rs`
+`any_answers_every_kind_no_other_handler_took`; `qp-session` `compose.rs` `the_follower_list_is_the_standard_list_without_reading` (audit-s32 B2); `qp-authority` `tests/subsystems.rs`
+`without_the_reading_subsystem_queries_and_inputs_are_unsupported`.

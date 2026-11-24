@@ -57,9 +57,9 @@
 //!
 //! Pre-R3 items (facts without `meaning`, capsules without a story) are never projected.
 
+mod detail;
 mod headsource;
 mod project;
-mod queries;
 mod reader;
 mod run;
 mod settled;
@@ -83,8 +83,8 @@ use qp_schema::capsule::{Audience, EvidenceFamily, LicenseClass, Stage, Story, U
 use qp_schema::data::FeedKey;
 use qp_schema::protocol::{
     CapsuleDetail, CapsuleInit, CapsuleItem, CapsuleSentence, ChangeOp, ClaimEvidence, ClaimRef,
-    DisputeVerdict, ErrorCode, Event, EvidenceAccess, Language, LedgerRow, LogEntry, Maturity,
-    OutboundLine, QueryResult, Seq, ServerComment, ServerMsg, Topic,
+    DisputeVerdict, ErrorCode, Event, EvidenceAccess, Language, LogEntry, Maturity, OutboundLine,
+    QueryResult, Seq, ServerComment, ServerMsg, Topic,
 };
 use qp_schema::{
     Author, Bar, Capsule, CapsuleState, Condition, Depth, Document, Fact, Finding, Provenance,
@@ -523,33 +523,7 @@ fn broken_stories<'a>(
 pub(crate) fn ledger_rows(
     doc: &Document,
 ) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
-    let retracted: BTreeSet<&str> = doc
-        .capsules
-        .iter()
-        .filter(|c| {
-            c.story
-                .as_ref()
-                .is_some_and(|s| s.stage == Stage::Retracted)
-        })
-        .map(|c| c.id.as_str())
-        .collect();
-    doc.ledger
-        .entries
-        .iter()
-        .filter(|e| e.capsule.as_deref().is_none_or(|c| !retracted.contains(c)))
-        .filter_map(|e| {
-            let k = e.key.clone()?;
-            let kind = qp_schema::capsule::MeaningKind::ALL
-                .into_iter()
-                .find(|m| k.starts_with(&format!("{}/", m.name())))?;
-            Some((
-                k,
-                kind,
-                e.recorded_at,
-                e.outcome == qp_schema::Outcome::Confirmed,
-            ))
-        })
-        .collect()
+    run::ledger_rows_of(&doc.capsules, &doc.ledger.entries)
 }
 
 /// Candidates on the open (last) bar of `bars` (K28, A16): a fresh detector set and

@@ -3,7 +3,7 @@
 
 use super::*;
 
-impl Session {
+impl Rd<'_> {
     #[allow(clippy::too_many_lines)]
     /// The view drawn for a capsule at open depth `d` (`sentence`: its face, the card),
     /// if the reader gets one.
@@ -19,15 +19,14 @@ impl Session {
         // (R5/T3) So is a look other than `r4`: the face and the card are rebuilt with
         // its sizes (the replica's `viewer::face_scene` / `open_scene` do the same).
         // (R5/m17-int) So is a voice other than `r4`: the face and the card speak from it.
-        let voice = self.conns[ci].look.voice.clone();
-        let styled = self.conns[ci].look.face.is_some()
-            || self.conns[ci].look.look.is_some()
-            || voice.is_some();
-        let look = crate::viewer::look_of(&self.conns[ci].look);
+        let voice = self.looks[ci].voice.clone();
+        let styled =
+            self.looks[ci].face.is_some() || self.looks[ci].look.is_some() || voice.is_some();
+        let look = look_of(&self.looks[ci]);
         // (R5/M20) An open capsule design other than `r4` builds the capsule depth.
-        let open = self.conns[ci].look.open.clone();
+        let open = self.looks[ci].open.clone();
         if d == OpenDepth::Capsule
-            && (self.conns[ci].look.look.is_some() || voice.is_some() || open.is_some())
+            && (self.looks[ci].look.is_some() || voice.is_some() || open.is_some())
         {
             let Some(id) = pr.capsule_view.as_ref().map(|v| v.id.clone()) else {
                 return Ok(None);
@@ -35,13 +34,13 @@ impl Session {
             let max_points = self.conns[ci].profile.max_points;
             let lang = self.lang_of(ci);
             let (w, h) = self.frame(ci, depth_key(d));
-            let ask = self.conns[ci].look.ask.clone();
-            warm(rd!(self), &mut self.cache);
-            let p = DocProvider::new(rd!(self), &self.cache)
-                .with_headlines(&self.headlines)
-                .with_parts(self, lang)
+            let ask = self.looks[ci].ask.clone();
+            warm(rd!(self), self.cache);
+            let p = DocProvider::new(rd!(self), self.cache)
+                .with_headlines(self.headlines)
+                .with_parts(self.v.headline_source(), lang)
                 .with_voice(voice.as_deref())
-                .with_clock(self.conns[ci].look.clock);
+                .with_clock(self.looks[ci].clock);
             // (R5/M20) The design's view; `nobra` also reads the opened question and the
             // frame (the authority has no device check: "verified by the server").
             let ctx = qp_designs::open::OpenCtx {
@@ -65,15 +64,15 @@ impl Session {
             if pr.capsule_view.is_none() {
                 return Ok(None);
             }
-            let name = self.conns[ci].look.face.clone();
+            let name = self.looks[ci].face.clone();
             let max_points = self.conns[ci].profile.max_points;
             let lang = self.lang_of(ci);
-            warm(rd!(self), &mut self.cache);
-            let p = DocProvider::new(rd!(self), &self.cache)
-                .with_headlines(&self.headlines)
-                .with_parts(self, lang)
+            warm(rd!(self), self.cache);
+            let p = DocProvider::new(rd!(self), self.cache)
+                .with_headlines(self.headlines)
+                .with_parts(self.v.headline_source(), lang)
                 .with_voice(voice.as_deref())
-                .with_clock(self.conns[ci].look.clock);
+                .with_clock(self.looks[ci].clock);
             return Ok(qp_designs::depth::face_view_in(
                 look,
                 name.as_deref(),
@@ -91,18 +90,16 @@ impl Session {
         if matches!(
             depth::presenter_depth(face),
             Depth::Chart | Depth::Workspace
-        ) && self.conns[ci].look.look.is_some()
+        ) && self.looks[ci].look.is_some()
         {
             if let Some(given) = pr.view.as_ref() {
                 if !rd!(self).views.iter().any(|x| x.id == given.id) {
-                    let id = self.conns[ci]
-                        .look
+                    let id = self.looks[ci]
                         .view
                         .clone()
                         .unwrap_or_else(|| given.id.clone());
-                    warm(rd!(self), &mut self.cache);
-                    let p =
-                        DocProvider::new(rd!(self), &self.cache).with_headlines(&self.headlines);
+                    warm(rd!(self), self.cache);
+                    let p = DocProvider::new(rd!(self), self.cache).with_headlines(self.headlines);
                     if let Ok(v) = depth::chart_view_in(look, finding, &p, &id) {
                         return Ok(Some(v));
                     }
@@ -131,15 +128,15 @@ impl Session {
         face: Option<String>,
         story: Option<StoryCompiled<'_>>,
     ) -> PResult<(SceneDesc, Vec<i64>)> {
-        warm(rd!(self), &mut self.cache);
+        warm(rd!(self), self.cache);
         let asker = self.conns[ci].principal.clone();
         let blocked = self.blocked_layers(view, &asker);
         let filtered;
         let view = if blocked.is_empty() {
             view
         } else {
-            if let Some(bs) = view_bar_series_any(&self.doc, view) {
-                if let Some(b) = self.plane.gate(&self.doc, Some(&asker), &bs.id) {
+            if let Some(bs) = view_bar_series_any(self.doc, view) {
+                if let Some(b) = self.plane.gate(self.doc, Some(&asker), &bs.id) {
                     return Err(b.error(&bs.id, GP));
                 }
             }
@@ -149,22 +146,22 @@ impl Session {
         let mut opts = qp_designs::options(frame.0, frame.1);
         opts.range = range;
         // (R4/T5) The connection's style (view state).
-        opts.theme.clone_from(&self.conns[ci].look.theme);
-        opts.alphabet.clone_from(&self.conns[ci].look.alphabet);
-        opts.outcome.clone_from(&self.conns[ci].look.outcome);
-        opts.look.clone_from(&self.conns[ci].look.look);
+        opts.theme.clone_from(&self.looks[ci].theme);
+        opts.alphabet.clone_from(&self.looks[ci].alphabet);
+        opts.outcome.clone_from(&self.looks[ci].outcome);
+        opts.look.clone_from(&self.looks[ci].look);
         opts.face = face;
         let lang = self.lang_of(ci);
-        let voice = self.conns[ci].look.voice.clone();
-        let p = DocProvider::new(rd!(self), &self.cache)
-            .with_headlines(&self.headlines)
-            .with_parts(self, lang)
+        let voice = self.looks[ci].voice.clone();
+        let p = DocProvider::new(rd!(self), self.cache)
+            .with_headlines(self.headlines)
+            .with_parts(self.v.headline_source(), lang)
             .with_voice(voice.as_deref())
-            .with_clock(self.conns[ci].look.clock);
+            .with_clock(self.looks[ci].clock);
         // (RP4/T7) The rows' time, when the connection asked for it.
         let stamp = |r: &qp_schema::protocol::StoryRow| self.row_stamp(r, lang);
         let stamp_of: Option<&qp_designs::stories::StampFn<'_>> =
-            self.conns[ci].look.clock.then_some(&stamp);
+            self.looks[ci].clock.then_some(&stamp);
         // (R5/S) A story chart design that compiles the whole scene (`korda`).
         let scene = match story {
             Some((c, rows, finding)) => c(
@@ -174,7 +171,7 @@ impl Session {
                 &qp_designs::stories::StoryInput {
                     rows,
                     focus: Some(finding),
-                    hide_closed: self.conns[ci].look.hide_closed,
+                    hide_closed: self.looks[ci].hide_closed,
                     lang,
                     fact_of: &|_| None,
                     stamp_of,
@@ -208,13 +205,13 @@ impl Session {
         };
         let frame = self.frame(ci, depth_key(d));
         let face = if d == OpenDepth::Sentence {
-            self.conns[ci].look.face.clone()
+            self.looks[ci].face.clone()
         } else {
             None
         };
         // (R5/M18) A story chart design: the chart at its price height, then the stories.
         let story = if d >= OpenDepth::Chart {
-            qp_designs::depth::story_design(self.conns[ci].look.story.as_deref())
+            qp_designs::depth::story_design(self.looks[ci].story.as_deref())
         } else {
             None
         };
@@ -237,7 +234,7 @@ impl Session {
         }
         let at = (
             frame.0,
-            (sd.price_height)(crate::viewer::look_of(&self.conns[ci].look), frame.1),
+            (sd.price_height)(look_of(&self.looks[ci]), frame.1),
         );
         let (scene, times) = self.reader_scene(ci, &view, at, range, face, None)?;
         let scene = self.story_extend(ci, sd, &view, scene, frame.1, finding);
@@ -261,13 +258,13 @@ impl Session {
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
         let rows = self.story_rows(&series, &principal, lang);
-        let firsts = crate::viewer::FirstFacts::new(rd!(self), &rows);
+        let firsts = qp_ops::firsts::FirstFacts::new(rd!(self), &rows);
         let fact_of = |f: &str| firsts.get(f);
-        let look = &self.conns[ci].look;
+        let look = &self.looks[ci];
         let stamp = |r: &qp_schema::protocol::StoryRow| self.row_stamp(r, lang);
         let stamp_of: Option<&qp_designs::stories::StampFn<'_>> = look.clock.then_some(&stamp);
         (sd.extend)(
-            crate::viewer::look_of(look),
+            look_of(look),
             look.theme.as_deref().or(view.theme.as_deref()),
             scene,
             h,
@@ -286,8 +283,7 @@ impl Session {
     /// else the surface's initial range (§4.6), clamped to the current slots.
     pub(super) fn chart_range(&self, ci: usize, view: &View) -> Option<(u64, u64)> {
         let c = &self.conns[ci];
-        let saved = c
-            .look
+        let saved = self.looks[ci]
             .range
             .as_ref()
             .filter(|r| r.view == view.id)
@@ -360,7 +356,7 @@ impl Session {
         if to == OpenDepth::Capsule
             && presentation.capsule_view.is_none()
             && presentation.facts.is_empty()
-            && qp_designs::open::by_name(self.conns[ci].look.open.as_deref())
+            && qp_designs::open::by_name(self.looks[ci].open.as_deref())
                 .text
                 .is_some()
         {
@@ -383,7 +379,7 @@ impl Session {
             _ => None,
         };
         {
-            let look = &mut self.conns[ci].look;
+            let look = &mut self.looks[ci];
             // (R5/M20) The opened question belongs to the open capsule.
             if to == OpenDepth::Sentence || look.capsule.as_deref() != Some(cap) {
                 look.ask = None;
@@ -411,8 +407,7 @@ impl Session {
                     marked_bar: s.and_then(|x| x.2),
                 }
             }
-            let design =
-                qp_designs::transitions::by_name(self.conns[ci].look.transition.as_deref());
+            let design = qp_designs::transitions::by_name(self.looks[ci].transition.as_deref());
             (design.shared)(&side(from, before.as_ref()), &side(to, after.as_ref()))
         };
         let frame = after.is_some().then(|| {

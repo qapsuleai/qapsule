@@ -6,48 +6,21 @@ use std::collections::BTreeMap;
 
 use qp_schema::protocol::{
     AtBar, AttentionState, Candidate, Collection, Description, ErrorCode, Gesture, Op,
-    OutboundLine, PanelInfo, Query, QueryResult, Range, Reduce, Reduced, ScreenInfo, SeriesValues,
-    Target, Topic, Viewport, PROTOCOL_VERSION,
+    OutboundLine, PanelInfo, Query, QueryResult, Reduce, Reduced, ScreenInfo, SeriesValues, Target,
+    Topic, Viewport, PROTOCOL_VERSION,
 };
 use qp_schema::{CapsuleState, Document, Mark, Series, SeriesSource, View};
 use serde_json::Value;
 
-use crate::session::{permissions, Conn, Session};
+use crate::rd::{Conn, Rd};
 use qp_ops::apply::{all_ids, find_collection};
+use qp_ops::bounds::resolve_range;
 use qp_ops::expand::{need_finding, need_series, need_view, view_bar_series};
 use qp_ops::present::{present, profile_for};
 use qp_ops::provider::DocProvider;
 use qp_ops::select::{finding_about, finding_bar};
 use qp_plane::error::{invalid, ptr, PResult, E};
 use qp_plane::values::values;
-
-pub(crate) fn check_target_pub(doc: &Document, t: &Target, path: &str) -> PResult<()> {
-    if let Some(v) = &t.view {
-        need_view(doc, v, &ptr(path, "view"))?;
-    }
-    if let Some(s) = &t.series {
-        need_series(doc, s, &ptr(path, "series"))?;
-    }
-    if let Some(i) = &t.item {
-        if find_collection(doc, i).is_none() {
-            return Err(
-                E::new(ErrorCode::NotFound, format!("item `{i}` does not exist"))
-                    .at(ptr(path, "item"))
-                    .dym(i, all_ids(doc))
-                    .build(),
-            );
-        }
-    }
-    if let (Some(a), Some(b)) = (t.from_bar, t.to_bar) {
-        if a > b {
-            return Err(invalid(
-                format!("from_bar {a} is after to_bar {b}"),
-                ptr(path, "from_bar"),
-            ));
-        }
-    }
-    Ok(())
-}
 
 /// Names of the variants of a tagged enum, from its JSON Schema.
 fn variant_names(schema: &Value, tag: &str) -> Vec<String> {
@@ -83,65 +56,6 @@ fn collection_items(doc: &Document, c: Collection) -> Vec<Value> {
         Collection::Narratives => doc.narratives.iter().map(item_json).collect(),
         Collection::Comments => doc.comments.iter().map(item_json).collect(),
         Collection::Proposals => doc.proposals.iter().map(item_json).collect(),
-    }
-}
-
-/// Resolves a range to `(from, to)` inclusive bar indexes over `t`.
-pub(crate) fn resolve_range(r: Option<&Range>, t: &[i64], path: &str) -> PResult<(usize, usize)> {
-    let n = t.len();
-    if n == 0 {
-        return Err(invalid("the series has no bars", path));
-    }
-    let last = n - 1;
-    let Some(r) = r else { return Ok((0, last)) };
-    let rp = ptr(path, "range");
-    let forms = [
-        r.last.is_some(),
-        r.from_bar.is_some() || r.to_bar.is_some(),
-        r.from_t.is_some() || r.to_t.is_some(),
-    ];
-    if forms.iter().filter(|x| **x).count() != 1 {
-        return Err(E::new(ErrorCode::Invalid, "give exactly one range form")
-            .at(rp)
-            .expected([
-                "{\"last\":n}",
-                "{\"from_bar\":a,\"to_bar\":b}",
-                "{\"from_t\":a,\"to_t\":b}",
-            ])
-            .build());
-    }
-    let empty = || {
-        E::new(ErrorCode::Invalid, "the range is empty")
-            .at(rp.clone())
-            .expected([format!("bars 0..={last}")])
-            .build()
-    };
-    if let Some(k) = r.last {
-        let k = usize::try_from(k).unwrap_or(usize::MAX).min(n);
-        if k == 0 {
-            return Err(empty());
-        }
-        return Ok((n - k, last));
-    }
-    if forms[1] {
-        let a = r
-            .from_bar
-            .map_or(0, |x| usize::try_from(x).unwrap_or(usize::MAX));
-        let b = r
-            .to_bar
-            .map_or(last, |x| usize::try_from(x).unwrap_or(usize::MAX).min(last));
-        if a > b {
-            return Err(empty());
-        }
-        return Ok((a, b));
-    }
-    let lo = r.from_t.unwrap_or(i64::MIN);
-    let hi = r.to_t.unwrap_or(i64::MAX);
-    let a = t.iter().position(|x| *x >= lo);
-    let b = t.iter().rposition(|x| *x <= hi);
-    match (a, b) {
-        (Some(a), Some(b)) if a <= b => Ok((a, b)),
-        _ => Err(empty()),
     }
 }
 
@@ -209,7 +123,7 @@ fn reduce(vals: &[Option<f64>], t: &[i64], from: usize, how: Reduce) -> Reduced 
     }
 }
 
-impl Session {
+impl Rd<'_> {
     #[allow(clippy::too_many_lines)]
     pub(crate) fn query(&mut self, ci: usize, q: &Query) -> PResult<QueryResult> {
         let qp = "/query";
@@ -236,22 +150,22 @@ impl Session {
                                 )
                             })
                             .collect(),
-                        principals: self.principals.clone(),
+                        principals: self.principals.to_vec(),
                         role,
-                        permissions: permissions(role),
+                        permissions: self.conns[ci].permissions.clone(),
                     },
                 })
             }
             Query::Get { id } => {
-                let Some(c) = find_collection(&self.doc, id) else {
+                let Some(c) = find_collection(self.doc, id) else {
                     return Err(
                         E::new(ErrorCode::NotFound, format!("item `{id}` does not exist"))
                             .at(ptr(qp, "id"))
-                            .dym(id, all_ids(&self.doc))
+                            .dym(id, all_ids(self.doc))
                             .build(),
                     );
                 };
-                let item = collection_items(&self.doc, c)
+                let item = collection_items(self.doc, c)
                     .into_iter()
                     .find(|v| v.get("id").and_then(Value::as_str) == Some(id))
                     .unwrap_or(Value::Null);
@@ -276,7 +190,7 @@ impl Session {
                         .map(item_json)
                         .collect()
                 } else {
-                    collection_items(&self.doc, *collection)
+                    collection_items(self.doc, *collection)
                 };
                 let items = if full.unwrap_or(false) || *collection != Collection::Series {
                     items
@@ -342,7 +256,7 @@ impl Session {
                 let asker = &self.conns[ci].principal;
                 for e in &mut entries {
                     if let Some(ev) = e.evidence.as_mut() {
-                        *ev = crate::claims::for_principal(&self.doc, &self.plane, asker, ev);
+                        *ev = self.v.evidence_for(asker, ev);
                     }
                 }
                 Ok(QueryResult::Log { entries })
@@ -355,7 +269,7 @@ impl Session {
             } => {
                 need_series(rd!(self), series, &ptr(qp, "series"))?;
                 self.gate_read(ci, series, &ptr(qp, "series"))?;
-                let v = values(rd!(self), &mut self.cache, series)
+                let v = values(rd!(self), self.cache, series)
                     .map_err(|m| invalid(m, ptr(qp, "series")))?;
                 let (a, b) = resolve_range(range.as_ref(), &v.t, qp)?;
                 let mut outputs: BTreeMap<String, Vec<Option<f64>>> = BTreeMap::new();
@@ -466,9 +380,9 @@ impl Session {
                     attention: AttentionState {
                         principal: principal.clone(),
                         viewport,
-                        focus: self.focus.get(principal).cloned(),
+                        focus: self.st.focus.get(principal).cloned(),
                         at: conn.and_then(|c| c.last_at),
-                        directives: self.directives.get(principal).cloned().unwrap_or_default(),
+                        directives: self.v.directives(principal).cloned().unwrap_or_default(),
                     },
                 })
             }
@@ -546,7 +460,7 @@ impl Session {
                             .iter()
                             .find(|x| &x.id == id)
                             .is_some_and(|x| {
-                                self.plane.gate(&self.doc, Some(asker), &x.series).is_some()
+                                self.plane.gate(self.doc, Some(asker), &x.series).is_some()
                             })
                     });
                     let view_blocked = self
@@ -559,21 +473,14 @@ impl Session {
                         .is_some_and(|v| {
                             v.layers
                                 .iter()
-                                .any(|l| self.plane.gate_layer(&self.doc, Some(asker), l).is_some())
+                                .any(|l| self.plane.gate_layer(self.doc, Some(asker), l).is_some())
                         });
                     facts_blocked || view_blocked
                 };
                 // (R3, §20) A capsule with a story speaks with the realizer's sentence for
                 // the asker (its language and entitlement) when the authority runs the
                 // engine or the asker reads another language (`Session::headlines`).
-                let mut pr = present(
-                    rd!(self),
-                    &mut self.cache,
-                    &f,
-                    kind,
-                    &profile,
-                    &self.headlines,
-                );
+                let mut pr = present(rd!(self), self.cache, &f, kind, &profile, self.headlines);
                 if blocked {
                     pr.spark = None;
                     pr.view = None;

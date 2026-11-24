@@ -9,19 +9,19 @@ use qp_schema::protocol::{
 };
 use qp_schema::{Fact, SeriesSource};
 
-use crate::session::Session;
+use crate::rd::Rd;
 use qp_ops::expand::need_series;
 use qp_plane::error::{PResult, E};
 use qp_plane::plane::binding_of;
 use qp_plane::values::{find_series, values};
 
-impl Session {
+impl Rd<'_> {
     /// `no_entitlement` / `no_data` at `path` if connection `ci`'s principal may not read
     /// the data of `series` now (§18.3).
     pub(crate) fn gate_read(&self, ci: usize, series: &str, path: &str) -> PResult<()> {
         match self
             .plane
-            .gate(&self.doc, Some(&self.conns[ci].principal), series)
+            .gate(self.doc, Some(&self.conns[ci].principal), series)
         {
             Some(b) => Err(b.error(series, path)),
             None => Ok(()),
@@ -44,7 +44,7 @@ impl Session {
             .collect();
         let ids = match series {
             Some(id) => {
-                need_series(&self.doc, id, path)?;
+                need_series(self.doc, id, path)?;
                 if !bound.iter().any(|b| b == id) {
                     return Err(E::new(
                         ErrorCode::Invalid,
@@ -60,7 +60,7 @@ impl Session {
         };
         let mut out = Vec::with_capacity(ids.len());
         for id in ids {
-            let Some(binding) = find_series(&self.doc, &id).and_then(binding_of) else {
+            let Some(binding) = find_series(self.doc, &id).and_then(binding_of) else {
                 continue;
             };
             let (state, reason) = self
@@ -71,11 +71,20 @@ impl Session {
                 .anchor_t
                 .or_else(|| self.plane.series.get(&id).and_then(|bs| bs.bound.anchor_t));
             let position = if state == BindingState::Ready {
+                // (RF1 S3.2) The store's position read without its prefix-digest memo
+                // (the plane is the authority's, read through the view): the same digest
+                // (`FeedStore::digest_u64` is `data_digest_u64` of all bars).
                 self.plane
                     .series
-                    .get_mut(&id)
-                    .and_then(|bs| bs.bound.store.as_mut())
-                    .map(qp_source::FeedStore::position)
+                    .get(&id)
+                    .and_then(|bs| bs.bound.store.as_ref())
+                    .map(|s| qp_schema::data::DataPosition {
+                        feed: s.feed().clone(),
+                        bars: s.bars().len() as u64,
+                        last_t: s.bars().last().map(|b| b.t),
+                        seq: s.seq(),
+                        digest: qp_schema::data::data_digest(s.bars()),
+                    })
             } else {
                 None
             };
@@ -142,7 +151,7 @@ impl Session {
             c.message = "the fact has no evidence reference (written before RP2)".to_owned();
             return c;
         };
-        if let Some(b) = self.plane.gate(&self.doc, Some(asker), &stored.series) {
+        if let Some(b) = self.plane.gate(self.doc, Some(asker), &stored.series) {
             c.status = if b.state == BindingState::NoEntitlement {
                 EvidenceStatus::NoEntitlement
             } else {
@@ -192,7 +201,7 @@ impl Session {
             .is_some_and(|s| matches!(s.source, SeriesSource::Study { .. }));
         let mut value_diff: Option<String> = None;
         if is_study {
-            let v = values(rd!(self), &mut self.cache, &f.series).ok();
+            let v = values(rd!(self), self.cache, &f.series).ok();
             let idx = v.as_ref().and_then(|v| v.t.binary_search(&f.t).ok());
             for (key, back) in [("value", 0usize), ("prev", 1usize)] {
                 let Some(then) = f.evidence.get(key).copied() else {

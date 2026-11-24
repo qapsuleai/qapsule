@@ -1,4 +1,4 @@
-# read/interact/
+# interact/
 
 `interact.rs`'in parçaları: yüzeyin biçim ve çerçeve ayarları (`style`) ve derinlikteki
 sahneler (`scenes`: derinlik görünümü, okur, kapsül ve yan sahneler, geçişler).

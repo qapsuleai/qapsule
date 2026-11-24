@@ -1,14 +1,16 @@
 //! The `Subsystem` trait and its call context.
 
-use qp_schema::protocol::{Op, ProtocolError};
+use qp_plane::values::Cache;
+use qp_schema::protocol::{Op, ProtocolError, ViewState};
 
 use crate::handlers::{
     ClaimKind, ConditionKind, InputHandler, OpHandler, QueryHandler, TopicHandler, ValueSource,
 };
-use crate::{Moment, Outbox, Phase, SessionView, Slots};
+use crate::{Moment, Outbox, Phase, ReadView, SessionView, Slots};
 
 /// A call's context: a split borrow of the authority (read view, the subsystems' state,
-/// the outbox).
+/// the outbox, and the two pieces of the authority a reading changes: the values cache
+/// and the connections' view state; RF1 S3.2, critique-1 B9).
 pub struct SessionCtx<'a> {
     /// The authority, read only.
     pub view: &'a dyn SessionView,
@@ -16,6 +18,15 @@ pub struct SessionCtx<'a> {
     pub slots: &'a mut Slots,
     /// Where writes go.
     pub out: &'a mut Outbox,
+    /// The values cache (study values over the reading document; [`SessionView::reading`]):
+    /// taken out of the authority for the call, so that it can be warmed next to the view.
+    pub cache: &'a mut Cache,
+    /// The connections' view state (`look`, §7: open capsule, depth, range, frames,
+    /// style), by connection index ([`SessionView::conn_ids`] order).
+    pub looks: &'a mut Vec<ViewState>,
+    /// The read view, at a query's or a gesture's call only ([`QueryHandler`],
+    /// [`InputHandler`]; `None` at the phases).
+    pub read: Option<&'a dyn ReadView>,
 }
 
 /// A subsystem: a stateless behaviour object (`&'static dyn Subsystem`) registered with

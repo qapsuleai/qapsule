@@ -13,6 +13,7 @@ qp-source = { version = "0.0.0", path = "../qp-source" }
 qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
 # The standard subsystems (one line each in `compose`).
 qp-watch = { version = "0.0.0", path = "../qp-watch" }
+qp-read = { version = "0.0.0", path = "../qp-read" }
 # The conformance runner (`conform`).
 qp-ops = { version = "0.0.0", path = "../qp-ops" }
 qp-plane = { version = "0.0.0", path = "../qp-plane" }

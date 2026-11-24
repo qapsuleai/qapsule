@@ -2,4 +2,3 @@
 //! the session.
 
 mod headparts;
-mod item_memo;

@@ -2101,6 +2101,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-read"
+version = "0.0.0"
+dependencies = [
+ "qp-capsule",
+ "qp-compute",
+ "qp-designs",
+ "qp-glyph",
+ "qp-grammar",
+ "qp-look",
+ "qp-ops",
+ "qp-plane",
+ "qp-schema",
+ "qp-source",
+ "qp-subsystem",
+ "qp-voice",
+ "schemars",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-render"
 version = "0.0.0"
 dependencies = [
@@ -2147,6 +2168,7 @@ dependencies = [
  "qp-look",
  "qp-ops",
  "qp-plane",
+ "qp-read",
  "qp-schema",
  "qp-source",
  "qp-subsystem",

@@ -3,7 +3,7 @@
 
 use super::*;
 
-impl Session {
+impl Rd<'_> {
     pub(crate) fn at_bar(&mut self, series: &str, i: usize) -> AtBar {
         let bars = rd!(self)
             .series
@@ -22,7 +22,7 @@ impl Session {
             .collect();
         let mut studies = BTreeMap::new();
         for d in deps {
-            if let Ok(v) = values(rd!(self), &mut self.cache, &d) {
+            if let Ok(v) = values(rd!(self), self.cache, &d) {
                 let m: BTreeMap<String, Option<f64>> = v
                     .outputs
                     .iter()
@@ -42,7 +42,7 @@ impl Session {
     /// Times of the view's future slots (after its last bar; point series such as a
     /// forecast fan, `docs/GRAMMAR.md` §3). A viewport may reach them (K25).
     pub(crate) fn future_times(&self, view: &View) -> Vec<i64> {
-        qp_grammar::compile::future_times(view, &DocProvider::new(rd!(self), &self.cache))
+        qp_grammar::compile::future_times(view, &DocProvider::new(rd!(self), self.cache))
     }
 
     /// Initial visible range of a view for a surface (§4.6): the slots whose time falls
@@ -168,7 +168,7 @@ impl Session {
         // The viewport may end in a future slot (K25): the last close shown is the
         // close of the last bar in it.
         let last_close = bs
-            .filter(|s| self.plane.gate(&self.doc, Some(asker), &s.id).is_none())
+            .filter(|s| self.plane.gate(self.doc, Some(asker), &s.id).is_none())
             .and_then(Series::bars)
             .and_then(|b| {
                 b.get(
@@ -220,8 +220,8 @@ impl Session {
                 .collect(),
             capsules,
             last_close,
-            view_state: (c.look != qp_schema::protocol::ViewState::default())
-                .then(|| c.look.clone()),
+            view_state: (self.look_at(c) != &qp_schema::protocol::ViewState::default())
+                .then(|| self.look_at(c).clone()),
         })
     }
 
@@ -350,12 +350,12 @@ impl Session {
                     )
                     .build());
                 }
-                self.input_counter += 1;
+                self.st.input_counter += 1;
                 let principal = self.conns[ci].principal.clone();
                 let c = &mut self.conns[ci];
-                c.last_input = self.input_counter;
+                c.last_input = self.st.input_counter;
                 c.last_at = Some(self.clock);
-                self.focus.insert(
+                self.st.focus.insert(
                     principal,
                     Target {
                         layer: None,
@@ -383,11 +383,11 @@ impl Session {
             from_bar: nf,
             to_bar: nt,
         };
-        self.input_counter += 1;
+        self.st.input_counter += 1;
         let c = &mut self.conns[ci];
         c.viewports.insert(view.id.clone(), (nf, nt));
         c.current = Some(vp.clone());
-        c.last_input = self.input_counter;
+        c.last_input = self.st.input_counter;
         c.last_at = Some(self.clock);
         let principal = c.principal.clone();
         let events = self.viewport_events(&principal, &vp);

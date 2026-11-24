@@ -389,7 +389,7 @@ impl Session {
     }
 
     /// About `principal`'s position or one of the document's active intents.
-    pub(super) fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
+    pub(crate) fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
         let a = self.audience_of(doc, principal);
         a.positions.get(instrument).is_some_and(|q| *q != 0.0)
             || self
@@ -413,7 +413,7 @@ impl Session {
 
     /// Whether `story` passes the filters of the `capsules` query `q` (all but
     /// `latest` and `limit`).
-    pub(super) fn capsule_passes(
+    pub(crate) fn capsule_passes(
         &self,
         doc: &Document,
         principal: &str,
@@ -448,7 +448,7 @@ impl Session {
 
     /// (R5/M19, K53) Whether `story` passes every filter of the `capsules` query `q` but
     /// the audience, and the audience keeps it out by the coin-flip rule alone.
-    pub(super) fn coin_flip_hidden_by(
+    pub(crate) fn coin_flip_hidden_by(
         &self,
         doc: &Document,
         principal: &str,
@@ -495,7 +495,7 @@ impl Session {
     /// (R4/K42-FEED) Whether `it`'s latest transition is at the latest final bar of its
     /// series: what became known in the current bar period (for a daily series, the
     /// current session).
-    pub(super) fn is_current(&self, it: &CapsuleItem) -> bool {
+    pub(crate) fn is_current(&self, it: &CapsuleItem) -> bool {
         [rd!(self), &self.doc]
             .into_iter()
             .find_map(|d| {
@@ -505,4 +505,92 @@ impl Session {
             })
             .is_some_and(|last| usize::try_from(it.last_bar).is_ok_and(|b| b >= last))
     }
+
+    /// The ledger rows with a key, retracted capsules left out: the engine's when the
+    /// authority runs it (license-independent, K33: the same for every reader, also
+    /// inside [`Session::as_reader`]), else the document's.
+    pub(crate) fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+        match self.runner.as_ref() {
+            Some(r) => {
+                // (R3/K1) In the public world, the public-only engine's.
+                let engine = match (self.in_public, r.pub_engine.as_ref()) {
+                    (true, Some(e)) => e,
+                    _ => &r.engine,
+                };
+                // An engine's ledger: no capsule of its own is retracted (RF1 S3.2: no
+                // `Document` built for it).
+                ledger_rows_of(&[], &engine.ledger())
+            }
+            None => ledger_rows(&self.doc),
+        }
+    }
+
+    /// (R4/S1, §20.2, ergonomics C11) What a capsule selector `sel` may also have matched
+    /// that `principal` cannot see: when the reader lacks the licensed flow of the
+    /// instrument (the selector's, else the resolved capsule's) and the selector does not
+    /// rule flow out, the server comments the reader already gets (`capsules`) that are
+    /// newer than the resolved capsule's latest transition, with their entitlement. No new
+    /// existence oracle: only what the comments told this reader already.
+    pub(crate) fn withheld_for(
+        &self,
+        principal: &str,
+        sel: &qp_schema::protocol::CapsuleSel,
+        item: &CapsuleItem,
+    ) -> Option<qp_schema::protocol::Withheld> {
+        if sel
+            .meaning
+            .is_some_and(|m| m != qp_schema::capsule::MeaningKind::Flow)
+        {
+            return None;
+        }
+        let instrument = sel.instrument.as_deref().unwrap_or(&item.instrument);
+        let comments: Vec<ServerComment> = self
+            .comments_for(principal)
+            .into_iter()
+            .filter(|c| c.instrument == instrument && c.t > item.t)
+            .collect();
+        if comments.is_empty() {
+            return None;
+        }
+        let mut requires: Vec<String> = comments
+            .iter()
+            .filter_map(|c| c.attachments.get("entitlement").cloned())
+            .collect();
+        requires.sort();
+        requires.dedup();
+        Some(qp_schema::protocol::Withheld { requires, comments })
+    }
+}
+
+/// [`super::ledger_rows`] of ledger `entries` beside `capsules` (RF1 S3.2: an engine's ledger needs
+/// no document).
+pub(crate) fn ledger_rows_of(
+    capsules: &[Capsule],
+    entries: &[qp_schema::LedgerEntry],
+) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+    let retracted: BTreeSet<&str> = capsules
+        .iter()
+        .filter(|c| {
+            c.story
+                .as_ref()
+                .is_some_and(|s| s.stage == Stage::Retracted)
+        })
+        .map(|c| c.id.as_str())
+        .collect();
+    entries
+        .iter()
+        .filter(|e| e.capsule.as_deref().is_none_or(|c| !retracted.contains(c)))
+        .filter_map(|e| {
+            let k = e.key.clone()?;
+            let kind = qp_schema::capsule::MeaningKind::ALL
+                .into_iter()
+                .find(|m| k.starts_with(&format!("{}/", m.name())))?;
+            Some((
+                k,
+                kind,
+                e.recorded_at,
+                e.outcome == qp_schema::Outcome::Confirmed,
+            ))
+        })
+        .collect()
 }

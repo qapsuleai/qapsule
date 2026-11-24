@@ -16,7 +16,7 @@ mod worlds;
 
 pub use files::{confine, read_json};
 pub(crate) use phases::expand_ops;
-pub use phases::Subsystems;
+pub use phases::{Lists, Subsystems};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -24,8 +24,8 @@ use std::path::Path;
 use qp_schema::protocol::{
     AckStatus, AttentionDirective, ChangeOp, ClientMsg, DocumentRef, ErrorCode, Event, Limits,
     LogEntry, Op, OutboundLine, Permissions, Principal, Profile, Proposal, ProposalState,
-    ProtocolError, Role, Seq, ServerMsg, SessionInit, Surface, SurfaceKind, Target, Topic,
-    Viewport, WriteMode, PROTOCOL_VERSION,
+    ProtocolError, Role, Seq, ServerMsg, SessionInit, Surface, Topic, Viewport, WriteMode,
+    PROTOCOL_VERSION,
 };
 use qp_schema::{Author, CapsuleState, Document};
 use serde_json::Value;
@@ -108,25 +108,6 @@ pub(crate) struct Conn {
     pub surface: Surface,
     pub profile: Profile,
     pub subs: Vec<Sub>,
-    /// View id -> visible range.
-    pub viewports: BTreeMap<String, (u64, u64)>,
-    /// Last viewport set by input.
-    pub current: Option<Viewport>,
-    /// Input counter value of the last input (0 = none).
-    pub last_input: u64,
-    /// Clock at the last input.
-    pub last_at: Option<i64>,
-    /// (R4, §7) View state: open capsule, its depth and chart range, frame sizes.
-    pub look: qp_schema::protocol::ViewState,
-}
-
-impl Conn {
-    pub(crate) fn has_screen(&self) -> bool {
-        matches!(
-            self.surface.kind,
-            SurfaceKind::Desktop | SurfaceKind::Phone | SurfaceKind::Watch
-        )
-    }
 }
 
 /// The reference authority for one document.
@@ -140,12 +121,14 @@ pub struct Session {
     pub(crate) ttl: Option<u64>,
     pub(crate) limits: Limits,
     pub(crate) conns: Vec<Conn>,
+    /// (R4, §7) The connections' view state (open capsule, its depth and chart range,
+    /// frame sizes, style), by connection index: kept beside `conns` so that a subsystem
+    /// call can borrow it (`SessionCtx::looks`; RF1 S3.2).
+    pub(crate) looks: Vec<qp_schema::protocol::ViewState>,
     pub(crate) cache: Cache,
     pub(crate) intent_state: BTreeMap<String, bool>,
     pub(crate) directives: BTreeMap<String, Vec<AttentionDirective>>,
-    pub(crate) focus: BTreeMap<String, Target>,
     pub(crate) att_counter: u64,
-    pub(crate) input_counter: u64,
     pub(crate) schema: Value,
     /// The data plane (bound series resolutions; outside the document, §18).
     pub(crate) plane: DataPlane,

@@ -75,7 +75,7 @@ pub trait OpHandler: Sync {
 
 /// A query kind a subsystem answers.
 pub trait QueryHandler: Sync {
-    /// The query's wire tag (`kind`).
+    /// The query's wire tag (`kind`; [`crate::ANY`]: every kind no other handler takes).
     fn kind(&self) -> &'static str;
     /// Answers `q` of connection `conn` (inside the reader's projection).
     ///
@@ -91,7 +91,7 @@ pub trait QueryHandler: Sync {
 
 /// A gesture kind a subsystem handles (`input`).
 pub trait InputHandler: Sync {
-    /// The gesture's wire tag (`kind`).
+    /// The gesture's wire tag (`kind`; [`crate::ANY`]: every kind no other handler takes).
     fn kind(&self) -> &'static str;
     /// Handles gesture `g` of connection `conn`: the result and its notifications.
     ///

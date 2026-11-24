@@ -362,7 +362,7 @@ impl Session {
         let (from, to) = match range {
             None => (0, u64::MAX),
             Some(r) => {
-                let (a, b) = crate::query::resolve_range(Some(r), &times, qp)?;
+                let (a, b) = qp_ops::bounds::resolve_range(Some(r), &times, qp)?;
                 (a as u64, b as u64)
             }
         };

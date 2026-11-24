@@ -19,7 +19,10 @@ okuyucu izdüşümü `Proj`), `qp-ops` (işlem açılımı: `Ctx`, `expand_op`, 
 - `SessionView` (dar okuma görünümü: doküman, okuma dokümanı, günlük, saat, kimlik,
   bağlantı `ConnView`, bağlantı listesi ve abonelikleri, okuyucunun dünyası `public_view` ve
   izdüşümü `reader_proj`, veri düzlemi, piyasa, dünya, `entitled`, `param` K78, `run_kind`
-  `RunKind`, yeniden oynatma konumu), `SessionCtx { view, slots, out }` (bölünmüş ödünç).
+  `RunKind`, yeniden oynatma konumu), `ReadView` (`SessionView`'ın okuma eki, RF1 S3.2: başlıklar,
+  izdüşüm, günlük girdisinin izdüşümü, öneri önizlemesi, kapsül yaşamının okuma fonksiyonları;
+  yalnız sorgu ve girdi çağrısında), `SessionCtx { view, slots, out, cache, looks, read }`
+  (bölünmüş ödünç: değer önbelleği ve bağlantıların görünüm durumu da ödünç gelir).
 - `Slots` (`TypeId` → kutu; tek, `PerWorld<T>`, bağlantı anahtarlı), `PerWorld`.
 - `Outbox` (motor girdisi `EngineEntry`, bildirim, uyandırma; fazın kendi satırında alınanlar:
   bakışın girdisine değişim `amend`, o satırda bildirim `say`). Yazma sırası derinlik
@@ -31,6 +34,7 @@ okuyucu izdüşümü `Proj`), `qp-ops` (işlem açılımı: `Ctx`, `expand_op`, 
 - Kayıt kolları: `OpHandler` (tür `owns`, açılım + politika: `allowed`, `proposable`, `agent`
   `AgentOp`, `to_public`, `reader_private`), `QueryHandler`, `InputHandler`, `TopicHandler`,
   `ConditionKind` (canlı yol), `ValueSource` (D3), `ClaimKind` (D1).
+- `ANY`: sorgu/girdi işleyicisinin "başkasının almadığı her tür" etiketi (okuma alt sistemi).
 - `Registry`: kayıt sırasıyla alt sistemler ve tel etiketine göre tablolar; boşken her arama
   ıskalar, hiçbir faz çağrılmaz; `evaluates_conditions` (canlı yolun belleği atlanır).
   `op_name` (işlemin tel adı).

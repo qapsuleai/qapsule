@@ -1,13 +1,24 @@
 //! The narrow read view a subsystem gets of the authority.
 
+use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::rc::Rc;
 
+use qp_capsule::sentence::StudyMemo;
+use qp_ops::HeadlineSource;
+use qp_plane::capidx::ItemMemo;
+use qp_plane::error::PResult;
 use qp_plane::plane::DataPlane;
 use qp_plane::proj::Proj;
+use qp_schema::capsule::{MeaningKind, Story};
 use qp_schema::data::FeedKey;
 use qp_schema::market::MarketStatus;
-use qp_schema::protocol::{LogEntry, Permissions, Principal, Role, Seq, SurfaceKind, Topic};
-use qp_schema::Document;
+use qp_schema::protocol::{
+    AttentionDirective, CapsuleItem, CapsuleVoice, ChangeOp, ClaimEvidence, Language, LogEntry,
+    OutboundLine, Permissions, Principal, Profile, Query, QueryResult, Range, Role, Seq,
+    ServerComment, StoryRow, Surface, SurfaceKind, Topic, Viewport,
+};
+use qp_schema::{Calendar, Capsule, Document, Fact, Series};
 
 /// What a subsystem may know of a connection.
 #[derive(Debug, Clone)]
@@ -22,6 +33,10 @@ pub struct ConnView<'a> {
     pub permissions: Permissions,
     /// The surface kind it said hello with.
     pub surface: SurfaceKind,
+    /// The whole surface it said hello with (kind, language, depth; RF1 S3.2).
+    pub hello: &'a Surface,
+    /// Its presentation profile (RF1 S3.2).
+    pub profile: &'a Profile,
 }
 
 /// What kind of run the authority is in.
@@ -83,4 +98,127 @@ pub trait SessionView {
     fn replay_position(&self) -> Option<i64> {
         None
     }
+}
+
+/// The read view a query or input handler gets besides [`SessionView`] (RF1 S3.2, the
+/// reading subsystem `qp-read`; `SessionCtx::read`). A query or input runs inside the
+/// authority's `as_reader`: the document, the reading document and everything here are the
+/// asker's (its projection, its world, its language's headlines). Each method is the
+/// authority's own function of that name, unchanged.
+///
+/// A separate trait, given only at a query's or a gesture's call (not at the phases): an
+/// authority that never takes one (a replica's follower) never builds this table, so the
+/// functions behind it (proposal expansion, capsule detail, stories) stay out of a build
+/// that does not need them (the shell's WASM package; the ±2 % gate).
+pub trait ReadView: SessionView {
+    /// The principals of the session, in order.
+    fn principals(&self) -> &[Principal];
+    /// Finding id → the capsule sentence the grammar provider speaks with for the reader.
+    fn headlines(&self) -> &BTreeMap<String, String>;
+    /// The reader's headline pieces and voice surfaces (`DocProvider::with_parts`).
+    fn headline_source(&self) -> &dyn HeadlineSource;
+    /// The projection of the reader being read for (`None`: it may see everything).
+    fn proj(&self) -> Option<Rc<Proj>>;
+    /// The attention directives sent to `principal` (`attend`), in order.
+    fn directives(&self, principal: &str) -> Option<&Vec<AttentionDirective>>;
+    /// Log entry `e` as a reader with projection `p` in `lang` may receive it.
+    fn project_entry(&self, e: &LogEntry, p: &Proj, lang: Language) -> LogEntry;
+    /// Claim evidence `ev` as `principal` may read it (data-plane values, §18.3).
+    fn evidence_for(&self, principal: &str, ev: &ClaimEvidence) -> ClaimEvidence;
+    /// The events a viewport change of `principal` sends (`viewport` presence, §7).
+    fn viewport_events(&self, principal: &str, vp: &Viewport) -> Vec<OutboundLine>;
+    /// Pending proposal `pid` accepted now by `decider` (as its reader would), not
+    /// written: the document after it and its changes (the `preview` query).
+    ///
+    /// # Errors
+    /// As accepting it would fail.
+    fn accept_preview(&self, pid: &str, decider: &str) -> PResult<(Document, Vec<ChangeOp>)>;
+
+    // ---- Capsule life (stays in the authority; `qp-read` asks). `conn`: a connection's
+    // index in [`SessionView::conn_ids`] order.
+
+    /// The `stories` query of connection `conn`.
+    ///
+    /// # Errors
+    /// As the query.
+    #[allow(clippy::too_many_arguments)]
+    fn stories_query(
+        &self,
+        conn: usize,
+        instrument: &str,
+        series: Option<&str>,
+        range: Option<&Range>,
+        page: (Option<u32>, Option<&str>),
+        path: &str,
+    ) -> PResult<QueryResult>;
+    /// The reader's story rows of bar series `series`.
+    fn story_rows(&self, series: &str, principal: &str, lang: Language) -> Vec<StoryRow>;
+    /// A story row's time, as the reader's clock writes it.
+    fn row_stamp(&self, row: &StoryRow, lang: Language) -> Option<String>;
+    /// One capsule as listed for a reader (`p`: its projection; `memo`: one pass's values).
+    fn capsule_item(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        lang: Language,
+        principal: &str,
+        memo: &mut StudyMemo,
+    ) -> Option<CapsuleItem>;
+    /// A capsule's voice surfaces for the reader's chosen voice.
+    #[allow(clippy::too_many_arguments)]
+    fn reader_voice(
+        &self,
+        doc: &Document,
+        c: &Capsule,
+        p: Option<&Proj>,
+        lang: Language,
+        voice: &str,
+        clock: bool,
+        memo: &mut StudyMemo,
+    ) -> Option<CapsuleVoice>;
+    /// The market note of a listed capsule (§24).
+    fn market_item(&self, it: &mut CapsuleItem, lang: Language, principal: &str);
+    /// Whether `story` passes every filter of the `capsules` query `q`.
+    fn capsule_passes(&self, doc: &Document, principal: &str, story: &Story, q: &Query) -> bool;
+    /// Whether `story` is hidden from the `capsules` query `q` only by the coin-flip rule.
+    fn coin_flip_hidden_by(
+        &self,
+        doc: &Document,
+        principal: &str,
+        story: &Story,
+        q: &Query,
+    ) -> bool;
+    /// Whether `instrument` is relevant to `principal` (its positions and intents).
+    fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool;
+    /// Whether the coin-flip rule marks `story` for `principal`.
+    fn coin_flip_of(&self, principal: &str, story: &Story) -> bool;
+    /// Whether a listed capsule's transition is current.
+    fn is_current(&self, it: &CapsuleItem) -> bool;
+    /// The series a capsule item reads its bars from.
+    fn item_series<'d>(&'d self, doc: &'d Document, series: &str) -> Option<&'d Series>;
+    /// A fact by id over the facts sentences read.
+    fn fact_by_id(&self, id: &str) -> Option<&Fact>;
+    /// The `capsules` items by exact input (entitled readers).
+    fn item_memo(&self) -> &RefCell<ItemMemo>;
+    /// The headline calendar the host set.
+    fn headline_cal(&self) -> Option<&Calendar>;
+    /// The server comments `principal` gets.
+    fn comments_for(&self, principal: &str) -> Vec<ServerComment>;
+    /// The `capsule` query of connection `conn`: capsule (or finding) `id`'s detail
+    /// (stays with capsule life: the comment validator reads the same detail).
+    ///
+    /// # Errors
+    /// No capsule with a story `id`, or its bars are not available.
+    /// `look`: the connection's voice and clock (its view state).
+    fn capsule_query(
+        &self,
+        conn: usize,
+        id: &str,
+        path: &str,
+        look: (Option<&str>, bool),
+    ) -> PResult<QueryResult>;
+    /// The ledger rows with a key, retracted capsules left out (key, meaning, time,
+    /// realized): the engine's when the authority runs one, else the document's.
+    fn ledger_now(&self) -> Vec<(String, MeaningKind, i64, bool)>;
 }

@@ -331,3 +331,18 @@ fn the_settled_phase_follows_a_settled_answer() {
     let last = serde_json::to_value(lines.last().unwrap()).unwrap();
     assert_eq!(last["msg"]["error"]["message"], "settled px", "{last}");
 }
+
+/// (RF1 S3.2) Queries and gestures are the reading subsystem's: an authority without it
+/// answers them `unsupported` (the composition always registers it).
+#[test]
+fn without_the_reading_subsystem_queries_and_inputs_are_unsupported() {
+    let mut s = session();
+    hello(&mut s, "c", "arkin");
+    for msg in [
+        json!({"type":"query","id":"q","query":{"kind":"document"}}),
+        json!({"type":"input","id":"i","gesture":{"kind":"style","clock":true}}),
+    ] {
+        let r = send(&mut s, "c", msg);
+        assert_eq!(r[0]["msg"]["error"]["code"], "unsupported", "{r:?}");
+    }
+}

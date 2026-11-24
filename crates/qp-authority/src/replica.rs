@@ -355,7 +355,10 @@ impl Replica {
         self.s.as_ref().map(Session::document)
     }
 
-    /// The follower session (read access: queries over the replica's own data).
+    /// The follower session (read access to the replica's own data through its methods:
+    /// document, scene, provider). Built by the composition with the follower's subsystems
+    /// (`qp_session::FOLLOWER`, without the reading subsystem; RF1 S3.2): a `query` or an
+    /// `input` sent to it with `handle_raw` is answered `unsupported`.
     pub fn session_mut(&mut self) -> Option<&mut Session> {
         self.s.as_mut()
     }

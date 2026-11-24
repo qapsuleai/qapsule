@@ -1,6 +1,7 @@
 //! The composition (`docs/CONCEPTS.md` "Bileşim"): the standard subsystems, and the
 //! authorities built with them. Each type here wraps its `qp-authority` type
-//! (`Deref`/`DerefMut`: today's call sites unchanged) and builds it with [`STANDARD`].
+//! (`Deref`/`DerefMut`: today's call sites unchanged) and builds it with [`STANDARD`]; a
+//! follower (the replica, the viewer's open side) with [`FOLLOWER`] (RF1 S3.2).
 //! New code reaches a subsystem's state with [`Session::sub`] / [`Session::sub_mut`],
 //! not through `Deref`.
 
@@ -13,10 +14,21 @@ use qp_subsystem::Subsystem;
 /// The standard subsystems, in registration order: one line per subsystem.
 static LIST: &[&dyn Subsystem] = &[
     &qp_watch::WATCH, // izleme niyeti (RF1 S3.1)
+    &qp_read::READ,   // okuma ve sunum (RF1 S3.2)
 ];
 
 /// The standard subsystems every authority of the composition is built with.
 pub const STANDARD: qp_authority::Subsystems = qp_authority::Subsystems::new(LIST);
+
+/// The standard subsystems of a follower (a replica's authority, a viewer's open side):
+/// [`STANDARD`] without the reading subsystem. A follower takes no `query` or `input` (no
+/// connection talks to it; it follows a host's log and is read through its own methods),
+/// so the reading subsystem would never be called there; leaving it out keeps its code out
+/// of the shell's WASM package (RF1 S3.2: +1.38 MB otherwise; the WASM ±2 % gate).
+pub const FOLLOWER: qp_authority::Subsystems = qp_authority::Subsystems::new(FOLLOWER_LIST);
+
+/// [`FOLLOWER`]'s list.
+static FOLLOWER_LIST: &[&dyn Subsystem] = &[&qp_watch::WATCH];
 
 /// Implements `Deref`/`DerefMut` to the wrapped `qp-authority` type.
 macro_rules! wraps {
@@ -120,6 +132,44 @@ impl Session {
     pub fn into_inner(self) -> qp_authority::Session {
         self.0
     }
+
+    /// Compiles a view as connection `conn` sees it: `view_id` (default: the connection's
+    /// current view) at the connection's visible range of that view, unless `opts.range`
+    /// is set (the reading subsystem's `hit` range).
+    ///
+    /// # Errors
+    /// Unknown connection or view; compile errors as in `Session::scene`.
+    #[allow(clippy::result_large_err)] // the authority's protocol error, as its `scene`
+    pub fn scene_for(
+        &mut self,
+        conn: &str,
+        view_id: Option<&str>,
+        opts: &qp_authority::CompileOptions,
+    ) -> Result<qp_schema::scene::SceneDesc, qp_schema::protocol::ProtocolError> {
+        let (vid, range) = self
+            .0
+            .with_subsystems(|ctx| qp_read::scene_for_range(ctx, conn, view_id))?;
+        let mut o = opts.clone();
+        if o.range.is_none() {
+            o.range = range;
+        }
+        self.0.scene(&vid, &o)
+    }
+
+    /// [`qp_read::explain_scene`] of view `view_id` compiled with `opts`.
+    ///
+    /// # Errors
+    /// As `Session::scene`.
+    #[allow(clippy::result_large_err)] // the authority's protocol error, as its `scene`
+    pub fn explain(
+        &mut self,
+        view_id: &str,
+        opts: &qp_authority::CompileOptions,
+    ) -> Result<String, qp_schema::protocol::ProtocolError> {
+        let view = qp_ops::expand::need_view(self.0.document(), view_id, "/view")?.clone();
+        let scene = self.0.scene(view_id, opts)?;
+        Ok(qp_read::explain_scene(&view, &scene))
+    }
 }
 
 /// The replay host with the standard subsystems.
@@ -175,7 +225,7 @@ impl ReplayHost {
     }
 }
 
-/// A replica whose follower authority has the standard subsystems.
+/// A replica whose follower authority has the follower's subsystems ([`FOLLOWER`]).
 #[derive(Debug)]
 pub struct Replica(qp_authority::Replica);
 wraps!(Replica, qp_authority::Replica);
@@ -184,7 +234,7 @@ impl Replica {
     /// A replica for `principal` whose data comes from the host's `provider`.
     #[must_use]
     pub fn new(principal: &str, provider: Box<dyn qp_source::SourceProvider>) -> Self {
-        Self(qp_authority::Replica::new(principal, provider, STANDARD))
+        Self(qp_authority::Replica::new(principal, provider, FOLLOWER))
     }
 
     /// A replica whose provider is a [`qp_source::MemoryProvider`] that also takes the
@@ -192,12 +242,13 @@ impl Replica {
     #[must_use]
     pub fn with_memory(principal: &str, provider: qp_source::MemoryProvider) -> Self {
         Self(qp_authority::Replica::with_memory(
-            principal, provider, STANDARD,
+            principal, provider, FOLLOWER,
         ))
     }
 }
 
-/// The device's side of the open capsule, its replica with the standard subsystems.
+/// The device's side of the open capsule, its replica with the follower's subsystems
+/// ([`FOLLOWER`]).
 #[derive(Debug)]
 pub struct OpenSide(qp_authority::viewer::OpenSide);
 wraps!(OpenSide, qp_authority::viewer::OpenSide);
@@ -214,7 +265,27 @@ impl OpenSide {
         calendar: Option<qp_schema::Calendar>,
     ) -> Self {
         Self(qp_authority::viewer::OpenSide::new(
-            principal, open, seq, provider, calendar, STANDARD,
+            principal, open, seq, provider, calendar, FOLLOWER,
         ))
+    }
+}
+
+#[cfg(test)]
+mod lists {
+    use super::{FOLLOWER, STANDARD};
+    use qp_subsystem::Subsystem as _;
+
+    /// (RF1 S3.2, audit-s32 B2) The follower's list is the standard list without the
+    /// reading subsystem, in the same order: a subsystem added to `LIST` is added to
+    /// `FOLLOWER_LIST` too unless it is a reading of a connection (queries, gestures).
+    #[test]
+    fn the_follower_list_is_the_standard_list_without_reading() {
+        let names = |l: qp_authority::Subsystems| -> Vec<&str> {
+            l.list().iter().map(|s| s.name()).collect()
+        };
+        let mut want = names(STANDARD);
+        want.retain(|n| *n != qp_read::READ.name());
+        assert_eq!(names(FOLLOWER), want);
+        assert!(names(STANDARD).contains(&"read"));
     }
 }

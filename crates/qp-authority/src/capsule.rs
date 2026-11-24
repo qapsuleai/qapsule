@@ -523,8 +523,16 @@ fn broken_stories<'a>(
 pub(crate) fn ledger_rows(
     doc: &Document,
 ) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
-    let retracted: BTreeSet<&str> = doc
-        .capsules
+    ledger_rows_of(&doc.capsules, &doc.ledger.entries)
+}
+
+/// [`ledger_rows`] of ledger `entries` beside `capsules` (RF1 S3.2: an engine's ledger needs
+/// no document).
+pub(crate) fn ledger_rows_of(
+    capsules: &[Capsule],
+    entries: &[qp_schema::LedgerEntry],
+) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+    let retracted: BTreeSet<&str> = capsules
         .iter()
         .filter(|c| {
             c.story
@@ -533,8 +541,7 @@ pub(crate) fn ledger_rows(
         })
         .map(|c| c.id.as_str())
         .collect();
-    doc.ledger
-        .entries
+    entries
         .iter()
         .filter(|e| e.capsule.as_deref().is_none_or(|c| !retracted.contains(c)))
         .filter_map(|e| {

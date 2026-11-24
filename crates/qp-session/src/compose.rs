@@ -128,6 +128,7 @@ impl Session {
     ///
     /// # Errors
     /// Unknown connection or view; compile errors as in `Session::scene`.
+    #[allow(clippy::result_large_err)] // the authority's protocol error, as its `scene`
     pub fn scene_for(
         &mut self,
         conn: &str,
@@ -148,6 +149,7 @@ impl Session {
     ///
     /// # Errors
     /// As `Session::scene`.
+    #[allow(clippy::result_large_err)] // the authority's protocol error, as its `scene`
     pub fn explain(
         &mut self,
         view_id: &str,

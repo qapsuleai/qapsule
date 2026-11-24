@@ -517,29 +517,9 @@ impl Session {
                     (true, Some(e)) => e,
                     _ => &r.engine,
                 };
-                let doc = Document {
-                    ledger: qp_schema::Ledger {
-                        entries: engine.ledger(),
-                    },
-                    ..Document {
-                        schema_version: String::new(),
-                        id: String::new(),
-                        title: None,
-                        display_tz: None,
-                        series: Vec::new(),
-                        views: Vec::new(),
-                        facts: Vec::new(),
-                        findings: Vec::new(),
-                        capsules: Vec::new(),
-                        intents: Vec::new(),
-                        ledger: qp_schema::Ledger::default(),
-                        narratives: Vec::new(),
-                        proposals: Vec::new(),
-                        audiences: BTreeMap::new(),
-                        comments: Vec::new(),
-                    }
-                };
-                ledger_rows(&doc)
+                // An engine's ledger: no capsule of its own is retracted (RF1 S3.2: no
+                // `Document` built for it).
+                ledger_rows_of(&[], &engine.ledger())
             }
             None => ledger_rows(&self.doc),
         }

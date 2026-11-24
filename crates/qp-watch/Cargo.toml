@@ -1,0 +1,18 @@
+[package]
+name = "qp-watch"
+description = "Qapsule watches (izleme niyeti): the first subsystem of the authority — add_watch/remove_watch expansion and policy, matching watches against story transitions, intent_matched events."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
+qp-ops = { version = "0.0.0", path = "../qp-ops" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
+
+[lints]
+workspace = true

@@ -35,6 +35,11 @@ pub fn op_name(op: &Op) -> String {
 pub trait OpHandler: Sync {
     /// The op's wire tag (`add_watch`, …).
     fn op(&self) -> &'static str;
+    /// Whether `op` is of its kind (default: its wire tag is [`OpHandler::op`]; a handler
+    /// overrides it with a variant match, so that a lookup never serializes the op).
+    fn owns(&self, op: &Op) -> bool {
+        op_name(op) == self.op()
+    }
     /// Expands the op into changes against `doc` (`at`: its JSON pointer).
     ///
     /// # Errors

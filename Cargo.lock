@@ -2149,6 +2149,8 @@ dependencies = [
  "qp-plane",
  "qp-schema",
  "qp-source",
+ "qp-subsystem",
+ "qp-watch",
  "schemars",
  "serde",
  "serde_json",
@@ -2189,6 +2191,7 @@ dependencies = [
 name = "qp-subsystem"
 version = "0.0.0"
 dependencies = [
+ "qp-capsule",
  "qp-ops",
  "qp-plane",
  "qp-schema",
@@ -2226,6 +2229,17 @@ dependencies = [
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+]
+
+[[package]]
+name = "qp-watch"
+version = "0.0.0"
+dependencies = [
+ "qp-capsule",
+ "qp-ops",
+ "qp-plane",
+ "qp-schema",
+ "qp-subsystem",
 ]
 
 [[package]]

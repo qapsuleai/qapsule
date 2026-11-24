@@ -27,7 +27,7 @@ pub use handlers::{
     op_name, AgentOp, ClaimKind, ConditionKind, InputHandler, OpHandler, QueryHandler,
     TopicHandler, ValueSource,
 };
-pub use outbox::{EngineEntry, Outbox};
+pub use outbox::{EngineEntry, Outbox, MAX_EMIT_DEPTH};
 pub use phase::{Moment, Phase};
 pub use registry::Registry;
 pub use slots::{PerWorld, Slots};

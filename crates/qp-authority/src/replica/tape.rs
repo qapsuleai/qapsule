@@ -21,7 +21,8 @@ use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::replica::{document_digest, view_digest, Replica, ReplicaOptions};
-use crate::session::Session;
+use crate::session::{Session, Subsystems};
+use crate::viewer::OpenSide;
 
 /// Bars resolved before the stream.
 pub const START: usize = 200;
@@ -259,12 +260,12 @@ fn holds(op: &str, prev: Option<f64>, v: Option<f64>, k: f64) -> bool {
     }
 }
 
-/// Runs the scenario with the replica's data `lag` events behind the authority's.
+/// Runs the scenario (authorities built with `subs`), the replica's data `lag` events behind.
 ///
 /// # Errors
 /// The scenario cannot be set up.
-pub fn run(lag: usize) -> Result<Outcome, String> {
-    run_with(lag, &provider_init())
+pub fn run(lag: usize, subs: Subsystems) -> Result<Outcome, String> {
+    run_with(lag, &provider_init(), subs)
 }
 
 /// [`run`] with another replica provider (e.g. one that does not entitle `dev`).
@@ -272,10 +273,10 @@ pub fn run(lag: usize) -> Result<Outcome, String> {
 /// # Errors
 /// The scenario cannot be set up.
 #[allow(clippy::too_many_lines)]
-pub fn run_with(lag: usize, provider: &Value) -> Result<Outcome, String> {
+pub fn run_with(lag: usize, provider: &Value, subs: Subsystems) -> Result<Outcome, String> {
     let init: SessionInit = serde_json::from_value(init()).map_err(|e| e.to_string())?;
-    let a = Session::new(init, Path::new("."))?;
-    let r = Replica::with_memory("dev", memory_provider(provider)?);
+    let a = Session::new(init, Path::new("."), subs)?;
+    let r = Replica::with_memory("dev", memory_provider(provider)?, subs);
     let mut d = Driver {
         a,
         r,
@@ -456,8 +457,9 @@ type Said = std::collections::BTreeMap<(ClaimRef, i64), (ClaimState, Maturity)>;
 /// side) and records the authority's word on every claim it sent.
 fn viewer_deliver(
     lines: Vec<qp_schema::protocol::OutboundLine>,
-    side: &mut Option<crate::viewer::OpenSide>,
+    side: &mut Option<OpenSide>,
     said: &mut Said,
+    subs: Subsystems,
 ) {
     for l in lines.into_iter().filter(|l| l.conn == "r") {
         match &l.msg {
@@ -474,13 +476,7 @@ fn viewer_deliver(
                         None => {
                             // The open instrument's own source (THYAO), entitled.
                             let p = memory_provider(&provider_init()).expect("provider");
-                            *side = Some(crate::viewer::OpenSide::new(
-                                "dev",
-                                o.clone(),
-                                *seq,
-                                p,
-                                None,
-                            ));
+                            *side = Some(OpenSide::new("dev", o.clone(), *seq, p, None, subs));
                         }
                     }
                 }
@@ -515,7 +511,7 @@ fn viewer_deliver(
 /// # Errors
 /// The scenario cannot be set up.
 #[allow(clippy::too_many_lines)]
-pub fn run_viewer(lag: usize) -> Result<ViewerOutcome, String> {
+pub fn run_viewer(lag: usize, subs: Subsystems) -> Result<ViewerOutcome, String> {
     let mut iv = init();
     iv["document"]["series"]
         .as_array_mut()
@@ -531,7 +527,7 @@ pub fn run_viewer(lag: usize) -> Result<ViewerOutcome, String> {
             "synthetic":{"n":START,"seed":SEED + 1}}));
     iv["data"]["entitlements"]["dev"] = json!(["THYAO", "AKBNK"]);
     let init: SessionInit = serde_json::from_value(iv).map_err(|e| e.to_string())?;
-    let mut a = Session::new(init, Path::new("."))?;
+    let mut a = Session::new(init, Path::new("."), subs)?;
     let other = FeedKey {
         symbol: "AKBNK".to_owned(),
         interval: "1d".to_owned(),
@@ -550,7 +546,7 @@ pub fn run_viewer(lag: usize) -> Result<ViewerOutcome, String> {
             "width":390,"height":300}}),
     ] {
         let lines = a.handle_raw("r", &m.to_string());
-        viewer_deliver(lines, &mut side, &mut said);
+        viewer_deliver(lines, &mut side, &mut said, subs);
     }
     if side.is_none() {
         return Err("the viewer did not get the open capsule's slice".to_owned());
@@ -566,7 +562,7 @@ pub fn run_viewer(lag: usize) -> Result<ViewerOutcome, String> {
             if let Some(o) = others.get(i) {
                 lines.extend(a.data_event(o).map_err(|e| e.to_string())?);
             }
-            viewer_deliver(lines, &mut side, &mut said);
+            viewer_deliver(lines, &mut side, &mut said, subs);
         }
         // The host serves the device only the feeds it subscribes to (§22.5).
         let subs = a

@@ -69,7 +69,8 @@ impl<'a> Ctx<'a> {
         })
     }
 
-    pub(crate) fn prov(&self, based_on: Vec<String>) -> Provenance {
+    /// The provenance of an item this command makes (`based_on`: what it rests on).
+    pub fn prov(&self, based_on: Vec<String>) -> Provenance {
         Provenance {
             author: self.author.clone(),
             at: self.at,
@@ -79,7 +80,10 @@ impl<'a> Ctx<'a> {
     }
 
     /// Takes the given id (checked) or assigns `<kind>-<seq>-<n>`; records it as created.
-    pub(crate) fn new_id(
+    ///
+    /// # Errors
+    /// The given id is malformed or already taken.
+    pub fn new_id(
         &mut self,
         doc: &Document,
         kind: &str,
@@ -437,13 +441,29 @@ pub fn expand_ops(
     base_path: &str,
     ctx: &mut Ctx<'_>,
 ) -> PResult<Expanded> {
+    expand_ops_with(doc, ops, base_path, ctx, expand_op)
+}
+
+/// [`expand_ops`] with each op expanded by `one` (the authority's registry: an op a
+/// subsystem owns by its handler, every other op by [`expand_op`]); the one body of the
+/// command expansion (RF1 S3.1, audit-s30 B6).
+///
+/// # Errors
+/// As [`expand_ops`].
+pub fn expand_ops_with(
+    doc: &Document,
+    ops: &[Op],
+    base_path: &str,
+    ctx: &mut Ctx<'_>,
+    mut one: impl FnMut(&Document, &Op, &str, &mut Ctx<'_>) -> PResult<Vec<ChangeOp>>,
+) -> PResult<Expanded> {
     let mut scratch = doc.clone();
     let mut changes = Vec::new();
     let mut inverse = Vec::new();
     let mut origin = Vec::new();
     for (i, op) in ops.iter().enumerate() {
         let p = ptr(base_path, i);
-        let cs = expand_op(&scratch, op, &p, ctx)?;
+        let cs = one(&scratch, op, &p, ctx)?;
         let inv = apply_all(&mut scratch, &cs).map_err(|m| {
             let code = if matches!(op, Op::Undo { .. }) {
                 ErrorCode::UndoConflict

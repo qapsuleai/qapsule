@@ -72,7 +72,6 @@ pub(crate) mod comments;
 pub(crate) mod dispute;
 pub(crate) mod public;
 pub(crate) mod story;
-pub(crate) mod watch;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;

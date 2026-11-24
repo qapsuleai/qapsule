@@ -16,6 +16,7 @@ mod worlds;
 
 pub use files::{confine, read_json};
 pub(crate) use phases::expand_ops;
+pub use phases::Subsystems;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -259,6 +260,10 @@ pub struct Session {
     pub(crate) outbox: qp_subsystem::Outbox,
     /// The earliest clock a subsystem asked to be woken at ([`Session::next_wake`]).
     pub(crate) wake: Option<i64>,
+    /// (RF1 S3.1) The subsystems it was built with: every authority it spawns gets them.
+    pub(crate) subs: Subsystems,
+    /// How deep the emit step is writing requested entries (audit-s30 B3).
+    pub(crate) emit_depth: u32,
 }
 
 /// (R3/K1b) A writer of a command, for the two-world paths.
@@ -322,8 +327,6 @@ fn proposable(op: &Op, reg: &Registry) -> bool {
             | Op::SetSensitivity { .. }
             // (R5B, §25.4) Comments are written directly, never proposed.
             | Op::AddComment { .. }
-            | Op::AddWatch { .. }
-            | Op::RemoveWatch { .. }
     )
 }
 
@@ -343,20 +346,19 @@ fn allowed(op: &Op, perms: &Permissions, reg: &Registry) -> bool {
         Op::SetAudience { .. } | Op::SetSensitivity { .. } => perms.read,
         // (R5B, §25.4) A comment: anyone who may propose or write.
         Op::AddComment { .. } => perms.propose || perms.write,
-        // (R5B, §25.5) A person's own watches: anyone who may read.
-        Op::AddWatch { .. } | Op::RemoveWatch { .. } => perms.read,
         _ => perms.write,
     }
 }
 
 impl Session {
-    /// Starts an authority. A `DocumentRef::Path` is resolved under `repo_root` and may
-    /// not leave it.
+    /// Starts an authority with subsystems `subs` (the composition, `qp-session`, gives the
+    /// standard ones). A `DocumentRef::Path` is resolved under `repo_root` and may not leave
+    /// it.
     ///
     /// # Errors
-    /// The document cannot be read or parsed.
-    pub fn new(init: SessionInit, repo_root: &Path) -> Result<Self, String> {
-        Self::new_inner(init, repo_root, None)
+    /// The document cannot be read or parsed; a subsystem's kind is registered twice.
+    pub fn new(init: SessionInit, repo_root: &Path, subs: Subsystems) -> Result<Self, String> {
+        Self::new_inner(init, repo_root, None, subs)
     }
 
     /// (R3, §20) [`Session::new`] with the host's secret mühür keys (receipt key, audit-log
@@ -370,14 +372,16 @@ impl Session {
         repo_root: &Path,
         receipt_key: Vec<u8>,
         audit_key: Vec<u8>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
-        Self::new_inner(init, repo_root, Some((receipt_key, audit_key)))
+        Self::new_inner(init, repo_root, Some((receipt_key, audit_key)), subs)
     }
 
     fn new_inner(
         init: SessionInit,
         repo_root: &Path,
         keys: Option<(Vec<u8>, Vec<u8>)>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         let provider = match &init.data {
             Some(d) => Provider::Memory(
@@ -387,7 +391,7 @@ impl Session {
             None => Provider::None,
         };
         let settled = init.data.as_ref().and_then(|d| d.settled.clone());
-        let mut s = Self::build_keys(init, repo_root, provider, keys)?;
+        let mut s = Self::build_keys(init, repo_root, provider, keys, subs)?;
         if let Some(t) = settled {
             s.settle.set_test_source(&t);
         }
@@ -403,11 +407,12 @@ impl Session {
         init: SessionInit,
         repo_root: &Path,
         provider: Box<dyn qp_source::SourceProvider>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         if init.data.is_some() {
             return Err("give either init.data or a host provider, not both".to_owned());
         }
-        Self::build(init, repo_root, Provider::Host(provider))
+        Self::build_keys(init, repo_root, Provider::Host(provider), None, subs)
     }
 
     /// (R3, §20) [`Session::with_provider`] with the host's secret mühür keys (see
@@ -422,24 +427,13 @@ impl Session {
         provider: Box<dyn qp_source::SourceProvider>,
         receipt_key: Vec<u8>,
         audit_key: Vec<u8>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         if init.data.is_some() {
             return Err("give either init.data or a host provider, not both".to_owned());
         }
-        Self::build_keys(
-            init,
-            repo_root,
-            Provider::Host(provider),
-            Some((receipt_key, audit_key)),
-        )
-    }
-
-    pub(crate) fn build(
-        init: SessionInit,
-        repo_root: &Path,
-        provider: Provider,
-    ) -> Result<Self, String> {
-        Self::build_keys(init, repo_root, provider, None)
+        let keys = Some((receipt_key, audit_key));
+        Self::build_keys(init, repo_root, Provider::Host(provider), keys, subs)
     }
 
     fn build_keys(
@@ -447,12 +441,13 @@ impl Session {
         repo_root: &Path,
         provider: Provider,
         keys: Option<(Vec<u8>, Vec<u8>)>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         let schema = schemars::schema_for!(ClientMsg).to_value();
-        Self::build_with_keys(init, repo_root, provider, schema, keys)
+        Self::build_with_keys(init, repo_root, provider, schema, keys, subs)
     }
 
-    /// [`Session::build`] with the inbound schema given (`Null` for a follower that never
+    /// A session built with the inbound schema given (`Null` for a follower that never
     /// handles inbound messages: the replica, so that a WASM build does not carry the
     /// schema generator).
     pub(crate) fn build_with(
@@ -460,8 +455,9 @@ impl Session {
         repo_root: &Path,
         provider: Provider,
         schema: Value,
+        subs: Subsystems,
     ) -> Result<Self, String> {
-        Self::build_with_keys(init, repo_root, provider, schema, None)
+        Self::build_with_keys(init, repo_root, provider, schema, None, subs)
     }
 
     /// Switches the incremental live path (§18.8) on (default) or off. Off, every bar

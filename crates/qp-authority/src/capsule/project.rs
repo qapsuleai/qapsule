@@ -3,6 +3,19 @@
 use super::*;
 
 impl Session {
+    /// (Privacy, §25.5) Whether reader `reader` (a projection's principal; empty: the
+    /// host) may receive intent `i`: an intent without a watch, the reader's own watch
+    /// (an agent: its person's), or any watch for an `owner`. The rule of the document's
+    /// projection: it holds for any document, whatever subsystems are registered.
+    pub(crate) fn intent_for_reader(&self, i: &qp_schema::Intent, reader: &str) -> bool {
+        let Some(w) = &i.watch else { return true };
+        reader.is_empty()
+            || w.for_ == qp_ops::watch::person_of(&self.plane, reader)
+            || self
+                .principal(reader)
+                .is_some_and(|p| p.role == qp_schema::protocol::Role::Owner)
+    }
+
     // -----------------------------------------------------------------------
     // Notifications
     // -----------------------------------------------------------------------
@@ -389,21 +402,15 @@ impl Session {
         x.changes = self.project_changes(&e.changes, p, lang);
         x.inverse = self.project_changes(&e.inverse, p, lang);
         x.request.retain(|op| !p.mentions_hidden(op));
-        // (R5B, §25.5) Another person's watch requests stay out.
+        // (R5B, §25.5) Another person's private requests (watches: `qp-watch`) stay out.
         let author_person = qp_ops::watch::person_of(&self.plane, &e.author).to_owned();
         let reader_ok = p.principal.is_empty()
             || qp_ops::watch::person_of(&self.plane, &p.principal) == author_person
             || self
                 .principal(&p.principal)
                 .is_some_and(|q| q.role == qp_schema::protocol::Role::Owner);
-        x.request.retain(|op| {
-            reader_ok
-                || !(matches!(
-                    op,
-                    qp_schema::protocol::Op::AddWatch { .. }
-                        | qp_schema::protocol::Op::RemoveWatch { .. }
-                ) || self.registry.op(op).is_some_and(|h| h.reader_private()))
-        });
+        x.request
+            .retain(|op| reader_ok || !self.registry.op(op).is_some_and(|h| h.reader_private()));
         // (R5B, §25.4; audit B1, fail-closed) A restricted reader (hidden, redacted or
         // rewritten items) never gets an `add_comment` request: the stored comment, which
         // passes its own check (`projected_comment_ok`), is what it may read.

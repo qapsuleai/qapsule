@@ -6,9 +6,42 @@
 
 use qp_schema::market::MarketStatus;
 use qp_schema::protocol::{Gesture, Query, QueryResult};
-use qp_subsystem::{ConnView, SessionCtx, SessionView, Subsystem};
+use qp_subsystem::{ConnView, SessionCtx, SessionView, Slots, Subsystem, MAX_EMIT_DEPTH};
 
 use super::*;
+
+/// The subsystems an authority is built with (RF1 S3.1), in registration order. The
+/// composition (`qp-session`) gives its standard list to the authorities it builds; every
+/// authority spawned from one (a replay host's rebuilt session, a replica's follower, a
+/// viewer's open side, the tape's sessions) gets the same list. The authority knows none
+/// of them. [`Subsystems::NONE`]: no subsystem (the authority alone).
+#[derive(Clone, Copy, Default)]
+pub struct Subsystems(&'static [&'static dyn Subsystem]);
+
+impl Subsystems {
+    /// No subsystem.
+    pub const NONE: Self = Self(&[]);
+
+    /// The subsystems `list`, in registration order.
+    #[must_use]
+    pub const fn new(list: &'static [&'static dyn Subsystem]) -> Self {
+        Self(list)
+    }
+
+    /// The list, in registration order.
+    #[must_use]
+    pub fn list(self) -> &'static [&'static dyn Subsystem] {
+        self.0
+    }
+}
+
+impl std::fmt::Debug for Subsystems {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list()
+            .entries(self.0.iter().map(|s| s.name()))
+            .finish()
+    }
+}
 
 /// [`Phase::Expand`]: `ops` expanded against `doc`, an op a subsystem owns by its handler,
 /// every other op by `qp_ops::expand::expand_ops` ([`Registry::expand_ops`]).
@@ -53,6 +86,22 @@ impl SessionView for Session {
             surface,
         })
     }
+    fn conn_ids(&self) -> Vec<&str> {
+        self.conns.iter().map(|c| c.id.as_str()).collect()
+    }
+    fn subs(&self, conn: &str) -> Vec<(&str, &Topic)> {
+        self.conns
+            .iter()
+            .find(|c| c.id == conn)
+            .map(|c| c.subs.iter().map(|s| (s.id.as_str(), &s.topic)).collect())
+            .unwrap_or_default()
+    }
+    fn public_view(&self, principal: &str) -> bool {
+        Session::public_view(self, principal)
+    }
+    fn reader_proj(&self, principal: &str) -> Option<std::rc::Rc<qp_plane::proj::Proj>> {
+        Session::reader_proj(self, principal)
+    }
     fn plane(&self) -> &DataPlane {
         &self.plane
     }
@@ -83,6 +132,25 @@ impl Session {
         self.wake
     }
 
+    /// (RF1 S3.1) The subsystems it was built with.
+    #[must_use]
+    pub fn subsystems(&self) -> Subsystems {
+        self.subs
+    }
+
+    /// (RF1 S3.1) The subsystems' state (the composition's `sub::<T>()`).
+    #[doc(hidden)]
+    #[must_use]
+    pub fn slots(&self) -> &Slots {
+        &self.slots
+    }
+
+    /// (RF1 S3.1) The subsystems' state, to change (the composition's `sub_mut::<T>()`).
+    #[doc(hidden)]
+    pub fn slots_mut(&mut self) -> &mut Slots {
+        &mut self.slots
+    }
+
     /// Runs `f` with the registry and a call context: a split borrow of the authority
     /// (the read view; the slots and the outbox taken out for the call and put back).
     pub(crate) fn with_ctx<R>(&mut self, f: impl FnOnce(&Registry, &mut SessionCtx<'_>) -> R) -> R {
@@ -107,9 +175,36 @@ impl Session {
         }
     }
 
+    /// [`Phase::AfterData`], the capsule engine's look at one series in the world the
+    /// fields hold (`public`: the public world's engine): the changes the subsystems add
+    /// to the look's engine entry (watches, §25.5).
+    pub(crate) fn look_phase(
+        &mut self,
+        events: &[qp_capsule::StoryEvent],
+        public: bool,
+    ) -> Vec<ChangeOp> {
+        if !self.registry.wants(Phase::AfterData) {
+            return Vec::new();
+        }
+        self.phase(Phase::AfterData, Moment::Look { events, public });
+        self.outbox.take_changes()
+    }
+
+    /// [`Phase::AfterData`], the look's engine entry `seq` was written: the subsystems'
+    /// notifications at this line (`intent_matched`, §25.5).
+    pub(crate) fn written_phase(&mut self, seq: Seq) -> Vec<OutboundLine> {
+        if !self.registry.wants(Phase::AfterData) {
+            return Vec::new();
+        }
+        let public = self.pub_of(seq);
+        self.phase(Phase::AfterData, Moment::Written { seq, public });
+        self.outbox.take_lines()
+    }
+
     /// The emit step: what the subsystems asked for, in request order — engine entries
-    /// (each settled as any engine entry), then their notifications. Called at the end of
-    /// every settle point and of every message.
+    /// (each settled as any engine entry; depth first, at most [`MAX_EMIT_DEPTH`] levels
+    /// deep: audit-s30 B3), then their notifications. Called at the end of every settle
+    /// point and of every message.
     pub(crate) fn emit(&mut self) -> Vec<OutboundLine> {
         if self.outbox.is_empty() {
             return Vec::new();
@@ -117,10 +212,14 @@ impl Session {
         let (entries, notes, wake) = self.outbox.drain();
         self.wake = wake.into_iter().chain(self.wake).min();
         let mut lines = Vec::new();
-        for e in entries {
-            if let Some(s) = self.engine_entry(e.changes, e.summary) {
-                lines.extend(self.settle(s));
+        if self.emit_depth < MAX_EMIT_DEPTH {
+            self.emit_depth += 1;
+            for e in entries {
+                if let Some(s) = self.engine_entry(e.changes, e.summary) {
+                    lines.extend(self.settle(s));
+                }
             }
+            self.emit_depth -= 1;
         }
         lines.extend(notes);
         lines
@@ -189,7 +288,8 @@ impl Session {
     }
 
     /// A subscription: the built-in checks, then its topic kind's handler (a refusal
-    /// drops the subscription again), then [`Phase::Subscribe`].
+    /// drops the subscription again and undoes the built-in subscribe's side effects:
+    /// audit-s30 B5), then [`Phase::Subscribe`].
     pub(super) fn dispatch_subscribe(&mut self, ci: usize, id: &str, topic: Topic) -> PResult<()> {
         let h = self.registry.topic(&topic).map(|h| (h, topic.clone()));
         self.subscribe(ci, id, topic)?;
@@ -197,6 +297,7 @@ impl Session {
         if let Some((h, t)) = h {
             if let Err(e) = self.with_ctx(|_, ctx| h.subscribe(&conn, id, &t, ctx)) {
                 self.conns[ci].subs.retain(|s| s.id != id);
+                self.viewer_unsubscribed(&conn, id);
                 return Err(e);
             }
         }
@@ -228,10 +329,50 @@ impl Session {
         };
         let (conn, p) = (self.conns[ci].id.clone(), self.conns[ci].principal.clone());
         let (seq, now) = (self.seq_to(&p, self.seq()), self.clock());
-        let v = self.with_ctx(|_, ctx| k.verdict(&conn, &d.claim, d.t, ctx));
+        let seen = (
+            conn.clone(),
+            d.claim.clone(),
+            d.t,
+            d.digest.clone().unwrap_or_default(),
+        );
+        let v = match self.dispute_guard(&seen, d.digest.as_deref())? {
+            Some(v) => v,
+            None => {
+                let v = self.with_ctx(|_, ctx| k.verdict(&conn, &d.claim, d.t, ctx));
+                self.settle.seen_insert(seen, v);
+                v
+            }
+        };
         Ok(vec![crate::dispute::verdict_line(
             &conn, id, seq, now, v, None,
         )])
+    }
+
+    /// (audit-s30 B5) The built-in dispute's guards, for a claim kind a subsystem owns: a
+    /// malformed digest is an error; a dispute made already is `duplicate`; past the
+    /// per-connection or per-claim limit, `limited`.
+    fn dispute_guard(
+        &self,
+        k: &crate::dispute::SeenKey,
+        digest: Option<&str>,
+    ) -> PResult<Option<qp_schema::protocol::DisputeVerdict>> {
+        use crate::dispute::{valid_digest, MAX_DIGESTS, MAX_PER_CONN};
+        use qp_schema::protocol::DisputeVerdict;
+        if digest.is_some_and(|d| !valid_digest(d)) {
+            let m = "`digest` must be 16 lowercase hex digits (data_digest)";
+            return Err(E::new(ErrorCode::Invalid, m).at("/digest").build());
+        }
+        let seen = &self.settle.seen;
+        let mine = || seen.keys().filter(|s| s.0 == k.0);
+        Ok(if seen.contains_key(k) {
+            Some(DisputeVerdict::Duplicate)
+        } else if mine().count() >= MAX_PER_CONN
+            || mine().filter(|s| s.1 == k.1 && s.2 == k.2).count() >= MAX_DIGESTS
+        {
+            Some(DisputeVerdict::Limited)
+        } else {
+            None
+        })
     }
 
     /// The settled answer's capsule outcomes ([`Session::capsule_settled`]), then

@@ -351,7 +351,7 @@ impl Viewer {
 
     /// The trust state of the open capsule (`None`: nothing open).
     pub fn trust(&mut self) -> Option<TrustState> {
-        let t = self.open.as_mut().map(OpenSide::trust);
+        let t = self.open.as_mut().map(|o| o.trust());
         if t.is_some() {
             self.checks += 1;
         }

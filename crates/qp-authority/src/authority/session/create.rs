@@ -10,6 +10,7 @@ impl Session {
         provider: Provider,
         schema: Value,
         trust_keys: Option<(Vec<u8>, Vec<u8>)>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         let capsules = init.capsules.clone();
         // (R5B, §25.3) The agent policy, by name.
@@ -89,7 +90,7 @@ impl Session {
             }
             plane.delegates.insert(p.id.clone(), person.clone());
         }
-        let mut s = Self {
+        let s = Self {
             initial: doc.clone(),
             doc,
             log: Vec::new(),
@@ -154,9 +155,21 @@ impl Session {
             slots: qp_subsystem::Slots::default(),
             outbox: qp_subsystem::Outbox::default(),
             wake: None,
+            subs,
+            emit_depth: 0,
         };
+        s.load(capsules.as_ref())
+    }
+
+    /// (RF1 S3.1) The load, once the fields are built: the subsystems are registered before
+    /// anything runs (the load evaluates intents and runs the capsule engine).
+    fn load(mut self, capsules: Option<&qp_schema::protocol::CapsuleInit>) -> Result<Self, String> {
+        let s = &mut self;
+        for sub in s.subs.list() {
+            s.register(*sub)?;
+        }
         s.audience_seen = initial_audiences(&s.doc);
-        s.start_capsules(capsules.as_ref());
+        s.start_capsules(capsules);
         // Resolve the bindings on load (§18.3); a first ready resolution is anchored by
         // an engine entry. No connection exists yet: its notifications go nowhere.
         s.pending_stamps = s.plane.sync(&s.doc);
@@ -175,7 +188,7 @@ impl Session {
         // No connection exists at load: claims asserted now are registered (for their
         // finalisation) but announce nothing.
         let _ = s.claims.take();
-        Ok(s)
+        Ok(self)
     }
 }
 

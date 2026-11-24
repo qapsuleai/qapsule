@@ -8,7 +8,7 @@
 
 use std::path::PathBuf;
 
-use qp_authority::Session;
+use qp_authority::{Session, Subsystems};
 use qp_ops::expand::Ctx;
 use qp_plane::error::E;
 use qp_schema::protocol::{
@@ -25,7 +25,7 @@ fn root() -> PathBuf {
 
 fn session() -> Session {
     let init = qp_authority::read_json(&root().join("fixtures/protocol/init/thyao.json")).unwrap();
-    Session::new(init, &root()).unwrap()
+    Session::new(init, &root(), Subsystems::NONE).unwrap()
 }
 
 /// What the probe saw, in order.
@@ -312,7 +312,12 @@ fn the_settled_phase_follows_a_settled_answer() {
     let t: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
     let mut init = t["init"].clone();
     init["data"].as_object_mut().unwrap().remove("settled");
-    let mut s = Session::new(serde_json::from_value(init).unwrap(), &root()).unwrap();
+    let mut s = Session::new(
+        serde_json::from_value(init).unwrap(),
+        &root(),
+        Subsystems::NONE,
+    )
+    .unwrap();
     s.register(&Settle).unwrap();
     let bar = |i: i64, c: f64| qp_schema::Bar {
         t: T0 + i * DAY,

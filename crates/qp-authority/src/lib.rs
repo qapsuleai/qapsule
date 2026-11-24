@@ -50,4 +50,4 @@ pub use qp_voice as voices;
 pub use reading::{hit_scene, screen_frame, HIT_HEIGHT, HIT_WIDTH};
 pub use replayhost::{demo_init, ReplayHost};
 pub use replica::{document_digest, view_digest, Replica, ReplicaOptions};
-pub use session::{confine, default_limits, permissions, read_json, Session};
+pub use session::{confine, default_limits, permissions, read_json, Session, Subsystems};

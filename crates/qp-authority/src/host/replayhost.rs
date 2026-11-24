@@ -32,7 +32,7 @@ use qp_schema::protocol::{
 use qp_schema::{Instrument, Series, SeriesSource};
 use qp_source::{Replay, ReplayCalendar, ReplayFeed, ReplayOptions, ReplayStep};
 
-use crate::session::{confine, permissions, read_json, Session};
+use crate::session::{confine, permissions, read_json, Session, Subsystems};
 use qp_plane::error::E;
 
 /// Default number of instruments.

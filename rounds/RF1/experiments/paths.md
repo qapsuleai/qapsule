@@ -119,3 +119,38 @@ adlarla bilerek yeniden dışa aktarır (`crates/qp-session/src/lib.rs`). `qp-ho
 - `qp_subsystem::{Subsystem, SessionView, ConnView, RunKind, SessionCtx, Slots, PerWorld, Outbox, EngineEntry, Phase, Moment, OpHandler, AgentOp, QueryHandler, InputHandler, TopicHandler, ConditionKind, ValueSource, ClaimKind, Registry, op_name}`
 - `qp_authority::Session::{register (gizli), next_wake, host_adjust (gizli)}`; `impl qp_subsystem::SessionView for Session`
 - `qp_session::conform` modülü bileşimin kendi modülü (`pub mod conform`)
+
+## S3.1 — `qp-watch`, bileşimin kurucuları
+
+Çağıranların yolu korunur: `qp_session::{Session, ReplayHost, Replica}`, `qp_session::viewer::OpenSide`
+ve `qp_session::tape::{run, run_with, run_viewer}` aynı ad ve imzayla bileşimin sarıcılarıdır
+(`crates/qp-session/src/compose.rs`; `Deref`/`DerefMut` otorite tipine). Değişen yerler, alt sistem
+listesini taşıyan otorite imzaları ve sarıcının içindeki oturumun tipi:
+
+| Eski | Yeni |
+|---|---|
+| `qp_session::Session` = `qp_authority::Session` (aynı tip) | `qp_session::Session` bileşimin yeni tipi (`Session(qp_authority::Session)`, `Deref`); otoritenin kendisi `qp_session::Authority` |
+| `qp_session::{ReplayHost, Replica}`, `qp_session::viewer::OpenSide` = otorite tipleri | bileşimin sarıcıları (aynı kurucular, `STANDARD` ile); `ReplayHost::session()` / `session_mut()` `&Authority` döner (otorite tipi) |
+| `qp_session::agent::agent_op` = `qp_authority::agent::agent_op` | bileşimin `agent_op`'u: standart alt sistemin işlemi kendi işleyicisiyle (`add_watch`, `remove_watch` → `Direct`), öbürü otoritenin listesi; `qp_session::agent::*` geri kalanı aynı |
+| `qp_session::tape::{run, run_with, run_viewer}` = otoritenin | bileşimin sarıcıları (aynı imza) |
+| `qp_authority::Session::{new, new_with_trust_keys, with_provider, with_provider_and_trust_keys}(…)` | son parametre `subs: qp_authority::Subsystems` |
+| `qp_authority::ReplayHost::{new, with_local_dir, with_window, live}(…)` | son parametre `subs: Subsystems` |
+| `qp_authority::Replica::{new, with_memory}(…)`, `qp_authority::viewer::OpenSide::new(…)` | son parametre `subs: Subsystems` |
+| `qp_authority::tape::{run, run_with, run_viewer}(…)` | son parametre `subs: Subsystems` |
+| `qp_ops::watch::expand_watch` (`pub(crate)`) | taşındı: `qp-watch` `ops.rs` (`expand_watch` → `add_watch`, `remove_watch`; gizli) |
+| `qp_ops::watch::watch_visible` (`pub(crate)`) | `pub` (`qp-watch` kullanır) |
+| `qp_ops::expand::Ctx::{prov, new_id}` (`pub(crate)`) | `pub` (`qp-watch`'ın açılımı) |
+| (crate içi) `qp_authority` `capsule::watch` (`Matched`, `match_watches`, `watch_lines`, `intent_for_reader`) | `Matched`, `match_watches`, `watch_lines` → `qp-watch` `matching.rs` (gizli); `intent_for_reader` → `capsule/project.rs` (dokümanın izdüşümü) |
+| `qp_mcp::Hub::{session, session_mut}` → `&qp_session::Session` | `&qp_session::Authority` (düz oturum `Deref` ile, barındırıcınınki doğrudan) |
+| (sınama yardımcıları) `tests/charac/rig.rs` `Rig::{session, session_mut}`, `tests/open_nobra.rs` `open_scene_in` | `&qp_session::Authority` (kitaplar aynı) |
+| `qp-shellcore` `viewer.rs` `.map(OpenSide::trust)` | `.map(|o| o.trust())` (yöntem `Deref` üstünden) |
+
+**Yeni yollar:**
+
+- `qp_watch::{Watch, WATCH}`
+- `qp_authority::Subsystems` (`NONE`, `new`, `list`); `qp_authority::Session::{subsystems, slots (gizli), slots_mut (gizli)}`
+- `qp_session::{STANDARD, Authority, Subsystems, compose}`; `qp_session::Session::{sub, sub_mut, into_inner}`
+- `qp_subsystem::{MAX_EMIT_DEPTH}`; `OpHandler::owns`; `Outbox::{amend, say, take_changes, take_lines}`;
+  `Moment::{Look, Written}`; `SessionView::{conn_ids, subs, public_view, reader_proj}`;
+  `Registry::evaluates_conditions`
+- `qp_ops::expand::expand_ops_with` (tek açılım gövdesi; `expand_ops` ve `Registry::expand_ops` onu kullanır)

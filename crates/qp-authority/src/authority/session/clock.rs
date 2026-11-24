@@ -144,6 +144,10 @@ impl Session {
             .build());
         }
         self.clock = now;
+        // (audit-s30 B2) A wake the clock reached is spent; the phase may ask again.
+        if self.wake.is_some_and(|w| now >= w) {
+            self.wake = None;
+        }
         self.phase(Phase::Proposals, Moment::Clock { now });
         let due: Vec<Proposal> = self
             .doc

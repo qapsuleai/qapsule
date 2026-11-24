@@ -496,11 +496,14 @@ fn eval_memo(
     memo: &mut Option<(u64, [Option<usize>; 2])>,
     reg: &qp_subsystem::Registry,
 ) -> Option<(bool, u64, i64)> {
-    if let Some(r) = memo
-        .filter(|(g, _)| *g == cache.gen())
-        .and_then(|(_, sl)| eval_slots(cache, c, sl))
-    {
-        return r;
+    // (audit-s30 B1) A registered condition kind or value source is asked every time.
+    if !reg.evaluates_conditions() {
+        if let Some(r) = memo
+            .filter(|(g, _)| *g == cache.gen())
+            .and_then(|(_, sl)| eval_slots(cache, c, sl))
+        {
+            return r;
+        }
     }
     let r = reg.eval_condition(rd, cache, c);
     let ids = cond_ids(c);
@@ -512,4 +515,62 @@ fn eval_memo(
         ],
     ));
     r
+}
+
+#[cfg(test)]
+mod memo_registry {
+    //! (audit-s30 B1) A registered condition kind is asked on every evaluation of the
+    //! live path, also when the slot memo of the built-in evaluation is fresh.
+
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    use qp_plane::values::Cache;
+    use qp_schema::{CompareOp, Condition, Document};
+    use qp_subsystem::{ConditionKind, Registry, Subsystem};
+
+    static CALLS: AtomicUsize = AtomicUsize::new(0);
+
+    /// Thresholds always hold (the data plane would say the opposite here).
+    struct Always;
+    impl ConditionKind for Always {
+        fn kind(&self) -> &'static str {
+            "threshold"
+        }
+        fn eval(&self, _: &Document, _: &mut Cache, _: &Condition) -> Option<(bool, u64, i64)> {
+            CALLS.fetch_add(1, Ordering::SeqCst);
+            Some((true, 0, 0))
+        }
+    }
+    struct Lang;
+    impl Subsystem for Lang {
+        fn name(&self) -> &'static str {
+            "lang"
+        }
+        fn conditions(&self) -> &'static [&'static dyn ConditionKind] {
+            &[&Always]
+        }
+    }
+
+    #[test]
+    #[allow(clippy::unwrap_used)]
+    fn a_registered_condition_kind_is_asked_past_a_fresh_memo() {
+        let p = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../fixtures/protocol/docs/thyao.json");
+        let d: Document = serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap();
+        let c = Condition::Threshold {
+            series: "px".into(),
+            op: CompareOp::Lt,
+            value: -1.0,
+        };
+        let (mut cache, mut memo) = (Cache::default(), None);
+        let first = super::eval_memo(&d, &mut cache, &c, &mut memo, &Registry::default());
+        assert!(!first.unwrap().0, "the data plane: no close below -1");
+        let mut r = Registry::default();
+        r.add(&Lang).unwrap();
+        for _ in 0..2 {
+            let got = super::eval_memo(&d, &mut cache, &c, &mut memo, &r);
+            assert_eq!(got, Some((true, 0, 0)));
+        }
+        assert_eq!(CALLS.load(Ordering::SeqCst), 2);
+    }
 }

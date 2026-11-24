@@ -52,7 +52,7 @@ pub const MAX_PER_CONN: usize = qp_schema::params::system::DISPUTE_MAX_PER_CONN_
 pub const MAX_DIGESTS: usize = qp_schema::params::system::DISPUTE_MAX_DIGESTS_DEFAULT;
 
 /// A digest is exactly 16 lowercase hex digits (`data_digest`).
-fn valid_digest(d: &str) -> bool {
+pub(crate) fn valid_digest(d: &str) -> bool {
     d.len() == 16
         && d.bytes()
             .all(|c| c.is_ascii_digit() || (b'a'..=b'f').contains(&c))
@@ -105,7 +105,7 @@ pub(crate) struct Settle {
     /// that replace the provider's.
     test: Option<BTreeMap<FeedKey, BTreeMap<TimestampMs, Bar>>>,
     open: Vec<Open>,
-    seen: BTreeMap<SeenKey, DisputeVerdict>,
+    pub(crate) seen: BTreeMap<SeenKey, DisputeVerdict>,
 }
 
 impl Settle {

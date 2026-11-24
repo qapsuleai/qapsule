@@ -1,5 +1,6 @@
 //! Phases: the named, fixed moments at which the authority calls the subsystems.
 
+use qp_capsule::StoryEvent;
 use qp_plane::values::Delta;
 use qp_schema::protocol::{Op, Seq};
 
@@ -14,7 +15,10 @@ pub enum Phase {
     Expand,
     /// A log entry was committed.
     AfterCommit,
-    /// Bound series changed (data plane), before conditions and capsules are evaluated.
+    /// Bound series changed (data plane), before conditions and capsules are evaluated
+    /// ([`Moment::Data`]); the capsule engine looked at the new final bars of one series
+    /// ([`Moment::Look`], once per world) and its engine entry was written
+    /// ([`Moment::Written`]).
     AfterData,
     /// The clock advanced (proposal expiry).
     Proposals,
@@ -24,7 +28,9 @@ pub enum Phase {
     Unsubscribe,
     /// A connection said hello.
     Connect,
-    /// A connection closed (no call point yet: the authority has no close path).
+    /// A connection closed. No call point: `qp/0` has no close message and the authority
+    /// no close path (a host drops a whole session). When one comes, it calls this phase
+    /// and then [`crate::Slots::drop_conn`] (audit-s30 B4).
     Close,
     /// A claim's outcome was settled (a settled-bar answer decided disputes; D1).
     Settled,
@@ -36,7 +42,8 @@ pub enum Phase {
 /// What a phase is about (given to [`crate::Subsystem::collect`]).
 #[derive(Debug, Clone, Copy)]
 pub enum Moment<'a> {
-    /// [`Phase::Check`]: a command of connection `conn`.
+    /// [`Phase::Check`]: a command of connection `conn` (reserved: the check is called as
+    /// [`crate::Subsystem::check`] with the same arguments).
     Command {
         /// Connection id.
         conn: &'a str,
@@ -54,6 +61,23 @@ pub enum Moment<'a> {
         seq: Seq,
         /// The changed series and how.
         changed: &'a [(String, Delta)],
+    },
+    /// [`Phase::AfterData`]: the capsule engine's look at the new final bars of one
+    /// series in one world (`public`: the public world's engine), its story `events` in
+    /// the engine's order. Changes go into that look's engine entry ([`crate::Outbox::amend`]).
+    Look {
+        /// The look's story events.
+        events: &'a [StoryEvent],
+        /// Whether it is the public world's look.
+        public: bool,
+    },
+    /// [`Phase::AfterData`]: the look's engine entry was written: `seq`, and `public` the
+    /// public entry it made. Notifications go out at this line ([`crate::Outbox::say`]).
+    Written {
+        /// The entry's seq.
+        seq: Seq,
+        /// The public world's entry, if one was made.
+        public: Option<Seq>,
     },
     /// [`Phase::Proposals`]: the clock is now `now`.
     Clock {

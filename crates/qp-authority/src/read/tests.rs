@@ -18,7 +18,12 @@ fn fast_hints_equal_the_resolvers() {
     let mut init = t["init"].clone();
     let bars = qp_source::synthetic_market(1, 260, 1)[0].bars.clone();
     init["data"]["feeds"][0]["bars"] = serde_json::json!(bars);
-    let s = crate::Session::new(serde_json::from_value(init).unwrap(), &root).unwrap();
+    let s = crate::Session::new(
+        serde_json::from_value(init).unwrap(),
+        &root,
+        crate::Subsystems::NONE,
+    )
+    .unwrap();
     let doc = s.document();
     assert!(
         doc.facts.len() > 50 && doc.findings.len() > 20,

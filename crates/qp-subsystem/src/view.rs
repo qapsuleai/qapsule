@@ -1,9 +1,12 @@
 //! The narrow read view a subsystem gets of the authority.
 
+use std::rc::Rc;
+
 use qp_plane::plane::DataPlane;
+use qp_plane::proj::Proj;
 use qp_schema::data::FeedKey;
 use qp_schema::market::MarketStatus;
-use qp_schema::protocol::{LogEntry, Permissions, Principal, Role, Seq, SurfaceKind};
+use qp_schema::protocol::{LogEntry, Permissions, Principal, Role, Seq, SurfaceKind, Topic};
 use qp_schema::Document;
 
 /// What a subsystem may know of a connection.
@@ -50,6 +53,14 @@ pub trait SessionView {
     fn principal(&self, id: &str) -> Option<&Principal>;
     /// A connection that said hello.
     fn conn(&self, id: &str) -> Option<ConnView<'_>>;
+    /// The connections that said hello, in order.
+    fn conn_ids(&self) -> Vec<&str>;
+    /// Connection `conn`'s subscriptions (id, topic), in order.
+    fn subs(&self, conn: &str) -> Vec<(&str, &Topic)>;
+    /// Whether `principal` reads the public world (`docs/CONCEPTS.md`, two worlds).
+    fn public_view(&self, principal: &str) -> bool;
+    /// What `principal` may receive of the document (`None`: everything).
+    fn reader_proj(&self, principal: &str) -> Option<Rc<Proj>>;
     /// The data plane.
     fn plane(&self) -> &DataPlane;
     /// The market status the host last gave.

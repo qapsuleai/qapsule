@@ -180,11 +180,12 @@ imzayla bileşimin yöntemleri; `provider`, `scene`, `scene_as_reader`, `surface
 **Yeni yollar:**
 
 - `qp_read::{Read, READ, ReadState, scene_for_range, explain_scene, hit_scene, screen_frame, HIT_WIDTH, HIT_HEIGHT}`
-- `qp_subsystem::ANY`; `SessionCtx::{cache, looks}`; `ConnView::{hello, profile}`;
-  `SessionView::{principals, headlines, headline_source, proj, directives, project_entry,
+- `qp_subsystem::{ANY, ReadView}`; `SessionCtx::{cache, looks, read}`; `ConnView::{hello, profile}`;
+  `ReadView` (`SessionView`'ın okuma eki; yalnız sorgu ve girdi çağrısında `SessionCtx::read`) `{principals, headlines, headline_source, proj, directives, project_entry,
   evidence_for, viewport_events, accept_preview, stories_query, story_rows, row_stamp,
   capsule_item, reader_voice, market_item, capsule_passes, coin_flip_hidden_by, relevant,
   coin_flip_of, is_current, item_series, fact_by_id, item_memo, headline_cal, comments_for,
   capsule_query, ledger_now}`
 - `qp_authority::Session::with_subsystems` (gizli; bileşimin `scene_for`'u)
+- `qp_session::FOLLOWER` (izleyici otoritelerin listesi: `STANDARD` eksi okuma); `qp_session::{Replica, viewer::OpenSide}` artık `FOLLOWER` ile kurulur (S3.1'de `STANDARD`)
 - `qp_ops::{bounds, firsts}`

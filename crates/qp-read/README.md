@@ -32,7 +32,9 @@ bir kayıt satırıyla takar.
   bağlamından ödünç gelir (`SessionCtx::cache`, `SessionCtx::looks`).
 
 **Ne değildir:** kapsül yaşamı değildir: `capsule` sorgusunun ayrıntısı, `stories` sorgusu,
-kapsül öğeleri ve cümleleri otoritede kalır, görünüm (`SessionView`) üstünden sorulur.
+kapsül öğeleri ve cümleleri otoritede kalır, okuma görünümü (`ReadView`, `SessionCtx::read`)
+üstünden sorulur. İzleyici otoritelerde (yansı, açık taraf) kayıtlı değildir: bileşim onları
+`FOLLOWER` ile kurar (sorgu almazlar; WASM kabuk paketi).
 Otoritenin kendi derlemesi (`provider`, `scene`, `scene_as_reader`) değildir: barındırıcı ve
 yansı onları sorgu dışında kullanır.
 

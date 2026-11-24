@@ -124,3 +124,66 @@ Görünürlük yalnız (öğe aynı): `hello` (`pub(super)`), `verdict_line` (`p
 **Saf taşıma:** `qp-session/src` → `qp-authority/src`; `host/conform.rs` → `qp-session/src/conform.rs`
 (yalnız `use` yolları); `confine`, `read_json` → `authority/session/files.rs`; `AgentOp` →
 `qp-subsystem`.
+
+## S3.1 — `qp-watch` (ilk alt sistem), bileşimin kayıt yayılımı, audit-s30 düzeltmeleri
+
+Davranış aynı (S1 karakterizasyonu 25/25, kitaplar aynı; `compare.sh`). İzleme çekirdekten
+`qp-watch` alt sistemine çıktı: işlemler kayıt üstünden (`OpHandler`), eşleme `AfterData` fazında
+(`Moment::Look` → aynı motor girdisine değişim; `Moment::Written` → `intent_matched` o satırda).
+Bugünkü sıra korunur: bakışın değişimleri kapsül değişimlerinin hemen ardından (önce otoritenin
+dünyası, sonra kamu dünyası), olaylar `capsule_topic_lines`'tan hemen sonra.
+
+**Kayıt yayılımı (tasarım):** otorite alt sistem tanımaz; kurucuları alt sistem listesini
+(`qp_authority::Subsystems`, `&'static [&'static dyn Subsystem]`) parametre alır ve kurulumda,
+yükleme koşmadan önce kaydeder (`create.rs` `load`). Doğurduğu her otorite listeyi ondan alır:
+`ReplayHost::rebuild` (`self.session.subsystems()`), `Replica` (alan `subs` → izleyici),
+`OpenSide` (yansısına), `tape` (iki otoriteye ve açık tarafa). Ebeveynsiz giriş noktaları
+(`Session`, `ReplayHost`, `Replica`, `OpenSide`, `tape::run*`, `agent::agent_op`) bileşimde aynı
+adlı sarıcılardır ve `STANDARD`'ı verir. Yansı/barındırıcıyı yukarı taşımak (S3.3'ün işi) seçilmedi:
+iç alanlara yazdıkları için yeniden yazma ister; liste parametresi otoriteyi alt sistemsiz bırakıp
+aynı sonucu verir.
+
+**Yeniden yazılan öğeler (moved.py `CHANGED -`, 64; sınama yardımcıları dahil):**
+
+| Öğe | Dosya | Ne değişti |
+|---|---|---|
+| `match_watches`, `watch_lines` | `qp-authority` `capsule/watch.rs` → `qp-watch` `matching.rs` | `&self` yerine `(doc, clock, events)` / `&dyn SessionView`; `expect("on")` → `let … else continue`; `self.conns` → `view.conn_ids()`/`subs()`/`conn()`; `self.other.is_some() && public_view` → `view.public_view` (aynı anlam: `public_view` ikinci dünya yoksa `false`); `out(…)` → `OutboundLine {…}` |
+| `intent_for_reader` | `capsule/watch.rs` → `capsule/project.rs` | yer; belge yorumu (gövde aynı) |
+| `expand_watch` | `qp-ops` `watch.rs` → `qp-watch` `ops.rs` | `expand_watch` (dağıtıcı) + `add_watch` + `remove_watch`; `person_of_speaker` → `person_of`; `unreachable!` → `invalid` hatası; denetim sırası aynı |
+| `run_capsules` | `capsule/run.rs` | `match_watches` ×2 → `look_phase(&events, false/true)`; `watch_lines` → `written_phase(seq)` |
+| `allowed`, `proposable` | `authority/session.rs` | `AddWatch`/`RemoveWatch` kolları silindi (kayıttaki işleyici cevaplar) |
+| `agent_op` | `authority/agent.rs` | `AddWatch`/`RemoveWatch` kolu silindi (`qp_session::agent::agent_op` bileşimde) |
+| `project_entry` | `capsule/project.rs` | `matches!(AddWatch \| RemoveWatch)` silindi; yalnız `OpHandler::reader_private` |
+| `expand_op` | `qp-ops` `expand/op.rs` | izleme kolu → `unserved(op, p)` (`unsupported` hatası; kayıtsızken) |
+| `expand_ops` | `qp-ops` `expand.rs` | gövde `expand_ops_with`'e (B6); `expand_ops` = `expand_ops_with(…, expand_op)` |
+| `Registry::expand_ops` | `qp-subsystem` `registry.rs` | kopya gövde silindi → `expand_ops_with` (B6) |
+| `Registry::op` | `qp-subsystem` `registry.rs` | `op_name` serileştirmesi yerine `OpHandler::owns` |
+| `OpHandler`, `SessionView`, `Phase`, `Moment`, `Outbox` (+`is_empty`, `drain`) | `qp-subsystem` | `owns`; `conn_ids`, `subs`, `public_view`, `reader_proj`; belge (`AfterData`, `Close`, `Command`); `Look`, `Written`; `changes`/`lines` |
+| `emit` | `authority/session/phases.rs` | derinlik sınırı `MAX_EMIT_DEPTH` (B3) |
+| `dispatch_dispute` | `authority/session/phases.rs` | kayıtlı iddia türünde yerleşik korumalar: `dispute_guard` (B5) |
+| `dispatch_subscribe` | `authority/session/phases.rs` | ret sonrası `viewer_unsubscribed` (B5) |
+| `advance_clock` | `authority/session/clock.rs` | ulaşılan uyandırma silinir (B2) |
+| `eval_memo` | `data/live.rs` | kayıtlı koşul/kaynak varken bellek atlanır (B1) |
+| `struct Session`, `build_with_keys` | `authority/session.rs`, `create.rs` | alanlar `subs`, `emit_depth`; yükleme kuyruğu `load`'a (kayıt önce) |
+| `new`, `new_with_trust_keys`, `new_inner`, `with_provider`, `with_provider_and_trust_keys`, `build_keys`, `build_with` (`build` silindi) | `authority/session.rs` | `subs` parametresi |
+| `ReplayHost::{new, with_local_dir, with_window, live}`, `rebuild` | `host/replayhost/setup.rs`, `control.rs` | `subs`; yeniden kurulum listeyi eski oturumdan alır |
+| `struct Replica`, `Replica::{new, with_memory, with}`, `follower`, `load` | `replica.rs`, `replica/follow.rs` | `subs` alanı ve parametresi |
+| `OpenSide::new` | `replica/viewer/open.rs` | `subs` |
+| `tape::{run, run_with, run_viewer}`, `viewer_deliver` | `replica/tape.rs` | `subs`; `OpenSide` `use` ile |
+| `Ctx::{prov, new_id}` | `qp-ops` `expand.rs` | yalnız görünürlük ve belge |
+| `Hub::{session, session_mut}` | `qp-mcp` `hub.rs` | dönüş tipi `&qp_session::Authority` |
+| `trust` | `qp-shellcore` `viewer.rs` | `.map(OpenSide::trust)` → `.map(\|o\| o.trust())` |
+| sınama yardımcıları: `host` ×2, `fast_hints_equal_the_resolvers`, `session`, `the_settled_phase_follows_a_settled_answer`, `Rig::{session, session_mut}`, `open_scene_in` | `qp-authority` `capsule/tests`, `read/tests.rs`, `tests/subsystems.rs`; `qp-session` `tests/charac/rig.rs`, `tests/open_nobra.rs` | `Subsystems::NONE` / `&Authority` (kitaplar aynı) |
+
+**Yeni öğeler:** `qp-watch` (crate: `Watch`, `WATCH`, `Pending`, `WatchOp`, `ADD_WATCH`,
+`REMOVE_WATCH`, `OPS`); `qp-session` `compose.rs` (`STANDARD`, `LIST`, `wraps!`, `Session`,
+`ReplayHost`, `Replica`, `OpenSide`), `agent.rs` (`agent_op`), `tape.rs` (`run`, `run_with`,
+`run_viewer`), `replayhost.rs`, `replica.rs`, `viewer.rs` (yeniden dışa aktarım);
+`qp_authority::Subsystems`, `Session::{subsystems, slots, slots_mut, look_phase, written_phase,
+dispute_guard, load}`, `impl SessionView` yeni yöntemleri; `qp_ops::expand::expand_ops_with`;
+`Registry::evaluates_conditions`, `MAX_EMIT_DEPTH`, `Outbox::{amend, say, take_changes,
+take_lines}`. Sınamalar: `qp-authority/tests/contract_fixes.rs` (B2, B3, B5),
+`data/live.rs` `memo_registry` (B1).
+
+**Saf taşıma:** `Matched`, `negative`, `holds`, `matches` (`capsule/watch.rs` → `qp-watch`
+`matching.rs`); `max_watches_binds_registry` sınaması (`qp-watch` `lib.rs`).

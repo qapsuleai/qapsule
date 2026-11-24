@@ -41,9 +41,9 @@ use qp_schema::{Bar, Capsule, Document, Fact, Finding, Point, Series, SeriesSour
 use serde::Serialize;
 use serde_json::Value;
 
-use qp_authority::replica::{document_digest, fnv1a64, Replica, Shown};
 use qp_authority::Session;
 use qp_plane::error::E;
+use qp_replica::{document_digest, fnv1a64, Replica, Shown};
 
 /// Feed length of a `viewer` subscription without `limit`.
 pub const DEFAULT_LIMIT: u32 = 40;

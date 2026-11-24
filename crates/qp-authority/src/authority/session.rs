@@ -8,6 +8,7 @@ mod create;
 mod dispatch;
 mod events;
 mod files;
+mod follow;
 mod intake;
 mod phases;
 mod presence;

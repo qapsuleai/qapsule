@@ -21,7 +21,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::replica::{document_digest, view_digest, Replica, ReplicaOptions};
-use crate::session::{Lists, Session};
+use qp_authority::{Lists, Session};
 
 /// Bars resolved before the stream.
 pub const START: usize = 200;

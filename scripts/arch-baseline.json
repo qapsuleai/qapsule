@@ -19,7 +19,7 @@
   "file.soft": {
    "count": 32,
    "items": {
-    "crates/qp-authority/src/capsule/claims.rs": 631,
+    "crates/qp-authority/src/capsule/claims.rs": 630,
     "crates/qp-authority/src/capsule/comments.rs": 672,
     "crates/qp-authority/src/capsule/dispute.rs": 758,
     "crates/qp-authority/src/capsule/reader.rs": 639,
@@ -82,8 +82,6 @@
     "crates/qp-authority/src/capsule/story.rs::stories_query": 100,
     "crates/qp-authority/src/data/live/eval.rs::bar_command": 121,
     "crates/qp-authority/src/data/live/eval.rs::eval_conditions_live": 104,
-    "crates/qp-authority/src/replica/judge.rs::judge": 134,
-    "crates/qp-authority/src/replica/tape.rs::run_with": 157,
     "crates/qp-capsule/src/comment/check.rs::validate": 239,
     "crates/qp-capsule/src/engine/run.rs::run_bar": 240,
     "crates/qp-capsule/src/realize/en.rs::event_clause": 92,
@@ -201,6 +199,8 @@
     "crates/qp-render/src/spikes/vello_gpu.rs::render_async": 83,
     "crates/qp-replayhost/src/replayhost/control.rs::host_control": 93,
     "crates/qp-replayhost/src/replayhost/setup.rs::expand_init": 88,
+    "crates/qp-replica/src/replica/judge.rs::judge": 133,
+    "crates/qp-replica/src/tape.rs::run_with": 157,
     "crates/qp-shellcore/src/drive.rs::shell_less": 121,
     "crates/qp-shellcore/src/drive/viewer_less.rs::viewer_less": 125,
     "crates/qp-shellcore/src/gallery/build_impl.rs::shots": 116,
@@ -232,9 +232,9 @@
    }
   },
   "lint.allow": {
-   "count": 21,
+   "count": 22,
    "items": {
-    "qp-authority": 29,
+    "qp-authority": 25,
     "qp-capsule": 14,
     "qp-cli": 2,
     "qp-compute": 27,
@@ -251,6 +251,7 @@
     "qp-read": 11,
     "qp-render": 1,
     "qp-replayhost": 3,
+    "qp-replica": 4,
     "qp-shellcore": 17,
     "qp-source": 5,
     "qp-viewer": 4,

@@ -1,0 +1,24 @@
+[package]
+name = "qp-replica"
+description = "Qapsule client replica (istemci yansısı; PROTOCOL §19): a follower of an authority — mirrors its log, resolves its own data, applies the display rule — and the authority/replica consistency scenario (tape)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-authority = { version = "0.0.0", path = "../qp-authority" }
+qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
+qp-compute = { version = "0.0.0", path = "../qp-compute" }
+qp-designs = { version = "0.0.0", path = "../qp-designs" }
+qp-ops = { version = "0.0.0", path = "../qp-ops" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
+qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

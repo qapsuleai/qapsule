@@ -229,21 +229,21 @@ impl ReplayHost {
 
 /// A replica whose follower authority has the follower's subsystems ([`FOLLOWER`]).
 #[derive(Debug)]
-pub struct Replica(qp_authority::Replica);
-wraps!(Replica, qp_authority::Replica);
+pub struct Replica(qp_replica::Replica);
+wraps!(Replica, qp_replica::Replica);
 
 impl Replica {
     /// A replica for `principal` whose data comes from the host's `provider`.
     #[must_use]
     pub fn new(principal: &str, provider: Box<dyn qp_source::SourceProvider>) -> Self {
-        Self(qp_authority::Replica::new(principal, provider, FOLLOWER))
+        Self(qp_replica::Replica::new(principal, provider, FOLLOWER))
     }
 
     /// A replica whose provider is a [`qp_source::MemoryProvider`] that also takes the
     /// data events the host delivers.
     #[must_use]
     pub fn with_memory(principal: &str, provider: qp_source::MemoryProvider) -> Self {
-        Self(qp_authority::Replica::with_memory(
+        Self(qp_replica::Replica::with_memory(
             principal, provider, FOLLOWER,
         ))
     }

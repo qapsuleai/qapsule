@@ -72,7 +72,7 @@ impl Replica {
         let Some(s) = self.s.as_ref() else {
             return;
         };
-        let rd = rd!(s);
+        let rd = s.reading();
         let Some(bars) = qp_plane::values::find_series(rd, &ev.series).and_then(Series::bars)
         else {
             return;
@@ -81,7 +81,7 @@ impl Replica {
             return;
         };
         let digest = qp_schema::data::data_digest(&bars[..=i]);
-        let anchor_t = anchor_of(&s.doc, &ev.series);
+        let anchor_t = anchor_of(s.document(), &ev.series);
         if !self.disputes_sent.insert((
             claim.clone(),
             ev.t,
@@ -139,14 +139,14 @@ impl Replica {
         let Some(s) = self.s.as_mut() else {
             return pending(item, "no_document");
         };
+        let (doc, rd, plane, cache) = s.eval_parts();
         // The bar series of every operand must be resolved from the document's anchor,
         // and the authority's values computed from the same anchor.
         let mut bss: Vec<String> = Vec::new();
         for v in &ev.values {
-            let rd = rd!(s);
             let bs = bar_series(rd, &v.series)
                 .map(|x| x.id.clone())
-                .or_else(|| qp_plane::plane::bar_root(&s.doc, &v.series).map(|x| x.id.clone()))
+                .or_else(|| qp_plane::plane::bar_root(doc, &v.series).map(|x| x.id.clone()))
                 .unwrap_or_else(|| v.series.clone());
             bss.push(bs);
         }
@@ -156,25 +156,24 @@ impl Replica {
         roots.dedup();
         self.roots.insert((claim.clone(), ev.t), roots);
         for bs in &bss {
-            if let Some((state, _)) = s.plane.state_for(bs, None) {
+            if let Some((state, _)) = plane.state_for(bs, None) {
                 match state {
                     BindingState::Ready => {}
                     BindingState::NoEntitlement => return pending(item, "no_entitlement"),
                     BindingState::Stale => return pending(item, "stale"),
                     _ => return pending(item, "no_data"),
                 }
-                let doc_anchor = anchor_of(&s.doc, bs);
-                let own = s.plane.series.get(bs).and_then(|b| b.bound.anchor_t);
+                let doc_anchor = anchor_of(doc, bs);
+                let own = plane.series.get(bs).and_then(|b| b.bound.anchor_t);
                 if doc_anchor.is_none() || own != doc_anchor {
                     return pending(item, "anchor");
                 }
             }
         }
-        if anchor_of(&s.doc, &ev.series) != ev.anchor_t {
+        if anchor_of(doc, &ev.series) != ev.anchor_t {
             return pending(item, "anchor");
         }
-        let rd = s.rd.as_ref().unwrap_or(&s.doc);
-        let Some((holds, own)) = eval_at(rd, &mut s.cache, cond, Some(&ev.values)) else {
+        let Some((holds, own)) = eval_at(rd, cache, cond, Some(&ev.values)) else {
             return pending(item, "not_covered");
         };
         item.values = own;

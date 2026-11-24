@@ -126,9 +126,10 @@ impl Replica {
     pub(super) fn load(&mut self, doc: Document, seq: Seq) {
         let provider = match self.provider.take() {
             Some(p) => p,
-            None => self.s.take().map_or(Provider::None, |mut s| {
-                std::mem::replace(&mut s.plane.provider, Provider::None)
-            }),
+            None => self
+                .s
+                .take()
+                .map_or(Provider::None, |mut s| s.take_provider()),
         };
         match follower(doc, &self.principal, provider, self.subs) {
             Ok(mut s) => {
@@ -177,11 +178,7 @@ impl Replica {
         let Some(s) = self.s.as_mut() else {
             return false;
         };
-        let restore = crate::live::Restore {
-            initial: &s.initial,
-            log: &s.log,
-        };
-        let Ok(inverse) = crate::live::apply_in_place(&mut s.doc, &e.changes, restore) else {
+        let Ok(inverse) = s.mirror_apply(&e.changes) else {
             return false;
         };
         e.inverse = inverse;
@@ -189,7 +186,7 @@ impl Replica {
             for c in &e.changes {
                 if let qp_schema::protocol::ChangeOp::SetCapsuleState { capsule, .. } = c {
                     let finding = s
-                        .doc
+                        .document()
                         .capsules
                         .iter()
                         .find(|x| &x.id == capsule)
@@ -204,9 +201,7 @@ impl Replica {
             }
         }
         self.seq = e.seq;
-        s.committed(e);
-        s.pending_views.clear();
-        let _ = s.claims.take();
+        s.mirror_commit(e);
         let learn = std::mem::take(&mut self.pending_learn);
         for (c, ev) in learn {
             self.learn(c, ClaimState::Asserted, ev, false);
@@ -228,13 +223,10 @@ impl Replica {
             }
             return Ok(());
         };
-        let outcome = s.plane.apply_event(ev)?;
-        if outcome.changed.is_empty() {
+        let ids = s.follow_data(ev)?;
+        if ids.is_empty() {
             return Ok(());
         }
-        let ids: Vec<String> = outcome.changed.iter().map(|(id, _)| id.clone()).collect();
-        s.data_changed(outcome.changed);
-        s.pending_views.clear();
         self.reconcile_on(Some(&ids));
         Ok(())
     }
@@ -243,16 +235,7 @@ impl Replica {
     /// settled fetch it put into its provider, or after the provider caught up).
     pub fn resync(&mut self) {
         if let Some(s) = self.s.as_mut() {
-            let ids: Vec<String> = s.plane.series.keys().cloned().collect();
-            s.plane.series.clear();
-            let _ = s.plane.sync(&s.doc);
-            s.pending_stamps.clear();
-            s.data_changed(
-                ids.into_iter()
-                    .map(|id| (id, Delta::Rebuild { from: 0 }))
-                    .collect(),
-            );
-            s.pending_views.clear();
+            s.follow_resync();
         }
         self.reconcile();
     }

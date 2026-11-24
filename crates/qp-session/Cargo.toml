@@ -15,6 +15,7 @@ qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
 qp-watch = { version = "0.0.0", path = "../qp-watch" }
 qp-read = { version = "0.0.0", path = "../qp-read" }
 qp-viewer = { version = "0.0.0", path = "../qp-viewer" }
+qp-replica = { version = "0.0.0", path = "../qp-replica" }
 # The clients of the authority the composition builds with its lists.
 qp-replayhost = { version = "0.0.0", path = "../qp-replayhost" }
 # The conformance runner (`conform`).

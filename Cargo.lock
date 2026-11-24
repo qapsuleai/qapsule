@@ -2158,6 +2158,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-replica"
+version = "0.0.0"
+dependencies = [
+ "qp-authority",
+ "qp-capsule",
+ "qp-compute",
+ "qp-designs",
+ "qp-ops",
+ "qp-plane",
+ "qp-schema",
+ "qp-source",
+ "qp-subsystem",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-schema"
 version = "0.0.0"
 dependencies = [
@@ -2183,6 +2200,7 @@ dependencies = [
  "qp-plane",
  "qp-read",
  "qp-replayhost",
+ "qp-replica",
  "qp-schema",
  "qp-source",
  "qp-subsystem",
@@ -2250,6 +2268,7 @@ dependencies = [
  "qp-look",
  "qp-ops",
  "qp-plane",
+ "qp-replica",
  "qp-schema",
  "qp-source",
  "qp-subsystem",

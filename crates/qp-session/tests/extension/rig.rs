@@ -3,7 +3,7 @@
 use std::collections::VecDeque;
 use std::path::PathBuf;
 
-use qp_authority::Replica;
+use qp_replica::Replica;
 use qp_schema::protocol::{OutboundLine, SessionInit};
 use qp_session::{Authority, Subsystems, STANDARD};
 use qp_subsystem::Subsystem;

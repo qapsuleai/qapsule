@@ -23,17 +23,16 @@ mod authority;
 pub mod capsule;
 mod data;
 mod read;
-pub mod replica;
 
 pub use authority::agent;
 pub(crate) use authority::session;
 pub(crate) use capsule::{claims, comments, dispute, public, story};
+/// (RF1 S3.3) The claims' pure functions a follower and the viewer use (`qp-replica`,
+/// `qp-viewer`).
 #[doc(hidden)]
-pub use claims::feeds_of;
+pub use claims::{anchor_of, closed, eval_at, feeds_of};
 pub use comments::CommentAudit;
 pub(crate) use data::live;
-#[doc(hidden)]
-pub use replica::tape;
 
 pub use story::CoinFlipRule;
 
@@ -44,5 +43,4 @@ pub use dispute::{
 pub use qp_grammar::CompileOptions;
 /// (R5/m17-int) The capsule voices a connection may choose (`style` `voice`).
 pub use qp_voice as voices;
-pub use replica::{document_digest, view_digest, Replica, ReplicaOptions};
 pub use session::{confine, default_limits, permissions, read_json, Lists, Session, Subsystems};

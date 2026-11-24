@@ -1,10 +1,10 @@
 //! The replica (RP2/T8, `docs/PROTOCOL.md` §19): a device-side follower of an authority.
 //!
 //! A [`Replica`] holds a follower [`Session`] — the **same engine code** as the authority:
-//! the same document application ([`crate::live::apply_in_place`] + `Session::committed`),
+//! the same document application (`Session::mirror_apply` + `Session::mirror_commit`),
 //! the same data plane (`DataPlane`, `qp_source::FeedStore` with the §18.4 rules), the same
-//! values cache and live path (`Session::data_changed`), the same condition semantics
-//! ([`crate::claims::eval_at`]) and the same grammar compile (`Session::scene`). The
+//! values cache and live path (`Session::follow_data`), the same condition semantics
+//! ([`qp_authority::eval_at`]) and the same grammar compile (`Session::scene`). The
 //! follower never writes engine entries, never stamps anchors and evaluates no watchers;
 //! the document only changes by mirroring the authority's `change` events.
 //!
@@ -25,11 +25,7 @@
 mod follow;
 mod judge;
 
-#[doc(hidden)]
-pub mod tape;
-
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::Path;
 
 use qp_schema::data::{BindingState, DataEvent};
 use qp_schema::protocol::{
@@ -39,10 +35,10 @@ use qp_schema::protocol::{
 use qp_schema::{Author, Bar, Condition, Document, Series};
 use serde::Serialize;
 
-use crate::claims::{anchor_of, closed, eval_at};
-use crate::session::Session;
-use qp_plane::plane::{reading_doc, DataError, DataPlane, Provider};
-use qp_plane::values::{bar_series, Delta};
+use qp_authority::{anchor_of, closed, eval_at, Session, Subsystems};
+use qp_plane::plane::{DataError, Provider};
+use qp_plane::values::bar_series;
+use qp_subsystem::SessionView;
 
 /// At most this many claims are remembered (oldest dropped first).
 const MAX_CLAIMS: usize = 4096;
@@ -52,24 +48,7 @@ const SUB_CLAIMS: &str = "replica:claims";
 const Q_DOC: &str = "replica:doc";
 const Q_LOG: &str = "replica:log";
 
-/// FNV-1a 64 over `bytes` (standard offset basis and prime).
-#[must_use]
-pub fn fnv1a64(bytes: &[u8]) -> u64 {
-    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
-    for b in bytes {
-        h ^= u64::from(*b);
-        h = h.wrapping_mul(0x0000_0100_0000_01b3);
-    }
-    h
-}
-
-/// Document digest (§19.6): FNV-1a 64 of the document's JSON bytes (`serde_json`, the
-/// canonical field order of the schema types), 16 lowercase hex digits.
-#[must_use]
-pub fn document_digest(doc: &Document) -> String {
-    let bytes = serde_json::to_vec(doc).unwrap_or_default();
-    format!("{:016x}", fnv1a64(&bytes))
-}
+pub use qp_ops::digest::{document_digest, fnv1a64};
 
 /// View digest (§19.6): FNV-1a 64 of the JSON bytes of view `view`'s scene description
 /// at `width` × `height`, compiled by `session` over its own data.
@@ -159,7 +138,7 @@ struct Known {
 /// A replica of one document (see the module docs).
 pub struct Replica {
     /// (RF1 S3.1) The subsystems its follower authority is built with.
-    subs: crate::Subsystems,
+    subs: Subsystems,
     principal: String,
     /// The provider until the document arrives (then it lives in the session's plane).
     provider: Option<Provider>,
@@ -209,7 +188,7 @@ fn follower(
     doc: Document,
     principal: &str,
     provider: Provider,
-    subs: crate::Subsystems,
+    subs: Subsystems,
 ) -> Result<Session, String> {
     let init = SessionInit {
         document: DocumentRef::Inline(Box::new(doc.clone())),
@@ -232,24 +211,8 @@ fn follower(
         comment_strictness: None,
     };
     // Built without a provider: every binding is pending, so nothing is stamped.
-    let mut s = Session::build_with(
-        init,
-        Path::new("."),
-        Provider::None,
-        serde_json::Value::Null,
-        subs,
-    )?;
-    s.doc = doc.clone();
-    s.initial = doc;
-    s.log.clear();
-    s.plane = DataPlane::new(provider, Some(principal.to_owned()), s.limits.max_bind_bars);
-    let _ = s.plane.sync(&s.doc);
-    s.rd = reading_doc(&s.doc, &s.plane);
-    s.cache.clear();
-    s.view_reads = None;
-    s.pending_views.clear();
-    s.pending_stamps.clear();
-    let _ = s.claims.take();
+    let mut s = Session::build_follower(init, subs)?;
+    s.follow_start(doc, provider, principal);
     Ok(s)
 }
 
@@ -260,7 +223,7 @@ impl Replica {
     pub fn new(
         principal: &str,
         provider: Box<dyn qp_source::SourceProvider>,
-        subs: crate::Subsystems,
+        subs: Subsystems,
     ) -> Self {
         Self::with(principal, Provider::Host(provider), subs)
     }
@@ -272,12 +235,12 @@ impl Replica {
     pub fn with_memory(
         principal: &str,
         provider: qp_source::MemoryProvider,
-        subs: crate::Subsystems,
+        subs: Subsystems,
     ) -> Self {
         Self::with(principal, Provider::Memory(provider), subs)
     }
 
-    fn with(principal: &str, provider: Provider, subs: crate::Subsystems) -> Self {
+    fn with(principal: &str, provider: Provider, subs: Subsystems) -> Self {
         Self {
             subs,
             principal: principal.to_owned(),
@@ -382,11 +345,11 @@ impl Replica {
     #[must_use]
     pub fn bars(&self, series: &str) -> Option<&[Bar]> {
         let s = self.s.as_ref()?;
-        qp_plane::values::find_series(rd!(s), series).and_then(qp_schema::Series::bars)
+        qp_plane::values::find_series(s.reading(), series).and_then(qp_schema::Series::bars)
     }
 
     /// (R3, K28, §20) Capsule candidates on the open (last) bar of bar series `series`,
-    /// computed from its **own** data ([`crate::capsule::candidates`]: public detectors
+    /// computed from its **own** data ([`qp_authority::capsule::candidates`]: public detectors
     /// and `Engine::candidates`). Shown only on this replica; never sent to the
     /// authority, never in its log or ledger; a candidate whose formation the next tick
     /// undoes simply disappears.
@@ -395,15 +358,15 @@ impl Replica {
         let Some(s) = self.s.as_ref() else {
             return Vec::new();
         };
-        let Some(bs) = qp_plane::values::find_series(rd!(s), series) else {
+        let Some(bs) = qp_plane::values::find_series(s.reading(), series) else {
             return Vec::new();
         };
         let (Some(bars), Some(symbol)) = (bs.bars(), bs.symbol()) else {
             return Vec::new();
         };
         // (RP4) The record the authority runs, read from its stories (default `r3`).
-        let engine = crate::capsule::engine_of_doc(rd!(s));
-        crate::capsule::candidates_with(engine, symbol, series, bars)
+        let engine = qp_authority::capsule::engine_of_doc(s.reading());
+        qp_authority::capsule::candidates_with(engine, symbol, series, bars)
     }
 
     /// Its binding state of bound series `series`.

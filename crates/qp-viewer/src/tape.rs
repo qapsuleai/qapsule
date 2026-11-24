@@ -1,15 +1,15 @@
 //! (RP3/M15, §22) The authority ↔ viewer check (VERIFY 15, `qp replica-tape --viewer`):
-//! the replica scenario of `qp_authority::tape` for a **viewer** (moved here with the viewer
+//! the replica scenario of `qp_replica::tape` for a **viewer** (moved here with the viewer
 //! in RF1 S3.3): the device subscribes to `viewer`, opens the capsule and gets only that
 //! instrument's slice, its claims and its data. Tooling, not engine logic.
 
 use std::path::Path;
 
-use qp_authority::replica::{view_digest, Shown};
-use qp_authority::tape::{
+use qp_authority::{Lists, Session, Subsystems};
+use qp_replica::tape::{
     events, holds, init, memory_provider, provider_init, Violation, BARS, SEED, START, TICKS, VIEW,
 };
-use qp_authority::{Lists, Session, Subsystems};
+use qp_replica::{view_digest, Shown};
 use qp_schema::data::{DataEvent, FeedKey};
 use qp_schema::protocol::{ClaimRef, ClaimState, Event, Maturity, ServerMsg, SessionInit};
 use qp_schema::Condition;

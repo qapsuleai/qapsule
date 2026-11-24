@@ -9,8 +9,10 @@
 #![allow(clippy::result_large_err)]
 
 pub mod apply;
+pub mod bounds;
 pub mod canon;
 pub mod expand;
+pub mod firsts;
 pub mod gops;
 pub mod live;
 pub mod locate;

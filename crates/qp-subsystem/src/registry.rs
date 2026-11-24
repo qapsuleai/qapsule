@@ -31,6 +31,23 @@ fn claim<V>(t: &mut Table<V>, k: &'static str, v: V, who: &str) -> Result<(), St
     Ok(())
 }
 
+/// The handler of a wire value's kind `kind_of(v)`: the one registered under it, else the
+/// one registered under [`ANY`]. A table holding only [`ANY`] answers without reading the
+/// kind (no serialization on the query and input path).
+fn find_kind<T: Serialize, V: Copy>(t: &Table<V>, v: &T) -> Option<V> {
+    if t.iter().all(|(n, _)| *n == ANY) {
+        return t.first().map(|(_, h)| *h);
+    }
+    kind_of(v)
+        .and_then(|k| find(t, &k))
+        .or_else(|| find(t, ANY))
+}
+
+/// The wire tag a query or input handler registers under to answer every kind no other
+/// subsystem registered (the reading subsystem, `qp-read`: RF1 S3.2). A handler registered
+/// under a kind comes first.
+pub const ANY: &str = "*";
+
 /// The handler under `k`.
 fn find<V: Copy>(t: &Table<V>, k: &str) -> Option<V> {
     t.iter().find(|(n, _)| *n == k).map(|(_, v)| *v)
@@ -149,19 +166,13 @@ impl Registry {
     /// The handler of `q`'s kind.
     #[must_use]
     pub fn query(&self, q: &Query) -> Option<&'static dyn QueryHandler> {
-        if self.queries.is_empty() {
-            return None;
-        }
-        find(&self.queries, &kind_of(q)?)
+        find_kind(&self.queries, q)
     }
 
     /// The handler of `g`'s kind.
     #[must_use]
     pub fn input(&self, g: &Gesture) -> Option<&'static dyn InputHandler> {
-        if self.inputs.is_empty() {
-            return None;
-        }
-        find(&self.inputs, &kind_of(g)?)
+        find_kind(&self.inputs, g)
     }
 
     /// The handler of `t`'s kind.

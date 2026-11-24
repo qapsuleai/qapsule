@@ -185,7 +185,7 @@ impl Session {
         };
         let principal = self.conns[ci].principal.clone();
         let lang = self.lang_of(ci);
-        let look = self.conns[ci].look.clone();
+        let look = self.looks[ci].clone();
         let mp = self.conns[ci].profile.max_points;
         let open_cap = (look.depth != OpenDepth::Sentence)
             .then(|| look.capsule.clone())
@@ -224,7 +224,7 @@ impl Session {
             audience: true,
             limit: Some(vc.limit),
         };
-        let (caps, coin_flip_hidden) = match self.query(ci, &q) {
+        let (caps, coin_flip_hidden) = match self.dispatch_query(ci, &q) {
             Ok(QueryResult::Capsules {
                 capsules,
                 coin_flip_hidden,

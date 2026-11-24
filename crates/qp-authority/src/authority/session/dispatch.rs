@@ -262,12 +262,8 @@ impl Session {
             surface,
             profile: profile.clone(),
             subs: Vec::new(),
-            viewports: BTreeMap::new(),
-            current: None,
-            last_input: 0,
-            last_at: None,
-            look: qp_schema::protocol::ViewState::default(),
         });
+        self.looks.push(qp_schema::protocol::ViewState::default());
         vec![out(
             conn,
             ServerMsg::Welcome {

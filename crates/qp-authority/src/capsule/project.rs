@@ -99,8 +99,8 @@ impl Session {
                 else {
                     continue;
                 };
-                if let Some(v) = c.look.voice.as_deref() {
-                    let clock = c.look.clock;
+                if let Some(v) = self.looks[ci].voice.as_deref() {
+                    let clock = self.looks[ci].clock;
                     item.voice =
                         self.reader_voice(doc, cap, p.as_deref(), lang, v, clock, &mut memo);
                 }

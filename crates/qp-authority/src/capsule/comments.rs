@@ -82,7 +82,7 @@ impl Session {
         let syms = symbols(&self.doc);
         for id in cites {
             if let Ok(QueryResult::CapsuleDetail { detail }) =
-                self.capsule_query_with(ci, id, "/x", false)
+                self.capsule_query_with(ci, id, "/x", false, (None, false))
             {
                 s.known.insert(id.clone());
                 for e in &detail.evidence {

@@ -4,8 +4,13 @@
 //! the built-in path unchanged (today's code, today's errors). With an empty registry
 //! every check here misses at once.
 
+use qp_capsule::sentence::StudyMemo;
+use qp_schema::capsule::Story;
 use qp_schema::market::MarketStatus;
-use qp_schema::protocol::{Gesture, Query, QueryResult};
+use qp_schema::protocol::{
+    AttentionDirective, CapsuleItem, CapsuleVoice, ClaimEvidence, Gesture, Language, Query,
+    QueryResult, Range, ServerComment, StoryRow, Viewport,
+};
 use qp_subsystem::{ConnView, SessionCtx, SessionView, Slots, Subsystem, MAX_EMIT_DEPTH};
 
 use super::*;
@@ -55,6 +60,16 @@ pub(crate) fn expand_ops(
     reg.expand_ops(doc, ops, base, ctx)
 }
 
+/// A query or input no registered subsystem serves (an authority without the reading
+/// subsystem).
+fn unserved(what: &str) -> ProtocolError {
+    E::new(
+        ErrorCode::Unsupported,
+        format!("`{what}` is not served here: no subsystem reads"),
+    )
+    .build()
+}
+
 impl SessionView for Session {
     fn document(&self) -> &Document {
         &self.doc
@@ -84,6 +99,8 @@ impl SessionView for Session {
             role,
             permissions,
             surface,
+            hello: &c.surface,
+            profile: &c.profile,
         })
     }
     fn conn_ids(&self) -> Vec<&str> {
@@ -110,6 +127,125 @@ impl SessionView for Session {
     }
     fn in_public(&self) -> bool {
         self.in_public
+    }
+    fn principals(&self) -> &[Principal] {
+        &self.principals
+    }
+    fn headlines(&self) -> &BTreeMap<String, String> {
+        &self.headlines
+    }
+    fn headline_source(&self) -> &dyn qp_ops::HeadlineSource {
+        self
+    }
+    fn proj(&self) -> Option<std::rc::Rc<qp_plane::proj::Proj>> {
+        self.proj.clone()
+    }
+    fn directives(&self, principal: &str) -> Option<&Vec<AttentionDirective>> {
+        self.directives.get(principal)
+    }
+    fn project_entry(&self, e: &LogEntry, p: &qp_plane::proj::Proj, lang: Language) -> LogEntry {
+        Session::project_entry(self, e, p, lang)
+    }
+    fn evidence_for(&self, principal: &str, ev: &ClaimEvidence) -> ClaimEvidence {
+        crate::claims::for_principal(&self.doc, &self.plane, principal, ev)
+    }
+    fn viewport_events(&self, principal: &str, vp: &Viewport) -> Vec<OutboundLine> {
+        Session::viewport_events(self, principal, vp)
+    }
+    fn accept_preview(&self, pid: &str, decider: &str) -> PResult<(Document, Vec<ChangeOp>)> {
+        let acc = self.accept_expand(pid, None, decider, None, Session::seq(self) + 1)?;
+        Ok((acc.doc, acc.changes))
+    }
+    fn stories_query(
+        &self,
+        conn: usize,
+        instrument: &str,
+        series: Option<&str>,
+        range: Option<&Range>,
+        page: (Option<u32>, Option<&str>),
+        path: &str,
+    ) -> PResult<QueryResult> {
+        Session::stories_query(self, conn, instrument, series, range, page, path)
+    }
+    fn story_rows(&self, series: &str, principal: &str, lang: Language) -> Vec<StoryRow> {
+        Session::story_rows(self, series, principal, lang)
+    }
+    fn row_stamp(&self, row: &StoryRow, lang: Language) -> Option<String> {
+        Session::row_stamp(self, row, lang)
+    }
+    fn capsule_item(
+        &self,
+        doc: &Document,
+        c: &qp_schema::Capsule,
+        p: Option<&qp_plane::proj::Proj>,
+        lang: Language,
+        principal: &str,
+        memo: &mut StudyMemo,
+    ) -> Option<CapsuleItem> {
+        self.capsule_item_with(doc, c, p, lang, principal, memo)
+    }
+    fn reader_voice(
+        &self,
+        doc: &Document,
+        c: &qp_schema::Capsule,
+        p: Option<&qp_plane::proj::Proj>,
+        lang: Language,
+        voice: &str,
+        clock: bool,
+        memo: &mut StudyMemo,
+    ) -> Option<CapsuleVoice> {
+        Session::reader_voice(self, doc, c, p, lang, voice, clock, memo)
+    }
+    fn market_item(&self, it: &mut CapsuleItem, lang: Language, principal: &str) {
+        Session::market_item(self, it, lang, principal);
+    }
+    fn capsule_passes(&self, doc: &Document, principal: &str, story: &Story, q: &Query) -> bool {
+        Session::capsule_passes(self, doc, principal, story, q)
+    }
+    fn coin_flip_hidden_by(
+        &self,
+        doc: &Document,
+        principal: &str,
+        story: &Story,
+        q: &Query,
+    ) -> bool {
+        Session::coin_flip_hidden_by(self, doc, principal, story, q)
+    }
+    fn relevant(&self, doc: &Document, principal: &str, instrument: &str) -> bool {
+        Session::relevant(self, doc, principal, instrument)
+    }
+    fn coin_flip_of(&self, principal: &str, story: &Story) -> bool {
+        Session::coin_flip_of(self, principal, story)
+    }
+    fn is_current(&self, it: &CapsuleItem) -> bool {
+        Session::is_current(self, it)
+    }
+    fn item_series<'d>(&'d self, doc: &'d Document, series: &str) -> Option<&'d qp_schema::Series> {
+        Session::item_series(self, doc, series)
+    }
+    fn fact_by_id(&self, id: &str) -> Option<&qp_schema::Fact> {
+        Session::fact_by_id(self, id)
+    }
+    fn item_memo(&self) -> &std::cell::RefCell<qp_plane::capidx::ItemMemo> {
+        &self.item_memo
+    }
+    fn headline_cal(&self) -> Option<&qp_schema::Calendar> {
+        self.headline_cal.as_ref()
+    }
+    fn comments_for(&self, principal: &str) -> Vec<ServerComment> {
+        Session::comments_for(self, principal)
+    }
+    fn capsule_query(
+        &self,
+        conn: usize,
+        id: &str,
+        path: &str,
+        look: (Option<&str>, bool),
+    ) -> PResult<QueryResult> {
+        Session::capsule_query(self, conn, id, path, look)
+    }
+    fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
+        Session::ledger_now(self)
     }
 }
 
@@ -152,19 +288,27 @@ impl Session {
     }
 
     /// Runs `f` with the registry and a call context: a split borrow of the authority
-    /// (the read view; the slots and the outbox taken out for the call and put back).
+    /// (the read view; the slots, the outbox, the values cache and the connections' view
+    /// state taken out for the call and put back).
     pub(crate) fn with_ctx<R>(&mut self, f: impl FnOnce(&Registry, &mut SessionCtx<'_>) -> R) -> R {
         let (mut slots, mut out) = (
             std::mem::take(&mut self.slots),
             std::mem::take(&mut self.outbox),
         );
+        let (mut cache, mut looks) = (
+            std::mem::take(&mut self.cache),
+            std::mem::take(&mut self.looks),
+        );
         let mut ctx = SessionCtx {
             view: &*self,
             slots: &mut slots,
             out: &mut out,
+            cache: &mut cache,
+            looks: &mut looks,
         };
         let r = f(&self.registry, &mut ctx);
         (self.slots, self.outbox) = (slots, out);
+        (self.cache, self.looks) = (cache, looks);
         r
     }
 
@@ -265,23 +409,25 @@ impl Session {
         lines
     }
 
-    /// A query: its kind's handler, else the built-in query.
-    pub(super) fn dispatch_query(&mut self, ci: usize, q: &Query) -> PResult<QueryResult> {
+    /// A query: its kind's handler (the reading subsystem answers every kind no other
+    /// subsystem took: `qp-read`, RF1 S3.2); none: `unsupported`.
+    pub(crate) fn dispatch_query(&mut self, ci: usize, q: &Query) -> PResult<QueryResult> {
         let Some(h) = self.registry.query(q) else {
-            return self.query(ci, q);
+            return Err(unserved("query"));
         };
         let conn = self.conns[ci].id.clone();
         self.with_ctx(|_, ctx| h.answer(&conn, q, ctx))
     }
 
-    /// A gesture: its kind's handler, else the built-in input.
+    /// A gesture: its kind's handler (the reading subsystem, as for queries); none:
+    /// `unsupported`.
     pub(super) fn dispatch_input(
         &mut self,
         ci: usize,
         g: &Gesture,
     ) -> PResult<(QueryResult, Vec<OutboundLine>)> {
         let Some(h) = self.registry.input(g) else {
-            return self.input(ci, g);
+            return Err(unserved("input"));
         };
         let conn = self.conns[ci].id.clone();
         self.with_ctx(|_, ctx| h.input(&conn, g, ctx))

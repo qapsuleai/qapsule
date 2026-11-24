@@ -49,7 +49,7 @@ impl Default for OpenReader {
 
 /// (R5/S) The device's scene for `r` (`viewer::open_scene_with` with its `OpenExtra`).
 fn open_scene_in(
-    s: &mut qp_session::Session,
+    s: &mut qp_session::Authority,
     o: &qp_schema::protocol::Opening,
     headline: Option<&str>,
     voice: Option<&qp_schema::protocol::CapsuleVoice>,

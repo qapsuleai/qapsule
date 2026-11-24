@@ -71,7 +71,7 @@ impl Hub {
 
     /// The session.
     #[must_use]
-    pub fn session(&self) -> &Session {
+    pub fn session(&self) -> &qp_session::Authority {
         match &self.session {
             Authority::Plain(s) => s,
             Authority::Replay(h) => h.session(),
@@ -79,7 +79,7 @@ impl Hub {
     }
 
     /// The session, mutable (host-side reads such as compiling a scene).
-    pub fn session_mut(&mut self) -> &mut Session {
+    pub fn session_mut(&mut self) -> &mut qp_session::Authority {
         match &mut self.session {
             Authority::Plain(s) => s,
             Authority::Replay(h) => h.session_mut(),

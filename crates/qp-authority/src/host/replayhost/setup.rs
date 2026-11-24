@@ -174,13 +174,13 @@ fn expand_init(
 }
 
 impl ReplayHost {
-    /// Starts an authority on the replay of `init.replay`; local data is read from
-    /// [`qp_source::local_bars_dir`].
+    /// Starts an authority with subsystems `subs` on the replay of `init.replay`; local
+    /// data is read from [`qp_source::local_bars_dir`].
     ///
     /// # Errors
     /// No `init.replay`, an invalid replay, or the session's own errors.
-    pub fn new(init: SessionInit, root: &Path) -> Result<Self, String> {
-        Self::with_local_dir(init, root, &qp_source::local_bars_dir())
+    pub fn new(init: SessionInit, root: &Path, subs: Subsystems) -> Result<Self, String> {
+        Self::with_local_dir(init, root, &qp_source::local_bars_dir(), subs)
     }
 
     /// [`ReplayHost::new`] with local data read from `local_dir`.
@@ -191,8 +191,9 @@ impl ReplayHost {
         init: SessionInit,
         root: &Path,
         local_dir: &Path,
+        subs: Subsystems,
     ) -> Result<Self, String> {
-        Self::with_window(init, root, local_dir, None)
+        Self::with_window(init, root, local_dir, None, subs)
     }
 
     /// (R4/T6) [`ReplayHost::with_local_dir`] with a history window: with `init.replay.from_t`
@@ -209,6 +210,7 @@ impl ReplayHost {
         root: &Path,
         local_dir: &Path,
         window: Option<usize>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         let r = init
             .replay
@@ -237,7 +239,7 @@ impl ReplayHost {
         };
         let replay = Replay::new(feeds, &opts).map_err(|e| format!("init.replay: {e}"))?;
         let init = expand_init(init, root, &r, &replay)?;
-        let mut session = Session::new(init.clone(), root)?;
+        let mut session = Session::new(init.clone(), root, subs)?;
         // (R4/H-FP) The headline pieces' elapsed phrases on the replay's own calendar.
         session.set_headline_calendar(qp_plane::headparts::replay_calendar(info.kind));
         // (RP3/M15, §22) Viewers are told once per step, not after every event of it.
@@ -277,6 +279,7 @@ impl ReplayHost {
         mut init: SessionInit,
         root: &Path,
         feeds: Vec<ReplayFeed>,
+        subs: Subsystems,
     ) -> Result<Self, String> {
         let mut r = init
             .replay
@@ -301,8 +304,8 @@ impl ReplayHost {
         let shared = std::sync::Arc::new(std::sync::Mutex::new(provider));
         let mut session_init = init.clone();
         session_init.data = None;
-        let mut session =
-            Session::with_provider(session_init, root, Box::new(SharedProvider(shared.clone())))?;
+        let provider = Box::new(SharedProvider(shared.clone()));
+        let mut session = Session::with_provider(session_init, root, provider, subs)?;
         session.set_headline_calendar(qp_plane::headparts::replay_calendar(
             ReplaySourceKind::Local,
         ));

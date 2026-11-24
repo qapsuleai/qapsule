@@ -9,6 +9,10 @@ publish.workspace = true
 
 [dependencies]
 qp-authority = { version = "0.0.0", path = "../qp-authority" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
+qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
+# The standard subsystems (one line each in `compose`).
+qp-watch = { version = "0.0.0", path = "../qp-watch" }
 # The conformance runner (`conform`).
 qp-ops = { version = "0.0.0", path = "../qp-ops" }
 qp-plane = { version = "0.0.0", path = "../qp-plane" }
@@ -26,7 +30,6 @@ qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-designs = { version = "0.0.0", path = "../qp-designs" }
 qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
 qp-look = { version = "0.0.0", path = "../qp-look" }
-qp-source = { version = "0.0.0", path = "../qp-source" }
 schemars = "1.2.3"
 
 [lints]

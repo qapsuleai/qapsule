@@ -130,7 +130,7 @@ impl Replica {
                 std::mem::replace(&mut s.plane.provider, Provider::None)
             }),
         };
-        match follower(doc, &self.principal, provider) {
+        match follower(doc, &self.principal, provider, self.subs) {
             Ok(mut s) => {
                 s.set_headline_calendar(self.headline_cal.clone());
                 self.s = Some(s);

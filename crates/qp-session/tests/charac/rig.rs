@@ -68,14 +68,14 @@ impl Rig {
         Self { t }
     }
 
-    pub fn session(&self) -> &Session {
+    pub fn session(&self) -> &qp_session::Authority {
         match &self.t {
             Target::S(s) => s,
             Target::R(r) => r.session(),
         }
     }
 
-    pub fn session_mut(&mut self) -> &mut Session {
+    pub fn session_mut(&mut self) -> &mut qp_session::Authority {
         match &mut self.t {
             Target::S(s) => s,
             Target::R(r) => r.session_mut(),

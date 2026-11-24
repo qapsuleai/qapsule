@@ -246,7 +246,8 @@ impl std::fmt::Debug for OpenSide {
 
 impl OpenSide {
     /// The open side of `open` at log position `seq`, its replica's own data from
-    /// `provider` (the open instrument's feeds the host served).
+    /// `provider` (the open instrument's feeds the host served), its replica's authority
+    /// built with subsystems `subs`.
     #[must_use]
     pub fn new(
         principal: &str,
@@ -254,8 +255,9 @@ impl OpenSide {
         seq: u64,
         provider: qp_source::MemoryProvider,
         calendar: Option<qp_schema::Calendar>,
+        subs: crate::Subsystems,
     ) -> Self {
-        let mut replica = Replica::with_memory(principal, provider);
+        let mut replica = Replica::with_memory(principal, provider, subs);
         replica.set_headline_calendar(calendar);
         replica.start((*open.document).clone(), seq);
         Self {

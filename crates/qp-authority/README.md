@@ -8,7 +8,9 @@ ile koşar, kapsül motorunu bağlar, görünümü `qp-grammar` ile sahneye derl
 iletisiyle gelir; rastgelelik yok.
 
 **Katman:** oturum (`docs/ENGINEERING.md` §2); katman içi sırada `qp-subsystem`'den sonra,
-`qp-session` bileşiminden önce. Hiçbir alt sistem crate'ini tanımaz. RF1 S3.0'da
+`qp-session` bileşiminden önce. Hiçbir alt sistem crate'ini tanımaz: kurucuları alt sistem
+listesini (`Subsystems`) parametre alır, doğurduğu otoritelere (barındırıcının yeniden kurduğu
+oturum, yansının izleyicisi, görüntüleyicinin açık tarafı, kayıt oynatıcı) aynısını verir. RF1 S3.0'da
 `qp-session`'ın içeriği saf taşımayla buraya geldi; çağıranlar `qp-session` bileşiminin
 yeniden dışa aktardığı yolları kullanır (`rounds/RF1/PLAN.md` §3.3).
 
@@ -18,7 +20,7 @@ kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-
 `qp-subsystem` (alt sistem sözleşmesi); `schemars`, `serde`, `serde_json`,
 `serde_path_to_error`.
 
-**Dışa açık yüzey (`lib.rs`; `qp-session` bunları aynı adlarla yeniden dışa aktarır):** `Session`, `permissions`, `confine`; `Replica`,
+**Dışa açık yüzey (`lib.rs`; `qp-session` bunları aynı adlarla yeniden dışa aktarır):** `Session`, `Subsystems`, `permissions`, `confine`; `Replica`,
 `ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; `hit_scene`,
 `screen_frame`, `explain_scene`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
 `agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
@@ -28,7 +30,9 @@ kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-
 **Düzen (`src/`; her klasörün kendi `README.md`'si var):**
 
 - `authority/` — otorite ve komut yolu: `Session` (`session/`), ajan politikası.
-- `capsule/` — kapsül yaşamı: motor bağlama, iddialar, itiraz, yorumlar, izleme eşleşmesi.
+- `capsule/` — kapsül yaşamı: motor bağlama, iddialar, itiraz, yorumlar. İzleme eşleşmesi ve
+  izleme işlemleri S3.1'de `qp-watch` alt sistemine çıktı (`AfterData` fazı, `Look`/`Written`);
+  dokümandaki izleme öğelerinin gizliliği (`intent_for_reader`) izdüşümde kaldı.
 - `data/` — canlı yol, bağ sorguları.
 - `read/` — sorgu, anlamsal okuma, önizleme, açıklama, etkileşim.
 - `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).

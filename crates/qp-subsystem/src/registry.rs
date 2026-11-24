@@ -2,19 +2,14 @@
 
 use std::collections::BTreeMap;
 
-use qp_ops::apply::apply_all;
-use qp_ops::expand::{expand_op, expand_ops, Ctx, Expanded};
-use qp_plane::error::{ptr, E};
+use qp_ops::expand::{expand_op, expand_ops, expand_ops_with, Ctx, Expanded};
 use qp_plane::values::{eval_condition, eval_on, values, Cache, Computed};
-use qp_schema::protocol::{
-    ChangeOp, ClaimRef, ErrorCode, Gesture, Op, ProtocolError, Query, Topic,
-};
+use qp_schema::protocol::{ChangeOp, ClaimRef, Gesture, Op, ProtocolError, Query, Topic};
 use qp_schema::{Condition, Document};
 use serde::Serialize;
 
 use crate::handlers::{
-    op_name, ClaimKind, ConditionKind, InputHandler, OpHandler, QueryHandler, TopicHandler,
-    ValueSource,
+    ClaimKind, ConditionKind, InputHandler, OpHandler, QueryHandler, TopicHandler, ValueSource,
 };
 use crate::{Moment, Phase, SessionCtx, Subsystem};
 
@@ -145,7 +140,7 @@ impl Registry {
         if self.ops.is_empty() {
             return None;
         }
-        self.ops.get(op_name(op).as_str()).copied()
+        self.ops.values().copied().find(|h| h.owns(op))
     }
 
     /// The handler of `q`'s kind.
@@ -216,32 +211,17 @@ impl Registry {
         if self.ops.is_empty() {
             return expand_ops(doc, ops, base, ctx);
         }
-        let mut scratch = doc.clone();
-        let (mut changes, mut inverse, mut origin) = (Vec::new(), Vec::new(), Vec::new());
-        for (i, op) in ops.iter().enumerate() {
-            let p = ptr(base, i);
-            let cs = self.expand_op(&scratch, op, &p, ctx)?;
-            let inv = apply_all(&mut scratch, &cs).map_err(|m| {
-                let code = if matches!(op, Op::Undo { .. }) {
-                    ErrorCode::UndoConflict
-                } else {
-                    ErrorCode::Invalid
-                };
-                E::new(code, format!("cannot apply: {m}"))
-                    .at(p.clone())
-                    .build()
-            })?;
-            origin.extend(std::iter::repeat_n(i, cs.len()));
-            changes.extend(cs);
-            inverse.push(inv);
-        }
-        let inverse = inverse.into_iter().rev().flatten().collect();
-        Ok(Expanded {
-            doc: scratch,
-            changes,
-            inverse,
-            origin,
+        expand_ops_with(doc, ops, base, ctx, |d, op, p, ctx| {
+            self.expand_op(d, op, p, ctx)
         })
+    }
+
+    /// Whether a subsystem registered a condition kind or a value source: the live path
+    /// then asks [`Registry::eval_condition`] every time (no memo of the built-in
+    /// evaluation; audit-s30 B1).
+    #[must_use]
+    pub fn evaluates_conditions(&self) -> bool {
+        !(self.conditions.is_empty() && self.sources.is_empty())
     }
 
     /// Whether condition `c` holds now ([`Registry::eval_condition`]).

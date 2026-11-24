@@ -74,7 +74,7 @@ pub fn expand_op(doc: &Document, op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult
         Op::SetIntentActive { intent, active } => {
             people::set_intent_active(doc, intent, active, p, ctx)
         }
-        Op::AddWatch { .. } | Op::RemoveWatch { .. } => crate::watch::expand_watch(doc, op, p, ctx),
+        Op::AddWatch { .. } | Op::RemoveWatch { .. } => Err(unserved(op, p)),
         Op::AddComment {
             id,
             about,
@@ -118,4 +118,20 @@ pub fn expand_op(doc: &Document, op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult
             p,
         )),
     }
+}
+
+/// An op this expansion does not serve: a subsystem owns it (RF1 S3.1; watches:
+/// `qp-watch`, expanded by the authority's registry), and none that does is registered.
+fn unserved(op: &Op, p: &str) -> qp_schema::protocol::ProtocolError {
+    let name = if matches!(op, Op::AddWatch { .. }) {
+        "add_watch"
+    } else {
+        "remove_watch"
+    };
+    E::new(
+        ErrorCode::Unsupported,
+        format!("`{name}` is not served here: no subsystem owns it"),
+    )
+    .at(p.to_owned())
+    .build()
 }

@@ -262,7 +262,7 @@ impl ReplayHost {
         self.resets += 1;
         let mut init = self.init.clone();
         init.epoch += self.resets;
-        self.session = Session::new(init, &self.root)?;
+        self.session = Session::new(init, &self.root, self.session.subsystems())?;
         self.session
             .set_headline_calendar(qp_plane::headparts::replay_calendar(self.info.kind));
         self.session.set_viewer_batch(true);

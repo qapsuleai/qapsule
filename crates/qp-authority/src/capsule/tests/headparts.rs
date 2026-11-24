@@ -49,7 +49,13 @@ fn host() -> ReplayHost {
         .expect("visitor"),
     );
     let none = std::env::temp_dir().join("qp-hfp-no-local-data");
-    ReplayHost::with_local_dir(init, std::path::Path::new("."), &none).expect("demo host")
+    ReplayHost::with_local_dir(
+        init,
+        std::path::Path::new("."),
+        &none,
+        crate::Subsystems::NONE,
+    )
+    .expect("demo host")
 }
 
 /// Every capsule's pieces for a reader: `(finding, TR, EN)`.

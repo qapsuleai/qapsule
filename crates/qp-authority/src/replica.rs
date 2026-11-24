@@ -159,6 +159,8 @@ struct Known {
 
 /// A replica of one document (see the module docs).
 pub struct Replica {
+    /// (RF1 S3.1) The subsystems its follower authority is built with.
+    subs: crate::Subsystems,
     principal: String,
     /// The provider until the document arrives (then it lives in the session's plane).
     provider: Option<Provider>,
@@ -204,7 +206,12 @@ impl std::fmt::Debug for Replica {
 
 /// A follower session over `doc` whose bound series are resolved by `provider` with
 /// `principal`'s entitlement, from the document's anchors (no stamping, no engine entry).
-fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Session, String> {
+fn follower(
+    doc: Document,
+    principal: &str,
+    provider: Provider,
+    subs: crate::Subsystems,
+) -> Result<Session, String> {
     let init = SessionInit {
         document: DocumentRef::Inline(Box::new(doc.clone())),
         principals: vec![Principal {
@@ -231,6 +238,7 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
         Path::new("."),
         Provider::None,
         serde_json::Value::Null,
+        subs,
     )?;
     s.doc = doc.clone();
     s.initial = doc;
@@ -247,22 +255,32 @@ fn follower(doc: Document, principal: &str, provider: Provider) -> Result<Sessio
 }
 
 impl Replica {
-    /// A replica for `principal` whose data comes from the host's `provider`.
+    /// A replica for `principal` whose data comes from the host's `provider`; its
+    /// follower authority is built with subsystems `subs`.
     #[must_use]
-    pub fn new(principal: &str, provider: Box<dyn qp_source::SourceProvider>) -> Self {
-        Self::with(principal, Provider::Host(provider))
+    pub fn new(
+        principal: &str,
+        provider: Box<dyn qp_source::SourceProvider>,
+        subs: crate::Subsystems,
+    ) -> Self {
+        Self::with(principal, Provider::Host(provider), subs)
     }
 
     /// A replica whose provider is a [`qp_source::MemoryProvider`] that also takes the
     /// data events the host delivers (so a re-resolution sees them): tests, simple hosts,
     /// the WASM binding.
     #[must_use]
-    pub fn with_memory(principal: &str, provider: qp_source::MemoryProvider) -> Self {
-        Self::with(principal, Provider::Memory(provider))
+    pub fn with_memory(
+        principal: &str,
+        provider: qp_source::MemoryProvider,
+        subs: crate::Subsystems,
+    ) -> Self {
+        Self::with(principal, Provider::Memory(provider), subs)
     }
 
-    fn with(principal: &str, provider: Provider) -> Self {
+    fn with(principal: &str, provider: Provider, subs: crate::Subsystems) -> Self {
         Self {
+            subs,
             principal: principal.to_owned(),
             provider: Some(provider),
             s: None,

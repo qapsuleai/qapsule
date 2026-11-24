@@ -117,18 +117,14 @@ impl Session {
             w.done = fin;
             let series = w.series.clone();
             let mut changes = self.capsule_changes(&runner.engine, &events, &made, fin - 1);
-            // (R5B, §25.5) Watches, in the same entry.
-            let (wch, matched) = self.match_watches(&events);
-            changes.extend(wch);
-            let mut matched_pub = Vec::new();
+            // (RF1 S3.1) The look's subsystem changes (watches, §25.5), in the same entry.
+            changes.extend(self.look_phase(&events, false));
             if let Some(pe) = runner.pub_engine.as_ref() {
-                let (changes, mp) = self.in_world(true, |s| {
+                let changes = self.in_world(true, |s| {
                     let mut c = s.capsule_changes(pe, &events_pub, &made, fin - 1);
-                    let (w, m) = s.match_watches(&events_pub);
-                    c.extend(w);
-                    (c, m)
+                    c.extend(s.look_phase(&events_pub, true));
+                    c
                 });
-                matched_pub = mp;
                 self.pending_pub = Some(crate::public::PubPending::of(changes));
             }
             let summary = if fin - from == 1 {
@@ -147,10 +143,7 @@ impl Session {
             wrote = true;
             lines.extend(self.entry_events(seq));
             lines.extend(self.capsule_topic_lines(seq, &events, &events_pub, &said));
-            if !matched.is_empty() || !matched_pub.is_empty() {
-                let ps = self.pub_of(seq);
-                lines.extend(self.watch_lines(&matched, seq, &matched_pub, ps));
-            }
+            lines.extend(self.written_phase(seq));
             runner = self.runner.take().expect("runner put back");
         }
         self.runner = Some(runner);

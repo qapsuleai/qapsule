@@ -29,14 +29,26 @@ Toplam: 4 yeniden yazılan öğe, 3 yeni öğe. `moved.py`'nin bir CHANGED'ı da
 
 ## S4 — `expand_op` kol başına fonksiyon (`qp-ops` `expand/op.rs` + `expand/op/`)
 
-`expand_op` dağıtıcı `match`'i olarak kaldı (56 satırlık dosya); 22 kol kendi fonksiyonuna
-gitti. Her fonksiyonun gövdesi kolun gövdesidir (aynen; değerlendirme sırası, hata iletileri,
-erken dönüşler aynı; `return` kolda da `expand_op`'tan dönüyordu). Her fonksiyon `op`'u
-`let Op::X { … } = op else { unreachable!(…) };` ile açar (`expand_watch`'ın kalıbı);
-dağıtıcı yalnız o kolu o fonksiyona gönderir. `ctx` kullanmayanlar onu almaz
-(`set_params`, `remove_layer`, `append_bars`, `update_last_bar`), `set_audience` `doc` almaz.
-Kalan satır içi kollar: `add_watch`/`remove_watch`, `undo`, gramer işlemleri,
-`accept_proposal`. `expand_op`'un `too_many_lines` ve `cognitive_complexity` izinleri kalktı.
+`expand_op` bir dağıtıcı `match` olarak kaldı (`op.rs` 121 satır, fonksiyon 101 satır); 22 kol
+kendi fonksiyonuna gitti. Her fonksiyonun gövdesi kolun gövdesidir: değerlendirme sırası, hata
+iletileri ve erken dönüşler aynı; `return` kolda da `expand_op`'tan dönüyordu.
+
+- **Kol fonksiyonları alanları parametre olarak alır.** Dağıtıcı alanları açar, örneğin
+  `Op::PutSeries { series } => series::put_series(doc, series, p, ctx)`. Kalıpta
+  `unreachable!` yoktur.
+- **Yedi parametre sınırı:** alanı çok olan dört kol için `Arm { doc, p, ctx }` yapısı kullanılır
+  (yeni öğe): `add_study`, `add_fact`, `add_finding`, `add_comment`.
+- **`ptr_arg` izni:** alan bağları `&String` / `&Vec<_>` olduğundan, gövde değişmesin diye on
+  kol fonksiyonuna öğe düzeyinde `#[allow(clippy::ptr_arg)]` kondu. Bu, `arch-check`'in saydığı
+  beş lint'ten biri değil.
+- **`ctx` ve `doc` almayanlar:** `ctx` kullanmayanlar onu almaz (`set_params`, `remove_layer`,
+  `append_bars`, `update_last_bar`); `set_audience` `doc` almaz.
+- **Satır içinde kalan kollar:** `add_watch`/`remove_watch`, `undo`, gramer işlemleri,
+  `accept_proposal`.
+- **Dağıtıcı 101 satır** (alanları açılmış 23 kol, `rustfmt` biçimi). Arkin'in kararıyla
+  (`DECISION.md`, uygulama notları) `fn.lines` taban çizgisinde 101 satırla durur ve
+  `too_many_lines` izni kalır (`lint.allow` `qp-ops` 21). `main`'e göre borç 903 → 101;
+  `cognitive_complexity` izni kalktı.
 
 | Yeni fonksiyon | Dosya |
 |---|---|
@@ -45,9 +57,17 @@ Kalan satır içi kollar: `add_watch`/`remove_watch`, `undo`, gramer işlemleri,
 | `add_fact`, `add_finding`, `update_finding`, `decide_finding` (onay/ret), `add_narrative`, `show_finding` | `op/finding.rs` |
 | `add_intent`, `set_intent_active`, `add_comment`, `remove`, `set_audience`, `set_sensitivity`, `reject_proposal` | `op/people.rs` |
 
-- `put_series` 80 satırı aştığı için ikiye bölündü: kaynağa göre denetim (`match &series.source`,
-  `let src` ile) `put_series_source(doc, series, &mut s, &sp, ctx)` adımına gitti; orada `sp`
-  `&str` olduğundan `&sp` → `sp` (6 yer; clippy `needless_borrow`), `s.source = …` `&mut` üstünden.
-- Yeniden yazılan öğe sayısı: `expand_op` (1) + 23 yeni fonksiyon. Yeni fonksiyonların hiçbiri
-  80 satırı aşmıyor (arch-check `fn.lines` taban çizgisinde `expand/op` kalemi yok); dosyalar ≤ 337.
-- İ6'nın `op.rs` kalemi yapılandırmadan silindi; `expand_op` `fn.lines` kalemi kalktı.
+- **`put_series` ikiye bölündü:** 80 satırı aştığı için kaynağa göre denetim (`match &series.source`,
+  `let src` ile) `put_series_source(doc, series, &mut s, &sp, ctx)` adımına gitti. Orada `sp`
+  `&str` olduğundan 6 yerde `&sp` → `sp` (clippy `needless_borrow`); `s.source = …` ataması
+  `&mut` üstünden.
+- **Sayım:** yeniden yazılan öğe `expand_op` (1); yeni öğeler 23 kol fonksiyonu ve `struct Arm`.
+  `expand_op` dışında yeni fonksiyonların hiçbiri 80 satırı aşmıyor; dosyalar ≤ 337 satır.
+- **İ6:** `op.rs` kalemi yapılandırmadan silindi.
+
+## Not: crate düzeyi izin
+
+`qp-ops` ve `qp-plane`'in `lib.rs`'inde `#![allow(clippy::result_large_err)]` var. Bu,
+`qp-session`'da zaten bulunan iznin kopyası: protokol hatası soğuk yolda kutusuz dönüyor,
+gerekçe `qp-session` `lib.rs`'teki yorum. `arch-check`'in `lint.inner` kuralı bu lint'e bakmıyor.
+Taşınan kodla birlikte geldi; yeni bir susturma değil.

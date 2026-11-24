@@ -71,3 +71,56 @@ iletileri ve erken dönüşler aynı; `return` kolda da `expand_op`'tan dönüyo
 `qp-session`'da zaten bulunan iznin kopyası: protokol hatası soğuk yolda kutusuz dönüyor,
 gerekçe `qp-session` `lib.rs`'teki yorum. `arch-check`'in `lint.inner` kuralı bu lint'e bakmıyor.
 Taşınan kodla birlikte geldi; yeni bir susturma değil.
+
+## S3.0 — alt sistem sözleşmesi ve otoritede çağrı noktaları
+
+Boş kayıtla davranış aynı (S1 karakterizasyonu, `compare.sh`). Bütün çağrı noktaları "önce kayıt":
+kayıtta karşılığı olan tür (işlem, sorgu, girdi, konu, koşul, iddia) onun işleyicisine gider; öbürü
+bugünkü yoldan, bugünkü hatayla. Kapalı şema enum'larında `_` kolu yazılamaz (her kol dolu:
+`unreachable_patterns`, `-D warnings`), bu yüzden "varsayılan kol" dağıtıcının girişinde kayda
+bakıştır; `allowed`/`proposable`/`agent_op`/`ops_to_pub` gibi zaten `_` kolu olanlarda da aynı biçim
+kullanıldı (tek anlam).
+
+**Yeniden yazılan öğeler (moved.py `CHANGED -`, 37):**
+
+| Öğe | Dosya | Ne değişti |
+|---|---|---|
+| `struct Session` | `authority/session.rs` | 4 alan: `registry`, `slots`, `outbox`, `wake` |
+| `allowed`, `proposable` | `authority/session.rs` | `reg: &Registry` parametresi; kayıtlı işlemde işleyicinin cevabı |
+| `op_name` ×2 | `authority/session.rs`, `authority/agent.rs` | silindi; tek kopya `qp_subsystem::op_name` (gövde aynı, belge yorumu yeni) |
+| `agent_check` | `authority/agent.rs` | ajan sınıfı: kayıtlı işlemde `OpHandler::agent`, öbürü `agent_op` |
+| `command` | `authority/session/command.rs` | `allowed`/`proposable` kayıtla; `expand_ops(&self.registry, …)` ×3; `check_comments` → `check_command` (yorum denetimi + `Check` fazı) |
+| `pub_expand`, `direct_two_worlds`, `propose_two_worlds` | `authority/session/worlds.rs` | `expand_ops(&…registry, …)` |
+| `accept_expand` | `authority/session/accept.rs` | `expand_ops(&self.registry, …)` |
+| `committed` | `authority/session/accept.rs` | kitle döngüsü `note_audiences`'e ayrıldı (yeni öğe, gövde aynen); sonuna `AfterCommit` |
+| `build_with_keys` | `authority/session/create.rs` | 4 alan kurulumu; `audience_seen` kurulumu `initial_audiences`'e ayrıldı (yeni öğe, ifade aynen) |
+| `handle` | `authority/session/dispatch.rs` | `handle_resolved` → `handle_msg` (ileti sonu yazma adımı) |
+| `handle_resolved` | `authority/session/dispatch.rs` | `query`/`subscribe`/`input`/`dispute`/`hello` → `dispatch_*`; `viewer_unsubscribed` → `unsubscribed` |
+| `handle_raw`, `resolve_selectors` | `authority/session/intake.rs` | `handle_msg`; `registry.expand_op` |
+| `subscribe` | `authority/session/presence.rs` | `holds` → `registry.holds` |
+| `advance_clock` | `authority/session/clock.rs` | `Proposals` fazı (toplama) ve yazma adımı |
+| `data_changed` | `authority/session/settle.rs` | `AfterData` fazı (toplama), `pending_views`'den önce |
+| `settle`, `settle_data` | `authority/session/settle.rs` | sonda yazma adımı (`emit`) |
+| `eval_watchers`, `eval_intents`, `invalidate_these` | `authority/session/events.rs` | `eval_condition`/`holds` → `registry.…` |
+| `settle_live` | `data/live/eval.rs` | sonda yazma adımı |
+| `bar_command` | `data/live/eval.rs` | `registry.expand_op` |
+| `eval_conditions_live`, `eval_intents_live`, `invalidate_live` | `data/live/eval.rs` | `eval_memo(…, &self.registry)` |
+| `eval_memo` | `data/live.rs` | `reg` parametresi; kimlikle değerlendirme `reg.eval_condition` |
+| `swap_world` | `capsule/public.rs` | `self.slots.swap_world();` (tek satır) |
+| `ops_to_pub` | `capsule/public.rs` | `other` kolu: kayıtlı işlemde `OpHandler::to_public` |
+| `invalidate_in_public`, `eval_intents_public` | `capsule/public/commit.rs` | `registry.holds` / `registry.eval_condition` |
+| `project_entry` | `capsule/project.rs` | okuyucu gizliliği: kayıtlı işlemde `OpHandler::reader_private` |
+| `settled_bars` | `capsule/dispute.rs` | `capsule_settled` → `settled_phase` (+ `Settled` fazı) |
+
+Görünürlük yalnız (öğe aynı): `hello` (`pub(super)`), `verdict_line` (`pub(crate)`),
+`Computed::new` (`pub`).
+
+**Yeni öğeler:** `qp-subsystem` (bütün crate; ≈ 0,8 bin satır), `authority/session/phases.rs`
+(`impl SessionView for Session`, `expand_ops`, `register`, `next_wake`, `with_ctx`, `phase`, `emit`,
+`handle_msg`, `check_command`, `dispatch_hello`, `dispatch_query`, `dispatch_input`,
+`dispatch_subscribe`, `unsubscribed`, `dispatch_dispute`, `settled_phase`, `host_adjust`),
+`note_audiences`, `initial_audiences`, `crates/qp-session/src/lib.rs` (yüz).
+
+**Saf taşıma:** `qp-session/src` → `qp-authority/src`; `host/conform.rs` → `qp-session/src/conform.rs`
+(yalnız `use` yolları); `confine`, `read_json` → `authority/session/files.rs`; `AgentOp` →
+`qp-subsystem`.

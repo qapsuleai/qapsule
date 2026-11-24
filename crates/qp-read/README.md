@@ -38,7 +38,7 @@ kapsül öğeleri ve cümleleri otoritede kalır, okuma görünümü (`ReadView`
 Otoritenin kendi derlemesi (`provider`, `scene`, `scene_as_reader`) değildir: barındırıcı ve
 yansı onları sorgu dışında kullanır.
 
-**Düzen:** `src/lib.rs` (alt sistem, kancalar), `rd.rs` (okuma bağlamı `Rd`: bölünmüş ödünç,
+**Düzen:** `src/lib.rs` (bildirim), `subsystem.rs` (alt sistem, kancalar), `rd.rs` (okuma bağlamı `Rd`: bölünmüş ödünç,
 yuva), `query.rs` + `query/view.rs` (sorgular, `input`), `reading.rs` (`screen`, `hit`),
 `interact.rs` + `interact/{scenes,style}.rs` (piksel hareketleri, derinlikler), `preview.rs`,
 `explain.rs`, `bindq.rs` (bağ sorguları), `capsules.rs` (`capsules`, `ledger`).

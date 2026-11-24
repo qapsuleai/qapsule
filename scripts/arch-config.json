@@ -157,8 +157,8 @@
       "id": "İ3",
       "rule": "crate.lines",
       "item": "qp-authority",
-      "max": 20129,
-      "max_note": "RF1 S2 sonu değeri (qp-ops, qp-plane ayrıldı; K89: net satır eklenmez); S3.0: istisna aynı içerikle qp-session → qp-authority taşındı, tavan aynı (rounds/RF1/DECISION.md, uygulama notları); S3.1: izleme qp-watch alt sistemine çıktı, tavan ölçülen değere indi (mandal; audit-s30 B8)",
+      "max": 16687,
+      "max_note": "RF1 S2 sonu değeri (qp-ops, qp-plane ayrıldı; K89: net satır eklenmez); S3.0: istisna aynı içerikle qp-session → qp-authority taşındı, tavan aynı (rounds/RF1/DECISION.md, uygulama notları); S3.1: izleme qp-watch alt sistemine çıktı, tavan ölçülen değere indi (mandal; audit-s30 B8); S3.2: okuma ve sunum qp-read alt sistemine çıktı, tavan ölçülen değere indi (mandal; 13.000 sınırı S3.3 sonunda)",
       "status": "onaylandı (K85, 2026-11-22)",
       "reason": "23 modül tek güçlü bağlı bileşen (≈26 bin satır); Session'ın inherent impl'leri 18 dosyaya dağılmış, başka crate'te yazılamaz. Konu klasörlerine bölündü; crate bölmesi Session'ı alt sistemlere ayıran bir tasarım round'u ister (PLAN §4)."
     }

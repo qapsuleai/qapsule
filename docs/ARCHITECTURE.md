@@ -185,10 +185,14 @@ dokunulacak dosyalar şunlardır.
 | `qp-ops` | `expand/undo.rs` | `expand_remove` (`Collection` üstünde kapalı) |
 | `qp-ops` | `expand/op.rs`, `expand/describe.rs` | yeni `Op` yerleşikse (kapalı, 38 kol); alt sistemin `OpHandler`'ı açarsa dokunulmaz |
 | `qp-authority` | `read/query.rs` | `collection_items` (`Collection` üstünde kapalı, 9 kol) |
+| `qp-authority` | `replica/viewer.rs` | açık taraf için `Document { … }` (alan alan; yeni koleksiyonun açık tarafa gidip gitmeyeceği bir gizlilik kararı) |
+| `qp-authority` | `capsule/queries.rs` | `ledger_now`'ın `Document { … }` değişmezi (S3.2'de `qp-read`'e taşınır) |
 | `qp-authority` | `capsule/public.rs` | kimlikle öğe bulma zinciri (derleyici zorlamaz) |
 
-**Otorite: hedef 0 dosya, bugün 1 zorunlu + 1 yumuşak.** `read/query.rs` kapalı eşlemedir
-(derleyici ister). `capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
+**Otorite: hedef 0 dosya, bugün 3 zorunlu + 1 yumuşak.** `read/query.rs` kapalı eşlemedir;
+`replica/viewer.rs` ve `capsule/queries.rs` `Document`'ın tam yapı değişmezleridir (`Document`'ta
+`Default` yok); üçünü de derleyici ister. S3.2 `capsule/queries.rs`'i `qp-read`'e taşıyınca
+otoritede 2 zorunlu kalır. `capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
 eklenmezse yeni tür o yolda bulunmaz. Joker kollu eşlemeler (`capsule/project.rs`,
 `capsule/public.rs` `to_public`, `capsule/settled.rs`, `authority/session/accept.rs`,
 `data/live.rs`) yeni türü değiştirmeden geçirir; gizlilik ya da kamu dünyası farkı

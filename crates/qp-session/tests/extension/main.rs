@@ -104,8 +104,7 @@ fn ext_tally_counts_its_op_through_an_engine_entry() {
 fn ext_tally_a_replica_with_the_same_list_follows() {
     let subs = list(&[&TALLY]);
     let mut s = with_list(subs);
-    let mut r =
-        qp_session::AuthorityReplica::with_memory("arkin", qp_source::MemoryProvider::new(), subs);
+    let mut r = qp_authority::Replica::with_memory("arkin", qp_source::MemoryProvider::new(), subs);
     let hello_msg =
         json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}});
     let w = s.handle_raw("r", &hello_msg.to_string());
@@ -179,15 +178,46 @@ fn ext_the_authority_depends_on_no_subsystem_crate() {
     let pos = |n: &str| order.iter().position(|c| c == n).unwrap();
     let subsystems = &order[pos("qp-subsystem") + 1..pos("qp-authority")];
     assert!(subsystems.iter().any(|c| c == "qp-watch"), "{order:?}");
-    let toml = std::fs::read_to_string(root.join("crates/qp-authority/Cargo.toml")).unwrap();
+    // qp-authority's dependencies as Cargo resolves them (every manifest form: inline,
+    // `.workspace`, `[dependencies.x]`, renamed; normal, dev and build).
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_owned());
+    let out = std::process::Command::new(cargo)
+        .args([
+            "metadata",
+            "--format-version",
+            "1",
+            "--no-deps",
+            "--offline",
+        ])
+        .arg("--manifest-path")
+        .arg(root.join("Cargo.toml"))
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let meta: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    let deps: Vec<String> = meta["packages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["name"] == "qp-authority")
+        .unwrap()["dependencies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|d| d["name"].as_str().unwrap().to_owned())
+        .collect();
+    assert!(
+        deps.iter().any(|d| d == "qp-subsystem"),
+        "the contract: {deps:?}"
+    );
     for c in subsystems {
         assert!(
-            !toml
-                .lines()
-                .any(|l| l.trim_start().starts_with(&format!("{c} "))
-                    || l.trim_start().starts_with(&format!("{c}="))),
+            !deps.contains(c),
             "qp-authority depends on subsystem crate {c}"
         );
     }
-    assert!(toml.contains("qp-subsystem ="), "the contract only");
 }

@@ -1,4 +1,4 @@
-//! The title row's figures (OV-7): R0's "C <close>", or the OHLC legend of the cursor's
+//! The title row's figures (OV-7): R0's "`C <close>`", or the OHLC legend of the cursor's
 //! (else the last visible) bar: letters muted, values `text`, change and change % in the
 //! direction colour; touch: C and change %; parts drop in a fixed order when narrow.
 //! Letters O H L C in both languages: Turkish A Y D K is not in the glossary yet.
@@ -88,7 +88,7 @@ pub(in crate::compile) fn title_figures(
     x - GAPS.1
 }
 
-/// R0's "C <close>" of the last visible bar, in the direction colour.
+/// R0's "`C <close>`" of the last visible bar, in the direction colour.
 fn close(ch: &Chart<'_>, close_x: i32, last_bar: usize, over: &mut Vec<Prim>) -> i32 {
     let (fr, theme) = (ch.fr, ch.theme());
     let title_px = ch.size("title");

@@ -71,7 +71,7 @@ pub struct CompileOptions {
     pub emphasis: Vec<Emphasis>,
     /// Theme override (`dark`, `light`); the view's theme otherwise.
     pub theme: Option<String>,
-    /// (R4/M11) Outcome style of glyphs by name (`qp_grammar::glyph::outcome::STYLES`);
+    /// (R4/M11) Outcome style of glyphs by name (`qp_glyph::outcome::STYLES`);
     /// absent = `r3`, the R3 drawing. A view setting like the theme override.
     pub outcome: Option<String>,
     /// Level of detail when slots are narrower than one pixel (default `true`).
@@ -82,9 +82,10 @@ pub struct CompileOptions {
     /// (R4/T5) Glyph alphabet by name (`qp_glyph::ALPHABETS`); the product's if
     /// `None`.
     pub alphabet: Option<String>,
-    /// (R4/H-FP) The face design (`crate::faces`) whose feed face this scene is, set only
-    /// when compiling a face (open depth `sentence`). With a headline template
-    /// ([`crate::faces::FaceDesign::headline`]) the finding's `headline` text field is
+    /// (R4/H-FP) The face design (`qp_designs::faces`, reached through
+    /// [`Self::designs`]) whose feed face this scene is, set only when compiling a face
+    /// (open depth `sentence`). With a headline template (the design's
+    /// [`HeadlineFn`](crate::designs::HeadlineFn)) the finding's `headline` text field is
     /// the template's output; `None` (every other scene) or a design without one: the
     /// capsule's sentence. An unknown name is `invalid`.
     pub face: Option<String>,

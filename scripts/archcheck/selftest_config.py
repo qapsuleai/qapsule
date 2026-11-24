@@ -113,6 +113,11 @@ def run(CFG, check):
          fails(dict(base_cfg, exceptions=[dict(exc, item="qp-b")]), old_cfg=old_x) == 1),
         ("an exception moved to a new crate with a raised max fails",
          fails(dict(newcr, exceptions=[dict(exc, item="qp-n", max=101)]), old_cfg=old_x) == 1),
+        ("B7: two entries for one rule and item fail",
+         fails(dict(newcr, exceptions=[dict(exc, item="qp-n"), dict(exc, item="qp-n")]), old_cfg=old_x) >= 1),
+        ("B7: two old exceptions cannot both move onto one new item",
+         fails(dict(newcr, exceptions=[dict(exc, item="qp-n")]),
+               old_cfg=dict(base_cfg, exceptions=[exc, dict(exc, item="qp-c")])) == 0),
     ]
     for label, hit in cases:
         ok &= check(f"config-diff: {label}", hit)

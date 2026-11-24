@@ -136,6 +136,10 @@ def judge_config(old, new, v):
 def _judge_exceptions(old, new, v):
     oe = {(e["rule"], e["item"]): e for e in old.get("exceptions", [])}
     ne = {(e["rule"], e["item"]): e for e in new.get("exceptions", [])}
+    keys = [(e["rule"], e["item"]) for e in new.get("exceptions", [])]
+    for k in sorted({k for k in keys if keys.count(k) > 1}):
+        # Two entries for one (rule, item) would hide one of them (audit-s30 B7).
+        v.fail(f"exception [{k[0]}] {k[1]} listed {keys.count(k)} times", "one entry per rule and item")
     gone = oe.keys() - ne.keys()
     fresh = crates_of(new) - crates_of(old)
     moved_from = set()

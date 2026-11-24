@@ -100,7 +100,9 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   `committed`, `build_with_keys` ve eski `conform.rs` kalemleri sıkılaşır; yeni borç yok);
   (B) İ3 istisnasının `qp-session` → `qp-authority` yer değiştirmesi (aynı kural, aynı tavan
   20.437). Arkin'in cevabı: **"İkisine de onay."** (B) için `config-diff`'e "yeni crate'e taşınan
-  istisna" tanıması eklenir: aynı kural, aynı tavan, eski crate artık yok, yeni crate bu
-  değişiklikte yapılandırmaya girmiş. Öz-sınamasıyla gelir. Bu round'un kalan taşımalarında
+  istisna" tanıması eklenir: aynı kimlik ve kural, tavan yükselmez, eski istisna kalemi artık yok (eski crate
+  başka bir rolle sürebilir: S3.0'da `qp-session` bileşim oldu), yeni kalemin crate'i bu
+  değişiklikte yapılandırmaya girmiş; bir yeni kaleme tek eski istisna taşınır ve aynı kural ve
+  kalem iki kez yazılamaz (denetim `audit-s30.md` B7). Öz-sınamasıyla gelir. Bu round'un kalan taşımalarında
   (S3.1–S3.3) aynı türden taban çizgisi yazımları yapılabilir: yalnız taşıma ve sıkılaşma, yeni
   borç yok.

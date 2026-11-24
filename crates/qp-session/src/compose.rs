@@ -269,3 +269,23 @@ impl OpenSide {
         ))
     }
 }
+
+#[cfg(test)]
+mod lists {
+    use super::{FOLLOWER, STANDARD};
+    use qp_subsystem::Subsystem as _;
+
+    /// (RF1 S3.2, audit-s32 B2) The follower's list is the standard list without the
+    /// reading subsystem, in the same order: a subsystem added to `LIST` is added to
+    /// `FOLLOWER_LIST` too unless it is a reading of a connection (queries, gestures).
+    #[test]
+    fn the_follower_list_is_the_standard_list_without_reading() {
+        let names = |l: qp_authority::Subsystems| -> Vec<&str> {
+            l.list().iter().map(|s| s.name()).collect()
+        };
+        let mut want = names(STANDARD);
+        want.retain(|n| *n != qp_read::READ.name());
+        assert_eq!(names(FOLLOWER), want);
+        assert!(names(STANDARD).contains(&"read"));
+    }
+}

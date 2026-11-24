@@ -260,12 +260,13 @@ fn holds(op: &str, prev: Option<f64>, v: Option<f64>, k: f64) -> bool {
     }
 }
 
-/// Runs the scenario (authorities built with `subs`), the replica's data `lag` events behind.
+/// Runs the scenario (the authority built with `subs`, the replica's with `follower`), the
+/// replica's data `lag` events behind.
 ///
 /// # Errors
 /// The scenario cannot be set up.
-pub fn run(lag: usize, subs: Subsystems) -> Result<Outcome, String> {
-    run_with(lag, &provider_init(), subs)
+pub fn run(lag: usize, (subs, follower): (Subsystems, Subsystems)) -> Result<Outcome, String> {
+    run_with(lag, &provider_init(), (subs, follower))
 }
 
 /// [`run`] with another replica provider (e.g. one that does not entitle `dev`).
@@ -273,10 +274,14 @@ pub fn run(lag: usize, subs: Subsystems) -> Result<Outcome, String> {
 /// # Errors
 /// The scenario cannot be set up.
 #[allow(clippy::too_many_lines)]
-pub fn run_with(lag: usize, provider: &Value, subs: Subsystems) -> Result<Outcome, String> {
+pub fn run_with(
+    lag: usize,
+    provider: &Value,
+    (subs, follower): (Subsystems, Subsystems),
+) -> Result<Outcome, String> {
     let init: SessionInit = serde_json::from_value(init()).map_err(|e| e.to_string())?;
     let a = Session::new(init, Path::new("."), subs)?;
-    let r = Replica::with_memory("dev", memory_provider(provider)?, subs);
+    let r = Replica::with_memory("dev", memory_provider(provider)?, follower);
     let mut d = Driver {
         a,
         r,
@@ -511,7 +516,10 @@ fn viewer_deliver(
 /// # Errors
 /// The scenario cannot be set up.
 #[allow(clippy::too_many_lines)]
-pub fn run_viewer(lag: usize, subs: Subsystems) -> Result<ViewerOutcome, String> {
+pub fn run_viewer(
+    lag: usize,
+    (subs, follower): (Subsystems, Subsystems),
+) -> Result<ViewerOutcome, String> {
     let mut iv = init();
     iv["document"]["series"]
         .as_array_mut()
@@ -546,7 +554,7 @@ pub fn run_viewer(lag: usize, subs: Subsystems) -> Result<ViewerOutcome, String>
             "width":390,"height":300}}),
     ] {
         let lines = a.handle_raw("r", &m.to_string());
-        viewer_deliver(lines, &mut side, &mut said, subs);
+        viewer_deliver(lines, &mut side, &mut said, follower);
     }
     if side.is_none() {
         return Err("the viewer did not get the open capsule's slice".to_owned());
@@ -562,7 +570,7 @@ pub fn run_viewer(lag: usize, subs: Subsystems) -> Result<ViewerOutcome, String>
             if let Some(o) = others.get(i) {
                 lines.extend(a.data_event(o).map_err(|e| e.to_string())?);
             }
-            viewer_deliver(lines, &mut side, &mut said, subs);
+            viewer_deliver(lines, &mut side, &mut said, follower);
         }
         // The host serves the device only the feeds it subscribes to (§22.5).
         let subs = a

@@ -154,11 +154,19 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
 5. **Yeniden oynatma.** Değişimlerden çalışır: `qp_ops::apply::replay(initial, log)` alt sistem
    kodu istemez. Alt sistemin durumu yeniden oynatmada kurulmaz; dokümanda yaşaması gereken
    her şey değişimle yazılır.
-6. **Yansı.** Yansıya giden protokol mesajıdır. Bileşimin kurduğu her otorite (oturum,
-   yeniden oynatma barındırıcısı, yansı, görüntüleyicinin açık tarafı) aynı listeyle kurulur;
-   otoritenin doğurduğu otorite listeyi ondan devralır.
+6. **Yansı.** Yansıya giden protokol mesajıdır. Bileşimin iki listesi var: `STANDARD`
+   (oturum, yeniden oynatma barındırıcısı; bağlantı konuşan otoriteler) ve `FOLLOWER`
+   (izleyiciler: yansı, görüntüleyicinin açık tarafı; `STANDARD` eksi okuma, sıra aynı).
+   İzleyiciye bağlantı konuşmaz: sorgu ya da girdi almaz, bir sunucunun günlüğünü izler
+   (RF1 S3.2, `rounds/RF1/DECISION.md` uygulama notları). Otoritenin doğurduğu otorite
+   listeyi ondan devralır.
 7. **Kayıt.** `crates/qp-session/src/compose.rs` `LIST`'ine **bir satır**, ve
-   `crates/qp-session/Cargo.toml`'a bir bağımlılık satırı. Otorite crate'i değişmez.
+   `crates/qp-session/Cargo.toml`'a bir bağımlılık satırı. Alt sistem izleyicide de
+   gerekiyorsa (günlüğü izlerken iş görüyorsa: faz, koşul, değer kaynağı, işlem açılımı)
+   `FOLLOWER_LIST`'e de bir satır; yalnız bir bağlantının okumasına hizmet ediyorsa (sorgu,
+   girdi) yalnız `LIST`'e. İki listenin uyumunu `compose.rs`'in `lists` sınaması tutar
+   (`FOLLOWER` = `STANDARD` eksi okuma); yeni alt sistemin yazarı sınamayı da günceller.
+   Otorite crate'i değişmez.
 8. **Barındırıcı API'si.** Alt sistemin durumu `session.sub::<T>()` / `sub_mut::<T>()`
    (yuva tipiyle); `Deref` üstünden değil. Standart dışı bir liste (sınama):
    `qp_session::Authority::new(init, root, Subsystems::new(list))` ve

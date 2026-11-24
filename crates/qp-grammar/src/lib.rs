@@ -1,6 +1,6 @@
 //! Qapsule visual grammar compiler (R2).
 //!
-//! [`compile`] turns a [`View`](qp_schema::grammar::View) and its data (from a
+//! [`compile()`] turns a [`View`](qp_schema::grammar::View) and its data (from a
 //! [`DataProvider`]) into a [`SceneDesc`](qp_schema::scene::SceneDesc): the
 //! renderer-independent scene the reference renderer draws and semantic reading
 //! (`screen`, `hit`) reads. [`depth`] holds the presenter's depth rules.

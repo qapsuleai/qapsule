@@ -19,7 +19,7 @@ pub fn is_face(name: &str) -> bool {
 }
 
 /// The face of a capsule in the feed (open depth `sentence`) by face design `face`
-/// (`None`: the default, `r3` = the §18.4 capsule card [`capsule_view`] at `max_points`).
+/// (`None`: the default, `r3` = the §18.4 capsule card [`qp_grammar::depth::capsule_view`] at `max_points`).
 /// The designs are registered in [`crate::faces::FACES`].
 ///
 /// # Errors

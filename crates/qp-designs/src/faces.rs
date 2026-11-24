@@ -4,8 +4,8 @@
 //! A face design is a grammar rule that builds the [`View`] of a capsule's face in the feed
 //! (open depth `sentence`) and **states its own height** (CSS px at the phone width): the
 //! shell lays faces out at the height the core reads from here, it never computes one.
-//! The authority (`qp-session` `interact.rs`, hit testing and openings) and the shell's
-//! replica (`qp-wasm` `shell.rs` `face_scene`) both call [`face_view`] by name, so they
+//! The authority (`qp-session`'s interaction reading: hit testing and openings) and the
+//! shell's replica (`qp-wasm` `bind/shell.rs` `face_scene`) both call [`face_view`] by name, so they
 //! compile the same scene.
 //!
 //! The reference `r3` is the R3 capsule card (§18.4, [`depth::capsule_view`]) at 240 px,
@@ -17,7 +17,7 @@
 //! settings page and the harness list the names from here.
 //!
 //! **Headline template (R4/H-FP, SPEC E5):** a design may also write its own headline
-//! ([`FaceDesign::headline`], a [`HeadlineFn`] over [`HeadlineParts`]). In that design's
+//! ([`FaceDesign::headline`], a [`HeadlineFn`] over [`HeadlineParts`](qp_grammar::HeadlineParts)). In that design's
 //! face scene — and only there: the compile option [`qp_grammar::CompileOptions::face`] names
 //! it — the finding's `headline` text field is the template's output (the harness
 //! measures the headline from that field); without a template, or when the provider has

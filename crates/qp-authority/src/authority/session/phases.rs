@@ -11,7 +11,7 @@ use qp_schema::protocol::{
     AttentionDirective, CapsuleItem, CapsuleVoice, ClaimEvidence, Gesture, Language, Query,
     QueryResult, Range, ServerComment, StoryRow, Viewport,
 };
-use qp_subsystem::{ConnView, SessionCtx, SessionView, Slots, Subsystem, MAX_EMIT_DEPTH};
+use qp_subsystem::{ConnView, ReadView, SessionCtx, SessionView, Slots, Subsystem, MAX_EMIT_DEPTH};
 
 use super::*;
 
@@ -128,6 +128,9 @@ impl SessionView for Session {
     fn in_public(&self) -> bool {
         self.in_public
     }
+}
+
+impl ReadView for Session {
     fn principals(&self) -> &[Principal] {
         &self.principals
     }
@@ -291,13 +294,31 @@ impl Session {
     /// through a subsystem: `qp_session::Session::scene_for`).
     #[doc(hidden)]
     pub fn with_subsystems<R>(&mut self, f: impl FnOnce(&mut SessionCtx<'_>) -> R) -> R {
-        self.with_ctx(|_, ctx| f(ctx))
+        self.with_read_ctx(|_, ctx| f(ctx))
     }
 
     /// Runs `f` with the registry and a call context: a split borrow of the authority
     /// (the read view; the slots, the outbox, the values cache and the connections' view
     /// state taken out for the call and put back).
     pub(crate) fn with_ctx<R>(&mut self, f: impl FnOnce(&Registry, &mut SessionCtx<'_>) -> R) -> R {
+        self.with_ctx_as::<false, R>(f)
+    }
+
+    /// [`Session::with_ctx`] with the read view (`SessionCtx::read`): a query's or a
+    /// gesture's call (RF1 S3.2).
+    pub(crate) fn with_read_ctx<R>(
+        &mut self,
+        f: impl FnOnce(&Registry, &mut SessionCtx<'_>) -> R,
+    ) -> R {
+        self.with_ctx_as::<true, R>(f)
+    }
+
+    /// `READ` is a constant so that a phase's call never names the read view's table (a
+    /// build without queries leaves it out).
+    fn with_ctx_as<const READ: bool, R>(
+        &mut self,
+        f: impl FnOnce(&Registry, &mut SessionCtx<'_>) -> R,
+    ) -> R {
         let (mut slots, mut out) = (
             std::mem::take(&mut self.slots),
             std::mem::take(&mut self.outbox),
@@ -312,7 +333,11 @@ impl Session {
             out: &mut out,
             cache: &mut cache,
             looks: &mut looks,
+            read: None,
         };
+        if READ {
+            ctx.read = Some(&*self);
+        }
         let r = f(&self.registry, &mut ctx);
         (self.slots, self.outbox) = (slots, out);
         (self.cache, self.looks) = (cache, looks);
@@ -423,7 +448,7 @@ impl Session {
             return Err(unserved("query"));
         };
         let conn = self.conns[ci].id.clone();
-        self.with_ctx(|_, ctx| h.answer(&conn, q, ctx))
+        self.with_read_ctx(|_, ctx| h.answer(&conn, q, ctx))
     }
 
     /// A gesture: its kind's handler (the reading subsystem, as for queries); none:
@@ -437,7 +462,7 @@ impl Session {
             return Err(unserved("input"));
         };
         let conn = self.conns[ci].id.clone();
-        self.with_ctx(|_, ctx| h.input(&conn, g, ctx))
+        self.with_read_ctx(|_, ctx| h.input(&conn, g, ctx))
     }
 
     /// A subscription: the built-in checks, then its topic kind's handler (a refusal

@@ -15,7 +15,7 @@ use qp_schema::protocol::{
     Target, ViewState, Viewport,
 };
 use qp_schema::{Capsule, Document, Fact, Series};
-use qp_subsystem::{SessionCtx, SessionView};
+use qp_subsystem::{ReadView, SessionCtx};
 
 use qp_capsule::sentence::StudyMemo;
 use qp_plane::error::{PResult, E};
@@ -72,7 +72,7 @@ impl Conn {
 /// One reading's context: the fields the authority's reading code read on the session,
 /// split so that the values cache can be warmed next to the reading document.
 pub(crate) struct Rd<'a> {
-    pub v: &'a dyn SessionView,
+    pub v: &'a dyn ReadView,
     pub doc: &'a Document,
     pub rdoc: &'a Document,
     pub log: &'a [LogEntry],
@@ -98,7 +98,10 @@ pub(crate) fn reading<R>(
         Some(st) => st,
         None => &mut own,
     };
-    let mut r = Rd::new(ctx.view, ctx.cache, ctx.looks, st);
+    let Some(v) = ctx.read else {
+        return Err(E::new(ErrorCode::Unsupported, "no read view at this call").build());
+    };
+    let mut r = Rd::new(v, ctx.cache, ctx.looks, st);
     let ci = r.conns.iter().position(|c| c.id == conn).ok_or_else(|| {
         E::new(ErrorCode::NotFound, format!("unknown connection `{conn}`")).build()
     })?;
@@ -124,7 +127,7 @@ pub fn scene_for_range(
 
 impl<'a> Rd<'a> {
     fn new(
-        v: &'a dyn SessionView,
+        v: &'a dyn ReadView,
         cache: &'a mut Cache,
         looks: &'a mut Vec<ViewState>,
         st: &'a mut ReadState,
@@ -285,11 +288,11 @@ impl<'a> Rd<'a> {
     }
     pub(crate) fn item_series(&self, doc: &'a Document, series: &str) -> Option<&'a Series> {
         // The view's document outlives the reading; the series is looked up in `doc`.
-        let v: &'a dyn SessionView = self.v;
+        let v: &'a dyn ReadView = self.v;
         v.item_series(doc, series)
     }
     pub(crate) fn fact_by_id(&self, id: &str) -> Option<&'a Fact> {
-        let v: &'a dyn SessionView = self.v;
+        let v: &'a dyn ReadView = self.v;
         v.fact_by_id(id)
     }
     pub(crate) fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {

@@ -1,6 +1,7 @@
 //! The composition (`docs/CONCEPTS.md` "Bileşim"): the standard subsystems, and the
 //! authorities built with them. Each type here wraps its `qp-authority` type
-//! (`Deref`/`DerefMut`: today's call sites unchanged) and builds it with [`STANDARD`].
+//! (`Deref`/`DerefMut`: today's call sites unchanged) and builds it with [`STANDARD`]; a
+//! follower (the replica, the viewer's open side) with [`FOLLOWER`] (RF1 S3.2).
 //! New code reaches a subsystem's state with [`Session::sub`] / [`Session::sub_mut`],
 //! not through `Deref`.
 
@@ -18,6 +19,16 @@ static LIST: &[&dyn Subsystem] = &[
 
 /// The standard subsystems every authority of the composition is built with.
 pub const STANDARD: qp_authority::Subsystems = qp_authority::Subsystems::new(LIST);
+
+/// The standard subsystems of a follower (a replica's authority, a viewer's open side):
+/// [`STANDARD`] without the reading subsystem. A follower takes no `query` or `input` (no
+/// connection talks to it; it follows a host's log and is read through its own methods),
+/// so the reading subsystem would never be called there; leaving it out keeps its code out
+/// of the shell's WASM package (RF1 S3.2: +1.38 MB otherwise; the WASM ±2 % gate).
+pub const FOLLOWER: qp_authority::Subsystems = qp_authority::Subsystems::new(FOLLOWER_LIST);
+
+/// [`FOLLOWER`]'s list.
+static FOLLOWER_LIST: &[&dyn Subsystem] = &[&qp_watch::WATCH];
 
 /// Implements `Deref`/`DerefMut` to the wrapped `qp-authority` type.
 macro_rules! wraps {
@@ -214,7 +225,7 @@ impl ReplayHost {
     }
 }
 
-/// A replica whose follower authority has the standard subsystems.
+/// A replica whose follower authority has the follower's subsystems ([`FOLLOWER`]).
 #[derive(Debug)]
 pub struct Replica(qp_authority::Replica);
 wraps!(Replica, qp_authority::Replica);
@@ -223,7 +234,7 @@ impl Replica {
     /// A replica for `principal` whose data comes from the host's `provider`.
     #[must_use]
     pub fn new(principal: &str, provider: Box<dyn qp_source::SourceProvider>) -> Self {
-        Self(qp_authority::Replica::new(principal, provider, STANDARD))
+        Self(qp_authority::Replica::new(principal, provider, FOLLOWER))
     }
 
     /// A replica whose provider is a [`qp_source::MemoryProvider`] that also takes the
@@ -231,12 +242,13 @@ impl Replica {
     #[must_use]
     pub fn with_memory(principal: &str, provider: qp_source::MemoryProvider) -> Self {
         Self(qp_authority::Replica::with_memory(
-            principal, provider, STANDARD,
+            principal, provider, FOLLOWER,
         ))
     }
 }
 
-/// The device's side of the open capsule, its replica with the standard subsystems.
+/// The device's side of the open capsule, its replica with the follower's subsystems
+/// ([`FOLLOWER`]).
 #[derive(Debug)]
 pub struct OpenSide(qp_authority::viewer::OpenSide);
 wraps!(OpenSide, qp_authority::viewer::OpenSide);
@@ -253,7 +265,7 @@ impl OpenSide {
         calendar: Option<qp_schema::Calendar>,
     ) -> Self {
         Self(qp_authority::viewer::OpenSide::new(
-            principal, open, seq, provider, calendar, STANDARD,
+            principal, open, seq, provider, calendar, FOLLOWER,
         ))
     }
 }

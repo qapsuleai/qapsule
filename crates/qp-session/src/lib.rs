@@ -20,7 +20,7 @@ pub mod replica;
 pub mod tape;
 pub mod viewer;
 
-pub use compose::{OpenSide, ReplayHost, Replica, Session, STANDARD};
+pub use compose::{OpenSide, ReplayHost, Replica, Session, FOLLOWER, STANDARD};
 pub use qp_authority::{capsule, voices};
 pub use qp_authority::{
     confine, default_limits, demo_init, document_digest, permissions, read_json, view_digest,

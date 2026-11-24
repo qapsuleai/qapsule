@@ -6,7 +6,7 @@
 //!
 //! The authority knows none of it: it dispatches every query and gesture no other
 //! subsystem registered to this one (`qp_subsystem::ANY`), inside its `as_reader` (the
-//! asker's projection and world). Everything is read through `SessionView`; what a
+//! asker's projection and world). Everything is read through `ReadView`; what a
 //! reading changes is the subsystem's own state ([`ReadState`]: viewports, focus, input
 //! counter) and the two pieces of the authority the call context lends (`SessionCtx`:
 //! the values cache, the connections' view state). Nothing here writes the document or the

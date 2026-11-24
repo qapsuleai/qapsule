@@ -98,12 +98,19 @@ pub trait SessionView {
     fn replay_position(&self) -> Option<i64> {
         None
     }
+}
 
-    // ---- Reading (RF1 S3.2, `qp-read`). A query or input handler runs inside the
-    // authority's `as_reader`: the document, the reading document and everything below are
-    // the asker's (its projection, its world, its language's headlines). Each method is
-    // the authority's own function of that name, unchanged.
-
+/// The read view a query or input handler gets besides [`SessionView`] (RF1 S3.2, the
+/// reading subsystem `qp-read`; `SessionCtx::read`). A query or input runs inside the
+/// authority's `as_reader`: the document, the reading document and everything here are the
+/// asker's (its projection, its world, its language's headlines). Each method is the
+/// authority's own function of that name, unchanged.
+///
+/// A separate trait, given only at a query's or a gesture's call (not at the phases): an
+/// authority that never takes one (a replica's follower) never builds this table, so the
+/// functions behind it (proposal expansion, capsule detail, stories) stay out of a build
+/// that does not need them (the shell's WASM package; the ±2 % gate).
+pub trait ReadView: SessionView {
     /// The principals of the session, in order.
     fn principals(&self) -> &[Principal];
     /// Finding id → the capsule sentence the grammar provider speaks with for the reader.

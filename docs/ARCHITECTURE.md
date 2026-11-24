@@ -55,10 +55,11 @@ yalnızca bir istemcidir (AI-native testi 5).
   insan arayüzü (web/telefon/saat/ses)      ajan (MCP, satır akışı, süreç içi)
               │  hello · command · query · subscribe · input · attend
               ▼
-  ┌──────────────── otorite (qp-session) ────────────────┐
+  ┌──── otorite (qp-authority; bileşim: qp-session) ─────┐
   │ yetki ve öneri ─► işlem açılımı ─► değişim ─► günlük │  ← saat bir girdidir (clock)
   │ sorgular (qp-compute ile)   sunucu (presenter)       │
   │ abonelik ve olaylar         varlık durumu (presence) │
+  │ alt sistemler kayıtla (qp-subsystem; ör. qp-watch)   │
   └──────────────────────────────────────────────────────┘
               │  welcome · ack · result · notify · error
               ▼
@@ -84,7 +85,7 @@ yalnız protokol mesajlarıyla sürüldüğünde aynı doküman ve aynı sahne �
   ┌───────────── kabuk (JS, ince) ─────────────┐     ┌──────────────────────────────┐
   │ düzen öğeleri: liste, sekme, ayar, düğme   │     │ yeniden oynatma (qp-source)  │
   │ girdi → `input` / `command` / `replay`     │◄───►│   veri olayları + saat       │
-  │ protokolden gelen metni ve sırayı gösterir │ qp/0│ otorite (qp-session)         │
+  │ protokolden gelen metni ve sırayı gösterir │ qp/0│ otorite (qp-session bileşimi)│
   │ WASM (Rust çekirdeği):                     │     │ statik dosyalar (aynı köken) │
   │   yansı, gramer derleme, sahne → piksel    │     └──────────────────────────────┘
   └────────────────────────────────────────────┘
@@ -115,6 +116,89 @@ da aynıdır.
 - Bir değer hem akıştan hem yerel hesaptan gelebiliyorsa, tanım tektir ve sonuçlar
   test ile karşılaştırılır.
 
+## Yeni alt sistem nasıl eklenir (RF1)
+
+Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem` sözleşmesidir.
+Örnek: `qp-watch` (izleme). Sınama: `crates/qp-session/tests/extension/` (`Tally`).
+
+1. **Crate.** Oturum katmanında yeni crate; `scripts/arch-config.json` sırasında
+   `qp-subsystem`'den sonra, `qp-authority`'den önce. Bağımlılıkları `qp-subsystem`, `qp-ops`,
+   `qp-schema` ve gerekiyorsa sırada önceki alt sistemler; otoriteye bağımlı olmaz.
+2. **Durum.** Davranış durumsuz bir `static` nesnedir (`&'static dyn Subsystem`). Durum
+   otoritenin yuvalarında: `init`'te `ctx.slots.put(T)`; iki dünyada ayrı tutulacaksa
+   `put_world(PerWorld<T>)` (otorite dünya değiştirirken yuvayı da değiştirir); bağlantı başına
+   `put_conn`.
+3. **`impl Subsystem`.** Her şeyin varsayılanı vardır; alt sistem yalnız yaptığını söyler:
+   - `ops()` → `OpHandler`: işlemin açılımı (`expand` → `ChangeOp`'lar) ve politikası
+     (`allowed`, `proposable`, `agent`, `to_public`, `reader_private`). Kayıtlı işlem
+     yerleşik açılımdan önce sorulur.
+   - `phases()` + `collect` (ve `check`). Fazlar ve çağrıldıkları otorite dosyası
+     (`crates/qp-authority/src/`): `Check`, `Expand`, `Connect`, `Subscribe`, `Unsubscribe`,
+     `Adjust` → `authority/session/phases.rs`; `AfterCommit` → `authority/session/accept.rs`;
+     `AfterData` → `authority/session/settle.rs` (`Data`) ve `capsule/run.rs` (`Look`,
+     `Written`); `Proposals` → `authority/session/clock.rs`; `Settled` → `capsule/dispute.rs`;
+     `Close` çağrılmaz (protokolde kapanış iletisi yok).
+   - `queries()`, `inputs()`, `topics()`: `kind` etiketiyle kayıt; kayıtlı olan yerleşikten
+     önce sorulur (konu: yerleşik abonelikten sonra kabul/ret).
+   - `conditions()` (`ConditionKind`, canlı yol), `value_sources()` (`ValueSource`, veri
+     düzlemi), `claims()` (`ClaimKind`, itiraz hükmü).
+   - Aynı `op`/`kind`'i iki alt sistem kaydedemez (`Registry::add` hata verir).
+4. **Okuma ve yazma.** Alt sistem `ctx.view` (`SessionView`) üstünden okur. Günlüğe yalnız
+   iki yoldan yazar: işlemin açılımı ya da `ctx.out.entry(..)` (motor girdisi, yazar `qp`;
+   fazın emit adımında, istek sırasıyla, en çok `MAX_EMIT_DEPTH` derinlik). Bildirim
+   `ctx.out.notify`; o anın girdisine ek `amend` (`Moment::Look`), o satırdaki bildirim `say`
+   (`Moment::Written`).
+5. **Yeniden oynatma.** Değişimlerden çalışır: `qp_ops::apply::replay(initial, log)` alt sistem
+   kodu istemez. Alt sistemin durumu yeniden oynatmada kurulmaz; dokümanda yaşaması gereken
+   her şey değişimle yazılır.
+6. **Yansı.** Yansıya giden protokol mesajıdır. Bileşimin kurduğu her otorite (oturum,
+   yeniden oynatma barındırıcısı, yansı, görüntüleyicinin açık tarafı) aynı listeyle kurulur;
+   otoritenin doğurduğu otorite listeyi ondan devralır.
+7. **Kayıt.** `crates/qp-session/src/compose.rs` `LIST`'ine **bir satır**, ve
+   `crates/qp-session/Cargo.toml`'a bir bağımlılık satırı. Otorite crate'i değişmez.
+8. **Barındırıcı API'si.** Alt sistemin durumu `session.sub::<T>()` / `sub_mut::<T>()`
+   (yuva tipiyle); `Deref` üstünden değil. Standart dışı bir liste (sınama):
+   `qp_session::Authority::new(init, root, Subsystems::new(list))` ve
+   `qp_authority::Replica::with_memory(.., list)`; durum `slots().get::<T>()`.
+
+**Bilinen sınırlar.** (B-e) `amend`/`say` yanlış anda sessizce düşer; `Look`'tan önceki bir
+`amend` o bakışın girdisine karışır. (B-f) `qp_session` `Authority` ve `Subsystems`'i (ve
+`Subsystems::NONE`) dışa açar; boş listeyle kurulumu engelleyen bir kural yok. Ayrıca
+`Query`, `Topic`, `Gesture`, `Event` kapalı `qp-schema` enum'larıdır: yeni bir tür şema
+değişikliği ister (alt sistem var olan bir türü üstlenebilir). Kayıtsız alt sistem işlemi
+yazma yetkili kişiye `unsupported`, izleyiciye `forbidden` döner (B-a).
+
+## Yeni doküman nesnesi nasıl eklenir (RF1 D2)
+
+`ChangeOp` için kayıt yok (D2): yeni bir nesne türü (dokümanda yeni koleksiyon) şemaya ve
+kapalı eşlemelere girer. Ölçüm (RF1 E, `grep`; `match` bloklarında `_ =>` var mı): bugün
+dokunulacak dosyalar şunlardır.
+
+| Crate | Dosya | Neden |
+|---|---|---|
+| `qp-schema` | `types/document.rs` | `Document` alanı |
+| `qp-schema` | `protocol/change.rs` | `ChangeOp::Put…` (yoksa genel `Delete` yeter) |
+| `qp-schema` | `protocol/query.rs` | `Collection` türü |
+| `qp-schema` | `protocol/ops.rs` | yeni `Op` (gerekiyorsa) |
+| `qp-ops` | `apply.rs` | `find_collection`, `all_ids` (zincir); `apply_change` ve `touched` (iki kapalı `match`, 24/23 kol) |
+| `qp-ops` | `expand.rs` | `coll_name` (`Collection` üstünde kapalı) |
+| `qp-ops` | `expand/undo.rs` | `expand_remove` (`Collection` üstünde kapalı) |
+| `qp-ops` | `expand/op.rs`, `expand/describe.rs` | yeni `Op` yerleşikse (kapalı, 38 kol); alt sistemin `OpHandler`'ı açarsa dokunulmaz |
+| `qp-authority` | `read/query.rs` | `collection_items` (`Collection` üstünde kapalı, 9 kol) |
+| `qp-authority` | `replica/viewer.rs` | açık taraf için `Document { … }` (alan alan; yeni koleksiyonun açık tarafa gidip gitmeyeceği bir gizlilik kararı) |
+| `qp-authority` | `capsule/queries.rs` | `ledger_now`'ın `Document { … }` değişmezi (S3.2'de `qp-read`'e taşınır) |
+| `qp-authority` | `capsule/public.rs` | kimlikle öğe bulma zinciri (derleyici zorlamaz) |
+
+**Otorite: hedef 0 dosya, bugün 3 zorunlu + 1 yumuşak.** `read/query.rs` kapalı eşlemedir;
+`replica/viewer.rs` ve `capsule/queries.rs` `Document`'ın tam yapı değişmezleridir (`Document`'ta
+`Default` yok); üçünü de derleyici ister. S3.2 `capsule/queries.rs`'i `qp-read`'e taşıyınca
+otoritede 2 zorunlu kalır. `capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
+eklenmezse yeni tür o yolda bulunmaz. Joker kollu eşlemeler (`capsule/project.rs`,
+`capsule/public.rs` `to_public`, `capsule/settled.rs`, `authority/session/accept.rs`,
+`data/live.rs`) yeni türü değiştirmeden geçirir; gizlilik ya da kamu dünyası farkı
+gerekiyorsa onlara da dokunulur. İşlemin politikası (`authority/agent.rs`,
+`authority/session.rs` tabloları) alt sistemin `OpHandler`'ıyla otoriteye dokunmadan verilir.
+
 ## Kod düzeni (hedef)
 
 ```
@@ -128,8 +212,16 @@ qapsule/
     qp-facts/      olgu dedektörleri                                       [alan]
     qp-capsule/    kapsül motoru: olgu → hikâye → karne, cümle ve sesler   [alan]
     qp-grammar/    görsel gramer                                           [alan]
+    qp-look/, qp-glyph/, qp-designs/  gramerin görünüş, simge ve tasarım parçaları (RF1)  [alan]
+    qp-voice/      kapsül sesleri ve cümleleri (RF1'de qp-capsule'den)     [alan]
     qp-render/     çizim (headless + GPU)                                  [çekirdek]
-    qp-session/    otorite: komut yolu, günlük, sorgu, abonelik, öneri, sunucu (RD1)  [oturum]
+    qp-plane/      veri düzlemi, değer önbelleği, hata kurucusu (RF1)      [oturum]
+    qp-ops/        işlem açılımı, değişim uygulama, geri alma, yeniden oynatma (RF1)  [oturum]
+    qp-subsystem/  alt sistem sözleşmesi: Subsystem, fazlar, yuvalar, giden kutusu (RF1)  [oturum]
+    qp-watch/      izleme alt sistemi (RF1 S3.1)                           [oturum]
+    qp-authority/  otorite çekirdeği: komut yolu, günlük, sorgu, abonelik, öneri,
+                   iki dünya, kapsül yaşamı, canlı yol; alt sistem tanımaz (RF1)  [oturum]
+    qp-session/    bileşim: otorite + standart alt sistemler (`STANDARD`); dış yüz  [oturum]
     qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)        [uyarlayıcılar]
     qp-live/       canlı Matriks bağlantısı (belirteç, MQTT/WebSocket; R6) [uyarlayıcılar]
     qp-matriks/    Matriks ileti katmanı: proto, fiyat kartı, veri olayları (R6)  [uyarlayıcılar]

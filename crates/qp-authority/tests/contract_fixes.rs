@@ -173,3 +173,38 @@ fn a_refused_subscription_leaves_nothing_behind() {
     assert_eq!(r[0]["msg"]["status"], "subscribed", "{r:?}");
     assert!(s.viewer_data("a").is_none());
 }
+
+/// (RF1 E, audit-s31 B-c) The guard's `limited` arms: at most `MAX_DISPUTE_DIGESTS`
+/// digests per (connection, claim, `t`), at most `MAX_DISPUTES_PER_CONN` disputes per
+/// connection; a registered claim kind keeps both.
+#[test]
+fn a_registered_claim_kind_keeps_the_limited_guards() {
+    use qp_authority::{MAX_DISPUTES_PER_CONN, MAX_DISPUTE_DIGESTS};
+    let mut s = session();
+    s.register(&Guarded).unwrap();
+    hello(&mut s, "a");
+    let d = |t: usize, i: usize| {
+        json!({"type":"dispute","id":"d","claim":{"kind":"intent","intent":"i1"},
+            "t":t,"digest":format!("{i:016x}")})
+    };
+    let verdict = |r: Vec<Value>| r[0]["msg"]["data"]["verdict"].clone();
+    for i in 0..MAX_DISPUTE_DIGESTS {
+        assert_eq!(verdict(send(&mut s, "a", d(0, i))), "upheld");
+    }
+    assert_eq!(
+        verdict(send(&mut s, "a", d(0, MAX_DISPUTE_DIGESTS))),
+        "limited"
+    );
+    // Other `t`s, up to the connection's limit.
+    let mut n = MAX_DISPUTE_DIGESTS;
+    let mut t = 1;
+    while n < MAX_DISPUTES_PER_CONN {
+        assert_eq!(verdict(send(&mut s, "a", d(t, 0))), "upheld");
+        n += 1;
+        t += 1;
+    }
+    assert_eq!(verdict(send(&mut s, "a", d(t, 0))), "limited");
+    // Another connection is not limited.
+    hello(&mut s, "b");
+    assert_eq!(verdict(send(&mut s, "b", d(t, 0))), "upheld");
+}

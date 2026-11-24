@@ -154,3 +154,37 @@ listesini taşıyan otorite imzaları ve sarıcının içindeki oturumun tipi:
   `Moment::{Look, Written}`; `SessionView::{conn_ids, subs, public_view, reader_proj}`;
   `Registry::evaluates_conditions`
 - `qp_ops::expand::expand_ops_with` (tek açılım gövdesi; `expand_ops` ve `Registry::expand_ops` onu kullanır)
+
+## S3.2 — `qp-read` (okuma ve sunum)
+
+Çağıranların yolu korunur: `qp_session::{explain_scene, hit_scene, screen_frame, HIT_WIDTH,
+HIT_HEIGHT}` aynı adlarla (artık `qp_read`'den); `qp_session::Session::{scene_for, explain}` aynı
+imzayla bileşimin yöntemleri; `provider`, `scene`, `scene_as_reader`, `surface_kind` otoritede
+(`Deref` üstünden aynı çağrı). Sorgu ve girdi tel biçimi aynı.
+
+| Eski | Yeni |
+|---|---|
+| `qp_authority::{explain_scene, hit_scene, screen_frame, HIT_WIDTH, HIT_HEIGHT}` | `qp_read::…` (`qp_session` aynı adlarla yeniden dışa aktarır) |
+| `qp_authority::Session::scene_for` | `qp_session::Session::scene_for` (bileşim: `qp_read::scene_for_range` + otoritenin `scene`) |
+| `qp_authority::Session::explain` | `qp_session::Session::explain` (bileşim: otoritenin `scene` + `qp_read::explain_scene`) |
+| `qp_authority::viewer::{first_facts, FirstFacts}` | `qp_ops::firsts::{first_facts, FirstFacts}` (eski yolda `pub use` ile duruyor) |
+| (crate içi) `qp_authority` `read::query::{check_target_pub, resolve_range}`, `read::reading::without_layers`, `Session::gated_view` | `qp_ops::bounds::{check_target_pub, resolve_range, without_layers, gated_view}` (`pub`; otorite ve `qp-read` ortak) |
+| (crate içi) `read/{query, query/view, interact, interact/{scenes,style}, preview, explain, reading}.rs`, `data/bindq.rs`, `capsule/queries.rs` | `qp-read` `src/{query, query/view, interact, interact/{scenes,style}, preview, explain, reading, bindq, capsules}.rs` (`impl Session` → `impl Rd<'_>`) |
+| (crate içi) `capsule/queries.rs` `capsule_query`, `capsule_query_with`, `evidence_access` | otoritede kaldı: `capsule/detail.rs` (yorum doğrulayıcısı aynı ayrıntıyı okur); `voice`/`clock` parametre |
+| (crate içi) `capsule/queries.rs` `ledger_now`, `withheld_for` | otoritede kaldı: `capsule/run.rs` |
+| (crate içi) `Session::query`, `Session::input` (yerleşik yol) | `qp-read` (`READ`, `ANY` kolu); kayıtsız otorite `unsupported` döner |
+| (crate içi) `Conn::{viewports, current, last_input, last_at}`, `Session::{focus, input_counter}` | `qp_read::ReadState` (yuva) |
+| (crate içi) `Conn::look` | `Session::looks` (bağlantı sırasıyla vektör; `SessionCtx::looks` ile ödünç) |
+| (sınama) `qp-authority` `capsule/tests/item_memo.rs` | `qp-session` `tests/capsule_perf_equality/item_memo.rs` (bileşimle) |
+
+**Yeni yollar:**
+
+- `qp_read::{Read, READ, ReadState, scene_for_range, explain_scene, hit_scene, screen_frame, HIT_WIDTH, HIT_HEIGHT}`
+- `qp_subsystem::ANY`; `SessionCtx::{cache, looks}`; `ConnView::{hello, profile}`;
+  `SessionView::{principals, headlines, headline_source, proj, directives, project_entry,
+  evidence_for, viewport_events, accept_preview, stories_query, story_rows, row_stamp,
+  capsule_item, reader_voice, market_item, capsule_passes, coin_flip_hidden_by, relevant,
+  coin_flip_of, is_current, item_series, fact_by_id, item_memo, headline_cal, comments_for,
+  capsule_query, ledger_now}`
+- `qp_authority::Session::with_subsystems` (gizli; bileşimin `scene_for`'u)
+- `qp_ops::{bounds, firsts}`

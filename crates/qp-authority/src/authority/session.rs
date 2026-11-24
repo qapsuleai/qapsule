@@ -16,7 +16,7 @@ mod worlds;
 
 pub use files::{confine, read_json};
 pub(crate) use phases::expand_ops;
-pub use phases::Subsystems;
+pub use phases::{Lists, Subsystems};
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;

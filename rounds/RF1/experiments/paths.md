@@ -188,5 +188,5 @@ imzayla bileşimin yöntemleri; `provider`, `scene`, `scene_as_reader`, `surface
   capsule_query, ledger_now}`
 - `qp_authority::Session::with_subsystems` (gizli; bileşimin `scene_for`'u)
 - `qp_session::FOLLOWER` (izleyici otoritelerin listesi: `STANDARD` eksi okuma); `qp_session::{Replica, viewer::OpenSide}` artık `FOLLOWER` ile kurulur (S3.1'de `STANDARD`)
-- `qp_authority::tape::{run, run_with, run_viewer}(…)`: son parametre `subs: Subsystems` → `(subs, follower): (Subsystems, Subsystems)` (audit-s32 B2); `qp_session::tape::*` imzası aynı
+- `qp_authority::tape::{run, run_with, run_viewer}(…)`: son parametre `subs: Subsystems` → `subs: qp_authority::Lists` (= `(Subsystems, Subsystems)`: otoritenin, izleyicilerin; audit-s32 B2); `qp_session::tape::*` imzası aynı
 - `qp_ops::{bounds, firsts}`

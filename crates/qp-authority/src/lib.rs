@@ -47,4 +47,4 @@ pub use qp_grammar::CompileOptions;
 pub use qp_voice as voices;
 pub use replayhost::{demo_init, ReplayHost};
 pub use replica::{document_digest, view_digest, Replica, ReplicaOptions};
-pub use session::{confine, default_limits, permissions, read_json, Session, Subsystems};
+pub use session::{confine, default_limits, permissions, read_json, Lists, Session, Subsystems};

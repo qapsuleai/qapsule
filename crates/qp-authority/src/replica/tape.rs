@@ -21,7 +21,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 
 use crate::replica::{document_digest, view_digest, Replica, ReplicaOptions};
-use crate::session::{Session, Subsystems};
+use crate::session::{Lists, Session, Subsystems};
 use crate::viewer::OpenSide;
 
 /// Bars resolved before the stream.
@@ -260,13 +260,12 @@ fn holds(op: &str, prev: Option<f64>, v: Option<f64>, k: f64) -> bool {
     }
 }
 
-/// Runs the scenario (the authority built with `subs`, the replica's with `follower`), the
-/// replica's data `lag` events behind.
+/// Runs the scenario (`subs`: the authority's list, the replica's), `lag` events behind.
 ///
 /// # Errors
 /// The scenario cannot be set up.
-pub fn run(lag: usize, (subs, follower): (Subsystems, Subsystems)) -> Result<Outcome, String> {
-    run_with(lag, &provider_init(), (subs, follower))
+pub fn run(lag: usize, subs: Lists) -> Result<Outcome, String> {
+    run_with(lag, &provider_init(), subs)
 }
 
 /// [`run`] with another replica provider (e.g. one that does not entitle `dev`).
@@ -274,14 +273,10 @@ pub fn run(lag: usize, (subs, follower): (Subsystems, Subsystems)) -> Result<Out
 /// # Errors
 /// The scenario cannot be set up.
 #[allow(clippy::too_many_lines)]
-pub fn run_with(
-    lag: usize,
-    provider: &Value,
-    (subs, follower): (Subsystems, Subsystems),
-) -> Result<Outcome, String> {
+pub fn run_with(lag: usize, provider: &Value, subs: Lists) -> Result<Outcome, String> {
     let init: SessionInit = serde_json::from_value(init()).map_err(|e| e.to_string())?;
-    let a = Session::new(init, Path::new("."), subs)?;
-    let r = Replica::with_memory("dev", memory_provider(provider)?, follower);
+    let a = Session::new(init, Path::new("."), subs.0)?;
+    let r = Replica::with_memory("dev", memory_provider(provider)?, subs.1);
     let mut d = Driver {
         a,
         r,
@@ -516,10 +511,7 @@ fn viewer_deliver(
 /// # Errors
 /// The scenario cannot be set up.
 #[allow(clippy::too_many_lines)]
-pub fn run_viewer(
-    lag: usize,
-    (subs, follower): (Subsystems, Subsystems),
-) -> Result<ViewerOutcome, String> {
+pub fn run_viewer(lag: usize, subs: Lists) -> Result<ViewerOutcome, String> {
     let mut iv = init();
     iv["document"]["series"]
         .as_array_mut()
@@ -535,7 +527,7 @@ pub fn run_viewer(
             "synthetic":{"n":START,"seed":SEED + 1}}));
     iv["data"]["entitlements"]["dev"] = json!(["THYAO", "AKBNK"]);
     let init: SessionInit = serde_json::from_value(iv).map_err(|e| e.to_string())?;
-    let mut a = Session::new(init, Path::new("."), subs)?;
+    let mut a = Session::new(init, Path::new("."), subs.0)?;
     let other = FeedKey {
         symbol: "AKBNK".to_owned(),
         interval: "1d".to_owned(),
@@ -554,7 +546,7 @@ pub fn run_viewer(
             "width":390,"height":300}}),
     ] {
         let lines = a.handle_raw("r", &m.to_string());
-        viewer_deliver(lines, &mut side, &mut said, follower);
+        viewer_deliver(lines, &mut side, &mut said, subs.1);
     }
     if side.is_none() {
         return Err("the viewer did not get the open capsule's slice".to_owned());
@@ -570,7 +562,7 @@ pub fn run_viewer(
             if let Some(o) = others.get(i) {
                 lines.extend(a.data_event(o).map_err(|e| e.to_string())?);
             }
-            viewer_deliver(lines, &mut side, &mut said, follower);
+            viewer_deliver(lines, &mut side, &mut said, subs.1);
         }
         // The host serves the device only the feeds it subscribes to (§22.5).
         let subs = a

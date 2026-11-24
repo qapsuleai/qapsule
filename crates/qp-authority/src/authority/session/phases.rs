@@ -40,6 +40,10 @@ impl Subsystems {
     }
 }
 
+/// (RF1 S3.2) Two lists: an authority's and its followers' (replica, open side; the
+/// composition's `STANDARD` and `FOLLOWER`), as the replica scenario (`tape`) takes them.
+pub type Lists = (Subsystems, Subsystems);
+
 impl std::fmt::Debug for Subsystems {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_list()

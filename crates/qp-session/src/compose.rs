@@ -174,8 +174,8 @@ impl Session {
 
 /// The replay host with the standard subsystems.
 #[derive(Debug)]
-pub struct ReplayHost(qp_authority::ReplayHost);
-wraps!(ReplayHost, qp_authority::ReplayHost);
+pub struct ReplayHost(qp_replayhost::ReplayHost);
+wraps!(ReplayHost, qp_replayhost::ReplayHost);
 
 impl ReplayHost {
     /// Starts an authority on the replay of `init.replay`; local data is read from
@@ -184,7 +184,7 @@ impl ReplayHost {
     /// # Errors
     /// No `init.replay`, an invalid replay, or the session's own errors.
     pub fn new(init: SessionInit, root: &Path) -> Result<Self, String> {
-        qp_authority::ReplayHost::new(init, root, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::new(init, root, STANDARD).map(Self)
     }
 
     /// [`ReplayHost::new`] with local data read from `local_dir`.
@@ -196,7 +196,7 @@ impl ReplayHost {
         root: &Path,
         local_dir: &Path,
     ) -> Result<Self, String> {
-        qp_authority::ReplayHost::with_local_dir(init, root, local_dir, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::with_local_dir(init, root, local_dir, STANDARD).map(Self)
     }
 
     /// (R4/T6) [`ReplayHost::with_local_dir`] with a history window.
@@ -209,7 +209,7 @@ impl ReplayHost {
         local_dir: &Path,
         window: Option<usize>,
     ) -> Result<Self, String> {
-        qp_authority::ReplayHost::with_window(init, root, local_dir, window, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::with_window(init, root, local_dir, window, STANDARD).map(Self)
     }
 
     /// (R6/T7) A live host: `feeds` are the initial bars; the host gives the data events.
@@ -221,7 +221,7 @@ impl ReplayHost {
         root: &Path,
         feeds: Vec<qp_source::ReplayFeed>,
     ) -> Result<Self, String> {
-        qp_authority::ReplayHost::live(init, root, feeds, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::live(init, root, feeds, STANDARD).map(Self)
     }
 }
 

@@ -1,4 +1,6 @@
-//! Tests of the headline pieces (`qp_plane::headparts`) through the session (R4/H-FP).
+//! Tests of the headline pieces (`qp_plane::headparts`) through the session (R4/H-FP),
+//! over the demo replay (moved from `qp-authority` `capsule/tests/headparts.rs` in RF1
+//! S3.3: the replay host left the authority).
 
 use std::collections::BTreeMap;
 
@@ -6,7 +8,7 @@ use qp_grammar::HeadlineParts;
 use qp_schema::capsule::Validity;
 use qp_schema::protocol::{Language, ReplayInit, ReplaySourceKind};
 
-use crate::{demo_init, ReplayHost};
+use qp_replayhost::{demo_init, ReplayHost};
 
 /// An example headline template (tests only; no face design in the registry).
 fn example(hp: &HeadlineParts) -> String {
@@ -53,7 +55,7 @@ fn host() -> ReplayHost {
         init,
         std::path::Path::new("."),
         &none,
-        crate::Subsystems::NONE,
+        qp_authority::Subsystems::NONE,
     )
     .expect("demo host")
 }
@@ -63,7 +65,7 @@ fn all_parts(h: &mut ReplayHost, reader: &str) -> Vec<(String, HeadlineParts, He
     let s = h.session_mut();
     let mut out = Vec::new();
     let findings: Vec<String> = s
-        .doc
+        .document()
         .capsules
         .iter()
         .filter(|c| c.story.is_some())
@@ -72,17 +74,7 @@ fn all_parts(h: &mut ReplayHost, reader: &str) -> Vec<(String, HeadlineParts, He
     for f in findings {
         let mut both = Vec::new();
         for lang in [Language::Tr, Language::En] {
-            let hp = s.as_reader(reader, lang, |s| {
-                let c = s.doc.capsules.iter().find(|c| c.finding == f)?;
-                s.reader_parts(
-                    &s.doc,
-                    c,
-                    s.proj.as_deref(),
-                    lang,
-                    &mut qp_capsule::sentence::StudyMemo::default(),
-                )
-            });
-            both.extend(hp);
+            both.extend(s.reader_parts_of(reader, lang, &f));
         }
         if let [tr, en] = both.as_slice() {
             out.push((f, tr.clone(), en.clone()));

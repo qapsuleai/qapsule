@@ -54,6 +54,7 @@
         "qp-watch",
         "qp-read",
         "qp-authority",
+        "qp-replayhost",
         "qp-session"
       ],
       "order": [
@@ -63,6 +64,7 @@
         "qp-watch",
         "qp-read",
         "qp-authority",
+        "qp-replayhost",
         "qp-session"
       ]
     },

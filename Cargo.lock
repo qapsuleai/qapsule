@@ -2145,6 +2145,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-replayhost"
+version = "0.0.0"
+dependencies = [
+ "qp-authority",
+ "qp-grammar",
+ "qp-plane",
+ "qp-schema",
+ "qp-source",
+ "qp-subsystem",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-schema"
 version = "0.0.0"
 dependencies = [
@@ -2169,6 +2182,7 @@ dependencies = [
  "qp-ops",
  "qp-plane",
  "qp-read",
+ "qp-replayhost",
  "qp-schema",
  "qp-source",
  "qp-subsystem",

@@ -32,7 +32,7 @@ use qp_schema::protocol::{
 use qp_schema::{Instrument, Series, SeriesSource};
 use qp_source::{Replay, ReplayCalendar, ReplayFeed, ReplayOptions, ReplayStep};
 
-use crate::session::{confine, permissions, read_json, Session, Subsystems};
+use qp_authority::{confine, permissions, read_json, Session, Subsystems};
 use qp_plane::error::E;
 
 /// Default number of instruments.
@@ -107,7 +107,7 @@ pub struct ReplayHost {
     record: bool,
     recorded: Recorded,
     /// (R5/M19) Per-principal feed rules the host set (kept over a backward seek).
-    principal_rules: std::collections::BTreeMap<String, Option<crate::CoinFlipRule>>,
+    principal_rules: std::collections::BTreeMap<String, Option<qp_authority::CoinFlipRule>>,
     /// (R6/T7) A live host ([`ReplayHost::live`]): the data provider the authority
     /// resolves from, shared with the host (initial bars + every recorded event).
     live: Option<std::sync::Arc<std::sync::Mutex<qp_source::MemoryProvider>>>,
@@ -309,7 +309,7 @@ impl ReplayHost {
     pub fn set_principal_coin_flip_rule(
         &mut self,
         principal: &str,
-        rule: Option<crate::CoinFlipRule>,
+        rule: Option<qp_authority::CoinFlipRule>,
     ) {
         self.principal_rules.insert(principal.to_owned(), rule);
         self.session.set_principal_coin_flip_rule(principal, rule);

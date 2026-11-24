@@ -35,3 +35,19 @@ impl qp_ops::HeadlineSource for Session {
         )
     }
 }
+
+impl Session {
+    /// (RF1 S3.3) The headline pieces of the capsule of finding `finding` as `principal`
+    /// reads it in `lang` (the headline source inside its `as_reader`): the headline
+    /// pieces test (`qp-replayhost` `tests/headparts.rs`, over the demo replay).
+    #[doc(hidden)]
+    pub fn reader_parts_of(
+        &mut self,
+        principal: &str,
+        lang: Language,
+        finding: &str,
+    ) -> Option<qp_grammar::HeadlineParts> {
+        use qp_ops::HeadlineSource as _;
+        self.as_reader(principal, lang, |s| s.headline_parts(finding, lang))
+    }
+}

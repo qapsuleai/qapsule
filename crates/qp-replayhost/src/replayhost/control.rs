@@ -1,6 +1,7 @@
 //! Messages and replay control: frames, `replay` controls, rebuild, steps and pumping.
 
 use super::*;
+use qp_subsystem::SessionView;
 
 impl ReplayHost {
     /// One raw inbound message on `conn` (the in-process transport): a `replay` message
@@ -71,7 +72,7 @@ impl ReplayHost {
         if v.get("type").and_then(serde_json::Value::as_str) != Some("replay") {
             return None;
         }
-        self.session.conns.iter().find(|c| c.id == conn)?;
+        SessionView::conn(&self.session, conn)?;
         match serde_json::from_value::<ClientMsg>(v).ok()? {
             ClientMsg::Replay { id, control } => Some((id, control)),
             _ => None,
@@ -90,24 +91,15 @@ impl ReplayHost {
 
     /// A `replay` message of connection `conn` (it said `hello`).
     fn control_msg(&mut self, conn: &str, id: String, control: ReplayControl) -> Vec<OutboundLine> {
-        let Some((principal, role)) = self
-            .session
-            .conns
-            .iter()
-            .find(|c| c.id == conn)
-            .map(|c| (c.principal.clone(), c.role))
+        let Some((principal, role)) =
+            SessionView::conn(&self.session, conn).map(|c| (c.principal.to_owned(), c.role))
         else {
             return Vec::new();
         };
         let status = matches!(control, ReplayControl::Status);
         // (R5B audit B6, §25.3) an agent never controls the shared timeline, whatever its
         // role: a marked connection or an agent principal reads the status only.
-        let agent = self
-            .session
-            .conns
-            .iter()
-            .position(|c| c.id == conn)
-            .is_some_and(|ci| self.session.agent_origin(ci));
+        let agent = self.session.conn_agent_origin(conn);
         let allowed = if status {
             permissions(role).read
         } else {

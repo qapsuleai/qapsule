@@ -90,6 +90,17 @@ impl Session {
             || matches!(self.author_of(&c.principal), Some(Author::Agent { .. }))
     }
 
+    /// (RF1 S3.3) [`Session::agent_origin`] of connection `conn` (`false`: unknown); the
+    /// replay host's control check (`qp-replayhost`).
+    #[doc(hidden)]
+    #[must_use]
+    pub fn conn_agent_origin(&self, conn: &str) -> bool {
+        self.conns
+            .iter()
+            .position(|c| c.id == conn)
+            .is_some_and(|ci| self.agent_origin(ci))
+    }
+
     /// Whether a command of connection `ci` is of human origin: its principal's author
     /// is `human` and the connection is not marked (§25.2).
     pub(crate) fn human_origin(&self, ci: usize) -> bool {

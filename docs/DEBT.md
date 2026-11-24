@@ -197,6 +197,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-ops/src/locate.rs::walk` | 102 |
 | `crates/qp-session/src/capsule/claims.rs::after_bars` | 102 |
 | `crates/qp-mcp/src/surfaces/query/capsule.rs::detail_parts` | 101 |
+| `crates/qp-ops/src/expand/op.rs::expand_op` | 101 |
 | `crates/qp-designs/src/transitions/zumlak.rs::frame` | 100 |
 | `crates/qp-host/src/mcp_serve/http.rs::handle` | 100 |
 | `crates/qp-ops/src/expand/undo.rs::expand_remove` | 100 |
@@ -279,7 +280,7 @@ Hedef: ihlali düzelt, izni kaldır.
 | `qp-compute` | 27 |
 | `qp-live` | 23 |
 | `qp-host` | 21 |
-| `qp-ops` | 20 |
+| `qp-ops` | 21 |
 | `qp-mcp` | 17 |
 | `qp-shellcore` | 17 |
 | `qp-capsule` | 14 |

@@ -12,10 +12,12 @@
 //! The reference **`r4`** carries the values the product had before looks existed: every
 //! existing golden image and transcript is byte-identical under it (it is the default).
 //!
-//! **Adding a look (M16):** in this file only — write a `const` [`Look`] below the
-//! `M16 looks` marker (start from [`R4`] with `..R4` and change what differs) and add one
-//! line to [`LOOKS`]. A new font file: put the file and its licence next to the others
-//! (`crates/qp-render/assets/fonts/`), add a [`FontAsset`] line to [`FONTS`] here and one
+//! **Adding a look (M16):** write a `const` [`Look`] in its own file `look/<name>.rs`
+//! (start from [`R4`] with `..R4` and change what differs; `look/ornek.rs` marks where the
+//! M16 looks start), declare and re-export it here, and add one line to [`LOOKS`]
+//! (`look/registry.rs`). A new font file: put the file and its licence next to the others
+//! (`crates/qp-render/assets/fonts/`), add a [`FontAsset`] line to [`FONTS`]
+//! (`look/fonts.rs`) and one
 //! `include_bytes!` line to `qp_render::fonts::FILES`; a registry test checks both lists
 //! agree. Nothing else changes; the settings page, `?look=` and `qp look` list the names
 //! from here.
@@ -241,8 +243,8 @@ pub struct Motion {
     /// Duration of the shell chrome's own changes (tabs, banners), ms; `0`: none.
     pub chrome_ms: f64,
     /// (R5/M21) Duration of a face's own change in the feed (a live value or a state
-    /// change: `crate::motion`), ms, before [`Self::duration_scale`]. Read only by a motion
-    /// design that marks changes (`motion::MOTIONS`); `r4`'s own motion marks none, so
+    /// change: `qp_designs::motion`), ms, before [`Self::duration_scale`]. Read only by a motion
+    /// design that marks changes (`qp_designs::motion::MOTIONS`); `r4`'s own motion marks none, so
     /// this value changes nothing under it.
     pub change_ms: f64,
 }
@@ -390,7 +392,7 @@ pub struct StoryLook {
 /// role (4.5:1 on the ground in every look, `look::tests`), as on the face `oltan`.
 pub const NO_LONGER_HEADLINE: &str = "muted";
 
-/// (R5/S) The open capsule design `tesir`'s line and bar counts (`crate::open::tesir`;
+/// (R5/S) The open capsule design `tesir`'s line and bar counts (`qp_designs::open::tesir`;
 /// M20's "values to record", `rounds/R5/experiments/M20/tesir/DESIGN.md`). Sizes,
 /// colours and spacing already come from the look.
 #[derive(Debug, Clone, Copy, PartialEq)]

@@ -97,7 +97,7 @@ fn capsule_texts(fr: &Frame<'_>, layer: &Layer, f: &str, all_rows: &mut [Row]) {
         }),
     };
     let detail = voice.map(|v| v.detail);
-    // (R5/M20) An open capsule design's text field (`ask/…`, `crate::open`): resolved
+    // (R5/M20) An open capsule design's text field (`ask/…`, `qp_designs::open`): resolved
     // here from the provider, only for the field the layer reads.
     let asked = layer
         .encoding
@@ -118,7 +118,7 @@ fn capsule_texts(fr: &Frame<'_>, layer: &Layer, f: &str, all_rows: &mut [Row]) {
             row.texts.insert("detail".to_owned(), d.clone());
         }
     }
-    // (R5/M20) An open capsule design's own field (`open.*`, `crate::open::text`).
+    // (R5/M20) An open capsule design's own field (`open.*`, `qp_designs::open::text`).
     if let Some(k) = layer.encoding.text.as_deref() {
         if let Some(t) = (fr.designs.open_text)(k, f, fr.p) {
             for row in all_rows.iter_mut() {

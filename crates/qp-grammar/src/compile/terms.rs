@@ -26,9 +26,9 @@
 //! wraps across two lines is marked by the part on one line, when that part starts with a
 //! word of four letters or more).
 //!
-//! Positions use the same width estimate the text was wrapped with
-//! ([`crate::draw::est_width`] with the look's advance for that size), so the boxes sit on
-//! the drawn words in every painter that draws the scene's fonts at their advance.
+//! Positions use the same width estimate the text was wrapped with (the font's advance
+//! table, [`qp_look::look::FontAsset::width`], at that size), so the boxes sit on the drawn
+//! words in every painter that draws the scene's fonts at their advance.
 
 use qp_schema::protocol::GlossEntry;
 use qp_schema::scene::{Align, PixelRect, Prim, ScenePanel, TermMark};

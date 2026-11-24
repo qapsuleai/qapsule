@@ -5,7 +5,7 @@
 /// fontdue, draws a variable font at its default instance only).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FontAsset {
-    /// Asset id (`[a-z][a-z0-9-]*`): what a [`TypeRole`] and a scene's text name.
+    /// Asset id (`[a-z][a-z0-9-]*`): what a [`TypeRole`](super::TypeRole) and a scene's text name.
     pub id: &'static str,
     /// The family name as published.
     pub family: &'static str,

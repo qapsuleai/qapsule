@@ -26,7 +26,7 @@ pub enum SeriesKind {
 }
 
 /// (R4/H-FP) The pieces of a capsule's short headline for one reader, from which a face
-/// design's headline template ([`crate::faces::HeadlineFn`]) builds its sentence (M8;
+/// design's headline template ([`HeadlineFn`](crate::designs::HeadlineFn)) builds its sentence (M8;
 /// `docs/CONCEPTS.md` "Başlık yapı taşları").
 ///
 /// Plain texts in the reader's language ([`HeadlineParts::lang`]) plus a few flags. The

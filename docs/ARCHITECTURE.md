@@ -55,10 +55,11 @@ yalnızca bir istemcidir (AI-native testi 5).
   insan arayüzü (web/telefon/saat/ses)      ajan (MCP, satır akışı, süreç içi)
               │  hello · command · query · subscribe · input · attend
               ▼
-  ┌──────────────── otorite (qp-session) ────────────────┐
+  ┌──── otorite (qp-authority; bileşim: qp-session) ─────┐
   │ yetki ve öneri ─► işlem açılımı ─► değişim ─► günlük │  ← saat bir girdidir (clock)
   │ sorgular (qp-compute ile)   sunucu (presenter)       │
   │ abonelik ve olaylar         varlık durumu (presence) │
+  │ alt sistemler kayıtla (qp-subsystem; ör. qp-watch)   │
   └──────────────────────────────────────────────────────┘
               │  welcome · ack · result · notify · error
               ▼
@@ -84,7 +85,7 @@ yalnız protokol mesajlarıyla sürüldüğünde aynı doküman ve aynı sahne �
   ┌───────────── kabuk (JS, ince) ─────────────┐     ┌──────────────────────────────┐
   │ düzen öğeleri: liste, sekme, ayar, düğme   │     │ yeniden oynatma (qp-source)  │
   │ girdi → `input` / `command` / `replay`     │◄───►│   veri olayları + saat       │
-  │ protokolden gelen metni ve sırayı gösterir │ qp/0│ otorite (qp-session)         │
+  │ protokolden gelen metni ve sırayı gösterir │ qp/0│ otorite (qp-session bileşimi)│
   │ WASM (Rust çekirdeği):                     │     │ statik dosyalar (aynı köken) │
   │   yansı, gramer derleme, sahne → piksel    │     └──────────────────────────────┘
   └────────────────────────────────────────────┘
@@ -165,6 +166,33 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
 değişikliği ister (alt sistem var olan bir türü üstlenebilir). Kayıtsız alt sistem işlemi
 yazma yetkili kişiye `unsupported`, izleyiciye `forbidden` döner (B-a).
 
+## Yeni doküman nesnesi nasıl eklenir (RF1 D2)
+
+`ChangeOp` için kayıt yok (D2): yeni bir nesne türü (dokümanda yeni koleksiyon) şemaya ve
+kapalı eşlemelere girer. Ölçüm (RF1 E, `grep`; `match` bloklarında `_ =>` var mı): bugün
+dokunulacak dosyalar şunlardır.
+
+| Crate | Dosya | Neden |
+|---|---|---|
+| `qp-schema` | `types/document.rs` | `Document` alanı |
+| `qp-schema` | `protocol/change.rs` | `ChangeOp::Put…` (yoksa genel `Delete` yeter) |
+| `qp-schema` | `protocol/query.rs` | `Collection` türü |
+| `qp-schema` | `protocol/ops.rs` | yeni `Op` (gerekiyorsa) |
+| `qp-ops` | `apply.rs` | `find_collection`, `all_ids` (zincir); `apply_change` ve `touched` (iki kapalı `match`, 24/23 kol) |
+| `qp-ops` | `expand.rs` | `coll_name` (`Collection` üstünde kapalı) |
+| `qp-ops` | `expand/undo.rs` | `expand_remove` (`Collection` üstünde kapalı) |
+| `qp-ops` | `expand/op.rs`, `expand/describe.rs` | yeni `Op` yerleşikse (kapalı, 38 kol); alt sistemin `OpHandler`'ı açarsa dokunulmaz |
+| `qp-authority` | `read/query.rs` | `collection_items` (`Collection` üstünde kapalı, 9 kol) |
+| `qp-authority` | `capsule/public.rs` | kimlikle öğe bulma zinciri (derleyici zorlamaz) |
+
+**Otorite: hedef 0 dosya, bugün 1 zorunlu + 1 yumuşak.** `read/query.rs` kapalı eşlemedir
+(derleyici ister). `capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
+eklenmezse yeni tür o yolda bulunmaz. Joker kollu eşlemeler (`capsule/project.rs`,
+`capsule/public.rs` `to_public`, `capsule/settled.rs`, `authority/session/accept.rs`,
+`data/live.rs`) yeni türü değiştirmeden geçirir; gizlilik ya da kamu dünyası farkı
+gerekiyorsa onlara da dokunulur. İşlemin politikası (`authority/agent.rs`,
+`authority/session.rs` tabloları) alt sistemin `OpHandler`'ıyla otoriteye dokunmadan verilir.
+
 ## Kod düzeni (hedef)
 
 ```
@@ -178,8 +206,16 @@ qapsule/
     qp-facts/      olgu dedektörleri                                       [alan]
     qp-capsule/    kapsül motoru: olgu → hikâye → karne, cümle ve sesler   [alan]
     qp-grammar/    görsel gramer                                           [alan]
+    qp-look/, qp-glyph/, qp-designs/  gramerin görünüş, simge ve tasarım parçaları (RF1)  [alan]
+    qp-voice/      kapsül sesleri ve cümleleri (RF1'de qp-capsule'den)     [alan]
     qp-render/     çizim (headless + GPU)                                  [çekirdek]
-    qp-session/    otorite: komut yolu, günlük, sorgu, abonelik, öneri, sunucu (RD1)  [oturum]
+    qp-plane/      veri düzlemi, değer önbelleği, hata kurucusu (RF1)      [oturum]
+    qp-ops/        işlem açılımı, değişim uygulama, geri alma, yeniden oynatma (RF1)  [oturum]
+    qp-subsystem/  alt sistem sözleşmesi: Subsystem, fazlar, yuvalar, giden kutusu (RF1)  [oturum]
+    qp-watch/      izleme alt sistemi (RF1 S3.1)                           [oturum]
+    qp-authority/  otorite çekirdeği: komut yolu, günlük, sorgu, abonelik, öneri,
+                   iki dünya, kapsül yaşamı, canlı yol; alt sistem tanımaz (RF1)  [oturum]
+    qp-session/    bileşim: otorite + standart alt sistemler (`STANDARD`); dış yüz  [oturum]
     qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)        [uyarlayıcılar]
     qp-live/       canlı Matriks bağlantısı (belirteç, MQTT/WebSocket; R6) [uyarlayıcılar]
     qp-matriks/    Matriks ileti katmanı: proto, fiyat kartı, veri olayları (R6)  [uyarlayıcılar]

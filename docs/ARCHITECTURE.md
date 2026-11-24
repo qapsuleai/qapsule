@@ -138,8 +138,11 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
      `AfterData` → `authority/session/settle.rs` (`Data`) ve `capsule/run.rs` (`Look`,
      `Written`); `Proposals` → `authority/session/clock.rs`; `Settled` → `capsule/dispute.rs`;
      `Close` çağrılmaz (protokolde kapanış iletisi yok).
-   - `queries()`, `inputs()`, `topics()`: `kind` etiketiyle kayıt; kayıtlı olan yerleşikten
-     önce sorulur (konu: yerleşik abonelikten sonra kabul/ret).
+   - `queries()`, `inputs()`, `topics()`: `kind` etiketiyle kayıt (konu: yerleşik abonelikten
+     sonra kabul/ret). Sorgu ve girdinin yerleşik yolu yok: okuma alt sistemi (`qp-read`,
+     S3.2) `ANY` etiketiyle başka alt sistemin kaydetmediği her türü cevaplar; bir türü
+     kendi etiketiyle kaydeden alt sistem ondan önce sorulur. Kayıtsız otorite `unsupported`
+     döner.
    - `conditions()` (`ConditionKind`, canlı yol), `value_sources()` (`ValueSource`, veri
      düzlemi), `claims()` (`ClaimKind`, itiraz hükmü).
    - Aynı `op`/`kind`'i iki alt sistem kaydedemez (`Registry::add` hata verir).
@@ -184,15 +187,17 @@ dokunulacak dosyalar şunlardır.
 | `qp-ops` | `expand.rs` | `coll_name` (`Collection` üstünde kapalı) |
 | `qp-ops` | `expand/undo.rs` | `expand_remove` (`Collection` üstünde kapalı) |
 | `qp-ops` | `expand/op.rs`, `expand/describe.rs` | yeni `Op` yerleşikse (kapalı, 38 kol); alt sistemin `OpHandler`'ı açarsa dokunulmaz |
-| `qp-authority` | `read/query.rs` | `collection_items` (`Collection` üstünde kapalı, 9 kol) |
+| `qp-read` | `query.rs` | `collection_items` (`Collection` üstünde kapalı, 9 kol; S3.2'de otoriteden) |
 | `qp-authority` | `replica/viewer.rs` | açık taraf için `Document { … }` (alan alan; yeni koleksiyonun açık tarafa gidip gitmeyeceği bir gizlilik kararı) |
-| `qp-authority` | `capsule/queries.rs` | `ledger_now`'ın `Document { … }` değişmezi (S3.2'de `qp-read`'e taşınır) |
 | `qp-authority` | `capsule/public.rs` | kimlikle öğe bulma zinciri (derleyici zorlamaz) |
 
-**Otorite: hedef 0 dosya, bugün 3 zorunlu + 1 yumuşak.** `read/query.rs` kapalı eşlemedir;
-`replica/viewer.rs` ve `capsule/queries.rs` `Document`'ın tam yapı değişmezleridir (`Document`'ta
-`Default` yok); üçünü de derleyici ister. S3.2 `capsule/queries.rs`'i `qp-read`'e taşıyınca
-otoritede 2 zorunlu kalır. `capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
+**Otorite: hedef 0 dosya, bugün 1 zorunlu + 1 yumuşak** (S3.2). `collection_items` kapalı
+eşlemesi `read/query.rs` ile `qp-read`'e çıktı (alt sistem crate'i; otorite değil).
+`capsule/queries.rs`'teki `ledger_now` `Document { … }` değişmezi kalktı: motorun sicili belge
+kurmadan okunur (`ledger_rows_of`, `capsule/run.rs`); `capsule` sorgusunun ayrıntısı
+`capsule/detail.rs`'te kaldı, doküman değişmezi yok. Kalan zorunlu: `replica/viewer.rs`
+(`Document`'ın tam yapı değişmezi; `Document`'ta `Default` yok; S3.3'te otoriteden çıkar).
+`capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
 eklenmezse yeni tür o yolda bulunmaz. Joker kollu eşlemeler (`capsule/project.rs`,
 `capsule/public.rs` `to_public`, `capsule/settled.rs`, `authority/session/accept.rs`,
 `data/live.rs`) yeni türü değiştirmeden geçirir; gizlilik ya da kamu dünyası farkı
@@ -219,7 +224,8 @@ qapsule/
     qp-ops/        işlem açılımı, değişim uygulama, geri alma, yeniden oynatma (RF1)  [oturum]
     qp-subsystem/  alt sistem sözleşmesi: Subsystem, fazlar, yuvalar, giden kutusu (RF1)  [oturum]
     qp-watch/      izleme alt sistemi (RF1 S3.1)                           [oturum]
-    qp-authority/  otorite çekirdeği: komut yolu, günlük, sorgu, abonelik, öneri,
+    qp-read/       okuma ve sunum alt sistemi: sorgular, girdi, okuma (RF1 S3.2)  [oturum]
+    qp-authority/  otorite çekirdeği: komut yolu, günlük, abonelik, öneri,
                    iki dünya, kapsül yaşamı, canlı yol; alt sistem tanımaz (RF1)  [oturum]
     qp-session/    bileşim: otorite + standart alt sistemler (`STANDARD`); dış yüz  [oturum]
     qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)        [uyarlayıcılar]

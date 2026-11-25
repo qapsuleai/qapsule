@@ -284,8 +284,9 @@ RX4 §6 aynen: `rule {target_pct?, stop_pct?, max_bars}`; `max_bars` zorunlu,
 `1 … program.signal.max_horizon_bars`; `target_pct`, `stop_pct` > 0 isteğe bağlı (değilse
 `E_BAD_RULE`); değerler parametre olabilir. Her sinyal barı ayrı iddiadır; giriş `c_i`; önce
 durdurma, sonra hedef, aynı barda ikisi → `stop`; `expired`; veri biterse `open`. Sonuç yalnız
-sinyal barından **sonraki kapanmış** barlardan kapanır; canlı bar sonuca girmez. `rule.kind`
-yoksa `single` (tek aşamalı; iki aşamalı kırılım RS1/R7, PS §8).
+sinyal barından **sonraki kapanmış** barlardan kapanır; canlı bar sonuca girmez. `qp-ir/0`'da
+`rule.kind` alanı yoktur: kural tek aşamalıdır; açık `"kind"` yazılırsa `E_UNSUPPORTED` (iki aşamalı
+kırılım RS1/R7'de alan olarak eklenir, yokluğu tek aşamalı sayılır; kimlik değişmez, PS §8).
 
 **Kayıt biçimi** (RX5 `LedgerEntry` adlarıyla; kimlik bar indeksiyle değil zamanla):
 

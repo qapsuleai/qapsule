@@ -1,6 +1,7 @@
-//! Collecting program errors and warnings (PR §11.1): every finding is kept (the checker
-//! never stops at the first), then sorted by position (root, `params`, `nodes`,
-//! `outputs`; indices numerically) and reason, and cut at `program.check.max_errors`.
+//! Collecting program errors and warnings (PR §11.1): the checker never stops at the
+//! first finding; errors are kept up to `program.check.max_errors` (the rest only
+//! counted, so a hostile program cannot make the answer grow), then sorted by position
+//! (root, `params`, `nodes`, `outputs`; indices numerically) and reason.
 
 use std::cmp::Ordering;
 
@@ -15,6 +16,23 @@ pub(crate) struct Diags {
     pub(crate) errors: Vec<ProgramError>,
     pub(crate) warnings: Vec<ProgramError>,
     pub(crate) lang: Lang,
+    /// Errors kept at most.
+    cap: usize,
+    /// Errors found beyond `cap` (counted, not kept).
+    dropped: usize,
+    /// Where a dropped error is written (and forgotten).
+    sink: ProgramError,
+}
+
+/// Longest message kept, in characters (a message quotes names from the input).
+const MAX_MESSAGE: usize = 512;
+
+fn bounded(mut m: String) -> String {
+    if let Some((i, _)) = m.char_indices().nth(MAX_MESSAGE) {
+        m.truncate(i);
+        m.push('…');
+    }
+    m
 }
 
 /// Adds detail to the finding just pushed.
@@ -44,25 +62,36 @@ impl Found<'_> {
 }
 
 impl Diags {
-    pub(crate) fn new(lang: Lang) -> Diags {
+    pub(crate) fn new(lang: Lang, cap: usize) -> Diags {
         Diags {
             errors: Vec::new(),
             warnings: Vec::new(),
             lang,
+            cap,
+            dropped: 0,
+            sink: Reason::Type.error(None, String::new()),
         }
     }
 
     /// Pushes a finding at JSON pointer `at` (`None`: outside the program, e.g. a bound
     /// value) and returns it for detail.
     pub(crate) fn push(&mut self, reason: Reason, at: Option<&str>, msg: &Msg) -> Found<'_> {
-        let e = reason.error(at.map(str::to_owned), msg.render(self.lang));
+        let e = reason.error(at.map(str::to_owned), bounded(msg.render(self.lang)));
+        let lang = self.lang;
+        if !reason.is_warning() && self.errors.len() >= self.cap {
+            self.dropped += 1;
+            self.sink = e;
+            return Found {
+                e: &mut self.sink,
+                lang,
+            };
+        }
         let list = if reason.is_warning() {
             &mut self.warnings
         } else {
             &mut self.errors
         };
         list.push(e);
-        let lang = self.lang;
         let last = list.len() - 1;
         Found {
             e: &mut list[last],
@@ -75,9 +104,9 @@ impl Diags {
         self.push(reason, Some(at), msg)
     }
 
-    /// Error count so far.
+    /// Error count so far (dropped ones included).
     pub(crate) fn count(&self) -> usize {
-        self.errors.len()
+        self.errors.len() + self.dropped
     }
 
     /// Clamps pointers to their shapes, sorts both lists, cuts errors at `max`; returns
@@ -90,7 +119,7 @@ impl Diags {
         }
         self.errors.sort_by(order);
         self.warnings.sort_by(order);
-        let cut = self.errors.len() > max;
+        let cut = self.errors.len() > max || self.dropped > 0;
         self.errors.truncate(max);
         cut
     }

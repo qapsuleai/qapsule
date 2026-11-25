@@ -9,27 +9,37 @@ use crate::diag::join_i;
 use crate::message::Msg;
 use crate::reason::Reason;
 
-/// Whether a bool node is edge-shaped: true on a bar never implies true on the next
-/// (`cross_*`, `once`, `rearm`, `cooldown` with `bars ≥ 1`, or `and` with such an operand).
-fn edge_shaped(ops: &[&Op], s: Slot) -> bool {
-    match ops.get(s.node) {
-        Some(Op::Binary {
-            kind: BinaryKind::CrossAbove | BinaryKind::CrossBelow,
-            ..
-        })
-        | Some(Op::Cond {
-            kind: CondKind::Once,
-            ..
-        })
-        | Some(Op::Rearm { .. }) => true,
-        Some(Op::Cooldown { bars, .. }) => *bars >= 1,
-        Some(Op::Binary {
-            kind: BinaryKind::And,
-            a,
-            b,
-        }) => edge_shaped(ops, *a) || edge_shaped(ops, *b),
-        _ => false,
+/// Per node, whether it is edge-shaped: true on a bar never implies true on the next
+/// (`cross_*`, `once`, `rearm`, `cooldown` with `bars ≥ 1`, or `and` with such an
+/// operand). One forward pass over the topological order: shared operands are not
+/// re-walked, and no recursion depth grows with the program.
+fn edge_shapes(ops: &[&Op]) -> Vec<bool> {
+    let mut edge: Vec<bool> = Vec::with_capacity(ops.len());
+    for op in ops {
+        let e = match op {
+            Op::Binary {
+                kind: BinaryKind::CrossAbove | BinaryKind::CrossBelow,
+                ..
+            }
+            | Op::Cond {
+                kind: CondKind::Once,
+                ..
+            }
+            | Op::Rearm { .. } => true,
+            Op::Cooldown { bars, .. } => *bars >= 1,
+            Op::Binary {
+                kind: BinaryKind::And,
+                a,
+                b,
+            } => {
+                edge.get(a.node).copied().unwrap_or(false)
+                    || edge.get(b.node).copied().unwrap_or(false)
+            }
+            _ => false,
+        };
+        edge.push(e);
     }
+    edge
 }
 
 /// Adds the warnings of a program whose nodes all typed (`ids` by index).
@@ -39,9 +49,10 @@ pub(super) fn warn(
     ids: &[String],
     outputs: &[(usize, &CheckedOutput)],
 ) {
+    let edge = edge_shapes(ops);
     for (i, o) in outputs {
         if let OutputSpec::Event(s) = &o.spec {
-            if !edge_shaped(ops, *s) {
+            if !edge.get(s.node).copied().unwrap_or(false) {
                 let at = format!("{}/node", join_i("/outputs", *i));
                 cx.d.at(
                     Reason::ConsecutiveEvents,

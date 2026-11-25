@@ -121,20 +121,36 @@ pub fn edit_distance(a: &str, b: &str) -> usize {
     prev[b.len()]
 }
 
+/// Longest name (in characters) that gets or gives suggestions: names in the language
+/// are at most 64 characters, and the distance is quadratic.
+const MAX_SUGGEST: usize = 64;
+
 /// Up to five candidates close to `given` (exact matches excluded, duplicates removed),
-/// by distance, then name.
+/// by distance, then name. Names longer than 64 characters get and give none.
 #[must_use]
 pub fn did_you_mean<'a, I>(given: &str, candidates: I) -> Vec<String>
 where
     I: IntoIterator<Item = &'a str>,
 {
     let mut scored: Vec<(usize, &str)> = Vec::new();
+    let n = given.chars().take(MAX_SUGGEST + 1).count();
+    if n > MAX_SUGGEST {
+        return Vec::new();
+    }
     for c in candidates {
         if c == given || scored.iter().any(|(_, s)| *s == c) {
             continue;
         }
-        let d = edit_distance(given, c);
+        let m = c.chars().take(MAX_SUGGEST + 1).count();
+        if m > MAX_SUGGEST {
+            continue;
+        }
         let substring = !given.is_empty() && (c.contains(given) || given.contains(c));
+        // The distance is at least the length difference: skip hopeless pairs early.
+        if n.abs_diff(m) > 3 && !substring {
+            continue;
+        }
+        let d = edit_distance(given, c);
         if d <= 3 || substring {
             scored.push((d, c));
         }

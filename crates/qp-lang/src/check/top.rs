@@ -26,8 +26,9 @@ pub(super) fn run(raw: &Value, ctx: &CheckCtx<'_>) -> CheckReport {
         None => Base::Unbound,
         Some(b) => Base::Bound(b.interval.as_deref().and_then(|s| parse_tf(s).ok())),
     };
+    let max = usize::try_from(ctx.limits.get(Limit::CheckMaxErrors)).unwrap_or(usize::MAX);
     let mut cx = Cx {
-        d: Diags::new(ctx.lang),
+        d: Diags::new(ctx.lang, max),
         limits: ctx.limits,
         base,
         params: BTreeMap::new(),
@@ -48,14 +49,25 @@ pub(super) fn run(raw: &Value, ctx: &CheckCtx<'_>) -> CheckReport {
         checked: None,
         limits: ctx.limits,
     };
-    if let Some(f) = Fields::new(raw, "", "program", &mut cx.d) {
-        if f.has("reject") {
-            reject(&mut cx, f, &mut report);
-        } else {
-            program(&mut cx, f, raw, &mut report);
+    // Size first (PR §2): an oversized input is refused before any per-node work.
+    let size = serde_json::to_string(raw).map_or(usize::MAX, |s| s.len());
+    count_limit(
+        &mut cx,
+        "",
+        size,
+        Limit::MaxIrBytes,
+        Reason::TooLarge,
+        Space::Bytes,
+    );
+    if cx.d.count() == 0 {
+        if let Some(f) = Fields::new(raw, "", "program", &mut cx.d) {
+            if f.has("reject") {
+                reject(&mut cx, f, &mut report);
+            } else {
+                program(&mut cx, f, raw, &mut report);
+            }
         }
     }
-    let max = usize::try_from(cx.limit(Limit::CheckMaxErrors)).unwrap_or(usize::MAX);
     report.truncated = cx.d.finish(max);
     report.errors = std::mem::take(&mut cx.d.errors);
     report.warnings = std::mem::take(&mut cx.d.warnings);
@@ -124,8 +136,16 @@ fn program(cx: &mut Cx<'_>, mut f: Fields<'_>, raw: &Value, report: &mut CheckRe
     bind(cx);
     let nraw = f.req("nodes", &mut cx.d);
     let ids = node_section(cx, nraw);
-    let outs = outputs(cx, f.opt("outputs"));
+    let oraw = f.opt("outputs");
+    let outs = match &ids {
+        Some(_) => outputs(cx, oraw),
+        None => Outputs::default(),
+    };
     f.finish(&mut cx.d, &[]);
+    // Over a count limit: the limit error stands alone (no per-item work beyond it).
+    let Some(ids) = ids.filter(|_| !outs.over) else {
+        return;
+    };
     report.outputs.clone_from(&outs.infos);
     resolve(cx, raw, &ids, &outs, report);
 }
@@ -138,23 +158,27 @@ fn count_limit(cx: &mut Cx<'_>, at: &str, n: usize, l: Limit, r: Reason, s: Spac
     }
 }
 
-/// Checks every node; returns the ids by index (empty string where unreadable).
-fn node_section(cx: &mut Cx<'_>, raw: Option<&Value>) -> Vec<String> {
+/// Checks every node; returns the ids by index (empty string where unreadable), or
+/// `None` when there are more nodes than `program.max_nodes` (none is read).
+fn node_section(cx: &mut Cx<'_>, raw: Option<&Value>) -> Option<Vec<String>> {
     let Some(raw) = raw else {
-        return Vec::new();
+        return Some(Vec::new());
     };
     let Value::Array(items) = raw else {
         cx.d.at(Reason::Type, "/nodes", &Msg::NotArray("nodes".to_owned()));
-        return Vec::new();
+        return Some(Vec::new());
     };
-    count_limit(
-        cx,
-        "/nodes",
-        items.len(),
-        Limit::MaxNodes,
-        Reason::TooManyNodes,
-        Space::Node,
-    );
+    if items.len() as u64 > cx.limit(Limit::MaxNodes) {
+        count_limit(
+            cx,
+            "/nodes",
+            items.len(),
+            Limit::MaxNodes,
+            Reason::TooManyNodes,
+            Space::Node,
+        );
+        return None;
+    }
     let ids: Vec<String> = items
         .iter()
         .map(|n| n.get("id").and_then(Value::as_str).unwrap_or("").to_owned())
@@ -168,7 +192,7 @@ fn node_section(cx: &mut Cx<'_>, raw: Option<&Value>) -> Vec<String> {
         let entry = nodes::node(cx, v, i);
         cx.nodes.push(entry);
     }
-    ids
+    Some(ids)
 }
 
 /// Cost, warnings, size, identities and the resolved program.
@@ -226,6 +250,9 @@ fn cost_and_warnings(
         )
         .expected([cost.limit])
         .hint(&Msg::HintCost);
+    }
+    if cx.d.count() > 0 {
+        return cost;
     }
     let ops: Vec<&Op> = typed.iter().map(|t| &t.op).collect();
     let indexed: Vec<(usize, &CheckedOutput)> = resolved.iter().copied().enumerate().collect();

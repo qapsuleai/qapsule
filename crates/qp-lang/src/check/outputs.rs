@@ -15,7 +15,10 @@ use crate::names::{is_lower_name, suggest, OUTPUT_KINDS};
 use crate::reason::Reason;
 
 /// What the outputs section gives.
+#[derive(Default)]
 pub(super) struct Outputs {
+    /// More outputs than `program.max_outputs`: none was read.
+    pub(super) over: bool,
     /// The outputs whose name and kind parsed.
     pub(super) infos: Vec<ProgramOutputInfo>,
     /// Resolved outputs (`None` for one with an error).
@@ -24,10 +27,7 @@ pub(super) struct Outputs {
 
 /// Reads the `outputs` section.
 pub(super) fn outputs(cx: &mut Cx<'_>, raw: Option<&Value>) -> Outputs {
-    let mut out = Outputs {
-        infos: Vec::new(),
-        specs: Vec::new(),
-    };
+    let mut out = Outputs::default();
     let items = match raw {
         None => {
             cx.d.at(Reason::NoOutput, "", &Msg::NoOutput)
@@ -56,6 +56,8 @@ pub(super) fn outputs(cx: &mut Cx<'_>, raw: Option<&Value>) -> Outputs {
             &Msg::TooMany(Space::Output, items.len() as u64, max),
         )
         .expected([max]);
+        out.over = true;
+        return out;
     }
     let mut names: Vec<String> = Vec::new();
     for (i, v) in items.iter().enumerate() {

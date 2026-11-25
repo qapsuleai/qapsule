@@ -39,3 +39,15 @@ sıkılaştırıcı kural `calls.restricted`, yapılandırması `scripts/arch-co
 (izleyici yöntemlerini yalnız `crates/qp-replica/src/replica/follower.rs` ve `qp-authority`
 çağırır). Gevşetme değil, yeni kural; `config` adımı yeni anahtar için bu satırı ister
 (`rule_changes` `restricted_calls`). Arkin'in GOAL'ü (ön iş 2) bu kuralın kaynağıdır.
+## D2 — `unreachable` lint'i ve `qp-authority` (2026-11-26)
+
+**Soru:** Ön iş 3 (K93) `clippy::unimplemented` ve `clippy::unreachable`'ı açar; mevcutlar öğe başına
+izinle. `qp-authority/src`'de 2 `unreachable!()` var; Cargo `[lints] workspace = true` ile crate
+başına geçersiz kılmayı reddediyor, lint tablosunu crate'e kopyalamak yeni istisna olur.
+
+**Karar (Arkin): 2 özniteliği değiştir.** İki yerde var olan `#[allow(clippy::too_many_lines)]`
+özniteliğine `clippy::unreachable` eklenir. Yeni satır yok, `qp-authority` izin sayısı 25'te kalır.
+VERIFY 4'te `qp-authority/src` farkı yalnız bu iki öznitelik değişikliğidir (+2/−2).
+
+**Mandal gevşetmeleri (A72, K93):** `lint.allow` `qp-compute` 27 → 30, `qp-ops` 20 → 23,
+`qp-plane` 1 → 2 (var olan `unreachable!` yerlerine öğe başına izin; sayı bundan sonra yalnız düşer).

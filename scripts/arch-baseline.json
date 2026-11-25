@@ -238,7 +238,7 @@
     "qp-capsule": 14,
     "qp-cli": 2,
     "qp-compute": {
-     "note": "K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3)",
+     "note": "rounds/RL1/DECISION.md D2, K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3)",
      "value": 30
     },
     "qp-designs": 14,
@@ -250,11 +250,11 @@
     "qp-matriks": 3,
     "qp-mcp": 17,
     "qp-ops": {
-     "note": "K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3)",
+     "note": "rounds/RL1/DECISION.md D2, K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3)",
      "value": 23
     },
     "qp-plane": {
-     "note": "K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3)",
+     "note": "rounds/RL1/DECISION.md D2, K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3)",
      "value": 2
     },
     "qp-read": 11,

@@ -184,6 +184,9 @@ kapsamı doküman içinde sahip başınadır; dokümanlar arası kişi başına 
 | `program.work.record` | int | unit | 0.. | 16 | system | release only | no | Work charged per emitted record (event bar, signal record, state key). | RL1 |
 | `program.work.open_record` | int | unit | 0.. | 1 | system | release only | no | Work charged per open signal record per bar. | RL1 |
 | `program.work.read` | int | unit | 0.. | 1 | system | release only | no | Work charged per output cursor read. | RL1 |
+| `program.text.max_source_chars` | int | chars | 1.. | 65536 | system | release only | no | Characters of a program text at most (`E_TOO_LARGE`); eight times `program.max_ir_bytes` for comments and spelling. | RL1 |
+| `program.text.max_token_chars` | int | chars | 1.. | 1024 | system | release only | no | Characters of one token (name, number, string) of a program text at most (`E_TOO_LARGE`). | RL1 |
+| `program.text.max_depth` | int | count | 1.. | 64 | system | release only | no | Expression nesting of a program text at most, parentheses included (`E_TOO_LARGE`). | RL1 |
 
 Dil sabitleri (kutu kenarı 1…8, durum boyutu 1…4, düğüm ağırlıkları) parametre değildir;
 değişmeleri dil sürümünü değiştirir (`docs/PROGRAMS.md` §8.4).

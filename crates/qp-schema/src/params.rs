@@ -9,6 +9,7 @@
 //! Resolution is pure and deterministic: [`resolve`] reads no clock, no file, no network.
 
 pub mod doc;
+pub mod program;
 pub mod system;
 
 pub use system::{by_key, REGISTRY};

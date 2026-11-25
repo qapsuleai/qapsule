@@ -5,6 +5,7 @@
 //! (`pub const LEDGER_MIN_N: u32 = SCORECARD_MIN_N_DEFAULT;`). A test next to each owner
 //! constant checks it still equals the old literal. Inventory: `docs/PARAMETERS.md`.
 
+use super::program;
 use super::{ChangedBy, ParamDef, ParamKind, ParamScope, ParamValue};
 
 const SYSTEM: &[ParamScope] = &[ParamScope::System];
@@ -239,7 +240,7 @@ pub const DEPTH_CHART_LOOKBACK_BARS: ParamDef = int(
     "Bars shown before the fact bar in the chart depth view.",
 );
 
-/// Every defined parameter, in document order.
+/// Every defined parameter, in document order (the RL1 rows last, as `program::PROGRAM_ROWS`).
 pub const REGISTRY: &[&ParamDef] = &[
     &SCORECARD_MIN_N,
     &GLYPH_MIN_LEDGER_N,
@@ -257,6 +258,27 @@ pub const REGISTRY: &[&ParamDef] = &[
     &DISPUTE_MAX_DIGESTS,
     &GESTURE_STORY_ZOOM_MIN_BARS,
     &DEPTH_CHART_LOOKBACK_BARS,
+    // RL1 (compute language), `program.rs`.
+    &program::PROGRAM_MAX_NODES,
+    &program::PROGRAM_MAX_WINDOW,
+    &program::PROGRAM_MAX_OUTPUTS,
+    &program::PROGRAM_MAX_PARAMS,
+    &program::PROGRAM_MAX_IR_BYTES,
+    &program::PROGRAM_MAX_COST_PER_BAR,
+    &program::PROGRAM_SIGNAL_MAX_HORIZON_BARS,
+    &program::PROGRAM_CHECK_MAX_ERRORS,
+    &program::PROGRAM_LIVE_DOC_MAX_INSTANCES,
+    &program::PROGRAM_LIVE_DOC_MAX_COST_PER_BAR,
+    &program::PROGRAM_LIVE_DOC_MAX_LOG_BYTES,
+    &program::PROGRAM_TRY_MAX_BARS,
+    &program::PROGRAM_TRY_MAX_WORK,
+    &program::PROGRAM_TRY_MAX_ITEMS,
+    &program::PROGRAM_WORK_RECORD,
+    &program::PROGRAM_WORK_OPEN_RECORD,
+    &program::PROGRAM_WORK_READ,
+    &program::PROGRAM_TEXT_MAX_SOURCE_CHARS,
+    &program::PROGRAM_TEXT_MAX_TOKEN_CHARS,
+    &program::PROGRAM_TEXT_MAX_DEPTH,
 ];
 
 /// The definition with this key, if any.

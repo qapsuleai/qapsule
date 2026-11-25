@@ -14,6 +14,7 @@
 mod ast;
 mod diag;
 mod lex;
+mod limits;
 mod lower;
 mod lowered;
 mod map;
@@ -22,7 +23,10 @@ mod names;
 mod parse;
 mod print;
 
-pub use lowered::{lower, Lowered};
+pub use limits::{
+    TextLimits, DEFAULT_MAX_DEPTH, DEFAULT_MAX_SOURCE_CHARS, DEFAULT_MAX_TOKEN_CHARS,
+};
+pub use lowered::{lower, lower_with, Lowered};
 pub use map::SourceMap;
 pub use names::{FUNCTIONS, REJECT_CODES};
-pub use print::{print, print_doc, print_reject};
+pub use print::{print, print_doc, print_reject, print_with, PrintError};

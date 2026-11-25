@@ -43,28 +43,50 @@ fn output_refs(o: &Output) -> Vec<&str> {
 }
 
 impl<'a> Printer<'a> {
-    pub(super) fn new(p: &'a Program) -> Printer<'a> {
+    /// A printer; inlined expressions nest at most `max_depth` levels (deeper chains get
+    /// their own lines, so rendering recursion stays bounded for any IR).
+    pub(super) fn new(p: &'a Program, max_depth: usize) -> Printer<'a> {
         let mut index = BTreeMap::new();
         for (i, n) in p.nodes.iter().enumerate() {
             index.entry(n.id.as_str()).or_insert(i);
         }
-        let mut uses = vec![0usize; p.nodes.len()];
-        let refs = p
+        let n = p.nodes.len();
+        let mut uses = vec![0usize; n];
+        // The user of a node: a later node, or `n` for an output.
+        let mut user = vec![0usize; n];
+        let node_refs = p
             .nodes
             .iter()
-            .flat_map(|n| n.op.refs())
-            .chain(p.outputs.iter().flat_map(output_refs));
-        for r in refs {
+            .enumerate()
+            .flat_map(|(j, nd)| nd.op.refs().into_iter().map(move |r| (j, r)));
+        let out_refs = p.outputs.iter().flat_map(output_refs).map(|r| (n, r));
+        for (j, r) in node_refs.chain(out_refs) {
             if let Some(&i) = index.get(base(r).0) {
                 uses[i] += 1;
+                user[i] = j;
             }
         }
-        let inline: Vec<bool> = p
-            .nodes
-            .iter()
-            .zip(&uses)
-            .map(|(n, u)| n.id.starts_with('_') && *u == 1)
+        // Inlined only when used once, by something after it (no cycle in bad IR).
+        let mut inline: Vec<bool> = (0..n)
+            .map(|i| p.nodes[i].id.starts_with('_') && uses[i] == 1 && user[i] > i)
             .collect();
+        let mut height = vec![1usize; n];
+        for i in 0..n {
+            let kids: Vec<usize> = p.nodes[i]
+                .op
+                .refs()
+                .into_iter()
+                .filter_map(|r| index.get(base(r).0).copied())
+                .filter(|&k| k < i && inline[k])
+                .collect();
+            height[i] = 1 + kids.iter().map(|&k| height[k]).max().unwrap_or(0);
+            if height[i] > max_depth {
+                for k in kids {
+                    inline[k] = false;
+                }
+                height[i] = 1;
+            }
+        }
         let names = names(p, &inline);
         Printer {
             p,

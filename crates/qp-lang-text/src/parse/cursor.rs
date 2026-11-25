@@ -13,9 +13,37 @@ pub(crate) type PErr = Box<Diag>;
 pub(crate) struct Cursor<'a> {
     pub(super) toks: &'a [Token],
     pub(super) pos: usize,
+    /// Current recursion depth of the expression parser.
+    pub(super) depth: usize,
+    /// `TextLimits::max_depth`.
+    pub(super) max_depth: usize,
 }
 
 impl Cursor<'_> {
+    /// Enters one level of parser recursion; past `max_depth` fails with
+    /// `E_TOO_LARGE` instead of growing the stack.
+    pub(crate) fn enter(&mut self) -> Result<(), PErr> {
+        self.depth += 1;
+        if self.depth > self.max_depth {
+            return Err(self.too_deep(self.span()));
+        }
+        Ok(())
+    }
+
+    /// Leaves one level of parser recursion.
+    pub(crate) fn leave(&mut self) {
+        self.depth = self.depth.saturating_sub(1);
+    }
+
+    /// The nesting error at `span`.
+    pub(crate) fn too_deep(&self, span: Span) -> PErr {
+        Box::new(Diag::new(
+            Reason::TooLarge,
+            Msg::TooDeep(self.max_depth),
+            span,
+        ))
+    }
+
     pub(crate) fn peek(&self) -> Option<&Tok> {
         self.toks.get(self.pos).map(|t| &t.tok)
     }
@@ -155,6 +183,8 @@ fn lex_diag(e: &LexError, span: Span) -> Diag {
         }
         LexError::Unterminated => Diag::new(Reason::Parse, Msg::Unterminated, span),
         LexError::Escape(c) => Diag::new(Reason::Parse, Msg::Escape(*c), span),
+        LexError::Exponent => Diag::new(Reason::Parse, Msg::Exponent, span),
+        LexError::TooLong(n) => Diag::new(Reason::TooLarge, Msg::TokenTooLong(*n), span),
     }
 }
 

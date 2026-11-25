@@ -28,7 +28,7 @@ fn text_lower_print_lower_is_stable() {
     for case in 0..CASES {
         let src = TextGen::new(&mut r).program();
         let (ir1, p1) = program(&src);
-        let text1 = print(&p1);
+        let text1 = print(&p1).unwrap();
         let (ir2, p2) = program(&text1);
         assert_eq!(
             ir1, ir2,
@@ -39,7 +39,11 @@ fn text_lower_print_lower_is_stable() {
             p2.canonical_json().unwrap(),
             "case {case}"
         );
-        assert_eq!(print(&p2), text1, "case {case}: print not idempotent");
+        assert_eq!(
+            print(&p2).unwrap(),
+            text1,
+            "case {case}: print not idempotent"
+        );
     }
 }
 
@@ -49,7 +53,7 @@ fn ir_without_underscore_ids_is_identity() {
     for case in 0..CASES {
         let v = ir_program(&mut r, false);
         let p: Program = serde_json::from_value(v.clone()).unwrap_or_else(|e| panic!("{e}\n{v}"));
-        let text = print(&p);
+        let text = print(&p).unwrap();
         let (_, q) = program(&text);
         assert_eq!(
             q.canonical_json().unwrap(),
@@ -65,11 +69,11 @@ fn ir_with_underscore_ids_is_identity_up_to_renaming() {
     for case in 0..CASES {
         let v = ir_program(&mut r, true);
         let p: Program = serde_json::from_value(v.clone()).unwrap_or_else(|e| panic!("{e}\n{v}"));
-        let text = print(&p);
+        let text = print(&p).unwrap();
         let (_, q) = program(&text);
         assert_eq!(q.nodes.len(), p.nodes.len(), "case {case}\n{text}");
-        assert_eq!(print(&q), text, "case {case}");
-        let (_, q2) = program(&print(&q));
+        assert_eq!(print(&q).unwrap(), text, "case {case}");
+        let (_, q2) = program(&print(&q).unwrap());
         assert_eq!(
             q2.canonical_json().unwrap(),
             q.canonical_json().unwrap(),
@@ -97,7 +101,7 @@ fn printer_names_unprintable_ids() {
     }))
     .unwrap();
     assert_eq!(
-        print(&p),
+        print(&p).unwrap(),
         "param v1 int = 2 in 1..9\nv3 = sma(close, v1)\nv2 = v3 - v3\nseries s = -v2\nseries t = -(2)\n"
     );
 }
@@ -133,7 +137,7 @@ fn printer_keeps_tree_shape() {
         ("series s = 2.50 + 007\n", Some("series s = 2.5 + 7\n")),
     ] {
         let (ir, p) = program(src);
-        let text = print(&p);
+        let text = print(&p).unwrap();
         assert_eq!(text, canonical.unwrap_or(src));
         assert_eq!(program(&text).0, ir, "{src}");
     }

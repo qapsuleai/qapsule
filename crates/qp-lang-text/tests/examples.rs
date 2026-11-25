@@ -24,7 +24,7 @@ fn check(src: &str, ir: &str) {
     let l = lower(src, Language::En).unwrap_or_else(|e| panic!("{src}\n{e:#?}"));
     let doc = l.doc().unwrap();
     assert_eq!(canon(&doc), expected(ir), "{src}");
-    assert_eq!(print_doc(&doc), src);
+    assert_eq!(print_doc(&doc).unwrap(), src);
 }
 
 #[test]
@@ -110,7 +110,7 @@ fn reject() {
         serde_json::to_string(&l.ir).unwrap(),
         r#"{"reject":{"code":"E_LOOKAHEAD","reason":"the next bar's close is not known at this bar's close"}}"#
     );
-    assert_eq!(print_doc(&l.doc().unwrap()), src);
+    assert_eq!(print_doc(&l.doc().unwrap()).unwrap(), src);
 }
 
 #[test]
@@ -135,7 +135,7 @@ fn study_equivalents() {
     ];
     for t in texts {
         let doc = lower(t, Language::En).unwrap().doc().unwrap();
-        assert_eq!(print_doc(&doc), t);
+        assert_eq!(print_doc(&doc).unwrap(), t);
     }
     let b = lower(texts[3], Language::En).unwrap().doc().unwrap();
     let ProgramDoc::Program(p) = b else {
@@ -168,7 +168,7 @@ fn surface_a_examples_lower() {
     let ProgramDoc::Program(p) = l.doc().unwrap() else {
         panic!("not a program")
     };
-    let printed = qp_lang_text::print(&p);
+    let printed = qp_lang_text::print(&p).unwrap();
     assert!(printed.contains(
         "state regime { momentum = bucket(r, [30, 50, 70]), activity = bucket(vol_ratio, [0.8, 1.2]) }"
     ));

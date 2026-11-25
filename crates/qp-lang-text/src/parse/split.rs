@@ -17,8 +17,8 @@ pub(crate) struct Parsed {
     pub poisoned: Vec<(String, u32)>,
 }
 
-/// Parses every statement.
-pub(crate) fn parse(tokens: &[Token]) -> Parsed {
+/// Parses every statement; expressions nest at most `max_depth` levels.
+pub(crate) fn parse(tokens: &[Token], max_depth: usize) -> Parsed {
     let mut p = Parsed {
         stmts: Vec::new(),
         diags: Vec::new(),
@@ -28,6 +28,8 @@ pub(crate) fn parse(tokens: &[Token]) -> Parsed {
         let mut cur = Cursor {
             toks: &toks,
             pos: 0,
+            depth: 0,
+            max_depth,
         };
         match stmt::statement(&mut cur) {
             Ok(s) => p.stmts.push(s),

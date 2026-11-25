@@ -39,11 +39,32 @@ impl BinOp {
     }
 }
 
-/// An expression with its span.
+/// An expression with its span and tree height (1 for a leaf).
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Expr {
     pub kind: ExprKind,
     pub span: Span,
+    pub depth: usize,
+}
+
+impl Expr {
+    /// An expression; its height is one more than its highest child.
+    pub(crate) fn new(kind: ExprKind, span: Span) -> Expr {
+        let child = match &kind {
+            ExprKind::Neg(x) | ExprKind::Not(x) | ExprKind::Select { x, .. } => x.depth,
+            ExprKind::Bin { a, b, .. } => a.depth.max(b.depth),
+            ExprKind::Lag { x, n } => x.depth.max(n.depth),
+            ExprKind::Call { args, .. } | ExprKind::List(args) => {
+                args.iter().map(|a| a.depth).max().unwrap_or(0)
+            }
+            _ => 0,
+        };
+        Expr {
+            kind,
+            span,
+            depth: child + 1,
+        }
+    }
 }
 
 /// What an expression is.
@@ -150,7 +171,7 @@ pub(crate) enum Stmt {
     Signal {
         name: Sp<String>,
         expr: Expr,
-        clauses: SignalClauses,
+        clauses: Box<SignalClauses>,
     },
     State {
         name: Sp<String>,

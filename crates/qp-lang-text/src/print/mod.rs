@@ -4,8 +4,10 @@
 //! id starts with `_` and that is used exactly once is written where it is used; other
 //! `_` nodes (and ids the text cannot spell) get the smallest unused `v<k>`.
 
+mod check;
 mod expr;
 mod lit;
 mod text;
 
-pub use text::{print, print_doc, print_reject};
+pub use check::PrintError;
+pub use text::{print, print_doc, print_reject, print_with};

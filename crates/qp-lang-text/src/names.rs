@@ -146,7 +146,7 @@ const RESERVED: &[&str] = &[
 
 /// Whether `s` is a reserved word.
 pub(crate) fn reserved(s: &str) -> bool {
-    RESERVED.contains(&s)
+    RESERVED.contains(&s) || hard_keyword(s).is_some()
 }
 
 /// Whether `s` can name a parameter or binding in text: `^[A-Za-z][A-Za-z0-9_]{0,63}$`,
@@ -181,6 +181,16 @@ pub(crate) fn unsupported_word(s: &str) -> Option<Missing> {
         "security" | "request" | "symbol" | "ticker" | "import" => Missing::MultiSymbol,
         _ => return None,
     })
+}
+
+/// Words that are never names: a construct the language leaves out, wherever it stands
+/// (`x = if close > 1 ...`).
+pub(crate) fn hard_keyword(s: &str) -> Option<Missing> {
+    match s {
+        "if" | "else" | "for" | "while" | "var" | "varip" | "def" | "fn" | "function"
+        | "return" | "lambda" => unsupported_word(s),
+        _ => None,
+    }
 }
 
 /// Function-call names of constructs the language leaves out.
@@ -330,28 +340,50 @@ fn edit_distance(a: &str, b: &str) -> usize {
     prev[b.len()]
 }
 
+/// Names longer than this get no suggestions and are no candidates: edit distance is
+/// O(n·m), and no name of the language is longer (PR §12.1: 64).
+pub(crate) const SUGGEST_MAX_CHARS: usize = 64;
+/// Candidates scored per suggestion at most (bounds the work for huge programs).
+pub(crate) const SUGGEST_MAX_CANDIDATES: usize = 512;
+
 /// At most five candidates close to `given`: the Turkish table's word first (when it is
 /// a candidate), then names within edit distance ⌈len/3⌉ (1…3, case folded) or
-/// containing it (or contained in it), by distance then name.
+/// containing it (or contained in it), by distance then name. Bounded: names over
+/// [`SUGGEST_MAX_CHARS`] are skipped, a length difference over the distance limit is
+/// rejected before any distance is computed, at most [`SUGGEST_MAX_CANDIDATES`] are scored.
 pub(crate) fn did_you_mean<'a, I>(given: &str, candidates: I) -> Vec<String>
 where
     I: IntoIterator<Item = &'a str>,
 {
-    let cands: Vec<&str> = candidates.into_iter().collect();
+    if given.chars().count() > SUGGEST_MAX_CHARS {
+        return Vec::new();
+    }
+    let cands: Vec<&str> = candidates
+        .into_iter()
+        .filter(|c| c.chars().count() <= SUGGEST_MAX_CHARS)
+        .take(SUGGEST_MAX_CANDIDATES)
+        .collect();
     let g = fold(given);
+    let glen = g.chars().count();
     let mut out: Vec<String> = Vec::new();
     if let Some(en) = turkish(given).filter(|en| cands.contains(en)) {
         out.push(en.to_owned());
     }
-    let limit = g.chars().count().div_ceil(3).clamp(1, 3);
+    let limit = glen.div_ceil(3).clamp(1, 3);
     let mut scored: Vec<(usize, &str)> = cands
         .iter()
         .filter(|c| **c != given && !out.iter().any(|o| o == *c))
         .filter_map(|c| {
             let fc = fold(c);
-            let d = edit_distance(&g, &fc);
             let sub = (g.len() > 2 && fc.contains(g.as_str())) || (fc.len() > 2 && g.contains(&fc));
-            (d <= limit || sub).then_some((d, *c))
+            if sub {
+                return Some((edit_distance(&g, &fc), *c));
+            }
+            if glen.abs_diff(fc.chars().count()) > limit {
+                return None;
+            }
+            let d = edit_distance(&g, &fc);
+            (d <= limit).then_some((d, *c))
         })
         .collect();
     scored.sort_unstable();
@@ -369,6 +401,17 @@ mod tests {
     fn function_list_matches_signatures() {
         let names: Vec<&str> = FUNCS.iter().map(|f| f.name).collect();
         assert_eq!(names, FUNCTIONS);
+    }
+
+    #[test]
+    fn suggestions_are_bounded() {
+        let long = "a".repeat(100_000);
+        assert!(did_you_mean(&long, FUNCTIONS.iter().copied()).is_empty());
+        let cands: Vec<String> = (0..10_000)
+            .map(|i| format!("{}{i}", "b".repeat(70)))
+            .collect();
+        assert!(did_you_mean("rsi", cands.iter().map(String::as_str)).is_empty());
+        assert_eq!(did_you_mean("rsii", FUNCTIONS.iter().copied()), vec!["rsi"]);
     }
 
     #[test]

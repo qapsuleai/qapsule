@@ -1,11 +1,13 @@
 //! The entry point of text → IR.
 
 use qp_schema::program::ProgramDoc;
-use qp_schema::protocol::{Language, ProgramError};
+use qp_schema::protocol::{Language, ProgramError, Span};
 use serde_json::Value;
 
-use crate::diag::render_all;
+use crate::diag::{render_all, Diag, Reason};
+use crate::limits::TextLimits;
 use crate::map::SourceMap;
+use crate::msg::Msg;
 
 /// A lowered text file.
 #[derive(Debug, Clone, PartialEq)]
@@ -40,8 +42,34 @@ impl Lowered {
 /// Every text error (syntax, unknown name or function, a non-literal in a number field,
 /// a duplicate text name, a misplaced `reject`), in position order, each with `span`.
 pub fn lower(src: &str, lang: Language) -> Result<Lowered, Vec<ProgramError>> {
-    let tokens = crate::lex::lex(src);
-    let parsed = crate::parse::parse(&tokens);
+    lower_with(src, lang, &TextLimits::default())
+}
+
+/// [`lower`] with explicit size limits.
+///
+/// # Errors
+/// As [`lower`]; a source over `max_source_chars` is one `E_TOO_LARGE` error and is not
+/// read further.
+pub fn lower_with(
+    src: &str,
+    lang: Language,
+    limits: &TextLimits,
+) -> Result<Lowered, Vec<ProgramError>> {
+    if src.chars().nth(limits.max_source_chars).is_some() {
+        let span = Span {
+            line: 1,
+            col: 1,
+            len: 1,
+        };
+        let d = Diag::new(
+            Reason::TooLarge,
+            Msg::SourceTooLong(limits.max_source_chars),
+            span,
+        );
+        return Err(render_all(vec![d], lang));
+    }
+    let tokens = crate::lex::lex(src, limits.max_token_chars);
+    let parsed = crate::parse::parse(&tokens, limits.max_depth);
     let (ir, map, diags) = crate::lower::lower(parsed);
     if diags.is_empty() {
         Ok(Lowered { ir, map })

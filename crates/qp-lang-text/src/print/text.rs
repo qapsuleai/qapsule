@@ -7,14 +7,27 @@ use qp_schema::program::{
     ProgramReject,
 };
 
+use super::check::{check_program, check_reject, PrintError};
 use super::expr::Printer;
 use super::lit::{self, fmt_num, quote};
+use crate::limits::TextLimits;
 use crate::names::text_name;
 
 /// The canonical text of a program.
-#[must_use]
-pub fn print(p: &Program) -> String {
-    let pr = Printer::new(p);
+///
+/// # Errors
+/// When a name the text cannot spell safely sits in the IR (see [`PrintError`]).
+pub fn print(p: &Program) -> Result<String, PrintError> {
+    print_with(p, &TextLimits::default())
+}
+
+/// [`print`] with explicit limits (`max_depth` bounds inlining).
+///
+/// # Errors
+/// As [`print`].
+pub fn print_with(p: &Program, limits: &TextLimits) -> Result<String, PrintError> {
+    check_program(p)?;
+    let pr = Printer::new(p, limits.max_depth);
     let mut lines: Vec<String> = p.params.iter().map(param_line).collect();
     let mut stmts: Vec<(usize, u8, String)> = Vec::new();
     for (i, n) in p.nodes.iter().enumerate() {
@@ -32,12 +45,14 @@ pub fn print(p: &Program) -> String {
     lines.extend(stmts.into_iter().map(|(_, _, s)| s));
     let mut out = lines.join("\n");
     out.push('\n');
-    out
+    Ok(out)
 }
 
 /// The canonical text of a program or a refusal.
-#[must_use]
-pub fn print_doc(doc: &ProgramDoc) -> String {
+///
+/// # Errors
+/// As [`print`].
+pub fn print_doc(doc: &ProgramDoc) -> Result<String, PrintError> {
     match doc {
         ProgramDoc::Program(p) => print(p),
         ProgramDoc::Reject(r) => print_reject(&r.reject),
@@ -45,9 +60,12 @@ pub fn print_doc(doc: &ProgramDoc) -> String {
 }
 
 /// The canonical text of a refusal: `reject <CODE> "<reason>"`.
-#[must_use]
-pub fn print_reject(r: &ProgramReject) -> String {
-    format!("reject {} {}\n", r.code, quote(&r.reason))
+///
+/// # Errors
+/// When the code is not a plain identifier.
+pub fn print_reject(r: &ProgramReject) -> Result<String, PrintError> {
+    check_reject(r)?;
+    Ok(format!("reject {} {}\n", r.code, quote(&r.reason)))
 }
 
 fn param_line(d: &ProgramParamDef) -> String {

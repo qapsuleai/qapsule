@@ -16,6 +16,7 @@ pub(crate) enum Reason {
     UnknownParam,
     DuplicateName,
     Unsupported,
+    TooLarge,
 }
 
 impl Reason {
@@ -30,6 +31,7 @@ impl Reason {
             Reason::UnknownParam => "E_UNKNOWN_PARAM",
             Reason::DuplicateName => "E_DUPLICATE_NAME",
             Reason::Unsupported => "E_UNSUPPORTED",
+            Reason::TooLarge => "E_TOO_LARGE",
         }
     }
 
@@ -42,6 +44,7 @@ impl Reason {
             Reason::UnknownRef | Reason::UnknownParam => ErrorCode::NotFound,
             Reason::DuplicateName => ErrorCode::Duplicate,
             Reason::Unsupported => ErrorCode::Unsupported,
+            Reason::TooLarge => ErrorCode::Limit,
         }
     }
 }

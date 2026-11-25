@@ -176,7 +176,7 @@ fn signal(c: &mut Cursor) -> Result<Stmt, PErr> {
     Ok(Stmt::Signal {
         name,
         expr,
-        clauses: cl,
+        clauses: Box::new(cl),
     })
 }
 

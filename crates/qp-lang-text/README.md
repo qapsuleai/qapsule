@@ -20,7 +20,8 @@ ayrıştırıcı; saat, rastgelelik, G/Ç yok; aynı girdi aynı çıktıyı ver
 - `Lowered::doc()` — tipli `ProgramDoc`; `Lowered::is_reject()`.
 - `SourceMap::span_at(at)`, `SourceMap::attach(&mut errors)` — denetçinin `at` işaretçili
   hatalarını (tip, saat, maliyet) kaynak satırına eşler (§12.4).
-- `print(&Program)`, `print_doc(&ProgramDoc)`, `print_reject(&ProgramReject)` — kanonik metin.
+- `print(&Program)`, `print_doc(&ProgramDoc)`, `print_reject(&ProgramReject)` → `Result<String, PrintError>` — kanonik metin; `print_with(&Program, &TextLimits)`.
+- `lower_with(src, lang, &TextLimits)`, `TextLimits`, `DEFAULT_MAX_*`.
 - `FUNCTIONS`, `REJECT_CODES` — işlev adları ve retin taşıyabileceği alt kodlar.
 
 **Düzen (`src/`):** `lex.rs` (sözcükler), `parse/` (deyimler, ifadeler; satır başından yeniden
@@ -37,6 +38,24 @@ gösterimin taşıyabildiği her şey (tip, saat, aralık, kesirli dönem, eksik
 yazdırılır; gidiş-dönüş (a) `lower(print(lower(t))) == lower(t)`, (b) `_` kimliksiz ara
 gösterimde `lower(print(p)) == p`, `_` kimlikliyse yeniden adlandırmaya kadar eşit, (c)
 `print` eşgüçlü — her biri 300 rastgele programla.
+
+**Sınırlar (`TextLimits`):** metin uzunluğu, sözcük uzunluğu ve ifade derinliği (parantez
+dahil, ağaç yüksekliği; varsayılan 64 Ki karakter, 1024, 64). Bunlar dilin yapısal sınırlarıdır
+(PR §8.4 dil sabiti; RL1 kayıt defteri anahtarları ara gösterimi sınırlar, metni değil); çağıran
+daha sıkısını `lower_with` / `print_with` ile verir. Aşım `E_TOO_LARGE` (`limit`); özyineleme
+yığını taşmaz. Yazıcı ara gösterimde tam bir kez kullanılan `_` zincirini en çok bu derinlikte
+gömer, ötesine satır açar. `did_you_mean` 64 karakterden uzun adlarda öneri vermez ve en çok 512
+aday puanlar. Üslü sayı (`1e5`) `E_PARSE` ("üslü yazım yok").
+
+**Kodlama:** metin UTF-8 `&str`. Baştaki BOM (U+FEFF) tanınmayan karakterdir: 1:1'de `E_PARSE`.
+`\r` boşluk sayılır: CRLF satır sonu çalışır, yalnız `\r` ile ayrılmış satırlar tek satır okunur
+(ilk bozuk deyimde `E_PARSE`).
+
+**Yazıcı reddi:** yazıcı ara gösterimdeki adları olduğu gibi yazmadan önce denetler (çıktı ve
+boyut adı, parametre anahtarı ve başvuruları, `tf`, `.çıktı` seçici, tanımsız başvuru, ret
+kodu). Metin dilbilgisine uymayan ad satır enjekte edebileceği için **reddedilir**
+(`PrintError {at, value, expected}`), yeniden adlandırılmaz: çıktı ve parametre adları programın
+anlamıdır. Düğüm kimlikleri anlam taşımaz; yazılamayanlar `v<k>` olur.
 
 **Ne değildir:** denetçi değildir (tip, saat, bütçe `qp-lang`); çalıştırmaz; günlüğe metin
 yazmaz (günlükte yalnız ara gösterim).

@@ -138,6 +138,10 @@ pub(crate) enum Msg {
     DupClause(String),
     UnknownClause(String),
     UnclosedBrace,
+    SourceTooLong(usize),
+    TokenTooLong(usize),
+    TooDeep(usize),
+    Exponent,
     HintNot,
     HintAndOr,
     HintTurkish,
@@ -193,6 +197,12 @@ impl Msg {
             Msg::DupClause(c) => format!("`{c}` is written twice"),
             Msg::UnknownClause(c) => format!("unknown signal clause `{c}`"),
             Msg::UnclosedBrace => "`{` is not closed".to_owned(),
+            Msg::SourceTooLong(n) => format!("the text is longer than {n} characters"),
+            Msg::TokenTooLong(n) => format!("a token is longer than {n} characters"),
+            Msg::TooDeep(n) => format!("the expression nests deeper than {n} levels"),
+            Msg::Exponent => {
+                "exponent notation (`1e5`) is not supported; write the number out".to_owned()
+            }
             Msg::HintNot => "write `not` for negation and `!=` for inequality".to_owned(),
             Msg::HintAndOr => "write `and` / `or`".to_owned(),
             Msg::HintTurkish => {
@@ -251,6 +261,10 @@ impl Msg {
             Msg::DupClause(c) => format!("`{c}` iki kez yazılmış"),
             Msg::UnknownClause(c) => format!("bilinmeyen sinyal yan tümcesi `{c}`"),
             Msg::UnclosedBrace => "`{` kapanmamış".to_owned(),
+            Msg::SourceTooLong(n) => format!("metin {n} karakterden uzun"),
+            Msg::TokenTooLong(n) => format!("bir sözcük {n} karakterden uzun"),
+            Msg::TooDeep(n) => format!("ifade {n} düzeyden derin iç içe"),
+            Msg::Exponent => "üslü yazım (`1e5`) desteklenmez; sayıyı açık yazın".to_owned(),
             Msg::HintNot => "değil için `not`, eşit değil için `!=` yazın".to_owned(),
             Msg::HintAndOr => "`and` / `or` yazın".to_owned(),
             Msg::HintTurkish => {

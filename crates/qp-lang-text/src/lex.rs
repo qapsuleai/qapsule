@@ -13,6 +13,10 @@ pub(crate) enum LexError {
     Unterminated,
     /// A backslash escape other than `\"`, `\\`, `\n`.
     Escape(char),
+    /// A name, number or string longer than the limit (the limit).
+    TooLong(usize),
+    /// A number in exponent notation (`1e400`), which the language does not have.
+    Exponent,
 }
 
 /// A token kind.
@@ -63,17 +67,20 @@ struct Lexer {
     pos: usize,
     line: u32,
     col: u32,
+    max_token: usize,
     out: Vec<Token>,
 }
 
 /// Tokenizes `src`. Comments and blank space are dropped; every line end is a
-/// [`Tok::Newline`].
-pub(crate) fn lex(src: &str) -> Vec<Token> {
+/// [`Tok::Newline`]; a name, number or string over `max_token` characters is an error
+/// token.
+pub(crate) fn lex(src: &str, max_token: usize) -> Vec<Token> {
     let mut lx = Lexer {
         chars: src.chars().collect(),
         pos: 0,
         line: 1,
         col: 1,
+        max_token,
         out: Vec::new(),
     };
     while let Some(c) = lx.peek(0) {
@@ -100,6 +107,17 @@ impl Lexer {
     }
 
     fn push(&mut self, tok: Tok, line: u32, col: u32, len: u32) {
+        let long = match &tok {
+            Tok::Ident(s) | Tok::Number(s) | Tok::Interval(s) | Tok::Str(s) => {
+                s.chars().nth(self.max_token).is_some()
+            }
+            _ => false,
+        };
+        let tok = if long {
+            Tok::Error(LexError::TooLong(self.max_token))
+        } else {
+            tok
+        };
         self.out.push(Token {
             tok,
             span: Span { line, col, len },
@@ -146,7 +164,18 @@ impl Lexer {
             s.push('.');
             s.push_str(&self.take_while(|c| c.is_ascii_digit()));
         }
-        if self.peek(0).is_some_and(char::is_alphabetic) {
+        let sign = matches!(self.peek(1), Some('+' | '-'));
+        let exp_digit = self.peek(if sign { 2 } else { 1 });
+        if matches!(self.peek(0), Some('e' | 'E')) && exp_digit.is_some_and(|c| c.is_ascii_digit())
+        {
+            s.push_str(&self.take_while(|c| c.is_ascii_alphanumeric()));
+            if sign {
+                self.bump();
+                s.push_str(&self.take_while(|c| c.is_ascii_digit()));
+            }
+            let len = count(&s) + u32::from(sign);
+            self.push(Tok::Error(LexError::Exponent), line, col, len);
+        } else if self.peek(0).is_some_and(char::is_alphabetic) {
             s.push_str(&self.take_while(char::is_alphanumeric));
             let len = count(&s);
             self.push(Tok::Interval(s), line, col, len);

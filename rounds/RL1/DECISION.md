@@ -31,3 +31,11 @@ kapanmış barlarda 0; canlı barda değer yok); canlı yolun koşulu var olan `
    raporda yazılır. R7'nin izleme görevleri bu kancalara dayanacaktı; R7'den önce karar verilecek.
 
 **Ek:** Şema değişikliği yalnız ekleme: `program` alanı yokken var olan dökümler bayt eşit kalır.
+
+## D3 — `restricted_calls` yapılandırma anahtarı (2026-11-26)
+
+GOAL 0.2 (izleyici tipi, A71) `qp-authority/src`'ye dokunmadan makine kuralıyla kapatıldı: yeni
+sıkılaştırıcı kural `calls.restricted`, yapılandırması `scripts/arch-config.json` `restricted_calls`
+(izleyici yöntemlerini yalnız `crates/qp-replica/src/replica/follower.rs` ve `qp-authority`
+çağırır). Gevşetme değil, yeni kural; `config` adımı yeni anahtar için bu satırı ister
+(`rule_changes` `restricted_calls`). Arkin'in GOAL'ü (ön iş 2) bu kuralın kaynağıdır.

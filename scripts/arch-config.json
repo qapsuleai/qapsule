@@ -190,5 +190,8 @@
       "reason": "RF1 sonrası otorite çekirdeği: komut yolu, günlük, iki dünya ve as_reader takası ile birlikte kapsül yaşamı, iddia/itiraz/yorum ve canlı yol aynı crate'te kaldı (bayt eşitliği için; aralarında döngü ve yeniden giriş zinciri var — rounds/RF1/PLAN.md §9 B1–B5). Çekirdek donuktur; yeni iş alt sistem sözleşmesiyle kendi crate'inde doğar. Kalan borç: kapsül yaşamı, iddia/itiraz/yorum ve canlı yolun alt sisteme ayrılması (aday: RS1'den sonra; rounds/RF1/DECISION.md cevap 2)."
     }
   ],
-  "_exceptions_doc": "Named exceptions approved by Arkin (DECISIONS K85; reasons in rounds/RG1/REPORT.md §4). A finding matching rule+item is printed as an exception on every run instead of failing. `max` is a latch (K89): a value above it fails; a crate.lines exception must carry one; it may only go down except by a decision row. Adding or removing one needs a decision row."
+  "_exceptions_doc": "Named exceptions approved by Arkin (DECISIONS K85; reasons in rounds/RG1/REPORT.md §4). A finding matching rule+item is printed as an exception on every run instead of failing. `max` is a latch (K89): a value above it fails; a crate.lines exception must carry one; it may only go down except by a decision row. Adding or removing one needs a decision row.",
+  "rule_changes": [
+    {"key": "restricted_calls", "reason": "rounds/RL1/DECISION.md D3 (GOAL 0.2, A71): yeni sıkılaştırıcı kural calls.restricted; izleyici yöntemlerini yalnız Follower çağırır"}
+  ]
 }

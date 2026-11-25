@@ -209,3 +209,9 @@ açılmadı.
   kuralına uygun yeniden bağlanma tasarımı.
 - **Hijyen:** Eski depoda `.gitignore` düzeltilmeli ve `ts/.env` içindeki token iptal
   edilip yenilenmeli (eski depo salt okunur olduğu için bu iş Arkin'e/sahibine bırakılır).
+
+## Eski `Command` tipi (önceki `PROTOCOL.md` Ek A)
+
+`qp-schema` v0'daki `Command {provenance, op}` ve `Op` (doküman şeması) `qp/0` protokolünden
+önceki taslaktır; köken istemciden geldiği için protokolde kullanılmaz. Şema dışa
+aktarımında `Op` adı artık protokol işlemini gösterir. (RL1'de belge bütçesi için buraya taşındı.)

@@ -293,6 +293,30 @@ Kararlar K60–K63; kaynak belgeler `docs/matriks/` (`INTEGRATION.md`, `MESSAGES
 | Canlı yol | live path (`data/live`) | Bar değişince koşulların, niyetlerin ve canlı kapsüllerin artımlı değerlendirmesi. Çekirdektedir; yeni koşul türleri koşul kaydıyla bağlanır. |
 | Tasarım kaydı | design registry (`Designs`; varsayılanı `qp-designs`) | Derleyicinin adlı tasarımlara (yüz, açılmış kapsül, katman terimi) eriştiği fonksiyon tablosu. Derleyici tasarım tarafını tanımaz; kaydı dışarıdan alır. |
 
+### Hesap dili (RL1)
+
+Şartname `docs/PROGRAMS.md` (`qp-ir/0`) ve `docs/PROGRAMS-SESSION.md`; karar K79, X30, D1. RL1'de
+program çıktısı değer kaynağı ve koşul kaydı kullanmaz; dokümanda hesap serisi olarak durur.
+
+| Kavram | Kodda | Tanım |
+|--------|-------|-------|
+| Hesap dili | compute language (`qp-lang`) | Ajanın ve insanın hesap yazdığı dil: tipli ara gösterim, küçük metin dil, denetim, çalıştırıcı, bütçe. Döngü, kullanıcı işlevi, atamayla durum, çoklu sembol, emir yok; maliyet statik, köken yapısal. |
+| Program | `Program` | Hesap dilinde tek hesap: parametreler, topolojik sıralı düğümler, adlı çıktılar. Gösterge, koşul, izleme koşulu, sinyal ve durum tanımı aynı yapıyla yazılır. |
+| Ara gösterim | IR (`qp-ir/0`) | Programın tek kanonik biçimi (tipli veri akışı JSON'u). Günlüğe ve dokümana yalnız o girer. |
+| Metin dil | text language (`qp_lang::text`) | Ara gösterime inen satır tabanlı yazım yüzeyi; tek anahtar sözcük kümesi (İngilizce), iletiler iki dilde. Ara gösterimin belirlenimci yazımı **kanonik metin**dir; gidiş-dönüş aynı ara gösterimi verir. |
+| Düğüm | node | Programın bir adımı (girdi, çekirdek, aritmetik, gecikme, karşılaştırma, kesişim, durum, tanımlılık, hizalama, çizgi, kutulama); saati (taban ya da üst periyot) ve bar başı ağırlığı vardır. |
+| Üst periyot hizası | session alignment | Üst periyot barlarının borsa seansına hizalanması (takvimsiz, 7/24'te UTC); yalnız kapanmış üst bar okunur. |
+| Çıktı türleri | output kinds | **Seri** (bar başına değer; canlı barda geçici değer), **olay** (yalnız kapanmış barda doğan an; dokümanda kapanmış barda 1/0, canlı barda boş seri; canlı yolun koşulu `threshold ge 1`), **sinyal**, **durum tanımı**. Sinyal ve durum tanımı RL1'de dokümana girmez. |
+| Sinyal | `signal` | Bir stratejinin al ya da sat dediği kapanmış bar; sonuç kuralıyla doğan iddia. "Tut" kayıt doğurmaz; tavsiye değildir (K77). RL1'de yalnız denemede "simüle" kayıt; canlı sicil RS1. |
+| Sonuç kuralı | outcome rule | Sinyalin doğumda taşıdığı hedef, durdurma, en çok bar; kural yoksa sinyal yazılamaz (X25). |
+| Durum tanımı | state definition (`state`) | Piyasanın o barda hangi durumda olduğunu kutulanmış 1–4 boyutla adlandıran çıktı (RX4'te "parmak izi"); benzer koşul sayımının temeli. |
+| Program parametresi | `ProgramParamDef` | Programın adlı, tipli, aralıklı girdisi; biçimi kayıt defterininkiyle aynı. Tarama uzayı ve çizim bağı (R7) buradan. |
+| Program örneği | program instance | Program + bağlanan değerler; dokümanda adı (`p1`) ve çıktı başına serisi (`p1.kirilim`) vardır. Kimlikleri `program_id` (kanonik ara gösterimin özeti) ve `instance_id`. |
+| Geçici değer | transient value | Canlı barda yalnız gösterim için, durumu değiştirmeden ve kopyasız hesaplanan değer; olay ya da kayıt doğurmaz. |
+| Bildirim birleşmesi | notification coalescing | Art arda barlarda doğan olayların kenar tetikli koşulda tek bildirim vermesi; seri her olay barını kaydeder, denetim ve deneme bunu söyler. |
+| Maliyet birimi | cost unit | Bir düğüm ağırlığının bir bardaki işi; bar başı maliyet çalıştırmadan bilinir. |
+| Hesap bütçesi | compute budget | Program başına, kişi başına (doküman içinde) ve deneme başına sınırlar; işi sayar (bar × ağırlık + kayıt + açık kayıt + okuma), aşınca çalışma durur ve nedenini söyler. Sınırlar kayıt defterinde, üst sınırlar satılabilir hak. |
+
 ## Kapsülün yaşam döngüsü
 
 R3'ten itibaren kapsülün hikâye aşamaları `Stage`'dir (yukarıda; `docs/CAPSULE.md` §3).

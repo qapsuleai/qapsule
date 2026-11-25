@@ -551,6 +551,7 @@ Kalıcı, adım adım bir **anlatım çizelgesi** dikkat değil, dokümandır: `
 | `add_comment` | `id?`, `about {capsule \| instrument}`, `lang`, `text`, `cites`, `external?` | (R5B, §25.4) Doğrulanmış yorum; yetki `propose` ya da `write`, doğrudan (öneri olmaz). Ret: `comment_rejected` + `reasons`. Değişim: `put_comment`. |
 | `add_watch` | `for?`, `text`, `match`, `expires_t?`, `max_matches?` | (R5B, §25.5) İzleme niyeti; yetki `read`, öneri olmaz; kişi başına 32. Değişim: `put_intent` (`watch`). |
 | `remove_watch` | `intent` | (R5B, §25.5) İzlemeyi kaldırır (`state: removed`). |
+| `add_program`, `set_program_params`, `remove_program` | §26 | (RL1) Program örneği ekler, değerlerini değiştirir, siler; çıktılar hesap serisidir. |
 
 Atanan kimlikler: `<tür>-<seq>-<n>`; `tür` ∈ `series`, `view`, `fact`, `fnd`, `cap`,
 `intent`, `narr`; `seq` girdinin konumu, `n` o girdide oluşturulan öğenin sırası (0'dan).
@@ -636,6 +637,7 @@ böylece aynı görünümün farklı katmanlarına eşzamanlı yazılar çakış
 | `ledger` | `key?`, `meaning?`, `detector?`, `by_kind?` | (R3, §20) `ledger`: anahtar (ya da tür) başına kapanan ve gerçekleşen sayısı; lisanstan bağımsız. |
 | `stories` | `instrument`, `series?`, `range?`, `limit?`, `after?` | (R5/M18, §23) `stories`: enstrümanın aralıktaki bütün hikâyeleri (kapsülleri), okuyucunun gördüğü biçimde, doğum sırasıyla, sayfalı; bar yok. |
 | `preview` | `proposal`, `width?`, `height?` | (R5B, §25.6) `preview`: bekleyen önerinin değişimleri ve eklediği/değiştirdiği görünümlerin sahne özeti; doküman değişmez. |
+| `check_program`, `try_program`, `explain_program` | §26 | (RL1) Denetle (bütün hatalar birden), dene (kısa özet), açıkla (kanonik metin, maliyet, köken). |
 
 **Hedef** (`Target`; dikkat, anlatım adımları ve R2'de görünüm vurgusu): `view`, `panel` (panel id'si), `layer` (R2), `series`, `output`
 (serinin çıktısı ya da bar alanı: hacim için `"v"`), `item` (bulgu, olgu…), `from_bar`,
@@ -1009,7 +1011,7 @@ karne; `cargo run -p qp-session --example make_feed_rule_transcript -- --write` 
 Var olan dökümler değişmedi (kural yokken yeni alanlar hiç yazılmaz).
 **R5B (§25):** 65–70 ajan yüzeyi (insan kararı, ajan yazamaz, yorum kabul/ret, yetkisiz kişi
 adına yorum, niyet yaşam döngüsü ve eşleşme, önizleme); `cargo run -p qp-session --example
-make_agent_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi.
+make_agent_transcripts -- --write` ile üretilir. Var olan dökümler değişmedi. **RL1:** 71–77 (§26).
 
 ## 16. Gömme
 
@@ -2949,8 +2951,6 @@ yazamaz (`agent_policy`, `agent_cannot_write`, `proposal_only`), 67 yorum kabul 
 niyet yaşam döngüsü ve eşleşme (`intent_matched`, `limit`), 70 önizleme. Var olan dökümler
 değişmedi.
 
-## Ek A — Eski `Command` tipi
+## 26. Programlar (RL1)
 
-`qp-schema` v0'daki `Command {provenance, op}` ve `Op` (doküman şeması) bu protokolden
-önceki taslaktır; köken istemciden geldiği için protokolde kullanılmaz. Şema dışa
-aktarımında `Op` adı artık protokol işlemini gösterir.
+Hesap dili `docs/PROGRAMS.md` (`qp-ir/0`); işlemler (`add_program`, `set_program_params`, `remove_program`), sorgular (`check_program`, `try_program`, `explain_program`), `SeriesSource::Study.program`, `ProtocolError.errors`, hata eşlemesi (yeni kod yok, alt kod `reason`), bütçe, üç taşıma ve dökümler 71–77: `docs/PROGRAMS-SESSION.md`. Eski `Command` tipi (önceki Ek A): `docs/LEGACY.md`.

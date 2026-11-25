@@ -397,8 +397,11 @@ step_digest() {
     gotl="$(node --no-warnings -e "const {WASI}=require('node:wasi');const w=new WASI({version:'preview1',args:['digest','rl1'],env:{}});WebAssembly.instantiate(require('fs').readFileSync(process.argv[1]),w.getImportObject()).then(({instance})=>w.start(instance))" "$target_dir/wasm32-wasip1/release/examples/digest.wasm")"
     echo "wasm32-wasip1 (node $(node --version)) rl1 kernels: $gotl"
     [ "$gotl" = "$wantl" ] || fail "wasm32 rl1 digest $gotl != $wantl"
+  elif [ "$mode" = 1 ]; then
+    fail "wasm32 rl1 digest: QP_VERIFY_BROWSER=1 but node or the wasm32-wasip1 target is missing"
   else
     echo "wasm32 rl1 kernels: skipped (QP_VERIFY_BROWSER=${mode:-unset}, node or wasm32-wasip1 missing)"
+    wantl="$wantl (wasm32 rl1 skipped)"
   fi
   local have_tools=1
   command -v node >/dev/null 2>&1 || have_tools=0

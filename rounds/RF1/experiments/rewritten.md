@@ -3,6 +3,39 @@
 `PLAN.md` §0: taşınan öğe `moved.py` ile "değişmedi" çıkar; gövdesi ya da imzası değişen her
 öğe burada sayılır.
 
+## G2b — tasarım kaydı (`Designs`; `qp-grammar` ↔ `qp-designs`)
+
+Derleyicinin tasarıma uzandığı 5 nokta bir fonksiyon göstergesi tablosundan geçer; tablo
+`CompileOptions`'ta taşınır. Kanıt `audit-g2.md`.
+
+| Öğe | Dosya | Ne değişti |
+|---|---|---|
+| `CompileOptions` | `qp-grammar/src/compile.rs` | `designs: &'static Designs` alanı; `with_designs`, `without_designs`; `Debug`/`PartialEq` tablonun adıyla |
+| `Frame` | `compile/frame.rs` | `designs` alanı |
+| `compile` | `compile/scene.rs` | başlık şablonu `(opts.designs.headline_template)(opts.face)`; `Frame`'e ve `mark`'a tablo |
+| `prepare` (2 çağrı noktası) | `compile/layer/prepare.rs` | açılmış kapsül alan metni ve `open.*` metni tablodan (`field_text`, `open_text`) |
+| `terms::mark` | `compile/terms.rs` | `designs` parametresi; iki çağrı tablodan (`layer_term`, `voice_terms_in`) |
+| `underline_layer` (yeni) | `compile/terms.rs` | `mark`'ın altı çizme bloğu sözcüğü sözcüğüne ayrıldı (fonksiyon tavanı) |
+| `Designs`, `NONE`, dört boş fonksiyon (yeni) | `qp-grammar/src/designs.rs` | tablo tipi; `HeadlineFn`, `headline_text`, `DeviceCheck` buraya saf taşındı |
+| `DESIGNS`, `options`, `headline_template` uyarlayıcısı (yeni) | `qp-designs/src/registry.rs` | varsayılan kayıt; uyarlayıcı adsız yüzde `None` döner (eski `match` gibi) |
+
+## G3 — `prepare` adlandırılmış adımlara (`qp-grammar` `compile/layer/prepare*`)
+
+885 satırlık tek fonksiyonun deyimleri aynı sırayla adımlara taşındı. Hata iletileri, erken
+dönüşler ve `palette` sayacının sırası aynı. Denetçi eski gövdeyle deyim deyim karşılaştırdı
+(`audit-g3.md`).
+
+| Dosya | Yeniden yazılan / yeni öğeler |
+|---|---|
+| `prepare.rs` | `prepare`, `check_encoding`, `start_state`, `mark_rows`, `main_or_err`, `next_palette` (kapanıştan fonksiyona), `finish`; yapılar `PrepState`, `Encoding` |
+| `prepare/source.rs` | `layer_source`, `finding_rows`, `capsule_texts` |
+| `prepare/series.rs` | `candle`, `line`, `area_band_bar` |
+| `prepare/rule.rs` | `rule`, `segment`, `horizontal`, `vertical` |
+| `prepare/panel.rs` | `panel_text`, `panel_text_size`, `glyph`, `glyph_channels`, `glyph_size` |
+| `prepare/point.rs` | `point_text`, `point_text_field`, `point_size_chan`, `point_source_rows`, `scale_sizes`, `type SizeChan` |
+
+Toplam 29 fonksiyon/tip ve 2 yapı; hiçbiri 80 satırı aşmıyor (en uzunu `glyph` 76).
+
 ## S2 — `qp-ops`, `qp-plane` (B7: sağlayıcının `&Session` bağı)
 
 | Öğe | Ne değişti |

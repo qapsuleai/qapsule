@@ -129,3 +129,6 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   kararlı sıralama; isim bölümü +17,5 KB). Tavan: kabuk paketi en çok ham +%2,5 / gzip +%2,5
   (RG1 İ7 emsali, K85); varsayılan paket ±%2 içinde kalır. Kalıcı çözüm önerisi: kabuk
   paketinde `wasm-opt` ya da derleme ayarı (ayrı round; `REPORT.md` Öneriler).
+- **Güncelleme (S3.3, kapanış denetimi notu).** S3.3'ten sonra `FOLLOWER` = `STANDARD` eksi
+  okuma eksi görüntüleyici (izleyicilerin görüntüleyici bağlantısı yok; `audit-s33`). S4
+  notundaki `qp-ops` `lint.allow` 21 sonraki dalgalarda 20'ye sıkıştı (taban çizgisi).

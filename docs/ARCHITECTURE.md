@@ -182,6 +182,15 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
 değişikliği ister (alt sistem var olan bir türü üstlenebilir). Kayıtsız alt sistem işlemi
 yazma yetkili kişiye `unsupported`, izleyiciye `forbidden` döner (B-a).
 
+**Yazarken dikkat** (RF1 kapanış denetimi, kendi örneği `Quota`):
+
+- `AfterCommit` alt sistemin kendi yazdırdığı motor girdisi için de çağrılır; kendi girdini
+  süz, yoksa döngüye girersin. `MAX_EMIT_DEPTH` döngüyü keser ama sessizce.
+- `check` içinde yuvaya yazılan durum, komut sonradan reddedilirse geri alınmaz. Durumu
+  `AfterCommit`'te yaz.
+- Hata kurucusu `qp_plane::error::E`'dir (`E::new(code, …).at(path).build()`); hatalar bu
+  kurucuyla, otoritenin hatalarıyla aynı biçimde döner.
+
 ## Yeni doküman nesnesi nasıl eklenir (RF1 D2)
 
 `ChangeOp` için kayıt yok (D2): yeni bir nesne türü (dokümanda yeni koleksiyon) şemaya ve

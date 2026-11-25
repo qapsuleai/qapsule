@@ -77,7 +77,7 @@ açık sorular A70–A73 (`docs/decisions/rounds/RF1.md`).
 | `qp-voice` (yeni) | alan | — | 4.763 | |
 | öbürleri | | | | değişmedi (`qp-host` 10.433, `qp-shellcore` 9.520 …) |
 
-Toplam test dışı satır ≈ 1,5 bin arttı. Nedenleri: sözleşme, kayıt, fazlar, yeni `README`/`//!`
+Toplam test dışı satır **+4.097** arttı (126.597 → 130.694; denetim K3). Nedenleri: sözleşme, kayıt, fazlar, yeni `README`/`//!`
 belgeleri, crate sınırında açılan arayüzler.
 
 **Oturum nasıl bölündü** (sıra alttan üste):

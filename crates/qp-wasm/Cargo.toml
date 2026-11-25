@@ -51,11 +51,11 @@ qp-wasm = { path = ".", features = ["replica"] }
 [package.metadata.wasm-pack.profile.release]
 # Size is measured on the raw rustc output and on wasm-opt output separately (see
 # crates/qp-render/SPIKE.md); wasm-pack's own wasm-opt step is disabled so builds do not
-# depend on downloading binaryen.
+# depend on downloading binaryen (the custom profile below does use wasm-opt).
 wasm-opt = false
 
 [package.metadata.wasm-pack.profile.custom]
-# RL1/Ö1 (A70): every `wasm-pack --profile wasm` build (the web shell package, the wasm32
+# RL1/Ö1 (A70): every `wasm-pack --profile wasm` build except web-spike (`--no-opt`; the shell package, the wasm32
 # digest and replica checks, the WASM sweep bench) runs wasm-opt with these passes. Measured
 # against -Os/-Oz/-O2/-O3 and opt-level z (rounds/RL1/experiments/o1-wasm/RESULT.md): -O1
 # plus function reordering gives the smallest gzip and brotli package without slowing the

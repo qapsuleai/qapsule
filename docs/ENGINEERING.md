@@ -57,8 +57,9 @@ alan            qp-source (İ1) < qp-facts < qp-look < qp-glyph < qp-grammar < q
   `qp-subsystem` sözleşmesiyle yazılır, bileşim (`qp-session`) kayıt satırıyla bağlar
   (`docs/ARCHITECTURE.md` "Yeni alt sistem nasıl eklenir"). Sıra yönü: izleme ve okuma
   otoritenin altında, onu tanımazlar. Otoritenin istemcileri (yansı, barındırıcı) üstünde.
-  Görüntüleyici bir alt sistemdir ama açık taraf için yansı tuttuğu için yansının üstünde
-  durur; otoriteye kayıttan başka yoldan çağrı yapmaz.
+  Görüntüleyici bir alt sistemdir; açık taraf için yansı tuttuğu için yansının üstünde durur.
+  Otoriteye kayıt üstünden bağlanır. Açık taraftaki yansı ise otoritenin gizli izleyici
+  yöntemleriyle çalışır (`qp-replica`).
 
 - Kabuk kuralı: kabuk crate'inde alan kararı veren kod bulunmaz. Kabuk büyüyorsa mantık
   yanlış katmandadır. Bütçe: kabuk crate'i en çok 4 bin satır.

@@ -287,3 +287,11 @@ bağlı. `FOLLOWER` görüntüleyiciyi almaz (izleyiciye abonelik gelmez); WASM'
 `feed_items`, `check`, `face_scene_in`, `face_with`, `wants_parts`), `qp-replica` (crate);
 otoritede `authority/session/push.rs`, `authority/session/follow.rs`, `reader_parts_of`,
 `conn_agent_origin`; `qp_ops::digest`; `qp-subsystem` ekleri (`paths.md` S3.3).
+
+### S3.3 denetim notları (audit-s33 Y2, Y3)
+
+- **Y2:** Görüntüleyicisiz otoritede (`viewer` kayıtlı değil; yalnız standart dışı listede)
+  `viewer` konusuna abonelik artık sessizce `subscribed` döner. `limit`/`width` denetlenmez, olay
+  itilmez. Bileşimde (`STANDARD`) çıktı aynı (tutanak 270/270).
+- **Y3:** `ViewerConn` yuvası artık `Phase::Subscribe`'dan önce kurulur ve `Phase::Unsubscribe`
+  içinde kayıt sırasıyla silinir. Bugün gözlenebilir bir fark yok (`qp-viewer` README).

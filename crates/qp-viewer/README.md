@@ -42,3 +42,5 @@ senaryosu), `qp-source`, `qp-schema`, `serde`, `serde_json`.
 (görüntüleyici tutarlılık senaryosu, `qp replica-tape --viewer`).
 
 **Ne değildir:** kapsül motoru (cihaz akış için motor koşmaz), çizici, kabuk.
+
+- Bağlantı başına `ViewerConn` yuvası abonelik fazından önce kurulur, `Unsubscribe` fazında kayıt sırasıyla silinir (RF1 audit-s33 Y3; bugün gözlenebilir fark yok).

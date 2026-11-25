@@ -14,7 +14,7 @@
 03-errors-self-correction.00  a2b407c11b6b8242  | s>welcome(editor,editor,seq=0)
 03-errors-self-correction.01  366b6e158d8200b7  | s>error(-,parse@-: not valid JSON: key must be a string at line 1 column 2)
 03-errors-self-correction.02  6829bf372b594814  | s>error(c1,schema@/ops/0/parms: unknown field `parms`)
-03-errors-self-correction.03  262d0a59539c83cf  | s>error(c1b,schema@/ops/0/op: unknown op `add_indicator`)
+03-errors-self-correction.03  845b94ce5ffb605a  | s>error(c1b,schema@/ops/0/op: unknown op `add_indicator`)
 03-errors-self-correction.04  375460483d0b66d4  | s>error(c2,not_found@/ops/0/show/with: series `rsi` does not exist)
 03-errors-self-correction.05  ecf3203af94151e0  | s>error(c3,invalid@/ops/0/params/period: parameter `period` must be an integer between 1 and 100000, got 0)
 03-errors-self-correction.06  a0cebd94fab5fa0d  | s>error(c4,not_found@/ops/1/id: item `nope` does not exist)
@@ -143,7 +143,7 @@
 16-screen-describe-presenter.01  d3c4c23cb7a1cb0a  | s>welcome(scout,proposer,seq=0)
 16-screen-describe-presenter.02  941c50ebb6e8947e  | e>welcome(editor,editor,seq=0)
 16-screen-describe-presenter.03  b5772b18ffdee1e5  | s>result(q1,seq=0,screen)
-16-screen-describe-presenter.04  28329469043d66ed  | s>result(q2,seq=0,description)
+16-screen-describe-presenter.04  46611248a784cada  | s>result(q2,seq=0,description)
 16-screen-describe-presenter.05  50d02f2f685d29b6  | e>ack(c1,applied,seq=1,created=[v-overbought])
 16-screen-describe-presenter.06  8b39791fa1bc3c3a  | e>result(q3,seq=1,item)
 16-screen-describe-presenter.final  4789904ce5c99b12  | log=1 doc=b2c426ca6dbe8d8e replay=equal

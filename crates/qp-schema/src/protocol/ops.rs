@@ -1,7 +1,14 @@
-//! Operations, the command side: `Op` and the shapes it carries (show, target,
-//! narration, agent comments and proposals awaiting approval).
+//! Operations, the command side: `Op` and the shapes it carries (show; target,
+//! narration and agent comments in `ops/narration.rs`; proposals awaiting approval in
+//! `ops/proposal.rs`).
 
 use super::*;
+
+mod narration;
+mod proposal;
+
+pub use narration::*;
+pub use proposal::*;
 
 // ---------------------------------------------------------------------------
 // Operations (command side)
@@ -27,144 +34,6 @@ pub struct Show {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(with = "Option<PanelRef>")]
     pub panel: Option<u32>,
-}
-
-/// A step of a narration or an attention directive points at something.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Target {
-    /// View id.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub view: Option<String>,
-    /// Panel id.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub panel: Option<u32>,
-    /// Layer id (R2).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub layer: Option<String>,
-    /// Series id (e.g. the series whose value matters).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub series: Option<String>,
-    /// Output or field of the series, e.g. `"v"` (volume of a bar series), `"signal"`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub output: Option<String>,
-    /// Document item id (finding, fact, capsule...).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<String>,
-    /// First bar index (0-based) of the region.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub from_bar: Option<u64>,
-    /// Last bar index (inclusive) of the region; equal to `from_bar` for one bar.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub to_bar: Option<u64>,
-}
-
-/// One step of a narration timeline.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct NarrativeStep {
-    /// Start of the step, milliseconds from the start of the narration.
-    pub at_ms: u32,
-    /// What to show.
-    pub target: Target,
-    /// What to say (one or two sentences).
-    pub say: String,
-}
-
-/// A narration timeline about a finding: ordered steps, each pointing at something.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Narrative {
-    /// Unique id within the document.
-    pub id: String,
-    /// The item it narrates (usually a finding id).
-    pub about: String,
-    /// Steps, ascending by `at_ms`.
-    pub steps: Vec<NarrativeStep>,
-    /// Who made it and when.
-    pub provenance: crate::types::Provenance,
-}
-
-/// (R5B, §25.4) What a comment is about: exactly one of a capsule (or its finding) and
-/// an instrument symbol.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct CommentAbout {
-    /// Capsule id (or its finding's id).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub capsule: Option<String>,
-    /// Instrument symbol.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub instrument: Option<String>,
-}
-
-/// (R5B, §25.4) A validated comment, as stored in the document.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Comment {
-    /// Unique id within the document.
-    pub id: String,
-    /// What it is about (a capsule is stored by its capsule id).
-    pub about: CommentAbout,
-    /// Language of the text.
-    pub lang: Language,
-    /// The text.
-    pub text: String,
-    /// Ids it rests on.
-    pub cites: Vec<String>,
-    /// External quotes.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub external: Vec<crate::comment::ExternalQuote>,
-    /// The strictness it was validated with.
-    pub strictness: crate::comment::Strictness,
-    /// Who wrote it (an agent: `author.kind = "agent"`) and when.
-    pub provenance: crate::types::Provenance,
-    /// (R5B) The person the writing agent works for, if any.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub on_behalf: Option<String>,
-}
-
-/// State of a proposal.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum ProposalState {
-    /// Waiting for a decision.
-    Pending,
-    /// Accepted and applied.
-    Accepted,
-    /// Rejected.
-    Rejected,
-    /// Not decided before `expires_at`.
-    Expired,
-}
-
-/// A write waiting for approval.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct Proposal {
-    /// Unique id within the document.
-    pub id: String,
-    /// The operations, exactly as proposed.
-    pub ops: Vec<Op>,
-    /// Why, as given by the proposer.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reason: Option<String>,
-    /// Current state.
-    pub state: ProposalState,
-    /// Proposer and time.
-    pub provenance: crate::types::Provenance,
-    /// Expiry time; absent means no expiry.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub expires_at: Option<TimestampMs>,
-    /// Who decided, once decided.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub decided_by: Option<Author>,
-    /// Decision note.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub note: Option<String>,
-    /// Log position at which it was decided or expired.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub decided_seq: Option<Seq>,
 }
 
 /// An operation in a command: what a human or an agent asks for, at the level of
@@ -708,5 +577,41 @@ pub enum Op {
     RemoveWatch {
         /// Intent id of the watch.
         intent: String,
+    },
+    /// (RL1, PS §3.1) Add a program instance: full check and budget, then one series per
+    /// series/event output (`<id>.<output>`), and with `show` one layer per output.
+    /// Signal or state outputs: `unsupported` / `E_TRY_ONLY`. `ack.created`: the series
+    /// ids, then the layer ids. Every program error at once (`error.errors`).
+    AddProgram {
+        /// Instance name; assigned if absent (`prog-<seq>-<n>`).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        id: Option<String>,
+        /// The program, as IR (the `Program` schema); read as JSON so that the checker
+        /// reports every error (PR §11). Text is not accepted here (`check_program`).
+        program: serde_json::Value,
+        /// Exactly one bar series.
+        /// Also takes a selector (§17).
+        #[schemars(with = "Vec<SeriesRef>")]
+        inputs: Vec<String>,
+        /// Bound parameter values; missing ones take their defaults.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        params: BTreeMap<String, crate::program::ProgramParamValue>,
+        /// Show the outputs in a view.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        show: Option<Show>,
+    },
+    /// (RL1, PS §3.1) Change an instance's parameter values (merged); new `instance_id`
+    /// and `since_t`, same series ids and layers, same IR.
+    SetProgramParams {
+        /// Instance name.
+        program: String,
+        /// Values to change.
+        params: BTreeMap<String, crate::program::ProgramParamValue>,
+    },
+    /// (RL1, PS §3.1) Remove an instance: every output series (and the layers drawing
+    /// them); `in_use` if a condition or an item rests on one.
+    RemoveProgram {
+        /// Instance name.
+        program: String,
     },
 }

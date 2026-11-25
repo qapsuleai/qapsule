@@ -10,6 +10,7 @@ mod export;
 pub mod grammar;
 pub mod market;
 pub mod params;
+pub mod program;
 pub mod protocol;
 pub mod scene;
 mod types;

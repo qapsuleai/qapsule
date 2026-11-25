@@ -23,6 +23,7 @@ impl E {
             hint: None,
             reason: None,
             reasons: Vec::new(),
+            errors: Vec::new(),
         })
     }
 

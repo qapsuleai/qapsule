@@ -75,6 +75,8 @@ pub fn expand_op(doc: &Document, op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult
             people::set_intent_active(doc, intent, active, p, ctx)
         }
         Op::AddWatch { .. } | Op::RemoveWatch { .. } => Err(unserved(op, p)),
+        Op::AddProgram { .. } | Op::RemoveProgram { .. } => Err(unserved(op, p)),
+        Op::SetProgramParams { .. } => Err(unserved(op, p)),
         Op::AddComment {
             id,
             about,
@@ -113,20 +115,25 @@ pub fn expand_op(doc: &Document, op: &Op, p: &str, ctx: &mut Ctx<'_>) -> PResult
         Op::RejectProposal { proposal, note } => {
             people::reject_proposal(doc, proposal, note, p, ctx)
         }
-        Op::AcceptProposal { .. } => Err(invalid(
-            "accept_proposal must be the only op of its command",
-            p,
-        )),
+        Op::AcceptProposal { .. } => Err(accept_not_alone(p)),
     }
 }
 
+/// `accept_proposal` inside a command with other ops.
+fn accept_not_alone(p: &str) -> qp_schema::protocol::ProtocolError {
+    invalid("accept_proposal must be the only op of its command", p)
+}
+
 /// An op this expansion does not serve: a subsystem owns it (RF1 S3.1; watches:
-/// `qp-watch`, expanded by the authority's registry), and none that does is registered.
+/// `qp-watch`, programs: `qp-program`, expanded by the authority's registry), and none
+/// that does is registered.
 fn unserved(op: &Op, p: &str) -> qp_schema::protocol::ProtocolError {
-    let name = if matches!(op, Op::AddWatch { .. }) {
-        "add_watch"
-    } else {
-        "remove_watch"
+    let name = match op {
+        Op::AddWatch { .. } => "add_watch",
+        Op::AddProgram { .. } => "add_program",
+        Op::SetProgramParams { .. } => "set_program_params",
+        Op::RemoveProgram { .. } => "remove_program",
+        _ => "remove_watch",
     };
     E::new(
         ErrorCode::Unsupported,

@@ -56,7 +56,6 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-source/src/replay.rs` | 752 |
 | `crates/qp-matriks/src/trade.rs` | 725 |
 | `crates/qp-ops/src/gops.rs` | 723 |
-| `crates/qp-schema/src/protocol/ops.rs` | 712 |
 | `crates/qp-shellcore/src/shell/bench.rs` | 708 |
 | `crates/qp-shellcore/src/shell/paint_gpu.rs` | 688 |
 | `crates/qp-read/src/interact.rs` | 685 |
@@ -76,12 +75,13 @@ Hedef: konuya göre alt modül; ≤ 600.
 | `crates/qp-voice/src/selvi.rs` | 624 |
 | `crates/qp-capsule/src/realize/tr.rs` | 623 |
 | `crates/qp-shellcore/src/shell/metrics.rs` | 621 |
+| `crates/qp-schema/src/protocol/ops.rs` | 617 |
 | `crates/qp-host/src/live.rs` | 616 |
 | `crates/qp-shellcore/src/shell/inbound.rs` | 611 |
 | `crates/qp-shellcore/src/shell.rs` | 610 |
 | `crates/qp-compute/src/sweep/share.rs` | 605 |
 | `crates/qp-glyph/src/rozet.rs` | 604 |
-| `crates/qp-plane/src/values.rs` | 603 |
+| `crates/qp-plane/src/values.rs` | 602 |
 
 ## `fn.lines` — Fonksiyon 80 satırı aşıyor (RG1'de fonksiyon bölünmedi)
 
@@ -92,7 +92,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-designs/src/stories/pavka/extend.rs::extend` | 592 |
 | `crates/qp-ops/src/gops.rs::expand_grammar` | 571 |
 | `crates/qp-grammar/src/compile/scene.rs::compile` | 562 |
-| `crates/qp-read/src/query.rs::query` | 365 |
+| `crates/qp-read/src/query.rs::query` | 341 |
 | `crates/qp-authority/src/authority/session/command.rs::command` | 300 |
 | `crates/qp-host/src/live_trades/compare.rs::compare_trades` | 294 |
 | `crates/qp-ops/src/apply.rs::apply_change` | 289 |
@@ -192,10 +192,10 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-ops/src/canon/layer.rs::check_layer` | 102 |
 | `crates/qp-ops/src/locate.rs::walk` | 102 |
 | `crates/qp-mcp/src/surfaces/query/capsule.rs::detail_parts` | 101 |
-| `crates/qp-ops/src/expand/op.rs::expand_op` | 101 |
 | `crates/qp-authority/src/capsule/story.rs::stories_query` | 100 |
 | `crates/qp-designs/src/transitions/zumlak.rs::frame` | 100 |
 | `crates/qp-host/src/mcp_serve/http.rs::handle` | 100 |
+| `crates/qp-ops/src/expand/op.rs::expand_op` | 100 |
 | `crates/qp-ops/src/expand/undo.rs::expand_remove` | 100 |
 | `crates/qp-shellcore/src/shell/metrics.rs::metrics_rows` | 100 |
 | `crates/qp-ops/src/summary.rs::summarize_doc` | 99 |
@@ -213,7 +213,6 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-ops/src/locate.rs::walk_branches` | 95 |
 | `crates/qp-voice/src/marla_glossary.rs::en` | 95 |
 | `crates/qp-authority/src/authority/session/intake.rs::handle_raw` | 94 |
-| `crates/qp-ops/src/expand/describe.rs::summarize` | 94 |
 | `crates/qp-capsule/src/realize/plan.rs::new` | 93 |
 | `crates/qp-grammar/src/compile/emphasis.rs::resolve_emphasis` | 93 |
 | `crates/qp-grammar/src/compile/terms.rs::mark` | 93 |
@@ -244,6 +243,7 @@ Hedef: adlandırılmış adımlara böl; ≤ 80.
 | `crates/qp-compute/src/lanes.rs::bollinger` | 87 |
 | `crates/qp-host/src/live/inspect.rs::inspect_trades` | 87 |
 | `crates/qp-live/src/mqtt.rs::decode_body` | 87 |
+| `crates/qp-ops/src/expand/describe.rs::summarize` | 87 |
 | `crates/qp-viewer/src/viewer.rs::slice` | 87 |
 | `crates/qp-read/src/interact.rs::move_chart` | 86 |
 | `crates/qp-capsule/src/realize/tr.rs::remark` | 85 |
@@ -269,10 +269,10 @@ Hedef: ihlali düzelt, izni kaldır.
 
 | Kalem | Değer |
 |---|---|
-| `qp-compute` | 30 — K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
+| `qp-compute` | 30 — rounds/RL1/DECISION.md D2, K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
 | `qp-authority` | 25 |
 | `qp-live` | 23 |
-| `qp-ops` | 23 — K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
+| `qp-ops` | 23 — rounds/RL1/DECISION.md D2, K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
 | `qp-host` | 21 |
 | `qp-mcp` | 17 |
 | `qp-shellcore` | 17 |
@@ -289,7 +289,7 @@ Hedef: ihlali düzelt, izni kaldır.
 | `qp-matriks` | 3 |
 | `qp-replayhost` | 3 |
 | `qp-cli` | 2 |
-| `qp-plane` | 2 — K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
+| `qp-plane` | 2 — rounds/RL1/DECISION.md D2, K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
 | `qp-render` | 1 |
 
 ## `test.file` — Test dosyası 800 satırı aşıyor (M5 kesildi)

@@ -489,6 +489,12 @@ pub enum QueryResult {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         comments: Vec<ServerComment>,
     },
+    /// (RL1, PS §3.2) Answer to `check_program` (fields flat).
+    ProgramCheck(Box<crate::program::ProgramCheck>),
+    /// (RL1, PS §3.2) Answer to `try_program` (fields flat).
+    ProgramTry(Box<crate::program::ProgramTry>),
+    /// (RL1, PS §3.2) Answer to `explain_program` (fields flat).
+    ProgramExplain(Box<crate::program::ProgramExplain>),
 }
 
 /// The verdict on a `dispute` (R3, §19.9).

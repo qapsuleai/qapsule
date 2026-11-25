@@ -369,9 +369,21 @@ fn grammar_ops_and_hit_are_generated_tools() {
     for k in r5b {
         assert!(names.contains(&k), "missing tool {k}");
     }
+    // RL1 (PS §3): program operations and queries, generated from the schema.
+    let rl1 = [
+        "op_add_program",
+        "op_set_program_params",
+        "op_remove_program",
+        "query_check_program",
+        "query_try_program",
+        "query_explain_program",
+    ];
+    for k in rl1 {
+        assert!(names.contains(&k), "missing tool {k}");
+    }
     assert_eq!(
         names.len(),
-        37 + grammar.len() + 1 + 2 + r3.len() + r4.len() + r5.len() + r5b.len(),
+        37 + grammar.len() + 1 + 2 + r3.len() + r4.len() + r5.len() + r5b.len() + rl1.len(),
         "{names:?}"
     );
 }

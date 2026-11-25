@@ -137,7 +137,7 @@ fn describe_lists_everything() {
     let mut h = two();
     let r = h.query("a", json!({"kind":"describe"}));
     let d = &r["data"]["description"];
-    assert_eq!(d["ops"].as_array().unwrap().len(), 38); // 22 in qp/0 (RD1) + 10 grammar ops (R2) + split_layer (R2/T8a) + set_audience, set_sensitivity (R3) + add_comment, add_watch, remove_watch (R5B)
+    assert_eq!(d["ops"].as_array().unwrap().len(), 41); // 22 in qp/0 (RD1) + 10 grammar ops (R2) + split_layer (R2/T8a) + set_audience, set_sensitivity (R3) + add_comment, add_watch, remove_watch (R5B) + add_program, set_program_params, remove_program (RL1)
     assert!(d["queries"].as_array().unwrap().contains(&json!("present")));
     assert_eq!(d["topics"].as_array().unwrap().len(), 12); // + view (RP2/T5), claims (RP2/T8), capsules (R3), viewer (RP3/M15), stories (R5/M18), comments (R5B)
     assert!(d["queries"].as_array().unwrap().contains(&json!("stories")));

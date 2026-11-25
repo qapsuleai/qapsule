@@ -30,7 +30,7 @@ fn example(hp: &HeadlineParts) -> String {
 }
 
 /// The demo world (synthetic, as `qp demo`), small; `visitor` reads without data.
-fn host() -> ReplayHost {
+fn host() -> Result<ReplayHost, String> {
     let mut ent = BTreeMap::new();
     for p in ["host", "arkin"] {
         ent.insert(p.to_owned(), vec!["*".to_owned()]);
@@ -48,7 +48,7 @@ fn host() -> ReplayHost {
     init.principals.push(
         serde_json::from_value(serde_json::json!(
             {"id": "visitor", "author": {"kind": "human", "name": "visitor"}, "role": "owner"}))
-        .expect("visitor"),
+        .map_err(|e| e.to_string())?,
     );
     let none = std::env::temp_dir().join("qp-hfp-no-local-data");
     ReplayHost::with_local_dir(
@@ -57,7 +57,6 @@ fn host() -> ReplayHost {
         &none,
         qp_authority::Subsystems::NONE,
     )
-    .expect("demo host")
 }
 
 /// Every capsule's pieces for a reader: `(finding, TR, EN)`.
@@ -88,7 +87,7 @@ fn all_parts(h: &mut ReplayHost, reader: &str) -> Vec<(String, HeadlineParts, He
 /// internal term, no digit for a reader without data entitlement; deterministic.
 #[test]
 fn reader_parts_by_language_and_audience() {
-    let mut h = host();
+    let mut h = host().expect("demo host");
     let mut seen = 0;
     let mut redacted = 0;
     let mut kinds = std::collections::BTreeSet::new();

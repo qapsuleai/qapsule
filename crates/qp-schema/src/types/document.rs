@@ -405,7 +405,7 @@ pub struct Document {
 }
 
 /// The operation a command performs on a document.
-// Legacy draft type (PROTOCOL Ek A); `Fact` grew with `evidence_ref` (RP2). Not on a hot path.
+// Legacy draft type (docs/LEGACY.md); `Fact` grew with `evidence_ref` (RP2). Not on a hot path.
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]

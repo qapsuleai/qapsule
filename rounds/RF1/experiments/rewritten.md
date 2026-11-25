@@ -34,7 +34,7 @@ dönüşler ve `palette` sayacının sırası aynı. Denetçi eski gövdeyle dey
 | `prepare/panel.rs` | `panel_text`, `panel_text_size`, `glyph`, `glyph_channels`, `glyph_size` |
 | `prepare/point.rs` | `point_text`, `point_text_field`, `point_size_chan`, `point_source_rows`, `scale_sizes`, `type SizeChan` |
 
-Toplam 29 fonksiyon/tip ve 2 yapı; hiçbiri 80 satırı aşmıyor (en uzunu `glyph` 76).
+Toplam 27 fonksiyon, 1 tip (`SizeChan`) ve 2 yapı (`PrepState`, `Encoding`); hiçbiri 80 satırı aşmıyor (en uzunu `glyph` 76).
 
 ## S2 — `qp-ops`, `qp-plane` (B7: sağlayıcının `&Session` bağı)
 

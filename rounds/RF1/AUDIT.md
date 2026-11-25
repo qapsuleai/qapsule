@@ -171,3 +171,61 @@ Sonuçlar:
 - Taban tablosu için açtığım geçici `7fb01d11` worktree'si (scratchpad) silindi.
 - Scratchpad'deki denetim dosyaları silindi.
 - Ürün kodu değişmedi, birleştirme yapılmadı.
+
+## Yeniden denetim (kapanış)
+
+**Denetlenen:** `main` @ `5f26cbd4` (`636788a6` + `5f26cbd4`, denetim cevapları). **Ortam:** ayrı
+detached worktree `.claude/worktrees/audit-close`; derleme gerekmedi. Worktree iş bitince
+silindi.
+
+### Hüküm: **KABUL**
+
+Üç koşul da karşılandı ve kanıtları tutuyor.
+
+- **Kod değişmedi.** `git diff accd72ab 5f26cbd4 --stat -- crates scripts fixtures shells
+  Cargo.toml Cargo.lock` boş. Değişen 7 dosya yalnız belge: `STATUS.md`,
+  `docs/ARCHITECTURE.md`, `AUDIT.md`, `DECISION.md`, `REPORT.md`, `experiments/clean.log`,
+  `experiments/rewritten.md`.
+- **Bu yüzden önceki ölçümler geçerli:** temiz klasörde `verify.sh` 21/21 ve tutanak 270/270.
+- **CI yeşil:** iki koşu da başarılı.
+
+### Koşulların durumu
+
+| Koşul | Hüküm | Kanıt |
+|---|---|---|
+| K1 | ✅ | **§6a:** tablodaki 20 medyan değer `experiments/perf-k17-ab.txt`'in orta sütunuyla bire bir aynı (A1, B1, A2, B2; sma 4,60/4,48/4,41/4,45 … bollinger 8,92/9,23/9,79/9,53). Dört koşuda özetler aynı. **§13 adım 3:** `verify-final.log` `total: 1003s`, `verify: OK`; ortak `target/`'taki ilk denemenin düşmesi de açıkça yazılmış. **CI satırı:** doğru. **§17 Disk:** dolu; silinenler, bilerek bırakılanlar ve kalan boyutlar listesi var. `ls target`: yok. `git worktree list`: yalnız ana ağaç (`5f26cbd4 [main]`). `experiments/clean.log`: önce 124G, `cargo clean` 384.311 dosya / 94,7 GiB sildi, sonra `target/ -`, depo toplamı 2,1G. **CI** (`scripts/preflight.sh` TAMAM, ardından `scripts/qgh run list --limit 3`): `45579438275` (`accd72ab`) completed/success, 27m56s. `45583858544` (`5f26cbd4`, kapanış) completed/success, 36m30s; bu koşuyu bitene kadar bekledim. |
+| K2 | ✅ | `rewritten.md`'ye "G2b — tasarım kaydı" (8 satır: `CompileOptions`, `Frame`, `compile`, `prepare` çağrı noktaları, `terms::mark`, `underline_layer`, `Designs`/`NONE`, `DESIGNS`/`options`/uyarlayıcı) ve "G3 — `prepare` adlandırılmış adımlara" bölümleri eklendi. G3 listesini koddaki öğelerle (`grep fn/struct/type`) karşılaştırdım; altı dosyanın her birinde liste kodla aynı: `prepare.rs` (`PrepState`, `Encoding`, `prepare`, `check_encoding`, `start_state`, `mark_rows`, `main_or_err`, `next_palette`, `finish`), `source.rs` (3), `series.rs` (3), `rule.rs` (4), `panel.rs` (5), `point.rs` (5 + `type SizeChan`). Kodda olup listede olmayan öğe yok. `without_designs` ve `with_designs` `compile.rs`'te var. |
+| K3 | ✅ | REPORT §3: "**+4.097** (126.597 → 130.694)". `arch-check --table` toplamı @`5f26cbd4` = 130.694. |
+| Notlar | ✅ | **DECISION:** "Güncelleme (S3.3, kapanış denetimi notu)" satırı eklendi: `FOLLOWER` = `STANDARD` eksi okuma eksi görüntüleyici; `qp-ops` `lint.allow` 21 → 20. **ARCHITECTURE:** "Yazarken dikkat" bölümünde üç madde var: kendi `AfterCommit` girdisini süz; `check` içindeki durum geri alınmaz, durumu `AfterCommit`'te yaz; hata kurucusu `qp_plane::error::E` (`new`/`at`/`build`). `E::at` ve `E::build`'in var olduğunu `qp-plane/src/error.rs`'te gördüm. |
+
+### Bilgi notları (koşul değil)
+
+- **G3 sayımı.** `rewritten.md` "29 fonksiyon/tip ve 2 yapı" diyor; benim kodda saydığım
+  27 fonksiyon + 1 tip (`SizeChan`) + 2 yapı. Adların hepsi tam ve doğru; fark yalnız sayıda
+  (±1). İsterseniz düzeltin.
+- **§17'deki "137 GB → 0".** Bu sayı denetim anındaki ölçüm. `clean.log` "önce 124G" diyor;
+  aradaki fark denetçinin bu arada sildiği `target/wt/audit-final` (≈ 13 GB). Tutarlı.
+- **İ8 kapısı.** Önceki B8 notu duruyor: kabuk WASM tavanını mekanik olarak denetleyen bir adım
+  yok. REPORT §18 bunu A70'e bağlıyor. Kabul edilebilir.
+
+### VERIFY 1–14 (son durum, `5f26cbd4`)
+
+| # | Komut | Sonuç |
+|---|---|---|
+| 1 | `git log --oneline -- rounds/RF1/experiments/baseline \| tail -1` | ✅ `7fb01d11` (16:54). İlk `src` değişikliği `717ad036` (21:57) bundan sonra. v2 ve normalleştirme farkları yukarıdaki ilk denetimde doğrulandı. |
+| 2 | `scripts/refactor/compare.sh` | ✅ 270/270 bayt eşit (ilk denetim, `e2f69afc`). Sonrasında kod değişmedi: `git diff accd72ab 5f26cbd4 --stat -- crates scripts fixtures shells Cargo.*` boş. |
+| 3 | `scripts/verify.sh` | ✅ İlk denetimde ayrı klasörde 21/21 PASS (710 sn). Yazarın `verify-final.log`'u da 21/21 (1003 sn). Bu iki koşudan sonra kod değişmedi (2. satırdaki boş fark). CI `45583858544` (`5f26cbd4`) success. |
+| 4 | `git diff --stat 7fb01d11 HEAD -- fixtures/{golden,compute,protocol,views,schema}` | ✅ boş |
+| 5 | `scripts/arch-check`, `--table`, `--self-test` | ✅ `0 error(s); 2 named exception(s), 0 awaiting approval`. Taban içinde: `fn.lines` 173, `file.soft` 32, `lint.allow` 22. 12 bin üstü yalnız `qp-authority` 12.744 (İ3). İ2 yok; altı katman sırası bildirilmiş. `self-test: PASS`. |
+| 6 | `arch-check --table` | ✅ `qp-grammar` 7.710 (R7 payı 4.290); `qp-capsule` 8.467 |
+| 7 | `find crates -name '*.rs' -path '*/src/*' \| xargs wc -l \| sort -rn \| sed -n 2,3p` | ✅ `878 qp-look/src/advances.rs` (üretilmiş); sonraki 762 |
+| 8 | `QP_CONFIG_BASE=7fb01d11 scripts/arch-check --config-diff` | ✅ `160 change(s), 0 uncited loosening(s)`. Tek `LOOSER` satırı `advances.rs`'in yer değiştirmesi (DECISION G2a). İ3 taşındı, tavan 12.744. Kapanan istisnalar silindi. |
+| 9 | Ek noktası sınaması; otorite `src` farkı | ✅ `extension` sınaması verify'da yeşil. `git diff --stat cd8d8e7c^1 cd8d8e7c -- crates/qp-authority/src` boş. Denetçinin `Quota` örneği de otorite crate'ine dokunmadan geçti. |
+| 10 | `cargo tree -p qp-grammar -e normal` | ✅ `qp-calendar qp-glyph qp-grammar qp-look qp-schema`; tasarım crate'i yok |
+| 11 | Perf, WASM | ✅ İ8 ile. Varsayılan paket +%0,39. Kabuk paketi +%2,45 / +%2,16 (≤ %2,5, İ8). K17 A/B gürültü içinde (§6a ile `perf-k17-ab.txt` aynı). K52 için `perf-final.txt`. |
+| 12 | `git log` sırası | ✅ Onay `dbd8efb9` → gramer `72018802` → oturum `0265a76b`…. D4 sırası tuttu: S3.1 → E (`cd8d8e7c`) → S3.2 → S3.3. |
+| 13 | Rapor listeleri | ✅ §7 ve `rewritten.md` (artık G2b ve G3 dahil, bütün dalgalar), §9 istisnalar, §10 ve `paths.md` |
+| 14 | `git worktree list`; `du -sh target`; belgeler | ✅ Yalnız ana ağaç; `target/` yok (0 ≤ 6 GB). AUDIT, REPORT (§17, §18), STATUS ve ROADMAP güncel. |
+
+**Temizlik:** `.claude/worktrees/audit-close` silindi; derleme klasörü açılmadı. Ürün koduna
+dokunulmadı.

@@ -181,7 +181,7 @@ adıyla ve nedeniyle listeli.
 | Dalga | Yeniden yazılan / yeni (sayı) | Ne |
 |---|---|---|
 | G2b | 8 + yeni `designs.rs`, `registry.rs` | `CompileOptions` (`designs` alanı), `Frame`, `compile` (başlık şablonu), `prepare`'in 2 çağrı noktası, `terms::mark` + `underline_layer` |
-| G3 | 31 | `prepare` adımları (29 fonksiyon/tip + `PrepState`, `Encoding`) |
+| G3 | 30 | `prepare` adımları (27 fonksiyon, 1 tip + `PrepState`, `Encoding`) |
 | S2 | 4 + 2 yeni | `DocProvider` (`&dyn HeadlineSource`), `with_parts`, `headline_parts`, `voice`; `Computed::is_empty` |
 | S4 | 1 + 23 yeni + `Arm` | `expand_op` dağıtıcısı ve kol fonksiyonları (gövdeler aynen); `put_series_source` |
 | S3.0 | 37 | sözleşme, faz çağrı noktaları, kayda önce bakan dağıtıcılar, `note_audiences`/`initial_audiences` bölmesi |

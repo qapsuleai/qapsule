@@ -9,7 +9,11 @@ jobs:
       CARGO_TERM_COLOR: always
       QP_VERIFY_BROWSER: "1"
     steps:
+      # Full history (K93): verify.sh's `config` step needs the merge base with main
+      # (or the round's baseline commit); a shallow clone would SKIP it.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install toolchain (from rust-toolchain.toml)
         run: rustup show
       - uses: Swatinem/rust-cache@v2

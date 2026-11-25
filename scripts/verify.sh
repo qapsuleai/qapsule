@@ -583,6 +583,10 @@ step_arch() {
 
 step_config() {
   command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/arch-check needs it)"
+  # A shallow clone has no merge base: the fallback would compare HEAD with itself and
+  # judge nothing, so say SKIP instead of passing (CI clones with full history, K93).
+  [ "$(git rev-parse --is-shallow-repository 2>/dev/null)" != "true" ] \
+    || skip "shallow clone: no base revision for the config diff"
   local rc=0
   scripts/arch-check --config-diff || rc=$?
   [ "$rc" -ne 2 ] || skip "no base revision for the config diff (shallow clone?)"

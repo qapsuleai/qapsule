@@ -23,8 +23,8 @@ pub use identity::{instance_id, program_id};
 pub use limits::{Limit, Limits};
 pub use message::Lang;
 pub use names::{
-    did_you_mean, edit_distance, is_lower_name, is_node_id, suggest, BAR_FIELDS, OP_NAMES,
-    OUTPUT_KINDS, TURKISH_NAMES,
+    did_you_mean, edit_distance, is_lower_name, is_node_id, suggest, BAR_FIELDS, MAX_CANDIDATES,
+    MAX_SUGGEST, OP_NAMES, OUTPUT_KINDS, TURKISH_NAMES,
 };
 pub use reason::Reason;
 pub use sha256::{sha256, sha256_hex};

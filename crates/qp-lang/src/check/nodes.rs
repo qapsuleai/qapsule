@@ -5,7 +5,7 @@
 use qp_schema::program::BarField;
 use serde_json::Value;
 
-use super::args::{const_value, int_arg, num_arg, num_value, ref_arg, IntRole, NumRole};
+use super::args::{const_value, int_arg, num_arg, num_value, ref_arg, IntRole, NumRole, MAX_EDGES};
 use super::clock::tf_clock;
 use super::cost::weight;
 use super::fields::Fields;
@@ -325,11 +325,11 @@ fn parse_bucket(rd: &mut Rd<'_, '_, '_>) -> Option<Op> {
             .at(Reason::Type, &at, &Msg::NotArray("edges".to_owned()));
         return None;
     };
-    if items.is_empty() || items.len() > 8 {
+    if items.is_empty() || items.len() > MAX_EDGES {
         rd.cx
             .d
             .at(Reason::BadParam, &at, &Msg::EdgesCount(items.len()))
-            .expected(["1..=8"]);
+            .expected([format!("1..={MAX_EDGES}")]);
         return None;
     }
     let edges: Vec<Option<f64>> = items

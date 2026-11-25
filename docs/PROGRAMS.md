@@ -445,7 +445,7 @@ RX4 §9 aynen, Qapsule kurallarıyla:
 |---|---|---|
 | `E_PARSE` | `schema` | Metin sözdizimi bozuk (`span` ile). Bozuk JSON ileti düzeyinde `parse`'tır |
 | `E_VERSION` | `schema` | `version` ≠ `qp-ir/0` (`expected`) — **yeni** |
-| `E_UNKNOWN_OP` | `schema` | Bilinmeyen düğüm / işlev |
+| `E_UNKNOWN_OP` | `schema` | Bilinmeyen düğüm / işlev ya da çıktı türü (`outputs[].kind`) |
 | `E_UNKNOWN_FIELD` | `schema` | Bilinmeyen alan ya da bar alanı |
 | `E_TYPE` | `schema` | Tip uyuşmazlığı (tamsayı alanına `float` parametre dahil) |
 | `E_MISSING_ARG` | `schema` | Eksik alan / argüman |

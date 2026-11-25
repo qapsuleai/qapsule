@@ -131,3 +131,76 @@ fn megabyte_names_do_not_blow_up_suggestions() {
         .iter()
         .all(|e| e.message.chars().count() <= 513 && e.did_you_mean.is_empty()));
 }
+
+/// `n` nodes, every one but the first reading an unknown, similar-looking reference.
+fn unknown_refs(n: usize) -> Value {
+    let mut nodes = vec![json!({"id": "n0", "op": "input", "field": "close"})];
+    for i in 1..n {
+        nodes.push(json!({"id": format!("n{i}"), "op": "neg", "x": format!("m{i}")}));
+    }
+    prog(
+        Value::Array(nodes),
+        json!([{"name": "s", "kind": "series", "node": "n0"}]),
+    )
+}
+
+#[test]
+fn suggestions_stay_cheap_with_raised_limits() {
+    // LA audit (1): one suggestion search per unknown reference over every earlier id was
+    // super-quadratic once the limits were raised. Searches now stop at the error cap and
+    // look at a bounded number of candidates.
+    let l = wide().with(Limit::MaxCostPerBar, 1_000_000);
+    // < 1 s optimized (measured ≈ 0.05 s on an M4 Max); debug builds get headroom.
+    let budget = Duration::from_secs(if cfg!(debug_assertions) { 3 } else { 1 });
+    let t = Instant::now();
+    let r = chk_limits(&unknown_refs(16_000), l);
+    assert!(t.elapsed() < budget, "{:?}", t.elapsed());
+    assert_eq!(r.errors.len(), 50);
+    assert!(r.truncated);
+    // Kept errors still carry their suggestions (`m1` → `n1` is not earlier than node 1,
+    // so the first kept error names the earlier `n0`).
+    assert_eq!(r.errors[0].did_you_mean, vec!["n0".to_owned()]);
+    // Even with the error cap raised to the node count, the work stays bounded.
+    let t = Instant::now();
+    let r = chk_limits(&unknown_refs(16_000), l.with(Limit::CheckMaxErrors, 20_000));
+    assert!(t.elapsed() < budget, "{:?}", t.elapsed());
+    assert_eq!(r.errors.len(), 15_999);
+    assert!(!r.truncated);
+}
+
+#[test]
+fn error_cap_keeps_the_first_errors_in_position_order() {
+    // LA audit (3): sort, then cut (PR §11.1). The outputs are checked after the nodes,
+    // but a root error found last still comes first; with a cap of 3, the three kept
+    // errors are the first three by position.
+    let mut p = chain(10, "nope");
+    p["version"] = json!("qp-ir/9");
+    let r = chk_limits(&p, wide().with(Limit::CheckMaxErrors, 3));
+    assert_eq!(
+        errs(&r),
+        vec![
+            ("E_VERSION".to_owned(), "/version".to_owned()),
+            ("E_UNKNOWN_OP".to_owned(), "/nodes/1/op".to_owned()),
+            ("E_UNKNOWN_OP".to_owned(), "/nodes/2/op".to_owned()),
+        ]
+    );
+    assert!(r.truncated);
+}
+
+#[test]
+fn huge_integers_keep_their_field_codes() {
+    // LA audit (6): ±1e20 is out of range, not malformed.
+    let lag = |n: Value| {
+        prog(
+            json!([{"id": "c", "op": "input", "field": "close"},
+                   {"id": "l", "op": "lag", "x": "c", "n": n}]),
+            json!([{"name": "s", "kind": "series", "node": "l"}]),
+        )
+    };
+    only(&chk(&lag(json!(1e20))), "E_WINDOW_LIMIT", "/nodes/1/n");
+    only(&chk(&lag(json!(-1e20))), "E_LOOKAHEAD", "/nodes/1/n");
+    only(&chk(&lag(json!(u64::MAX))), "E_WINDOW_LIMIT", "/nodes/1/n");
+    only(&chk(&sma(json!(1e20))), "E_WINDOW_LIMIT", "/nodes/1/period");
+    only(&chk(&sma(json!(-1e20))), "E_BAD_PARAM", "/nodes/1/period");
+    only(&chk(&lag(json!(2.5))), "E_BAD_PARAM", "/nodes/1/n");
+}

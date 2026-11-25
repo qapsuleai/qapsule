@@ -1,31 +1,21 @@
 //! Collecting program errors and warnings (PR §11.1): the checker never stops at the
-//! first finding; errors are kept up to `program.check.max_errors` (the rest only
-//! counted, so a hostile program cannot make the answer grow), then sorted by position
-//! (root, `params`, `nodes`, `outputs`; indices numerically) and reason.
+//! first finding. Errors are ordered by position (root, bound values, `params`, `nodes`,
+//! `outputs`; indices numerically), then reason, then discovery — and **then** cut at
+//! `program.check.max_errors`: the kept errors are the first ones in that order, whatever
+//! order they were found in. Memory stays bounded: a max-heap holds the best `cap` so far
+//! (a hostile program cannot make the answer or the work grow), the rest is only counted.
+//! A finding that will not be kept skips its detail (`did_you_mean` is computed lazily).
 
 use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 use qp_schema::protocol::ProgramError;
 
 use crate::message::{Lang, Msg};
 use crate::reason::Reason;
 
-/// Errors and warnings of one check.
-#[derive(Debug)]
-pub(crate) struct Diags {
-    pub(crate) errors: Vec<ProgramError>,
-    pub(crate) warnings: Vec<ProgramError>,
-    pub(crate) lang: Lang,
-    /// Errors kept at most.
-    cap: usize,
-    /// Errors found beyond `cap` (counted, not kept).
-    dropped: usize,
-    /// Where a dropped error is written (and forgotten).
-    sink: ProgramError,
-}
-
 /// Longest message kept, in characters (a message quotes names from the input).
-const MAX_MESSAGE: usize = 512;
+pub(crate) const MAX_MESSAGE: usize = 512;
 
 fn bounded(mut m: String) -> String {
     if let Some((i, _)) = m.char_indices().nth(MAX_MESSAGE) {
@@ -35,28 +25,146 @@ fn bounded(mut m: String) -> String {
     m
 }
 
+/// One segment of a pointer, ordered numerically when both sides are numbers.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Seg(String);
+
+impl Ord for Seg {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self.0.parse::<u64>(), other.0.parse::<u64>()) {
+            (Ok(x), Ok(y)) => x.cmp(&y),
+            _ => self.0.cmp(&other.0),
+        }
+    }
+}
+
+impl PartialOrd for Seg {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+/// The sort key of a finding: section, pointer segments, reason, discovery order.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct Key {
+    section: u8,
+    segs: Vec<Seg>,
+    reason: String,
+    seq: u64,
+}
+
+impl Key {
+    fn of(e: &ProgramError, seq: u64) -> Key {
+        let segs: Vec<Seg> =
+            e.at.as_deref()
+                .unwrap_or("")
+                .split('/')
+                .skip(1)
+                .map(|s| Seg(s.to_owned()))
+                .collect();
+        Key {
+            section: section(segs.first().map(|s| s.0.as_str()), e.at.is_none()),
+            segs,
+            reason: e.reason.clone(),
+            seq,
+        }
+    }
+}
+
+/// A kept finding, ordered by its key (the heap's top is the worst kept one).
+#[derive(Debug)]
+struct Kept {
+    key: Key,
+    e: ProgramError,
+}
+
+impl PartialEq for Kept {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key
+    }
+}
+impl Eq for Kept {}
+impl Ord for Kept {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.key.cmp(&other.key)
+    }
+}
+impl PartialOrd for Kept {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+/// Errors and warnings of one check.
+#[derive(Debug)]
+pub(crate) struct Diags {
+    /// The kept errors in order, after [`Diags::finish`].
+    pub(crate) errors: Vec<ProgramError>,
+    pub(crate) warnings: Vec<ProgramError>,
+    pub(crate) lang: Lang,
+    /// Errors kept at most.
+    cap: usize,
+    /// The best `cap` errors so far (worst on top).
+    heap: BinaryHeap<Kept>,
+    /// The error pushed last, kept, still open for detail (enters `heap` on the next push).
+    pending: Option<Kept>,
+    /// Errors found and not kept (counted only).
+    dropped: usize,
+    /// Findings so far (the discovery order tie-break).
+    seq: u64,
+    /// Costly suggestion searches left ([`Found::dym_with`]).
+    searches: usize,
+    /// Where a dropped error is written (and forgotten).
+    sink: ProgramError,
+}
+
+/// Costly suggestion searches (over node ids) one check runs at most: each looks at
+/// `names::MAX_CANDIDATES` names at most, so the whole check's suggestion work is bounded
+/// even when `program.check.max_errors` is raised to the node count.
+pub(crate) const MAX_SEARCHES: usize = 256;
+
 /// Adds detail to the finding just pushed.
 pub(crate) struct Found<'a> {
     e: &'a mut ProgramError,
     lang: Lang,
+    /// The check's remaining search budget.
+    searches: Option<&'a mut usize>,
+    /// Whether the finding is kept (detail on a dropped one is skipped).
+    kept: bool,
 }
 
 impl Found<'_> {
     /// Accepted values or forms.
     pub(crate) fn expected<S: ToString>(self, v: impl IntoIterator<Item = S>) -> Self {
-        self.e.expected = v.into_iter().map(|s| s.to_string()).collect();
+        if self.kept {
+            self.e.expected = v.into_iter().map(|s| s.to_string()).collect();
+        }
         self
     }
 
     /// Close names (at most 5).
     pub(crate) fn dym(self, v: Vec<String>) -> Self {
-        self.e.did_you_mean = v.into_iter().take(5).collect();
+        if self.kept {
+            self.e.did_you_mean = v.into_iter().take(5).collect();
+        }
+        self
+    }
+
+    /// Close names computed only when the finding is kept and the check's search budget
+    /// ([`MAX_SEARCHES`]) is not spent (the search can be costly).
+    pub(crate) fn dym_with(mut self, f: impl FnOnce() -> Vec<String>) -> Self {
+        if let Some(left) = self.searches.as_deref_mut().filter(|n| **n > 0) {
+            *left -= 1;
+            self.e.did_you_mean = f().into_iter().take(5).collect();
+        }
         self
     }
 
     /// How to fix it.
     pub(crate) fn hint(self, h: &Msg) -> Self {
-        self.e.hint = Some(h.render(self.lang));
+        if self.kept {
+            self.e.hint = Some(h.render(self.lang));
+        }
         self
     }
 }
@@ -68,34 +176,67 @@ impl Diags {
             warnings: Vec::new(),
             lang,
             cap,
+            heap: BinaryHeap::new(),
+            pending: None,
             dropped: 0,
+            seq: 0,
+            searches: MAX_SEARCHES,
             sink: Reason::Type.error(None, String::new()),
+        }
+    }
+
+    /// Moves the pending error into the heap, dropping the worst beyond `cap`.
+    fn flush(&mut self) {
+        if let Some(k) = self.pending.take() {
+            self.heap.push(k);
+            if self.heap.len() > self.cap {
+                self.heap.pop();
+                self.dropped += 1;
+            }
         }
     }
 
     /// Pushes a finding at JSON pointer `at` (`None`: outside the program, e.g. a bound
     /// value) and returns it for detail.
     pub(crate) fn push(&mut self, reason: Reason, at: Option<&str>, msg: &Msg) -> Found<'_> {
-        let e = reason.error(at.map(str::to_owned), bounded(msg.render(self.lang)));
         let lang = self.lang;
-        if !reason.is_warning() && self.errors.len() >= self.cap {
+        self.seq += 1;
+        let at = at.map(clamp);
+        if reason.is_warning() {
+            let e = reason.error(at, bounded(msg.render(lang)));
+            self.warnings.push(e);
+            let last = self.warnings.len() - 1;
+            return Found {
+                e: &mut self.warnings[last],
+                lang,
+                searches: None,
+                kept: true,
+            };
+        }
+        self.flush();
+        // Decide on the key alone before rendering anything.
+        let probe = reason.error(at, String::new());
+        let key = Key::of(&probe, self.seq);
+        let keep = self.cap > 0
+            && (self.heap.len() < self.cap || self.heap.peek().is_some_and(|w| key < w.key));
+        if !keep {
             self.dropped += 1;
-            self.sink = e;
+            self.sink = probe;
             return Found {
                 e: &mut self.sink,
                 lang,
+                searches: None,
+                kept: false,
             };
         }
-        let list = if reason.is_warning() {
-            &mut self.warnings
-        } else {
-            &mut self.errors
-        };
-        list.push(e);
-        let last = list.len() - 1;
+        let mut e = probe;
+        e.message = bounded(msg.render(lang));
+        let kept = self.pending.insert(Kept { key, e });
         Found {
-            e: &mut list[last],
+            e: &mut kept.e,
             lang,
+            searches: Some(&mut self.searches),
+            kept: true,
         }
     }
 
@@ -106,21 +247,24 @@ impl Diags {
 
     /// Error count so far (dropped ones included).
     pub(crate) fn count(&self) -> usize {
-        self.errors.len() + self.dropped
+        self.heap.len() + usize::from(self.pending.is_some()) + self.dropped
     }
 
-    /// Clamps pointers to their shapes, sorts both lists, cuts errors at `max`; returns
-    /// whether errors were cut.
+    /// Sorts the kept errors and the warnings into [`Diags::errors`] and
+    /// [`Diags::warnings`], cut at `max`; returns whether errors were cut.
     pub(crate) fn finish(&mut self, max: usize) -> bool {
-        for e in self.errors.iter_mut().chain(self.warnings.iter_mut()) {
-            if let Some(at) = &e.at {
-                e.at = Some(clamp(at));
-            }
-        }
-        self.errors.sort_by(order);
-        self.warnings.sort_by(order);
-        let cut = self.errors.len() > max || self.dropped > 0;
-        self.errors.truncate(max);
+        self.flush();
+        let mut kept = std::mem::take(&mut self.heap).into_sorted_vec();
+        let cut = kept.len() > max || self.dropped > 0;
+        kept.truncate(max);
+        self.errors = kept.into_iter().map(|k| k.e).collect();
+        let mut warnings: Vec<(Key, ProgramError)> = std::mem::take(&mut self.warnings)
+            .into_iter()
+            .enumerate()
+            .map(|(i, e)| (Key::of(&e, i as u64), e))
+            .collect();
+        warnings.sort_by(|a, b| a.0.cmp(&b.0));
+        self.warnings = warnings.into_iter().map(|(_, e)| e).collect();
         cut
     }
 }
@@ -138,38 +282,6 @@ fn section(seg: Option<&str>, bound: bool) -> u8 {
         Some("outputs") => 5,
         Some(_) => 1,
     }
-}
-
-fn cmp_segment(a: &str, b: &str) -> Ordering {
-    match (a.parse::<u64>(), b.parse::<u64>()) {
-        (Ok(x), Ok(y)) => x.cmp(&y),
-        _ => a.cmp(b),
-    }
-}
-
-fn order(a: &ProgramError, b: &ProgramError) -> Ordering {
-    let segs = |e: &ProgramError| -> Vec<String> {
-        e.at.as_deref()
-            .unwrap_or("")
-            .split('/')
-            .skip(1)
-            .map(str::to_owned)
-            .collect()
-    };
-    let (sa, sb) = (segs(a), segs(b));
-    let ka = section(sa.first().map(String::as_str), a.at.is_none());
-    let kb = section(sb.first().map(String::as_str), b.at.is_none());
-    ka.cmp(&kb)
-        .then_with(|| {
-            for (x, y) in sa.iter().zip(&sb) {
-                let o = cmp_segment(x, y);
-                if o != Ordering::Equal {
-                    return o;
-                }
-            }
-            sa.len().cmp(&sb.len())
-        })
-        .then_with(|| a.reason.cmp(&b.reason))
 }
 
 /// A pointer cut to the shapes the text language maps to source spans: `/params/i[/f]`,

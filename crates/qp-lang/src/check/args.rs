@@ -2,6 +2,8 @@
 //! literal or a parameter (`{"param": key}`), checked against the field's range — the
 //! static half of the two-level range check (PR §2.1) — and resolved to bound values.
 
+use std::ops::Bound::{Excluded, Included, Unbounded};
+
 use serde_json::Value;
 
 use super::fields::Fields;
@@ -11,12 +13,18 @@ use crate::checked::{Literal, Slot};
 use crate::diag::join;
 use crate::limits::Limit;
 use crate::message::Msg;
-use crate::names::did_you_mean;
+use crate::names::{did_you_mean, MAX_CANDIDATES};
 use crate::reason::Reason;
 use qp_schema::program::{ProgramParamKind, ProgramParamValue};
 
+// Language constants (PR §8.4): not parameters; changing one changes the language version.
+
 /// Largest line anchor time (2^53 ms, PR §4.6).
 const MAX_T: i64 = 1 << 53;
+/// Edges of a `bucket` at most (1 … 8, PR §4.6).
+pub(super) const MAX_EDGES: usize = 8;
+/// Dimensions of a state definition at most (1 … 4, PR §5).
+pub(super) const MAX_DIMS: usize = 4;
 
 /// What an integer field means, which sets its range and codes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -89,6 +97,15 @@ pub(super) fn int_arg(
     match v {
         Value::Number(n) => match n.as_i64() {
             Some(i) => literal_int(cx, &at, name, i, role),
+            // A number beyond i64 (`1e20`, `-1e20`) is out of range, not malformed:
+            // saturate it so the range check gives the field's own code
+            // (`E_WINDOW_LIMIT`, `E_LOOKAHEAD`, `E_BAD_RULE`). `20.0` stays `E_BAD_PARAM`.
+            #[allow(clippy::cast_possible_truncation)]
+            #[allow(clippy::cast_precision_loss)]
+            None if n.as_f64().is_some_and(|x| x.abs() >= i64::MAX as f64) => {
+                let x = n.as_f64().unwrap_or(0.0);
+                literal_int(cx, &at, name, x as i64, role)
+            }
             None => {
                 cx.d.at(role.bad(), &at, &Msg::IntExpected(name.to_owned()));
                 None
@@ -280,15 +297,25 @@ pub(super) fn resolve_ref(cx: &mut Cx<'_>, s: &str, at: &str, here: usize) -> Op
         None => (s, None),
     };
     let Some(&j) = cx.ids.get(id) else {
-        let earlier: Vec<&str> = cx
-            .ids
-            .iter()
-            .filter(|(_, &j)| j < here)
-            .map(|(k, _)| k.as_str())
-            .collect();
-        let dym = did_you_mean(id, earlier);
+        // Candidates: the earlier ids next to `id` in name order (shared prefixes),
+        // half on each side, so the search is bounded and local.
+        let ids = &cx.ids;
+        let half = MAX_CANDIDATES / 2;
+        let earlier = move || {
+            let before = ids
+                .range::<str, _>((Unbounded, Excluded(id)))
+                .rev()
+                .filter(move |(_, &j)| j < here);
+            let after = ids
+                .range::<str, _>((Included(id), Unbounded))
+                .filter(move |(_, &j)| j < here);
+            before
+                .take(half)
+                .chain(after.take(half))
+                .map(|(k, _)| k.as_str())
+        };
         cx.d.at(Reason::UnknownRef, at, &Msg::UnknownRef(s.to_owned()))
-            .dym(dym);
+            .dym_with(|| did_you_mean(id, earlier()));
         return None;
     };
     if j >= here {

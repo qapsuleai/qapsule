@@ -51,3 +51,14 @@ VERIFY 4'te `qp-authority/src` farkı yalnız bu iki öznitelik değişikliğidi
 
 **Mandal gevşetmeleri (A72, K93):** `lint.allow` `qp-compute` 27 → 30, `qp-ops` 20 → 23,
 `qp-plane` 1 → 2 (var olan `unreachable!` yerlerine öğe başına izin; sayı bundan sonra yalnız düşer).
+
+## D4 — İ8 tavanı sıkılaştırıldı (ön iş 1, 2026-11-26)
+
+GOAL 0.1: "kazanç varsa uygulanır ve İ8 tavanı yeni değere göre sıkılaştırılır". Kabuk paketinde
+`wasm-opt` (`-O1 --duplicate-function-elimination --reorder-functions --reorder-locals`) açıldı
+(`rounds/RL1/experiments/o1-wasm/RESULT.md`, denetim KABUL). Kabuk paketi (`--features replica`,
+verify adım 18): ham 9.004.332 → 6.598.168 B, gzip 2.485.078 → 1.939.823 B. **Yeni İ8 tavanı**
+(aynı kural, yeni değer + %2,5): **ham 6.763.122 B, gzip 1.988.319 B**. Varsayılan modül
+(2.354.868 / 773.639) ±%2 kuralında kalır. RL1'in sonraki işleri (qp-lang'in qp-plane'e
+bağlanması) bu tavana göre ölçülür (D1 şart 1). İ8 makine kuralı değildir (RF1 denetimi);
+VERIFY 6 bu satıra göre elle ölçülür.

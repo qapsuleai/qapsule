@@ -13,9 +13,11 @@ use std::collections::BTreeMap;
 
 use crate::lanes;
 
+mod rl1;
 mod share;
 use crate::studies::{Bollinger, Ema, Macd, Rsi, Sma};
 use crate::{create, period_param, ComputeError, Core, Field};
+pub use rl1::rl1_studies_digest;
 
 /// One variant's outputs: `columns[j][i]` is output `j` at bar `i`; `NaN` during warmup.
 #[derive(Debug, Clone)]

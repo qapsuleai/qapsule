@@ -22,7 +22,9 @@
 #  11 compute    qp compute: RSI(14) and MACD on the sample, outputs valid StudyOutput
 #  12 digest     cross-target compute digest == fixtures/compute/digest.txt on the host
 #                (aarch64 or x86_64), x86_64 via Rosetta on Apple silicon if available,
-#                and wasm32 in Node (same tool rule as the browser step)
+#                and wasm32 in Node (same tool rule as the browser step); RL1: also
+#                fixtures/compute/digest-rl1.txt (stdev, percentrank) on the host, x86_64
+#                and wasm32-wasip1 under node:wasi
 #  13 protocol   fixtures/protocol/valid/* validate and fixtures/protocol/invalid/* are
 #                rejected by the generated protocol schemas; transcripts and init validate
 #  14 conform    qp/0 conformance transcripts pass in-process, over `qp serve` and over MCP
@@ -370,6 +372,13 @@ step_digest() {
   got3="$(cargo run -q --release -p qp-compute --example digest -- r3)"
   echo "host $(uname -m) r3 studies: $got3 (expected $want3)"
   [ "$got3" = "$want3" ] || fail "host r3 digest $got3 != $want3"
+  # RL1: the compute-language kernels (Stdev, PercentRank) have their own digest too,
+  # compared on every architecture this host can run (wasm32 via wasm32-wasip1 + node:wasi).
+  local wantl gotl
+  wantl="$(tr -d '[:space:]' <fixtures/compute/digest-rl1.txt)"
+  gotl="$(cargo run -q --release -p qp-compute --example digest -- rl1)"
+  echo "host $(uname -m) rl1 kernels: $gotl (expected $wantl)"
+  [ "$gotl" = "$wantl" ] || fail "host rl1 digest $gotl != $wantl"
   ran="$(uname -m)"
   if [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ] \
     && rustup target list --installed 2>/dev/null | grep -q '^x86_64-apple-darwin$' \
@@ -377,14 +386,29 @@ step_digest() {
     got="$(cargo run -q --release -p qp-compute --example digest --target x86_64-apple-darwin)"
     echo "x86_64 (Rosetta): $got"
     [ "$got" = "$want" ] || fail "x86_64 digest $got != $want"
+    gotl="$(cargo run -q --release -p qp-compute --example digest --target x86_64-apple-darwin -- rl1)"
+    echo "x86_64 (Rosetta) rl1 kernels: $gotl"
+    [ "$gotl" = "$wantl" ] || fail "x86_64 rl1 digest $gotl != $wantl"
     ran="$ran, x86_64"
+  fi
+  if [ "$mode" != 0 ] && command -v node >/dev/null 2>&1 \
+    && rustup target list --installed 2>/dev/null | grep -q '^wasm32-wasip1$'; then
+    cargo build -q --release -p qp-compute --example digest --target wasm32-wasip1
+    gotl="$(node --no-warnings -e "const {WASI}=require('node:wasi');const w=new WASI({version:'preview1',args:['digest','rl1'],env:{}});WebAssembly.instantiate(require('fs').readFileSync(process.argv[1]),w.getImportObject()).then(({instance})=>w.start(instance))" "$target_dir/wasm32-wasip1/release/examples/digest.wasm")"
+    echo "wasm32-wasip1 (node $(node --version)) rl1 kernels: $gotl"
+    [ "$gotl" = "$wantl" ] || fail "wasm32 rl1 digest $gotl != $wantl"
+  elif [ "$mode" = 1 ]; then
+    fail "wasm32 rl1 digest: QP_VERIFY_BROWSER=1 but node or the wasm32-wasip1 target is missing"
+  else
+    echo "wasm32 rl1 kernels: skipped (QP_VERIFY_BROWSER=${mode:-unset}, node or wasm32-wasip1 missing)"
+    wantl="$wantl (wasm32 rl1 skipped)"
   fi
   local have_tools=1
   command -v node >/dev/null 2>&1 || have_tools=0
   if ! command -v wasm-pack >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/wasm-pack" ]; then have_tools=0; fi
   if [ "$mode" = 0 ] || { [ "$mode" != 1 ] && [ "$have_tools" = 0 ]; }; then
     echo "wasm32: skipped (QP_VERIFY_BROWSER=${mode:-unset}, tools: $have_tools)"
-    note "$ran: $want; wasm32 skipped"
+    note "$ran: $want; wasm32 skipped; rl1 $wantl"
     return 0
   fi
   local wp pkg="$target_dir/wasm-bench/pkg"
@@ -393,7 +417,7 @@ step_digest() {
   got="$(node -e "console.log(require('$pkg/qp_wasm.js').compute_digest())")"
   echo "wasm32 (node $(node --version)): $got"
   [ "$got" = "$want" ] || fail "wasm32 digest $got != $want"
-  note "$ran, wasm32: $want"
+  note "$ran, wasm32: $want; rl1 $wantl"
 }
 
 step_protocol() {

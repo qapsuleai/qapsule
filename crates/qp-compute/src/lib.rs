@@ -51,5 +51,5 @@ pub use error::ComputeError;
 pub use field::Field;
 pub(crate) use registry::{check_period, period_param};
 pub use registry::{compute_bars, create, default_params, MAX_PERIOD, STUDY_NAMES};
-pub use studies::{Atr, Bollinger, Ema, Highest, Lowest, Macd, Rsi, Sma};
+pub use studies::{Atr, Bollinger, Ema, Highest, Lowest, Macd, PercentRank, Rsi, Sma, Stdev};
 pub use study::{run, Study};

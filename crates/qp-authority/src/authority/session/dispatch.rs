@@ -9,7 +9,7 @@ impl Session {
         self.handle_msg(conn, msg, BTreeMap::new())
     }
 
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, clippy::unreachable)] // invariant: `hello` handled first
     /// Handles a parsed message whose selectors resolved to `resolved` (§17).
     pub(super) fn handle_resolved(
         &mut self,

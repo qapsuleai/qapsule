@@ -18,7 +18,7 @@ impl Session {
         self.capsule_query_with(ci, id, path, true, (voice, clock))
     }
 
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, clippy::unreachable)] // invariant: story checked above
     /// [`Session::capsule_query`]; with `with_comments`, the comments the reader may
     /// receive (R5B, §25.4); `voice`: the item's voice surfaces (none: the comment
     /// validator, which reads no voice).

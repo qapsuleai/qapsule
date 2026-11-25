@@ -51,7 +51,7 @@ açık sorular A70–A73 (`docs/decisions/rounds/RF1.md`).
 | 12 | Ek noktası belgesi ve sınaması | ✅ | `docs/ARCHITECTURE.md` iki bölüm; `qp-session/tests/extension` (`audit-e.md`) |
 | 13 | Borç taban çizgisi büyümedi; kalem sayısı ve en uzun fonksiyonlar önce/sonra | ✅ | §8 |
 | 14 | README'ler; ARCHITECTURE ve ENGINEERING §2 güncel; dışa açık Rust yolu değişiklikleri listeli | ✅ | 29/29 README; `experiments/paths.md` |
-| 15 | Bağımsız denetçi `AUDIT.md`; REPORT, STATUS, ROADMAP; kapanış temizliği | ✅ | `AUDIT.md`; §16 |
+| 15 | Bağımsız denetçi `AUDIT.md`; REPORT, STATUS, ROADMAP; kapanış temizliği | ✅ | `AUDIT.md` (koşullu kabul; K1–K3 karşılandı, §18); §17 |
 
 ## 3. Önce ve sonra
 
@@ -160,7 +160,18 @@ bölümü +17,5 KB). Büyümenin kaynağı taşınan kod değil.
 - **Seçim:** (1). Tavan ham ve gzip en çok +%2,5.
 - **Kalan pay** ≈ 4,8 KB: R7'den önce kabuk paketinde `wasm-opt` önerisi (A70).
 
-**§6a K17 aynı saat A/B.** (kapanışta eklenecek)
+**§6a K17 aynı saat A/B** (`experiments/perf-k17-ab.txt`; 2026-11-25 08:46Z, sıra A B A B; A
+tutanak `7fb01d11`, B HEAD `bd5bf705`; medyan ms):
+
+| Hesap | A koşu 1 | B koşu 1 | A koşu 2 | B koşu 2 |
+|---|---|---|---|---|
+| sma | 4,60 | 4,48 | 4,41 | 4,45 |
+| ema | 4,16 | 4,02 | 4,02 | 4,01 |
+| rsi | 9,60 | 9,45 | 9,42 | 9,50 |
+| macd | 8,51 | 8,33 | 8,45 | 8,28 |
+| bollinger | 8,92 | 9,23 | 9,79 | 9,53 |
+
+İki sürüm gürültü içinde eşit; dört koşuda özetler bayt eşit.
 
 ## 7. Yeniden yazılan öğeler
 
@@ -258,7 +269,7 @@ A72.
 |---|---|
 | 1 | Tutanak `7fb01d11` ilk kod değişikliğinden eski (`git log`; ilk kod `793a0975` Ö testleri, ilk crate kodu `8253ca23` sonrası) ✅ |
 | 2 | `compare.sh` 270/270 bayt eşit (`experiments/compare-final.txt`) ✅ |
-| 3 | `verify.sh` (temiz derleme klasörü): (kapanışta) |
+| 3 | `verify.sh` temiz derleme klasöründe 21/21 PASS (`arch`, `config`, `design` dahil; 1.003 s; `experiments/verify-final.log`). Ortak `target/`'ta koşulan ilk deneme `qp-calendar` testinde düştü: silinmiş bir worktree'nin yolunu gömmüş eski test ikilisi; kural gereği (K87) kesin hüküm ayrı klasörde verildi. Bağımsız denetçi de kendi klasöründe 21/21 ✅ |
 | 4 | `git diff --stat 7fb01d11 HEAD -- fixtures/golden fixtures/compute fixtures/protocol fixtures/views fixtures/schema` boş; eklenen yalnız `fixtures/design/desk-marks.json` ve `fixtures/design/docs/syn03-breakout.json` (Ö) ✅ |
 | 5 | `arch-check` 0 hata; 12 bin üstü yalnız İ3; İ2 yok; sıralar bildirilmiş; `--self-test` PASS ✅ |
 | 6 | `qp-grammar` 7.710, `qp-capsule` 8.467, R7 payı 4.290 ✅ |
@@ -269,9 +280,9 @@ A72.
 | 11 | Performans ve WASM §6 ✅ İ8 |
 | 12 | Onay `dbd8efb9`, gramer kodu `8253ca23`'ten (G1 testleri) ve `083d7878`'den önce; oturum kodu sonra ✅ |
 | 13 | Rapor §7, §9, §10 ✅ |
-| 14 | `git worktree list` yalnız ana ağaç; `target/` ve belgeler §16 |
+| 14 | `git worktree list` yalnız ana ağaç; `target/` 0 (§17); AUDIT, REPORT, STATUS, ROADMAP güncel ✅ |
 
-**CI:** (kapanışta)
+**CI:** `accd72ab` (son kod durumu: bütün dalgalar, C kanıtları) GitHub Actions koşusu **45579438275 yeşil** (28 dk). Sonraki commit'ler yalnız belge, rapor, `arch-config.json` İ3 gerekçe metni ve bir README satırı; kapanış commit'inin koşusu gönderimden sonra.
 
 ## 14. Yöntem, alt ajanlar, dallar
 
@@ -330,4 +341,58 @@ A72.
 
 ## 17. Disk (K56, K68)
 
-(kapanışta)
+**Silinenler:**
+
+| Ne | Boyut |
+|---|---|
+| Ortak `target/` (`scripts/clean.sh --deep`: artımlı önbellek, eski profiller, `cargo clean`) | 137 GB → 0 (cargo: 384.311 dosya, 94,7 GiB; `experiments/clean.log`) |
+| İş başına derleme klasörleri `target/wt/<iş>` (yazar ve denetçiler) | her biri 1–21 GB; iş bitince silindi |
+| Bütün RF1 worktree'leri (`.claude/worktrees/agent-*`, `audit-*`, `k17-base`) | birleşince ya da iş bitince; dallar kaldı |
+| Tutanak ve karşılaştırma ara klasörleri (`target/rf1-*`, `refactor-compare-*`) | ≈ 60 MB |
+| `__pycache__` (6 klasör: puanlayıcılar, araçlar), oturum scratchpad'i (alt ajan betikleri) | < 2 MB |
+| Depo dışı: `$TMPDIR` altında üç eski Playwright klasörü (14 ve 16 Kasım; §11) | 6,9 MB |
+
+Not: `clean.sh` artımlı önbelleği silerken bir klasör aynı anda yazıldığı için `rm` uyarı verdi
+(çıkış 1); ardından `cargo clean` `target/`'ı tümüyle sildi.
+
+**Bilerek bırakılanlar:**
+
+- `rf1/*` dalları (14): kod dalda da kalsın diye.
+- `shells/web/node_modules` (18 MB) ve `pkg` (13 MB): `verify.sh` adım 18 onlara bağlı.
+- `shells/web-spike/node_modules` (122 MB) ve `pkg` (2 MB): adım 10 onlara bağlı.
+- `fixtures/local/` (1,5 GB): yerel veri, bütçe içinde.
+- Oturum klasörü (872 KB): görev çıktıları.
+- Kökteki izlenmeyen `Prompt.txt`: benim değil, dokunulmadı; kime ait olduğunu soruyorum.
+
+**Kalan boyutlar:**
+
+| Klasör | Boyut |
+|---|---|
+| `target/` | 0 (bir sonraki `verify.sh` yeniden derler) |
+| `.claude/worktrees/` | 44 KB (yalnız `.DS_Store`) |
+| `fixtures/local/` | 1,5 GB |
+| `.git` | 226 MB |
+| Depo toplamı | 2,1 GB |
+
+`git worktree list` yalnız ana ağacı gösteriyor. `git status --porcelain --ignored` içinde
+beklenmeyen artık yok: `.DS_Store`, `.env.local`, `.claude/` yerel dosyaları, `fixtures/local/`,
+`node_modules`, `pkg` ve `Prompt.txt` (sahibi soruldu).
+
+## 18. Kapanış denetimi ve cevaplar (`AUDIT.md`)
+
+**Hüküm: koşullu kabul; kod tarafında koşul yok.** Denetçi kendi derleme klasöründe şunları
+yaptı:
+
+- tutanağı koştu: 270/270 bayt eşit;
+- `verify.sh` 21/21;
+- 12 yeniden yazılan öğeyi eski gövdeyle karşılaştırdı;
+- ek noktasını kendi örneğiyle (`Quota`: `Check`, `Connect`, `Subscribe`, `AfterCommit`, var
+  olan `log` sorgusunu üstlenme) otorite `src/`'si değişmeden denedi.
+
+| Koşul | Cevap |
+|---|---|
+| K1 (yüksek): rapordaki eksik yerler, `clean.sh` (`target/` 137 GB), CI | Karşılandı: §6a, §13, §17; CI 45579438275 yeşil |
+| K2 (orta): `rewritten.md`'de G2b ve G3 yok | Eklendi (G3'ün 29 öğesi adıyla) |
+| K3 (düşük): "≈ 1,5 bin arttı" yanlış | Düzeltildi: +4.097 (126.597 → 130.694) |
+| Notlar: DECISION'daki S3.2 `FOLLOWER` notu bayat; `qp-ops` 21/20; yazarken dikkat (kendi girdisi, `check` durumu, `E`) | DECISION'a güncelleme satırı; ARCHITECTURE "Yazarken dikkat" |
+| İ8'in mekanik kapısı yok, `DEBT.md`'de geçmiyor | Doğru. İ8 bir `arch-check` kuralı değil; ölçümü `perf.sh`'ta, kaydı DECISION ve Ö125'te. A70 ile ele alınmalı |

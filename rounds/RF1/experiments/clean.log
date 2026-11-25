@@ -1,0 +1,29 @@
+clean: kök /Users/arkns/Works/Mchart/qapsule
+önce:
+  target/              124G
+  .claude/worktrees/    44K
+  .claude/wt/           16K
+  depo toplamı         126G
+1. git worktree prune
+2. worktree'ler
+3. target/ (eski profiller ve artımlı önbellek)
+  siliniyor: target/flycheck0 (588K)
+  siliniyor: target/refactor-compare-a3354e13 ( 19M)
+  siliniyor: target/tmp (400K)
+  siliniyor: target/wasm-replica (8.7M)
+  siliniyor: target/.DS_Store (8.0K)
+  siliniyor: target/debug/incremental ( 53G)
+rm: /Users/arkns/Works/Mchart/qapsule/target/debug/incremental: Directory not empty
+4. node_modules
+  ana ağaç node_modules kalır (--node-modules ile silinir)
+5. tarayıcı profilleri
+6. --deep: target/ bütçesi 6 GB
+     Removed 384311 files, 94.7GiB total
+  cargo clean yapıldı
+sonra:
+  target/              -
+  .claude/worktrees/    44K
+  .claude/wt/           16K
+  depo toplamı         2.1G
+git worktree list:
+/Users/arkns/Works/Mchart/qapsule  636788a6 [main]

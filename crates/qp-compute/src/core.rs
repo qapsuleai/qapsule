@@ -220,6 +220,16 @@ impl Ring {
         old
     }
 
+    /// The held values, oldest first.
+    pub(crate) fn iter(&self) -> impl Iterator<Item = f64> + '_ {
+        let (newer, older) = if self.len == self.buf.len() {
+            self.buf.split_at(self.pos)
+        } else {
+            (&self.buf[..self.len], &self.buf[..0])
+        };
+        older.iter().chain(newer).copied()
+    }
+
     pub(crate) fn clear(&mut self) {
         self.pos = 0;
         self.len = 0;

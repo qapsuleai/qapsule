@@ -14,7 +14,9 @@ bitleri verir (`examples/digest.rs`).
 
 - `Study`, `run`, `Core`, `Streaming` — hesap sözleşmesi ve bekleyen bar modeli.
 - `create`, `compute_bars`, `default_params`, `STUDY_NAMES`, `MAX_PERIOD` — kayıt defteri.
-- Yerleşik hesaplar: `Sma`, `Ema`, `Rsi`, `Macd`, `Bollinger`, `Atr`, `Highest`, `Lowest`.
+- Yerleşik hesaplar: `Sma`, `Ema`, `Rsi`, `Macd`, `Bollinger`, `Atr`, `Highest`, `Lowest`;
+  RL1 hesap dili çekirdekleri `Stdev`, `PercentRank` (`add_study`'de yok, özeti
+  `sweep::rl1_studies_digest`).
 - `Address`, `Chain`, `Field`, `ComputeError`; modüller `graph`, `late`, `par`, `sweep`.
 
 **Düzen (`src/`):**

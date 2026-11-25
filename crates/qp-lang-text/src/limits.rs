@@ -1,9 +1,9 @@
 //! Size limits of the text surface. They guard the hand-written recursive parser, the
 //! lowering and the printer against hostile input (deep nesting, huge files, huge
-//! tokens). They are **structural caps of the language** (PR §8.4: language constants
-//! are not parameters): the RL1 registry keys bound the IR (`program.max_ir_bytes`,
-//! `program.max_nodes`), not text. A caller may pass tighter values with
-//! [`lower_with`](crate::lower_with) / [`print_with`](crate::print_with).
+//! tokens). The defaults are the language's structural caps; the registry task supplies
+//! the values from parameter keys, passed in through [`lower_with`](crate::lower_with) /
+//! [`print_with`](crate::print_with). The printer uses the same `max_depth` as the
+//! parser, so what it prints always lowers again.
 
 /// Size limits of one text file and of one printed program.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

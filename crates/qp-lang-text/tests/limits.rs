@@ -191,3 +191,155 @@ fn injecting_names_are_refused() {
         "reject E_LOOKAHEAD \"line\\nbreak \\\"q\\\"\"\n"
     );
 }
+
+/// A chain of `height` nodes: `_0` = close, then each node wraps the previous one.
+fn chain(kind: &str, height: usize, underscore: bool) -> Program {
+    let id = |i: usize| {
+        if underscore {
+            format!("_{i}")
+        } else {
+            format!("n{i}")
+        }
+    };
+    let shared = if underscore { "_c" } else { "cc" };
+    let mut nodes = vec![serde_json::json!({"id": id(0), "op": "input", "field": "close"})];
+    for i in 1..height {
+        let prev = id(i - 1);
+        let mut n = match kind {
+            "neg" => serde_json::json!({"op": "neg", "x": prev}),
+            "not" => serde_json::json!({"op": "not", "x": prev}),
+            "sub_left" => serde_json::json!({"op": "sub", "a": prev, "b": shared}),
+            "sub_right" => serde_json::json!({"op": "sub", "a": shared, "b": prev}),
+            "abs" => serde_json::json!({"op": "abs", "x": prev}),
+            "lag" => serde_json::json!({"op": "lag", "x": prev, "n": 1}),
+            "sel" => {
+                serde_json::json!({"op": "macd", "x": format!("{prev}.signal"), "fast": 1, "slow": 2, "signal": 3})
+            }
+            _ => serde_json::json!({"op": "bucket", "x": prev, "edges": [1.0]}),
+        };
+        n["id"] = serde_json::json!(id(i));
+        nodes.push(n);
+    }
+    // `_c` is a named-by-text node read many times (never inlined).
+    nodes.insert(
+        0,
+        serde_json::json!({"id": shared, "op": "input", "field": "open"}),
+    );
+    let root = id(height - 1);
+    let node = if kind == "sel" {
+        format!("{root}.signal")
+    } else {
+        root
+    };
+    serde_json::from_value(serde_json::json!({
+        "version": "qp-ir/0", "nodes": nodes,
+        "outputs": [{"name": "s", "kind": "series", "node": node}]
+    }))
+    .unwrap()
+}
+
+fn lowered(text: &str) -> Program {
+    match lower(text, Language::En)
+        .unwrap_or_else(|e| panic!("{text}\n{e:#?}"))
+        .doc()
+        .unwrap()
+    {
+        qp_schema::program::ProgramDoc::Program(p) => p,
+        qp_schema::program::ProgramDoc::Reject(_) => panic!("reject"),
+    }
+}
+
+/// Near-limit IR always prints to text that lowers: without `_` ids byte-equal; with
+/// `_` ids up to renaming (same canonical text), then byte-equal on the second pass.
+#[test]
+fn near_limit_ir_prints_to_text_that_lowers() {
+    small_stack(|| {
+        let heights = [30, 31, 32, 33, 50, 60, 62, 63, 64, 65, 66, 100, 128, 200];
+        for kind in [
+            "neg",
+            "not",
+            "sub_left",
+            "sub_right",
+            "abs",
+            "lag",
+            "sel",
+            "bucket",
+        ] {
+            for h in heights {
+                let p = chain(kind, h, false);
+                let q = lowered(&print(&p).unwrap());
+                assert_eq!(
+                    q.canonical_json().unwrap(),
+                    p.canonical_json().unwrap(),
+                    "{kind} {h}"
+                );
+                let p = chain(kind, h, true);
+                let text = print(&p).unwrap();
+                let q = lowered(&text);
+                assert_eq!(q.nodes.len(), p.nodes.len(), "{kind} {h}");
+                assert_eq!(print(&q).unwrap(), text, "{kind} {h}");
+                let q2 = lowered(&print(&q).unwrap());
+                assert_eq!(
+                    q2.canonical_json().unwrap(),
+                    q.canonical_json().unwrap(),
+                    "{kind} {h}"
+                );
+            }
+        }
+    });
+}
+
+/// Text within the limit is never cut by the printer: `lower(print(lower(t))) == lower(t)`
+/// byte for byte, up to the parser's limit.
+#[test]
+fn near_limit_text_round_trips() {
+    small_stack(|| {
+        let max = DEFAULT_MAX_DEPTH;
+        let mut texts = vec![];
+        for k in [30, 33, 50, 62, 63] {
+            texts.push(format!("series s = {}close\n", "- ".repeat(k)));
+            texts.push(format!("series s = {}close\n", "-".repeat(k)));
+            texts.push(format!("event e = {}true\n", "not ".repeat(k)));
+            texts.push(format!(
+                "series s = {}close{}\n",
+                "abs(".repeat(k),
+                ")".repeat(k)
+            ));
+            texts.push(format!("series s = close{}\n", "[1]".repeat(k)));
+            texts.push(format!("series s = close{}\n", " - open".repeat(k)));
+            texts.push(format!(
+                "series s = {}close{}\n",
+                "(open - ".repeat(k / 2),
+                ")".repeat(k / 2)
+            ));
+        }
+        texts.push(format!(
+            "series s = {}close{}\n",
+            "(".repeat(max - 1),
+            ")".repeat(max - 1)
+        ));
+        let mut lowered_count = 0;
+        let total = texts.len();
+        for t in texts {
+            let Ok(l) = lower(&t, Language::En) else {
+                continue;
+            };
+            lowered_count += 1;
+            let qp_schema::program::ProgramDoc::Program(p) = l.doc().unwrap() else {
+                panic!()
+            };
+            let printed = print(&p).unwrap();
+            let q = lowered(&printed);
+            assert_eq!(
+                q.canonical_json().unwrap(),
+                p.canonical_json().unwrap(),
+                "{t}"
+            );
+            assert!(!printed.contains("v1 ="), "cut: {t}");
+        }
+        assert!(
+            lowered_count + 4 >= total,
+            "{lowered_count} of {total} lowered"
+        );
+    });
+}

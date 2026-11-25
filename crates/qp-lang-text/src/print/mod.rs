@@ -7,6 +7,7 @@
 mod check;
 mod expr;
 mod lit;
+mod plan;
 mod text;
 
 pub use check::PrintError;

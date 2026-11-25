@@ -580,6 +580,20 @@ fn samples() -> Vec<(&'static str, Value)> {
             "set_sensitivity",
             json!({"op":"set_sensitivity","sensitivity":null}),
         ),
+        // (RL1) Program ops: denied until the `qp-program` subsystem registers its policy
+        // (PS §2.2: add/set as proposals only, remove never); then `allowed` changes.
+        (
+            "add_program",
+            json!({"op":"add_program","program":{},"inputs":["px"]}),
+        ),
+        (
+            "set_program_params",
+            json!({"op":"set_program_params","program":"p1","params":{}}),
+        ),
+        (
+            "remove_program",
+            json!({"op":"remove_program","program":"p1"}),
+        ),
     ]
 }
 

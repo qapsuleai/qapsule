@@ -124,7 +124,7 @@ fi
 wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
 if [ "$want_wasm" = 1 ] && command -v node >/dev/null 2>&1 && [ -x "$wp" ]; then
   pkg="$priv/pkg"
-  "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg" >/dev/null 2>&1
+  "$wp" build crates/qp-wasm --target nodejs --profile wasm --out-dir "$pkg" >/dev/null 2>&1
   node -e "console.log(require('$pkg/qp_wasm.js').compute_digest())" >"$out/compute/digest.wasm32.txt"
 fi
 

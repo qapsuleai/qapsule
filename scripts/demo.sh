@@ -16,7 +16,7 @@
 #          QP_DEMO_GALLERY_ONLY=1 stops after that (no wasm build, no host).
 #
 # 1. builds the web shell's core (qp-wasm, feature `replica`) with wasm-pack into
-#    shells/web/pkg, stripped of function names (skipped when up to date;
+#    shells/web/pkg, optimised by wasm-opt (no function names) (skipped when up to date;
 #    QP_DEMO_REBUILD=1 forces it) and writes
 #    shells/web/pkg/sizes.json (raw, gzip -9 and brotli sizes, for the metrics page) and
 #    pre-compressed copies of the package (pkg/*.gz, and pkg/*.br when `brotli` exists)
@@ -127,11 +127,11 @@ if [ -f "$pkg/qp_wasm_bg.wasm" ] && [ "${QP_DEMO_REBUILD:-0}" != 1 ]; then
   [ -z "$newer" ] && stale=0
 fi
 if [ "$stale" = 1 ]; then
-  echo "== building the shell core (wasm-pack, profile wasm, feature replica, stripped)"
-  # R4/T6: without the function-name section (22% of the raw file: 5.4 -> 4.2 MB raw,
-  # 1.45 -> 1.23 MB gzip); the default (view) build keeps the profile as it is.
-  CARGO_PROFILE_WASM_STRIP=true \
-  "$wasm_pack" build crates/qp-wasm --target web --profile wasm --no-opt \
+  echo "== building the shell core (wasm-pack, profile wasm, feature replica, wasm-opt)"
+  # RL1/Ö1: wasm-pack runs wasm-opt (passes in crates/qp-wasm/Cargo.toml), which also drops
+  # the function-name section (R4/T6 stripped it with CARGO_PROFILE_WASM_STRIP); the same
+  # package as verify.sh step 18 measures.
+  "$wasm_pack" build crates/qp-wasm --target web --profile wasm \
     --out-dir ../../shells/web/pkg -- --features replica
   rm -f "$pkg/.gitignore" "$pkg/package.json" "$pkg/README.md"
 fi

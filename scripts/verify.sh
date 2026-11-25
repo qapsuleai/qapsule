@@ -389,7 +389,7 @@ step_digest() {
   fi
   local wp pkg="$target_dir/wasm-bench/pkg"
   wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
-  "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg"
+  "$wp" build crates/qp-wasm --target nodejs --profile wasm --out-dir "$pkg"
   got="$(node -e "console.log(require('$pkg/qp_wasm.js').compute_digest())")"
   echo "wasm32 (node $(node --version)): $got"
   [ "$got" = "$want" ] || fail "wasm32 digest $got != $want"
@@ -480,7 +480,7 @@ step_replica() {
     return 0
   fi
   wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
-  "$wp" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$pkg" -- --features replica
+  "$wp" build crates/qp-wasm --target nodejs --profile wasm --out-dir "$pkg" -- --features replica
   node crates/qp-wasm/tests/replica_tape.mjs "$pkg" "$d/tape0.json" "$d/tape25.json" \
     || fail "wasm32 replica digests differ from native"
   note "native authority = native replica = wasm32 replica (lag 0, 25); viewer (lag 0, 25)"
@@ -509,7 +509,7 @@ step_demo() {
   esac
   build_qp
   wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
-  "$wp" build crates/qp-wasm --target web --profile wasm --no-opt \
+  "$wp" build crates/qp-wasm --target web --profile wasm \
     --out-dir ../../shells/web/pkg -- --features replica
   rm -f shells/web/pkg/.gitignore shells/web/pkg/package.json shells/web/pkg/README.md
   printf '{"wasm_raw":%s,"wasm_gzip":%s}\n' "$(wc -c <shells/web/pkg/qp_wasm_bg.wasm | tr -d ' ')" \

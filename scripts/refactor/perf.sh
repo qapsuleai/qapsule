@@ -7,7 +7,7 @@
 #   K52  shells/web/tests/metrics.mjs at CPU throttling 4 (headless Chromium, phone page):
 #        the metrics page summary (tick, face and scene paint p95, long frames)
 #   WASM verify.sh step 8 build (profile wasm): raw and gzip -9 bytes; the shell package
-#        (wasm-pack web, --features replica, as in verify.sh step 18)
+#        (wasm-pack web, --features replica, as in verify.sh step 18; wasm-opt since RL1/Ö1)
 # Timing numbers are noisy; the round compares them by eye within noise (GOAL.md).
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -27,7 +27,7 @@ qp="$target_dir/release/qp"
   echo "## WASM shell package (web, replica)"
   wp="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
   pkg="$root/shells/web/pkg"
-  "$wp" build crates/qp-wasm --target web --profile wasm --no-opt --out-dir ../../shells/web/pkg -- --features replica >/dev/null 2>&1
+  "$wp" build crates/qp-wasm --target web --profile wasm --out-dir ../../shells/web/pkg -- --features replica >/dev/null 2>&1
   rm -f "$pkg/.gitignore" "$pkg/package.json" "$pkg/README.md"
   echo "raw=$(wc -c <"$pkg/qp_wasm_bg.wasm" | tr -d ' ') gzip9=$(gzip -9 -c "$pkg/qp_wasm_bg.wasm" | wc -c | tr -d ' ')"
   echo "## K52 metrics.mjs (CPU x4)"

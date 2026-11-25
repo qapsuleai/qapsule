@@ -54,6 +54,15 @@ qp-wasm = { path = ".", features = ["replica"] }
 # depend on downloading binaryen.
 wasm-opt = false
 
+[package.metadata.wasm-pack.profile.custom]
+# RL1/Ö1 (A70): every `wasm-pack --profile wasm` build (the web shell package, the wasm32
+# digest and replica checks, the WASM sweep bench) runs wasm-opt with these passes. Measured
+# against -Os/-Oz/-O2/-O3 and opt-level z (rounds/RL1/experiments/o1-wasm/RESULT.md): -O1
+# plus function reordering gives the smallest gzip and brotli package without slowing the
+# compute kernels; -Os/-Oz shrink the raw file more but compress worse. wasm-opt drops the
+# function-name section (it is not run with -g). wasm-pack fetches binaryen once (cached).
+wasm-opt = ["-O1", "--duplicate-function-elimination", "--reorder-functions", "--reorder-locals"]
+
 [lints]
 workspace = true
 

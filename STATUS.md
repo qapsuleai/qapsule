@@ -5,10 +5,10 @@ Her round sonunda güncellenir.
 
 ## Şu an
 
-- **Aktif round:** yok. **RF1 tamamlandı** (2026-11-25): oturum ve gramer bölündü, davranış değişmedi (tutanak 270/270 bayt eşit). Karar bekleyenler: önerilen kararlar Ö119–Ö126 ve açık sorular A70–A73 (`docs/decisions/rounds/RF1.md`). Sıradaki **RL1** (hesap dili).
+- **Aktif round:** yok. RF1 tamamlandı ve kabul edildi (K93). Sıradaki **RL1** (hesap dili; paket `rounds/RL1/`).
 - **Son güncelleme:** 2026-11-25
 - **Hedef düzeltmesi (K69–K83):** ana akış araştırma kanalıyla birleşti; yeni oturum `docs/HANDOFF.md`'den başlar. Güncel sıra (K89): RG1 → RD2 → RF1 → RL1 → R7 → RS1 → RA1 → R8 → R9.
-- **Sıradaki adım:** ana akış RF1 raporunu okur ve Ö119–Ö126, A70–A73'ü karara bağlar. Bilinmesi gerekenler:
+- **Sıradaki adım:** RL1'i başlat (`rounds/RL1/PROMPT.md`). RF1'in önerileri ve açık soruları işlendi (K93). Bilinmesi gerekenler:
   - **Çekirdek donuk** (`qp-authority` 12.744 satır, İ3); yeni iş alt sistem sözleşmesiyle (`qp-subsystem`) kendi crate'inde doğar ve bileşime bir satırla girer (`docs/ARCHITECTURE.md` "Yeni alt sistem nasıl eklenir").
   - **WASM payı dar:** kabuk paketi İ8 tavanına (+%2,5) 4,8 KB uzakta; R7'den önce `wasm-opt` ölçümü önerilir (A70).
   - **R7 gramer payı:** `qp-grammar` 7.710 satır; R7 işaretleri için 4.290 satır pay var.
@@ -60,7 +60,7 @@ Her round sonunda güncellenir.
 
 - **RD2:** insan testi v4: kendi beş saniyelik bakış formun ve en az iki işlem yapan kullanıcı (`rounds/RD2/human-test/GUIDE.md`). Öneriler kabul edildi (K90).
 - **K91:** `THIRD_PARTY_NOTICES.md` ilk uyarlamayla oluşunca hukuk bir kez baksın.
-- **RF1:** bir karar noktası: bölme planı hazır olunca ana akışa göster.
+- **RL1:** round sonunda kendi ajanınla kısa deneme (bir gösterge ve bir koşul yazdır); adımları raporda olacak.
 - **R5B:** beş dakikalık deneme (`rounds/R5B/REPORT.md` son bölüm). Öneriler kabul edildi (K86).
 - **RP4:** ilk iş günü listesi `rounds/RP4/REPORT.md` §13. Öneriler kabul edildi (K86).
 - Kurumsal işlemde izleme kararı verildi (K88; RS1 kapsamı).

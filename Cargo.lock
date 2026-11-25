@@ -2025,6 +2025,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-lang-text"
+version = "0.0.0"
+dependencies = [
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-live"
 version = "0.0.0"
 dependencies = [

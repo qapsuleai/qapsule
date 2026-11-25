@@ -62,3 +62,16 @@ verify adım 18): ham 9.004.332 → 6.598.168 B, gzip 2.485.078 → 1.939.823 B.
 (2.354.868 / 773.639) ±%2 kuralında kalır. RL1'in sonraki işleri (qp-lang'in qp-plane'e
 bağlanması) bu tavana göre ölçülür (D1 şart 1). İ8 makine kuralı değildir (RF1 denetimi);
 VERIFY 6 bu satıra göre elle ölçülür.
+
+## D5 — `describe` cevabı ve üç karakterizasyon sınaması (yürüten oturum, 2026-11-26)
+
+Yeni işlemler (`add_program`, `set_program_params`, `remove_program`) ve sorgular (`check_program`,
+`try_program`, `explain_program`) `describe` cevabına ve "bilinmeyen işlem" hatasının `expected`
+listesine kendiliğinden girer. `qp-session` testlerindeki üç karakterizasyon kaydı (`charac`
+transcripts/worlds, `capsule_perf_equality`) bu yüzden değişir. Bunlar `fixtures/protocol`
+dökümleri değildir; R5B aynı nedenle yeniden kaydetmişti. Program işlemlerini `describe`'dan
+gizlemek ajanın keşfini bozacağı için seçilmedi. Karar: **yalnız ekleme olduğu kanıtlanınca
+yeniden kayıt.** Kanıt `rounds/RL1/experiments/i1/describe-diff.md`: 570 durumdan 8'i değişti,
+hepsi listelerin sonuna yeni adların eklenmesi (eski liste değişmemiş önek); bayt toplamları
+yalnız bu eklemelerle açıklanıyor. `fixtures/` değişmedi. PROGRAMS §17'deki "describe değişmez"
+varsayımı bu kadarıyla düzeltilir (ekleme).

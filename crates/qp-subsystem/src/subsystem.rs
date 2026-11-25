@@ -6,7 +6,7 @@ use qp_schema::protocol::{Op, ProtocolError, ViewState};
 use crate::handlers::{
     ClaimKind, ConditionKind, InputHandler, OpHandler, QueryHandler, TopicHandler, ValueSource,
 };
-use crate::{Moment, Outbox, Phase, ReadView, SessionView, Slots};
+use crate::{Moment, Outbox, Phase, ReadView, Registry, SessionView, Slots};
 
 /// A call's context: a split borrow of the authority (read view, the subsystems' state,
 /// the outbox, and the two pieces of the authority a reading changes: the values cache
@@ -24,9 +24,12 @@ pub struct SessionCtx<'a> {
     /// The connections' view state (`look`, §7: open capsule, depth, range, frames,
     /// style), by connection index ([`SessionView::conn_ids`] order).
     pub looks: &'a mut Vec<ViewState>,
-    /// The read view, at a query's or a gesture's call only ([`QueryHandler`],
-    /// [`InputHandler`]; `None` at the phases).
+    /// The read view, at a query's, a gesture's or a push's call only ([`QueryHandler`],
+    /// [`InputHandler`], [`TopicHandler::push`]; `None` at the phases).
     pub read: Option<&'a dyn ReadView>,
+    /// The authority's registry (RF1 S3.3: a pushed topic asks a query of the subsystem
+    /// that answers it, as the authority would).
+    pub registry: &'a Registry,
 }
 
 /// A subsystem: a stateless behaviour object (`&'static dyn Subsystem`) registered with

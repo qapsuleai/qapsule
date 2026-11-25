@@ -254,6 +254,16 @@ impl ReadView for Session {
     fn ledger_now(&self) -> Vec<(String, qp_schema::capsule::MeaningKind, i64, bool)> {
         Session::ledger_now(self)
     }
+    fn item_headline_parts(
+        &self,
+        item: &CapsuleItem,
+        lang: Language,
+    ) -> Option<qp_grammar::HeadlineParts> {
+        Session::item_headline_parts(self, item, lang)
+    }
+    fn market_for(&self, principal: &str) -> Option<MarketStatus> {
+        Session::market_for(self, principal)
+    }
 }
 
 impl Session {
@@ -338,6 +348,7 @@ impl Session {
             cache: &mut cache,
             looks: &mut looks,
             read: None,
+            registry: &self.registry,
         };
         if READ {
             ctx.read = Some(&*self);
@@ -467,36 +478,6 @@ impl Session {
         };
         let conn = self.conns[ci].id.clone();
         self.with_read_ctx(|_, ctx| h.input(&conn, g, ctx))
-    }
-
-    /// A subscription: the built-in checks, then its topic kind's handler (a refusal
-    /// drops the subscription again and undoes the built-in subscribe's side effects:
-    /// audit-s30 B5), then [`Phase::Subscribe`].
-    pub(super) fn dispatch_subscribe(&mut self, ci: usize, id: &str, topic: Topic) -> PResult<()> {
-        let h = self.registry.topic(&topic).map(|h| (h, topic.clone()));
-        self.subscribe(ci, id, topic)?;
-        let conn = self.conns[ci].id.clone();
-        if let Some((h, t)) = h {
-            if let Err(e) = self.with_ctx(|_, ctx| h.subscribe(&conn, id, &t, ctx)) {
-                self.conns[ci].subs.retain(|s| s.id != id);
-                self.viewer_unsubscribed(&conn, id);
-                return Err(e);
-            }
-        }
-        self.phase(
-            Phase::Subscribe,
-            Moment::Sub {
-                conn: &conn,
-                sub: id,
-            },
-        );
-        Ok(())
-    }
-
-    /// After subscription `sub` of `conn` was dropped: viewers, then [`Phase::Unsubscribe`].
-    pub(super) fn unsubscribed(&mut self, conn: &str, sub: &str) {
-        self.viewer_unsubscribed(conn, sub);
-        self.phase(Phase::Unsubscribe, Moment::Sub { conn, sub });
     }
 
     /// A dispute: its claim kind's verdict, else the built-in dispute.

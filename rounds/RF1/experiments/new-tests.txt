@@ -59,4 +59,4 @@ a_registered_claim_kind_keeps_the_limited_guards
 # S3.2 (qp-read; ANY kolu, kayıtsız otorite)
 any_answers_every_kind_no_other_handler_took
 without_the_reading_subsystem_queries_and_inputs_are_unsupported
-the_follower_list_is_the_standard_list_without_reading
+the_follower_list_is_the_standard_list_without_reading_and_viewers

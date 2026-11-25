@@ -140,7 +140,7 @@ fn claim_series(rd: &Document, c: &Condition) -> Option<String> {
 
 /// True if bar `t` of bar series `bs` is closed on `rd`: a later bar exists, or the
 /// series is bound with a closed window (`to_t`: no live bar).
-pub(crate) fn closed(rd: &Document, bs: &str, t: i64) -> bool {
+pub fn closed(rd: &Document, bs: &str, t: i64) -> bool {
     let Some(s) = find_series(rd, bs) else {
         return false;
     };
@@ -155,7 +155,7 @@ pub(crate) fn closed(rd: &Document, bs: &str, t: i64) -> bool {
 }
 
 /// The anchor of bound bar series `bs` in `rd` (`None`: inline or not anchored yet).
-pub(crate) fn anchor_of(rd: &Document, bs: &str) -> Option<i64> {
+pub fn anchor_of(rd: &Document, bs: &str) -> Option<i64> {
     match &find_series(rd, bs)?.source {
         SeriesSource::Bind { anchor_t, .. } => *anchor_t,
         _ => None,
@@ -201,7 +201,7 @@ pub(crate) fn assemble(
 /// Evaluates condition `c` at the bars named by `at` (one entry per operand, by time;
 /// `None`: at the last bar) on `rd`. Returns whether it holds and the operand values,
 /// or `None` if an operand's bar is not held (not covered) or `c` is a text condition.
-pub(crate) fn eval_at(
+pub fn eval_at(
     rd: &Document,
     cache: &mut Cache,
     c: &Condition,
@@ -518,9 +518,7 @@ impl crate::session::Session {
                 }
                 // (RP3/M15, §22) A viewer gets the claims about its open instrument on
                 // its `viewer` subscription (it subscribes to no `claims`).
-                let viewer = self
-                    .viewer_claim_sub(&c.id, &p.evidence.feeds)
-                    .map(str::to_owned);
+                let viewer = self.push_claim_sub(&c.id, &p.evidence.feeds);
                 for s in &c.subs {
                     let to_viewer = viewer.as_deref() == Some(s.id.as_str());
                     if !matches!(s.topic, qp_schema::protocol::Topic::Claims {}) && !to_viewer {
@@ -553,8 +551,8 @@ impl crate::session::Session {
 
 /// The bound feeds series `ids` rest on in `doc` (through study inputs), sorted and
 /// unique; `None` if a series cannot be resolved (then no evidence is made: a claim whose
-/// data dependencies are unknown cannot be gated, §19.7).
-pub(crate) fn feeds_of(doc: &Document, ids: &[&str]) -> Option<Vec<qp_schema::data::FeedKey>> {
+/// data dependencies are unknown cannot be gated, §19.7); the viewer's faces too.
+pub fn feeds_of(doc: &Document, ids: &[&str]) -> Option<Vec<qp_schema::data::FeedKey>> {
     let mut out: Vec<qp_schema::data::FeedKey> = Vec::new();
     let mut stack: Vec<&str> = ids.to_vec();
     let mut seen = 0usize;

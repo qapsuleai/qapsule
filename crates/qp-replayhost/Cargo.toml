@@ -1,0 +1,22 @@
+[package]
+name = "qp-replayhost"
+description = "Qapsule replay host (yeniden oynatma barındırıcısı): runs an authority on a replay source, answers the replay protocol message and rebuilds the authority with the subsystem list it is given."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-authority = { version = "0.0.0", path = "../qp-authority" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-source = { version = "0.0.0", path = "../qp-source" }
+qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[dev-dependencies]
+qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
+
+[lints]
+workspace = true

@@ -190,3 +190,35 @@ imzayla bileşimin yöntemleri; `provider`, `scene`, `scene_as_reader`, `surface
 - `qp_session::FOLLOWER` (izleyici otoritelerin listesi: `STANDARD` eksi okuma); `qp_session::{Replica, viewer::OpenSide}` artık `FOLLOWER` ile kurulur (S3.1'de `STANDARD`)
 - `qp_authority::tape::{run, run_with, run_viewer}(…)`: son parametre `subs: Subsystems` → `subs: qp_authority::Lists` (= `(Subsystems, Subsystems)`: otoritenin, izleyicilerin; audit-s32 B2); `qp_session::tape::*` imzası aynı
 - `qp_ops::{bounds, firsts}`
+
+## S3.3 — `qp-replayhost`, `qp-viewer`, `qp-replica` (otoritenin istemcileri ve görüntüleyici)
+
+Çağıranların yolu korunur: `qp_session::{ReplayHost, Replica, OpenSide, ReplicaOptions,
+document_digest, view_digest, demo_init}`, `qp_session::{replayhost, replica, viewer, tape}::*`
+aynı adlarla (artık yeni crate'lerden). `Session::{viewer_flush, viewer_data, has_viewers,
+set_viewer_batch}` otoritede aynı imzayla (genel itilen konu düzeneği). Tel biçimi aynı.
+
+| Eski | Yeni |
+|---|---|
+| `qp_authority::{ReplayHost, demo_init, replayhost::*}` | `qp_replayhost::…` (`qp_session` aynı adlarla) |
+| `qp_authority::viewer::*` (`OpenSide`, `face_scene`, `open_scene`, `open_scene_with`, `scene_digest`, `story_series`, `look_of`, `OpenExtra`, `slice`, `check_story`, `StoryCheck`, `TrustState`, `trust_text`, `open_provider`, `first_facts`, `FirstFacts`, `DEFAULT_LIMIT`, `MAX_LIMIT`, `DEFAULT_FACE_WIDTH`) | `qp_viewer::…` (`qp_session::viewer::*`) |
+| `qp_authority::{Replica, ReplicaOptions, document_digest, view_digest, replica::*}` | `qp_replica::…` (`qp_session::replica::*`, `qp_session::{…}`) |
+| `qp_authority::replica::{fnv1a64, document_digest}` | `qp_ops::digest::{fnv1a64, document_digest}` (`qp_replica` aynı adlarla yeniden dışa aktarır) |
+| `qp_authority::tape::{run, run_with, init, events, …}` | `qp_replica::tape::…`; `holds` artık `pub` |
+| `qp_authority::tape::{run_viewer, ViewerOutcome}` | `qp_viewer::tape::…` (`qp_session::tape::run_viewer` aynı imza) |
+| `qp_authority::replica::viewer` (modül yolu) | yok (`qp_session::viewer`) |
+| (crate içi) `Session::viewers`, `viewer_check`, `viewer_start`, `visible_msg`, `viewer_unsubscribed`, `viewer_lines`, `viewer_update`, `viewer_compute`, `viewer_row`, `viewer_claim_sub`; `ViewerConn` | `qp-viewer` alt sistemi (`VIEWER`; `ViewerConn` bağlantı başına yuva); otoritede genel `push.rs` (`dispatch_visible`, `push_lines`, `push_claim_sub`) |
+| (crate içi) `capsule/tests/headparts.rs` | `qp-replayhost` `tests/headparts.rs` |
+
+**Yeni yollar:**
+
+- `qp_replayhost::{ReplayHost, demo_init, interval_ms, DEFAULT_*, MAX_*}`
+- `qp_viewer::{Viewer, VIEWER}` ve yukarıdaki görüntüleyici yolları; gizli `qp_viewer::tape`
+- `qp_replica::{Replica, ReplicaOptions, DisplayItem, Shown, document_digest, view_digest, fnv1a64}`; gizli `qp_replica::tape`; `Replica::start_from` (gizli; ödünç dokümandan `start`)
+- `qp_ops::digest`
+- `qp_subsystem`: `TopicHandler::{pushing, pushes, push, visible, visible_result, claim_sub, data}` (varsayılanlı); `SessionCtx::registry`; `ReadView::{item_headline_parts, market_for}`; `Slots::{conn, any_conn, take_conn}`; `Registry::topic_handlers`
+- `qp_authority` gizli (`#[doc(hidden)]`) yöntemler — istemcilerin otoriteye dokunduğu tek yer:
+  - yansı (`authority/session/follow.rs`): `Session::build_follower` (sağlayıcısız `build_with`), `follow_start` (eski `replica.rs:229-241` alan yazımları), `take_provider`, `mirror_apply` (`apply_in_place` + `Restore`), `mirror_commit` (`committed` + bekleyen görünüm ve iddia temizliği), `follow_data` (`apply_event` + `data_changed`), `follow_resync`, `eval_parts` (doküman, okuma dokümanı, düzlem, önbellek birlikte)
+  - barındırıcı: `Session::seq_to`, `conn_agent_origin`, `reader_parts_of` (sınama)
+  - kök: `qp_authority::{anchor_of, closed, eval_at, feeds_of}` (iddiaların saf fonksiyonları)
+- `qp_session::FOLLOWER` = `STANDARD` eksi okuma ve görüntüleyici

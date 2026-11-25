@@ -55,7 +55,7 @@ struct RowKey {
 }
 
 fn key_digest(k: &RowKey) -> u64 {
-    crate::replica::fnv1a64(&serde_json::to_vec(k).unwrap_or_default())
+    qp_ops::digest::fnv1a64(&serde_json::to_vec(k).unwrap_or_default())
 }
 
 /// The bar series of `instrument` in `doc` that stories can be listed on (bars, not

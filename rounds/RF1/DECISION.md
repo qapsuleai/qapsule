@@ -118,3 +118,14 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
   kurar") bu ölçüde sapılır. Kayıt şeridi (`tape`) de izleyicileri `FOLLOWER` ile kurar
   (ürün yoluyla aynı; audit-s32 B2). Arkin itiraz ederse geri alınır (o zaman WASM kapısı
   yeniden konuşulur).
+- **İ8 (RF1), kabuk WASM paketi (Arkin'in kararı, 2026-11-25: "WASM istisnası kabul").**
+  Round oturumu S3.3'te durup sordu; seçenekler: (1) istisna; (2) yansı ve görüntüleyici
+  çekirdekte kalır (çekirdek 15.449, 13.000 tavanı tutmaz); (3) bir tur daha küçültme.
+  Ölçüm (S3.3 sonu, `--features replica`, `--no-opt`): kabuk paketi ham 9.004.524 B (+%2,45;
+  taban 8.789.414), gzip 2.485.151 B (+%2,17; taban 2.432.388); varsayılan `qp_wasm.wasm`
+  +%0,39 (±%2 içinde). Neden: taşınan kodun kendisi değil (`qp_authority` −35,7 KB, `qp_replica`
+  +27,6 KB, `qp_viewer` +10,7 KB), `--no-opt` pakette crate'ler arası jenerik örnek kopyaları
+  (`core`/`alloc` BTreeMap arama ve itme, `drop_in_place`, `clone`, serde ziyaretçileri, bir
+  kararlı sıralama; isim bölümü +17,5 KB). Tavan: kabuk paketi en çok ham +%2,5 / gzip +%2,5
+  (RG1 İ7 emsali, K85); varsayılan paket ±%2 içinde kalır. Kalıcı çözüm önerisi: kabuk
+  paketinde `wasm-opt` ya da derleme ayarı (ayrı round; `REPORT.md` Öneriler).

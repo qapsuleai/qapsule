@@ -15,19 +15,58 @@ pub fn face_scene(
     w: u32,
     h: u32,
 ) -> Option<SceneDesc> {
-    let heads = BTreeMap::from([(item.finding.clone(), item.sentence.text.clone())]);
     // (R4/H-FP) The headline pieces only for a design with a headline template.
-    let parts = qp_designs::faces::headline_template(look.face.as_deref())
+    let parts = wants_parts(look)
+        .then(|| s.item_headline_parts(item, item_lang(item)))
+        .flatten();
+    face_with(s.provider(), parts, item, look, max_points, (w, h))
+}
+
+/// (RF1 S3.3) [`face_scene`] as the viewer subsystem compiles it on the authority: the
+/// call context's reading document, values cache and the reader's headlines (the same
+/// provider `Session::provider` builds) and the read view's headline pieces.
+pub(crate) fn face_scene_in(
+    ctx: &mut qp_subsystem::SessionCtx<'_>,
+    item: &CapsuleItem,
+    look: &ViewState,
+    max_points: u32,
+    w: u32,
+    h: u32,
+) -> Option<SceneDesc> {
+    let read = ctx.read?;
+    let parts = wants_parts(look)
+        .then(|| read.item_headline_parts(item, item_lang(item)))
+        .flatten();
+    let rd = ctx.view.reading();
+    qp_ops::provider::warm(rd, ctx.cache);
+    let inner = qp_ops::DocProvider::new(rd, ctx.cache).with_headlines(read.headlines());
+    face_with(inner, parts, item, look, max_points, (w, h))
+}
+
+/// Whether the connection's face design has a headline template.
+fn wants_parts(look: &ViewState) -> bool {
+    qp_designs::faces::headline_template(look.face.as_deref())
         .ok()
         .flatten()
-        .and_then(|_| s.item_headline_parts(item, item_lang(item)))
-        .map(|hp| (item.finding.as_str(), hp));
+        .is_some()
+}
+
+/// The face scene over provider `inner` with headline pieces `parts`.
+fn face_with(
+    inner: qp_ops::DocProvider<'_>,
+    parts: Option<qp_grammar::HeadlineParts>,
+    item: &CapsuleItem,
+    look: &ViewState,
+    max_points: u32,
+    (w, h): (u32, u32),
+) -> Option<SceneDesc> {
+    let heads = BTreeMap::from([(item.finding.clone(), item.sentence.text.clone())]);
     // (R5/m17-int) The voice the authority wrote for this reader (the same function the
     // authority's own compile calls, `Session::reader_voice`).
     let p = Reader {
-        inner: s.provider(),
+        inner,
         heads: &heads,
-        parts,
+        parts: parts.map(|hp| (item.finding.as_str(), hp)),
         voice: item.voice.as_ref().map(|v| (item.finding.as_str(), v)),
         extra: OpenExtra::default(),
     };
@@ -255,11 +294,11 @@ impl OpenSide {
         seq: u64,
         provider: qp_source::MemoryProvider,
         calendar: Option<qp_schema::Calendar>,
-        subs: crate::Subsystems,
+        subs: qp_authority::Subsystems,
     ) -> Self {
         let mut replica = Replica::with_memory(principal, provider, subs);
         replica.set_headline_calendar(calendar);
-        replica.start((*open.document).clone(), seq);
+        replica.start_from(&open.document, seq);
         Self {
             open,
             replica,
@@ -272,7 +311,7 @@ impl OpenSide {
     /// A new slice of the same capsule (the authority's document changed): the replica
     /// reloads it and keeps its data and the claims it knows.
     pub fn update(&mut self, open: ViewerOpen, seq: u64) {
-        self.replica.start((*open.document).clone(), seq);
+        self.replica.start_from(&open.document, seq);
         self.open = open;
         self.checked_at = None;
     }

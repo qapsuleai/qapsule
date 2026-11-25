@@ -230,8 +230,11 @@ impl Session {
 
     /// (R3/K1b) Sequence number `s` (of the authority's log, as the authority's world
     /// writes it into a message) as `principal` may receive it: for a public-view reader
-    /// the public log's length at the time the authority's log had length `s`.
-    pub(crate) fn seq_to(&self, principal: &str, s: Seq) -> Seq {
+    /// the public log's length at the time the authority's log had length `s`. Hidden
+    /// public (RF1 S3.3): the replay host answers with it (`qp-replayhost`).
+    #[doc(hidden)]
+    #[must_use]
+    pub fn seq_to(&self, principal: &str, s: Seq) -> Seq {
         if self.in_public || !self.public_view(principal) {
             return s;
         }

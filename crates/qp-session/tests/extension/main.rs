@@ -104,7 +104,7 @@ fn ext_tally_counts_its_op_through_an_engine_entry() {
 fn ext_tally_a_replica_with_the_same_list_follows() {
     let subs = list(&[&TALLY]);
     let mut s = with_list(subs);
-    let mut r = qp_authority::Replica::with_memory("arkin", qp_source::MemoryProvider::new(), subs);
+    let mut r = qp_replica::Replica::with_memory("arkin", qp_source::MemoryProvider::new(), subs);
     let hello_msg =
         json!({"type":"hello","protocol":"qp/0","principal":"arkin","surface":{"kind":"phone"}});
     let w = s.handle_raw("r", &hello_msg.to_string());

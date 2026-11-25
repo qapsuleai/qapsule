@@ -8,9 +8,11 @@ mod create;
 mod dispatch;
 mod events;
 mod files;
+mod follow;
 mod intake;
 mod phases;
 mod presence;
+mod push;
 mod settle;
 mod worlds;
 
@@ -219,9 +221,8 @@ pub struct Session {
     pub(crate) pub_at: Vec<Seq>,
     /// (R3/K1b) A proposal both worlds hold: the authority's id → the public world's.
     pub(crate) prop_map: BTreeMap<String, String>,
-    /// (RP3/M15, §22) Viewer connections: what each was sent (by connection id).
-    pub(crate) viewers: BTreeMap<String, crate::viewer::ViewerConn>,
-    /// (RP3/M15) The host computes viewer updates after a batch of data events.
+    /// (RP3/M15) The host computes pushed updates (viewers, §22; stories, §23) after a
+    /// batch of data events (the viewers' state is the viewer subsystem's: RF1 S3.3).
     pub(crate) viewer_batch: bool,
     /// (R5/M18, K53; R5/M19) The host's coin-flip rule (`init.feed_rule`,
     /// `Session::set_coin_flip_rule`).

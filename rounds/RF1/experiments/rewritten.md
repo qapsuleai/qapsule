@@ -244,3 +244,46 @@ yerlerine, `qp-read` `lib.rs` iç `#![allow(clippy::result_large_err)]`ı — ot
 `qp_session::Session::{scene_for, explain}`. Sınamalar: `qp-subsystem` `tests/contract.rs`
 `any_answers_every_kind_no_other_handler_took`; `qp-session` `compose.rs` `the_follower_list_is_the_standard_list_without_reading` (audit-s32 B2); `qp-authority` `tests/subsystems.rs`
 `without_the_reading_subsystem_queries_and_inputs_are_unsupported`.
+
+## S3.3 — `qp-replayhost`, `qp-viewer` (alt sistem), `qp-replica`; otoritede itilen konular ve izleyici adımları
+
+Davranış aynı (S1 karakterizasyonu 25/25; `compare.sh`, doğrulama 15). Yeniden oynatma
+barındırıcısı ve yansı otoritenin **istemcisi** oldu: otoriteyi kendilerine verilen listeyle kurar,
+ona yalnız dışa açık ve dar gizli yöntemlerle ulaşır (`paths.md` S3.3). Görüntüleyici bir **alt
+sistem** oldu: otorite onu itilen konu olarak (`TopicHandler`) her girdiden sonra, bugünkü çağrı
+noktalarında (`handle_raw`, `host_data_event`, `set_market_status`, barındırıcının adımları) ve
+okuyucunun dünyasında (`as_reader` + okuma görünümü) çağırır; görüntüleyici durumu bağlantı başına
+yuvadadır. Toplu itme bayrağı (`viewer_batch`) otoritede kaldı: `stories` (§23, çekirdek) de ona
+bağlı. `FOLLOWER` görüntüleyiciyi almaz (izleyiciye abonelik gelmez); WASM'ı ölçüldü, İ8.
+
+**moved.py `main HEAD`:** 580 öğe değişmeden taşındı ya da yerinde; 20 yalnız yol; 154 `CHANGED`
+(53 `-`, 101 `+`); 27 `FLAG` (içe aktarma); 37 yeniden dışa aktarım değişikliği.
+
+| Öğe | Dosya | Ne değişti |
+|---|---|---|
+| `follower` | `qp-replica` `replica.rs` | alan yazımları (eski 229-241) → `Session::build_follower` + `follow_start` (gövde aynı, otoritede) |
+| `load`, `mirror`, `data_event`, `resync` | `qp-replica` `replica/follow.rs` | `plane.provider` değişimi → `take_provider`; `apply_in_place`/`Restore` → `mirror_apply`; `committed` + `pending_views.clear()` + `claims.take()` → `mirror_commit`; `apply_event` + `data_changed` + temizlik → `follow_data`; yeniden çözüm → `follow_resync`; `s.doc` → `document()` |
+| `judge`, `send_dispute`, `bars`, `candidates` | `qp-replica` `replica/judge.rs`, `replica.rs` | `rd!(s)`, `s.doc`, `s.plane`, `&mut s.cache` → `eval_parts()` / `SessionView::{reading, document}`; `claims::{anchor_of, closed, eval_at}` gizli kök yolundan |
+| `new`, `with_memory`, `with` | `qp-replica` `replica.rs` | `crate::Subsystems` → `qp_authority::Subsystems` (yol) |
+| `fnv1a64`, `document_digest` | `replica.rs` → `qp_ops::digest` | yer (çekirdeğin `story.rs`'i de kullanıyor) |
+| `tape::run_viewer`, `ViewerOutcome`, `viewer_deliver` | `replica/tape.rs` → `qp-viewer` `tape.rs` | yer; `holds` `pub` |
+| `ReplayHost::{control_msg, as_replay}` | `qp-replayhost` `replayhost/control.rs` | `session.conns` → `SessionView::conn`; `agent_origin(ci)` → `conn_agent_origin(conn)`; `seq_to` gizli `pub` |
+| `reader_parts_by_language_and_audience` (+ `host`, `all_parts`, `example`) | `capsule/tests/headparts.rs` → `qp-replayhost` `tests/headparts.rs` | iç alanlar yerine `document()` ve gizli `reader_parts_of` (`as_reader` içinde başlık kaynağının `headline_parts`'ı = eski çağrı) |
+| `viewer_check`, `viewer_start`, `viewer_unsubscribed` | `replica/viewer/updates.rs` → `qp-viewer` | `ViewerTopic::subscribe` (denetim + yuva; hatalar ve sırası aynı: yerleşik abonelikten sonra, ret aboneliği geri alır); ilk olay onaydan sonra `push(all)`; düşen abonelik `Unsubscribe` fazında |
+| `viewer_flush`, `has_viewers`, `has_pushers`, `viewer_data`, `set_viewer_batch` | otorite `authority/session/push.rs` | genel: konu işleyicilerine `pushing`/`pushes`/`data` sorulur; bağlantı sırası aynı |
+| `viewer_lines`, `viewer_update`, `viewer_compute`, `viewer_row` | `qp-viewer` `viewer/updates.rs` | `impl Session` → çağrı bağlamı; `dispatch_query` → `ctx.registry.query(&q)` + `answer` (aynı `capsules` cevabı); `self.doc`/`plane`/`looks`/`conns[ci]` → `ctx.view`/`ctx.looks`/`ConnView`; `market_for` → `ReadView`; satır ve `seq_to` otoritede (`push_lines`, ölçüm öncesi aynı dünyada); `Push` yapısı (parametre demeti) |
+| `visible_msg` | `qp-viewer` `ViewerTopic::{visible, visible_result}` + otorite `dispatch_visible` | kayıt okuyucunun dünyası dışında, yanıt içinde (eskisi gibi). Görüntüleyicisiz otoritede `visible` artık `unsupported` (eskiden `not_found` "no `viewer` subscription"); bileşimde çıktı aynı (görüntüleyici kayıtlı; tutanak 270/270) — fark **yalnız standart dışı listede gözlenir** |
+| `viewer_claim_sub` | `qp-viewer` `ViewerTopic::claim_sub`; otorite `push_claim_sub` | yuvadan |
+| `face_scene` | `qp-viewer` `viewer/open.rs` | `face_with` (ortak gövde) + `wants_parts`; alt sistem `face_scene_in` (bağlamın okuma dokümanı, önbelleği ve okuyucunun başlıklarıyla `Session::provider`'ın kurduğu sağlayıcı; başlık parçaları `ReadView`'dan). Dışa açık imza aynı |
+| `OpenSide::{new, update}` | `qp-viewer` | `start((*open.document).clone())` → `start_from(&open.document)` (WASM: tek klon örneği) |
+| `dispatch_subscribe`, `unsubscribed` | `phases.rs` → `push.rs` | konu işleyicisini döndürür; `viewer_unsubscribed` çağrıları kalktı |
+| `handle_resolved` (`Subscribe`, `Visible` kolları), `subscribe` (`Viewer` kolu), `claim_events`, `build_with_keys` (`viewers` alanı) | otorite | yukarıdaki genel düzenek |
+| `with_ctx_as` | `phases.rs` | `SessionCtx::registry` |
+| `impl ReadView for Session` | `phases.rs` | `item_headline_parts`, `market_for` (otoritenin aynı adlı fonksiyonları) |
+| `the_follower_list_is_the_standard_list_without_reading` → `…_without_reading_and_viewers` | `qp-session` `compose.rs` | `FOLLOWER` = `STANDARD` eksi okuma ve görüntüleyici |
+| `feeds_of`, `closed`, `anchor_of`, `eval_at` | `capsule/claims.rs` | `pub` (gizli kök yeniden dışa aktarımı) |
+
+**Yeni öğeler:** `qp-replayhost`, `qp-viewer` (`Viewer`, `VIEWER`, `ViewerTopic`, `Push`,
+`feed_items`, `check`, `face_scene_in`, `face_with`, `wants_parts`), `qp-replica` (crate);
+otoritede `authority/session/push.rs`, `authority/session/follow.rs`, `reader_parts_of`,
+`conn_agent_origin`; `qp_ops::digest`; `qp-subsystem` ekleri (`paths.md` S3.3).

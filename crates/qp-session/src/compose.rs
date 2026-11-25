@@ -13,18 +13,20 @@ use qp_subsystem::Subsystem;
 
 /// The standard subsystems, in registration order: one line per subsystem.
 static LIST: &[&dyn Subsystem] = &[
-    &qp_watch::WATCH, // izleme niyeti (RF1 S3.1)
-    &qp_read::READ,   // okuma ve sunum (RF1 S3.2)
+    &qp_watch::WATCH,   // izleme niyeti (RF1 S3.1)
+    &qp_read::READ,     // okuma ve sunum (RF1 S3.2)
+    &qp_viewer::VIEWER, // görüntüleyici bağlantıları (RF1 S3.3)
 ];
 
 /// The standard subsystems every authority of the composition is built with.
 pub const STANDARD: qp_authority::Subsystems = qp_authority::Subsystems::new(LIST);
 
 /// The standard subsystems of a follower (a replica's authority, a viewer's open side):
-/// [`STANDARD`] without the reading subsystem. A follower takes no `query` or `input` (no
-/// connection talks to it; it follows a host's log and is read through its own methods),
-/// so the reading subsystem would never be called there; leaving it out keeps its code out
-/// of the shell's WASM package (RF1 S3.2: +1.38 MB otherwise; the WASM ±2 % gate).
+/// [`STANDARD`] without the reading and the viewer subsystems. A follower takes no `query`,
+/// `input` or `subscribe` (no connection talks to it; it follows a host's log and is read
+/// through its own methods), so neither would ever be called there; leaving them out keeps
+/// their code out of the shell's WASM package (RF1 S3.2: +1.38 MB otherwise; the WASM ±2 %
+/// gate; RF1 S3.3 measured the viewer's share: `rounds/RF1/experiments/rewritten.md`).
 pub const FOLLOWER: qp_authority::Subsystems = qp_authority::Subsystems::new(FOLLOWER_LIST);
 
 /// [`FOLLOWER`]'s list.
@@ -174,8 +176,8 @@ impl Session {
 
 /// The replay host with the standard subsystems.
 #[derive(Debug)]
-pub struct ReplayHost(qp_authority::ReplayHost);
-wraps!(ReplayHost, qp_authority::ReplayHost);
+pub struct ReplayHost(qp_replayhost::ReplayHost);
+wraps!(ReplayHost, qp_replayhost::ReplayHost);
 
 impl ReplayHost {
     /// Starts an authority on the replay of `init.replay`; local data is read from
@@ -184,7 +186,7 @@ impl ReplayHost {
     /// # Errors
     /// No `init.replay`, an invalid replay, or the session's own errors.
     pub fn new(init: SessionInit, root: &Path) -> Result<Self, String> {
-        qp_authority::ReplayHost::new(init, root, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::new(init, root, STANDARD).map(Self)
     }
 
     /// [`ReplayHost::new`] with local data read from `local_dir`.
@@ -196,7 +198,7 @@ impl ReplayHost {
         root: &Path,
         local_dir: &Path,
     ) -> Result<Self, String> {
-        qp_authority::ReplayHost::with_local_dir(init, root, local_dir, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::with_local_dir(init, root, local_dir, STANDARD).map(Self)
     }
 
     /// (R4/T6) [`ReplayHost::with_local_dir`] with a history window.
@@ -209,7 +211,7 @@ impl ReplayHost {
         local_dir: &Path,
         window: Option<usize>,
     ) -> Result<Self, String> {
-        qp_authority::ReplayHost::with_window(init, root, local_dir, window, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::with_window(init, root, local_dir, window, STANDARD).map(Self)
     }
 
     /// (R6/T7) A live host: `feeds` are the initial bars; the host gives the data events.
@@ -221,27 +223,27 @@ impl ReplayHost {
         root: &Path,
         feeds: Vec<qp_source::ReplayFeed>,
     ) -> Result<Self, String> {
-        qp_authority::ReplayHost::live(init, root, feeds, STANDARD).map(Self)
+        qp_replayhost::ReplayHost::live(init, root, feeds, STANDARD).map(Self)
     }
 }
 
 /// A replica whose follower authority has the follower's subsystems ([`FOLLOWER`]).
 #[derive(Debug)]
-pub struct Replica(qp_authority::Replica);
-wraps!(Replica, qp_authority::Replica);
+pub struct Replica(qp_replica::Replica);
+wraps!(Replica, qp_replica::Replica);
 
 impl Replica {
     /// A replica for `principal` whose data comes from the host's `provider`.
     #[must_use]
     pub fn new(principal: &str, provider: Box<dyn qp_source::SourceProvider>) -> Self {
-        Self(qp_authority::Replica::new(principal, provider, FOLLOWER))
+        Self(qp_replica::Replica::new(principal, provider, FOLLOWER))
     }
 
     /// A replica whose provider is a [`qp_source::MemoryProvider`] that also takes the
     /// data events the host delivers.
     #[must_use]
     pub fn with_memory(principal: &str, provider: qp_source::MemoryProvider) -> Self {
-        Self(qp_authority::Replica::with_memory(
+        Self(qp_replica::Replica::with_memory(
             principal, provider, FOLLOWER,
         ))
     }
@@ -250,8 +252,8 @@ impl Replica {
 /// The device's side of the open capsule, its replica with the follower's subsystems
 /// ([`FOLLOWER`]).
 #[derive(Debug)]
-pub struct OpenSide(qp_authority::viewer::OpenSide);
-wraps!(OpenSide, qp_authority::viewer::OpenSide);
+pub struct OpenSide(qp_viewer::OpenSide);
+wraps!(OpenSide, qp_viewer::OpenSide);
 
 impl OpenSide {
     /// The open side of `open` at log position `seq`, its replica's own data from
@@ -264,7 +266,7 @@ impl OpenSide {
         provider: qp_source::MemoryProvider,
         calendar: Option<qp_schema::Calendar>,
     ) -> Self {
-        Self(qp_authority::viewer::OpenSide::new(
+        Self(qp_viewer::OpenSide::new(
             principal, open, seq, provider, calendar, FOLLOWER,
         ))
     }
@@ -275,17 +277,19 @@ mod lists {
     use super::{FOLLOWER, STANDARD};
     use qp_subsystem::Subsystem as _;
 
-    /// (RF1 S3.2, audit-s32 B2) The follower's list is the standard list without the
-    /// reading subsystem, in the same order: a subsystem added to `LIST` is added to
-    /// `FOLLOWER_LIST` too unless it is a reading of a connection (queries, gestures).
+    /// (RF1 S3.2, audit-s32 B2; S3.3) The follower's list is the standard list without the
+    /// reading and the viewer subsystems, in the same order: a subsystem added to `LIST` is
+    /// added to `FOLLOWER_LIST` too unless it serves a connection (queries, gestures, a
+    /// pushed topic).
     #[test]
-    fn the_follower_list_is_the_standard_list_without_reading() {
+    fn the_follower_list_is_the_standard_list_without_reading_and_viewers() {
         let names = |l: qp_authority::Subsystems| -> Vec<&str> {
             l.list().iter().map(|s| s.name()).collect()
         };
         let mut want = names(STANDARD);
-        want.retain(|n| *n != qp_read::READ.name());
+        want.retain(|n| *n != qp_read::READ.name() && *n != qp_viewer::VIEWER.name());
         assert_eq!(names(FOLLOWER), want);
         assert!(names(STANDARD).contains(&"read"));
+        assert!(names(STANDARD).contains(&"viewer"));
     }
 }

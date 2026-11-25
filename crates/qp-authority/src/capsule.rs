@@ -64,9 +64,6 @@ mod reader;
 mod run;
 mod settled;
 
-#[cfg(test)]
-mod tests;
-
 pub(crate) mod claims;
 pub(crate) mod comments;
 pub(crate) mod dispute;

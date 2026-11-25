@@ -139,7 +139,9 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
      `Written`); `Proposals` → `authority/session/clock.rs`; `Settled` → `capsule/dispute.rs`;
      `Close` çağrılmaz (protokolde kapanış iletisi yok).
    - `queries()`, `inputs()`, `topics()`: `kind` etiketiyle kayıt (konu: yerleşik abonelikten
-     sonra kabul/ret). Sorgu ve girdinin yerleşik yolu yok: okuma alt sistemi (`qp-read`,
+     sonra kabul/ret; itilen konu — `pushing`/`pushes`/`push`, `visible`, `claim_sub`, `data` —
+     her girdiden sonra okuyucunun dünyasında sorulur: `authority/session/push.rs`, örnek
+     `qp-viewer`, S3.3). Sorgu ve girdinin yerleşik yolu yok: okuma alt sistemi (`qp-read`,
      S3.2) `ANY` etiketiyle başka alt sistemin kaydetmediği her türü cevaplar; bir türü
      kendi etiketiyle kaydeden alt sistem ondan önce sorulur. Kayıtsız otorite `unsupported`
      döner.
@@ -156,21 +158,22 @@ Otorite (`qp-authority`) hiçbir alt sistemi tanımaz; tek arayüz `qp-subsystem
    her şey değişimle yazılır.
 6. **Yansı.** Yansıya giden protokol mesajıdır. Bileşimin iki listesi var: `STANDARD`
    (oturum, yeniden oynatma barındırıcısı; bağlantı konuşan otoriteler) ve `FOLLOWER`
-   (izleyiciler: yansı, görüntüleyicinin açık tarafı; `STANDARD` eksi okuma, sıra aynı).
-   İzleyiciye bağlantı konuşmaz: sorgu ya da girdi almaz, bir sunucunun günlüğünü izler
-   (RF1 S3.2, `rounds/RF1/DECISION.md` uygulama notları). Otoritenin doğurduğu otorite
+   (izleyiciler: yansı, görüntüleyicinin açık tarafı; `STANDARD` eksi okuma ve görüntüleyici,
+   sıra aynı). İzleyiciye bağlantı konuşmaz: sorgu, girdi ya da abonelik almaz, bir sunucunun
+   günlüğünü izler (RF1 S3.2, S3.3; `rounds/RF1/DECISION.md` uygulama notları). Otoritenin doğurduğu otorite
    listeyi ondan devralır.
 7. **Kayıt.** `crates/qp-session/src/compose.rs` `LIST`'ine **bir satır**, ve
    `crates/qp-session/Cargo.toml`'a bir bağımlılık satırı. Alt sistem izleyicide de
    gerekiyorsa (günlüğü izlerken iş görüyorsa: faz, koşul, değer kaynağı, işlem açılımı)
    `FOLLOWER_LIST`'e de bir satır; yalnız bir bağlantının okumasına hizmet ediyorsa (sorgu,
-   girdi) yalnız `LIST`'e. İki listenin uyumunu `compose.rs`'in `lists` sınaması tutar
-   (`FOLLOWER` = `STANDARD` eksi okuma); yeni alt sistemin yazarı sınamayı da günceller.
+   girdi, itilen konu) yalnız `LIST`'e. İki listenin uyumunu `compose.rs`'in `lists` sınaması
+   tutar (`FOLLOWER` = `STANDARD` eksi okuma ve görüntüleyici); yeni alt sistemin yazarı
+   sınamayı da günceller.
    Otorite crate'i değişmez.
 8. **Barındırıcı API'si.** Alt sistemin durumu `session.sub::<T>()` / `sub_mut::<T>()`
    (yuva tipiyle); `Deref` üstünden değil. Standart dışı bir liste (sınama):
    `qp_session::Authority::new(init, root, Subsystems::new(list))` ve
-   `qp_authority::Replica::with_memory(.., list)`; durum `slots().get::<T>()`.
+   `qp_replica::Replica::with_memory(.., list)`; durum `slots().get::<T>()`.
 
 **Bilinen sınırlar.** (B-e) `amend`/`say` yanlış anda sessizce düşer; `Look`'tan önceki bir
 `amend` o bakışın girdisine karışır. (B-f) `qp_session` `Authority` ve `Subsystems`'i (ve
@@ -196,15 +199,15 @@ dokunulacak dosyalar şunlardır.
 | `qp-ops` | `expand/undo.rs` | `expand_remove` (`Collection` üstünde kapalı) |
 | `qp-ops` | `expand/op.rs`, `expand/describe.rs` | yeni `Op` yerleşikse (kapalı, 38 kol); alt sistemin `OpHandler`'ı açarsa dokunulmaz |
 | `qp-read` | `query.rs` | `collection_items` (`Collection` üstünde kapalı, 9 kol; S3.2'de otoriteden) |
-| `qp-authority` | `replica/viewer.rs` | açık taraf için `Document { … }` (alan alan; yeni koleksiyonun açık tarafa gidip gitmeyeceği bir gizlilik kararı) |
+| `qp-viewer` | `viewer.rs` (`slice`) | açık taraf için `Document { … }` (alan alan; yeni koleksiyonun açık tarafa gidip gitmeyeceği bir gizlilik kararı; S3.3'te otoriteden çıktı) |
 | `qp-authority` | `capsule/public.rs` | kimlikle öğe bulma zinciri (derleyici zorlamaz) |
 
-**Otorite: hedef 0 dosya, bugün 1 zorunlu + 1 yumuşak** (S3.2). `collection_items` kapalı
-eşlemesi `read/query.rs` ile `qp-read`'e çıktı (alt sistem crate'i; otorite değil).
-`capsule/queries.rs`'teki `ledger_now` `Document { … }` değişmezi kalktı: motorun sicili belge
-kurmadan okunur (`ledger_rows_of`, `capsule/run.rs`); `capsule` sorgusunun ayrıntısı
-`capsule/detail.rs`'te kaldı, doküman değişmezi yok. Kalan zorunlu: `replica/viewer.rs`
-(`Document`'ın tam yapı değişmezi; `Document`'ta `Default` yok; S3.3'te otoriteden çıkar).
+**Otorite: hedef 0 dosya, bugün 0 zorunlu + 1 yumuşak** (S3.3). `collection_items` kapalı
+eşlemesi `read/query.rs` ile `qp-read`'e çıktı (S3.2); `capsule/queries.rs`'teki `ledger_now`
+`Document { … }` değişmezi kalktı: motorun sicili belge kurmadan okunur (`ledger_rows_of`,
+`capsule/run.rs`). Son zorunlu dosya, görüntüleyicinin açık taraf dilimi (`slice`: `Document`'ın
+tam yapı değişmezi; `Document`'ta `Default` yok) S3.3'te görüntüleyiciyle `qp-viewer`'a çıktı:
+derleyici onu orada zorlar, otoriteye dokunulmaz. Otoritede `Document { … }` değişmezi yok.
 `capsule/public.rs`'teki zincir derleyicinin zorlamadığı bir listedir;
 eklenmezse yeni tür o yolda bulunmaz. Joker kollu eşlemeler (`capsule/project.rs`,
 `capsule/public.rs` `to_public`, `capsule/settled.rs`, `authority/session/accept.rs`,
@@ -235,6 +238,9 @@ qapsule/
     qp-read/       okuma ve sunum alt sistemi: sorgular, girdi, okuma (RF1 S3.2)  [oturum]
     qp-authority/  otorite çekirdeği: komut yolu, günlük, abonelik, öneri,
                    iki dünya, kapsül yaşamı, canlı yol; alt sistem tanımaz (RF1)  [oturum]
+    qp-replica/    istemci yansısı: otoritenin izleyicisi, gösterim kuralı (RF1 S3.3)  [oturum]
+    qp-viewer/     görüntüleyici alt sistemi ve açık taraf (RF1 S3.3)       [oturum]
+    qp-replayhost/ yeniden oynatma barındırıcısı (RF1 S3.3)                [oturum]
     qp-session/    bileşim: otorite + standart alt sistemler (`STANDARD`); dış yüz  [oturum]
     qp-mcp/        MCP uyarlayıcısı; araçlar şemadan üretilir (RD1)        [uyarlayıcılar]
     qp-live/       canlı Matriks bağlantısı (belirteç, MQTT/WebSocket; R6) [uyarlayıcılar]

@@ -1,4 +1,6 @@
-//! Tests of the headline pieces (`qp_plane::headparts`) through the session (R4/H-FP).
+//! Tests of the headline pieces (`qp_plane::headparts`) through the session (R4/H-FP),
+//! over the demo replay (moved from `qp-authority` `capsule/tests/headparts.rs` in RF1
+//! S3.3: the replay host left the authority).
 
 use std::collections::BTreeMap;
 
@@ -6,7 +8,7 @@ use qp_grammar::HeadlineParts;
 use qp_schema::capsule::Validity;
 use qp_schema::protocol::{Language, ReplayInit, ReplaySourceKind};
 
-use crate::{demo_init, ReplayHost};
+use qp_replayhost::{demo_init, ReplayHost};
 
 /// An example headline template (tests only; no face design in the registry).
 fn example(hp: &HeadlineParts) -> String {
@@ -28,7 +30,7 @@ fn example(hp: &HeadlineParts) -> String {
 }
 
 /// The demo world (synthetic, as `qp demo`), small; `visitor` reads without data.
-fn host() -> ReplayHost {
+fn host() -> Result<ReplayHost, String> {
     let mut ent = BTreeMap::new();
     for p in ["host", "arkin"] {
         ent.insert(p.to_owned(), vec!["*".to_owned()]);
@@ -46,16 +48,15 @@ fn host() -> ReplayHost {
     init.principals.push(
         serde_json::from_value(serde_json::json!(
             {"id": "visitor", "author": {"kind": "human", "name": "visitor"}, "role": "owner"}))
-        .expect("visitor"),
+        .map_err(|e| e.to_string())?,
     );
     let none = std::env::temp_dir().join("qp-hfp-no-local-data");
     ReplayHost::with_local_dir(
         init,
         std::path::Path::new("."),
         &none,
-        crate::Subsystems::NONE,
+        qp_authority::Subsystems::NONE,
     )
-    .expect("demo host")
 }
 
 /// Every capsule's pieces for a reader: `(finding, TR, EN)`.
@@ -63,7 +64,7 @@ fn all_parts(h: &mut ReplayHost, reader: &str) -> Vec<(String, HeadlineParts, He
     let s = h.session_mut();
     let mut out = Vec::new();
     let findings: Vec<String> = s
-        .doc
+        .document()
         .capsules
         .iter()
         .filter(|c| c.story.is_some())
@@ -72,17 +73,7 @@ fn all_parts(h: &mut ReplayHost, reader: &str) -> Vec<(String, HeadlineParts, He
     for f in findings {
         let mut both = Vec::new();
         for lang in [Language::Tr, Language::En] {
-            let hp = s.as_reader(reader, lang, |s| {
-                let c = s.doc.capsules.iter().find(|c| c.finding == f)?;
-                s.reader_parts(
-                    &s.doc,
-                    c,
-                    s.proj.as_deref(),
-                    lang,
-                    &mut qp_capsule::sentence::StudyMemo::default(),
-                )
-            });
-            both.extend(hp);
+            both.extend(s.reader_parts_of(reader, lang, &f));
         }
         if let [tr, en] = both.as_slice() {
             out.push((f, tr.clone(), en.clone()));
@@ -96,7 +87,7 @@ fn all_parts(h: &mut ReplayHost, reader: &str) -> Vec<(String, HeadlineParts, He
 /// internal term, no digit for a reader without data entitlement; deterministic.
 #[test]
 fn reader_parts_by_language_and_audience() {
-    let mut h = host();
+    let mut h = host().expect("demo host");
     let mut seen = 0;
     let mut redacted = 0;
     let mut kinds = std::collections::BTreeSet::new();

@@ -11,6 +11,7 @@
 pub mod apply;
 pub mod bounds;
 pub mod canon;
+pub mod digest;
 pub mod expand;
 pub mod firsts;
 pub mod gops;

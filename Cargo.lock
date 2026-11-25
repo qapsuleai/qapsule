@@ -2016,6 +2016,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "qp-lang"
+version = "0.0.0"
+dependencies = [
+ "qp-calendar",
+ "qp-schema",
+ "serde_json",
+]
+
+[[package]]
 name = "qp-live"
 version = "0.0.0"
 dependencies = [

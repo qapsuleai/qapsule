@@ -32,9 +32,11 @@
         "qp-facts",
         "qp-look",
         "qp-glyph",
-        "qp-designs"
+        "qp-designs",
+        "qp-lang"
       ],
       "order": [
+        "qp-lang",
         "qp-source",
         "qp-facts",
         "qp-look",

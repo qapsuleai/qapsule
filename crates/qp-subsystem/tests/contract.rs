@@ -118,6 +118,7 @@ impl QueryHandler for Q {
     fn kind(&self) -> &'static str {
         self.0
     }
+    #[allow(clippy::unreachable)] // test stub: the contract never queries it
     fn answer(
         &self,
         _conn: &str,

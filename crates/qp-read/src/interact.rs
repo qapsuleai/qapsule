@@ -96,7 +96,7 @@ fn depth_name(d: OpenDepth) -> &'static str {
 }
 
 impl Rd<'_> {
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, clippy::unreachable)] // invariant: `input` routes bar-space
     /// Handles a pixel gesture or open/close (called from `input`).
     pub(crate) fn interact(
         &mut self,
@@ -570,7 +570,7 @@ impl Rd<'_> {
         }
     }
 
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, clippy::unreachable)] // invariant: pan/zoom give a viewport
     /// `drag` and `pinch`: a document view goes through `pan` / `zoom` (its connection
     /// viewport); an open capsule's chart moves the view state's range by the same rules.
     fn move_chart(&mut self, ci: usize, on: &On, m: Move) -> PResult<(Out, Vec<OutboundLine>)> {

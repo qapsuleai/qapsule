@@ -222,7 +222,7 @@ def rule_path_attrs(scan):
 
 
 _LINTS = (r"clippy\s*::\s*(unwrap_used|expect_used|panic|too_many_lines|cognitive_complexity"
-          r"|restriction|nursery)\b")
+          r"|unimplemented|unreachable|restriction|nursery)\b")
 # `#[allow(…)]`, `#[expect(…)]` and `#[cfg_attr(…, allow(…))]` all silence clippy.
 LINT_ALLOW = re.compile(r"#\[(?:allow|expect|cfg_attr\([^\]]*?(?:allow|expect))\([^\]]*" + _LINTS)
 LINT_INNER = re.compile(r"#!\[(?:allow|expect|cfg_attr\([^\]]*?(?:allow|expect))\([^\]]*" + _LINTS)
@@ -254,7 +254,7 @@ def rule_lint_allows(scan):
     for crate, n in sorted(per.items()):
         yield finding("lint.allow", crate, n, 0,
                       f"{crate}: {n} grandfathered lint allows (unwrap/expect/panic/too_many_lines/"
-                      f"cognitive_complexity)")
+                      f"cognitive_complexity/unimplemented/unreachable)")
 
 
 def rule_lint_flags(root):

@@ -571,19 +571,19 @@ impl DataPlane {
                 Ok(a @ (Applied::Gap { .. } | Applied::Stale(_))) => {
                     if before != store.state() {
                         changed.push((id.clone(), Delta::Rebuild { from: 0 }));
-                        let feed = ev.feed.clone();
                         notices.push(match a {
                             Applied::Gap { expected, got } => HostNotice::Gap {
                                 series: id.clone(),
-                                feed,
+                                feed: ev.feed.clone(),
                                 expected,
                                 got,
                             },
                             Applied::Stale(r) => HostNotice::Stale {
                                 series: id.clone(),
-                                feed,
+                                feed: ev.feed.clone(),
                                 reason: r.reason(),
                             },
+                            #[allow(clippy::unreachable)] // invariant: see outer arm
                             _ => unreachable!("matched above"),
                         });
                     }

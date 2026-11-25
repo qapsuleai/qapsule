@@ -306,7 +306,7 @@ fn macd_line(mut ef: Ema, mut es: Ema, x: &[f64], line: &mut [f64]) {
     }
 }
 
-#[allow(clippy::expect_used)]
+#[allow(clippy::expect_used, clippy::unreachable)] // invariant: macd has three outputs
 /// Steps `L` signal EMAs over `m[w..]` (the macd values), writing signal and histogram
 /// into columns 1 and 2 of `bufs[l]` exactly as `Macd::peek1`/`commit1` do. Until every
 /// lane is past its seed bar the regular `peek1`/`commit1` run; after that the steady
@@ -400,21 +400,21 @@ fn bollinger_run(
     visit: &mut impl FnMut(usize, &SweepColumns),
 ) -> Result<(), ComputeError> {
     let bs: Vec<Bollinger> = run.iter().map(bollinger_build).collect::<Result<_, _>>()?;
-    let n = x.len();
-    shape(b, Bollinger::OUTPUTS, n);
-    std.resize(n, 0.0);
+    shape(b, Bollinger::OUTPUTS, x.len());
+    std.resize(x.len(), 0.0);
     // The k-independent state, stepped once: middle (column 0) and std.
     let mut st = bs[0].clone();
     for ((m, s), &xi) in b.columns[0].iter_mut().zip(std.iter_mut()).zip(x) {
         (*m, *s) = st.step_std(xi).unwrap_or((NAN, NAN));
     }
-    let w = bs[0].warmup()[0].min(n);
+    let w = bs[0].warmup()[0].min(x.len());
     for c in &mut b.columns[1..] {
         c[..w].fill(NAN);
     }
     for (j, (bv, p)) in bs.iter().zip(run).enumerate() {
         let k = p["k"];
         b.warmup = bv.warmup();
+        #[allow(clippy::unreachable)] // invariant: bollinger has four outputs
         let [mid, up, lo, bw] = &mut b.columns[..] else {
             unreachable!("four bollinger outputs")
         };

@@ -145,7 +145,9 @@ impl<'a> FastHints<'a> {
         if s.first && s.latest {
             return Vec::new();
         }
-        let Some(k) = &s.kind else {
+        #[allow(clippy::unreachable)] // invariant: hint candidates name a kind
+        let Some(k) = &s.kind
+        else {
             unreachable!("hint candidates name a kind");
         };
         let rows = self.kind_facts(&k.to_lowercase());
@@ -172,6 +174,7 @@ impl<'a> FastHints<'a> {
         let rows: Rc<Vec<usize>> = match (&s.kind, &s.fact) {
             (Some(k), None) => self.kind_findings(&k.to_lowercase()),
             (None, Some(r)) => {
+                #[allow(clippy::unreachable)] // invariant: candidates select their fact
                 let FactRef::Select(h) = r.as_ref() else {
                     unreachable!("hint candidates select their fact");
                 };
@@ -186,6 +189,7 @@ impl<'a> FastHints<'a> {
                     }
                 }
             }
+            #[allow(clippy::unreachable)] // invariant: candidates carry a kind or a fact
             _ => unreachable!("hint candidates: kind or fact"),
         };
         let mut m: Vec<&str> = rows.iter().map(|&i| doc.findings[i].id.as_str()).collect();

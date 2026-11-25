@@ -226,7 +226,7 @@ impl Rd<'_> {
     }
 
     /// Handles a gesture; returns the result and the notifications it causes.
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, clippy::unreachable)] // invariant: pixel gestures return early
     pub(crate) fn input(
         &mut self,
         ci: usize,

@@ -40,7 +40,7 @@ fn host() -> ReplayHost {
     // RSI(14) on the first instruments (their bound series are added by `bind_all`).
     let mut doc: qp_schema::Document = match init.document {
         qp_schema::protocol::DocumentRef::Inline(d) => *d,
-        qp_schema::protocol::DocumentRef::Path(_) => unreachable!(),
+        qp_schema::protocol::DocumentRef::Path(_) => panic!("inline document"),
     };
     for i in 1..=WATCHED {
         doc.series.push(

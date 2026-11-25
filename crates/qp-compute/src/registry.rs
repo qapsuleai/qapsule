@@ -134,6 +134,7 @@ pub fn create(
             Bollinger::new(period_param(&full, "period")?, full["k"])?,
             field,
         )),
+        #[allow(clippy::unreachable)] // invariant: default_params rejected unknown names
         _ => unreachable!("default_params covers every study name"),
     })
 }

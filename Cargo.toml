@@ -18,6 +18,8 @@ todo = "warn"
 unwrap_used = "warn"
 expect_used = "warn"
 panic = "warn"
+unimplemented = "warn"
+unreachable = "warn"
 too_many_lines = "warn"
 cognitive_complexity = "warn"
 

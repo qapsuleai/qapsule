@@ -81,6 +81,7 @@ pub fn sweep_each(
 /// # Errors
 /// See [`sweep_each`].
 #[doc(hidden)]
+#[allow(clippy::unreachable)] // invariant: every built-in study has a lane kernel
 pub fn sweep_each_lanes(
     name: &str,
     param_sets: &[BTreeMap<String, f64>],

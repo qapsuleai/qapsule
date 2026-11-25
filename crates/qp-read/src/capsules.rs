@@ -11,7 +11,7 @@ use qp_schema::Fact;
 use crate::rd::Rd;
 
 impl Rd<'_> {
-    #[allow(clippy::too_many_lines)]
+    #[allow(clippy::too_many_lines, clippy::unreachable)] // invariant: a capsules query
     /// Answer to the `capsules` query (run on the asker's projected document).
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn capsules_query(

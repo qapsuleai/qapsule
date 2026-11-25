@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"sma","x":"n0","period":50},{"id":"n2","op":"cross_above","a":"n0","b":"n1"},{"id":"n3","op":"bars_since","c":"n2"}],"outputs":[{"name":"d0f_gecen","kind":"series","node":"n3"}]}

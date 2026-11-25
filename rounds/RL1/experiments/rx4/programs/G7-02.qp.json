@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"rsi","x":"n0","period":14},{"id":"n2","op":"const","value":70.0},{"id":"n3","op":"cross_below","a":"n1","b":"n2"}],"outputs":[{"name":"j3r_tepe","kind":"signal","node":"n3","side":"sat","rule":{"target_pct":3.0,"stop_pct":1.5,"max_bars":24},"source":{"strategy":"rsi-tepe","version":"1"}}]}

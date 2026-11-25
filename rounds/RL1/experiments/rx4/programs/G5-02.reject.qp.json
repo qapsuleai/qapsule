@@ -1,0 +1,1 @@
+{"reject":{"code":"E_UNSUPPORTED","reason":"unbounded loops are not part of the language; cost must be static"}}

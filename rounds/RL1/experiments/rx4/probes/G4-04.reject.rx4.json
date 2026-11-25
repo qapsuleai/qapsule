@@ -1,0 +1,1 @@
+{"reject": {"code": "E_LOOKAHEAD", "reason": "the close of a 4h bar that has not closed yet is not known at an hourly bar's close"}}

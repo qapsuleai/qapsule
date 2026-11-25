@@ -1,0 +1,1 @@
+{"version": "rx4-ir/0", "nodes": [{"id": "cd", "op": "input", "field": "close", "tf": "1d"}, {"id": "next", "op": "lag", "x": "cd", "n": -1}, {"id": "up", "op": "gt", "a": "next", "b": "cd"}, {"id": "upb", "op": "align", "x": "up"}], "outputs": [{"name": "y5k_yarin", "kind": "event", "node": "upb"}]}

@@ -1,0 +1,1 @@
+{"version": "rx4-ir/0", "nodes": [{"id": "c4", "op": "input", "field": "close", "tf": "4h", "partial": true}, {"id": "e4", "op": "ema", "x": "c4", "period": 20}, {"id": "up", "op": "gt", "a": "c4", "b": "e4"}, {"id": "upb", "op": "align", "x": "up"}], "outputs": [{"name": "m4t_tuzak", "kind": "event", "node": "upb"}]}

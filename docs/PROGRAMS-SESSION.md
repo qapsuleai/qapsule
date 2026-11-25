@@ -213,6 +213,16 @@ işlem adlarıyla: `check_program`, `try_program`, `explain_program` (metin ya d
 politika onları yine sınırlar. Komut satırı: `qp program check | run | explain <dosya>` (metin ya
 da JSON; `run` = `try_program` çekirdeği, kapalı pencere).
 
+**Komut satırı biçimi (RX4 uygunluğu buna dayanır):**
+- `qp program check [--json] [--lang tr|en] <dosya>`: `program_check` cevabı; ret `ok:true, reject{code}`, çıkış 0.
+- `qp program run [--json] [--full] --data <seri.json> <dosya>`: veri `fixtures/bars` biçiminde
+  (`qp_schema::Series`, gömülü barlar). Dosya **kapalı pencere** sayılır: son bar da kapanmıştır,
+  canlı bar yoktur (PR §1). `--full` olmadan `try_program` özeti; `--full` ile bar başına tam çıktı:
+  `outputs` adla eşlem; seri `values` (bar başına, `null` dahil), olay `bars` (indeks, artan) ve
+  `t`, sinyal `records` (PR §6 kayıt biçimi + `bar`, `exit_bar` indeksleri), durum `keys` (bar
+  başına dizi ya da `null`) ve `counts`.
+- `qp program explain [--json] [--lang tr|en] <dosya>`: `program_explain` cevabı.
+
 ## 4. Uygunluk dökümleri (eklenecek: 71–77)
 
 Üç taşımada; var olan dökümler değişmez. Üreten örnek `qp-program` ya da bir sınama crate'i

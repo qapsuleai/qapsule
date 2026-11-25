@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"sma","x":"n0","period":20},{"id":"n2","op":"cross_above","a":"n0","b":"n1"},{"id":"n3","op":"cooldown","trigger":"n2","bars":10}],"outputs":[{"name":"c1w_giris","kind":"event","node":"n3"}]}

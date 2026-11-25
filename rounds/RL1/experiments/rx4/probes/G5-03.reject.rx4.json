@@ -1,0 +1,1 @@
+{"reject": {"code": "E_UNSUPPORTED", "reason": "Parabolic SAR needs state assigned by a loop or var; not expressible in qp-ir/0"}}

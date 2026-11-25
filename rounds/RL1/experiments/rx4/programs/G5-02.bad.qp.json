@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"c","op":"input","field":"close"},{"id":"s","op":"sma","x":"c","period":1000000}],"outputs":[{"name":"u3l_say","kind":"series","node":"s"}]}

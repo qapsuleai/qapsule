@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"s","op":"psar","start":0.02,"step":0.02,"max":0.2}],"outputs":[{"name":"k9s_sar","kind":"series","node":"s"}]}

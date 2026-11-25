@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"rsi","x":"n0","period":18},{"id":"n2","op":"ema","x":"n1","period":20}],"outputs":[{"name":"p2c_ersi","kind":"series","node":"n2"}]}

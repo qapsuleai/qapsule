@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"lag","x":"n0","n":1},{"id":"n2","op":"gt","a":"n0","b":"n1"},{"id":"n3","op":"streak","c":"n2"},{"id":"n4","op":"const","value":5.0},{"id":"n5","op":"eq","a":"n3","b":"n4"}],"outputs":[{"name":"s6r_seri","kind":"series","node":"n3"},{"name":"s6r_bes","kind":"event","node":"n5"}]}

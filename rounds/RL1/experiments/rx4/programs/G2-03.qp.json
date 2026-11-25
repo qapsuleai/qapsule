@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"input","field":"high"},{"id":"n2","op":"highest","x":"n1","period":20},{"id":"n3","op":"lag","x":"n2","n":1},{"id":"n4","op":"gt","a":"n0","b":"n3"}],"outputs":[{"name":"h9n_seviye","kind":"series","node":"n3"},{"name":"h9n_kir","kind":"event","node":"n4"}]}

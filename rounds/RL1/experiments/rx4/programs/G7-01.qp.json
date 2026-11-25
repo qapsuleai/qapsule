@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"rsi","x":"n0","period":14},{"id":"n2","op":"const","value":30.0},{"id":"n3","op":"cross_above","a":"n1","b":"n2"}],"outputs":[{"name":"f6g_dip","kind":"signal","node":"n3","side":"al","rule":{"target_pct":4.0,"stop_pct":2.0,"max_bars":24},"source":{"strategy":"rsi-dip","version":"1"}}]}

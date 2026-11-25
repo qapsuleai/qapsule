@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"sma","x":"n0","period":10},{"id":"n2","op":"sma","x":"n0","period":30},{"id":"n3","op":"cross_above","a":"n1","b":"n2"}],"outputs":[{"name":"n8e_kes","kind":"signal","node":"n3","side":"al","rule":{"target_pct":3.0,"max_bars":48},"source":{"strategy":"sma-10-30","version":"1"}}]}

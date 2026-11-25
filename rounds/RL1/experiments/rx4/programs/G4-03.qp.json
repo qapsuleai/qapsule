@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"input","field":"high","tf":"4h"},{"id":"n2","op":"align","x":"n1"},{"id":"n3","op":"cross_above","a":"n0","b":"n2"}],"outputs":[{"name":"m4x_ust","kind":"event","node":"n3"}]}

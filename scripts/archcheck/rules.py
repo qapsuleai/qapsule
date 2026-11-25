@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 
+from . import calls
 from . import rustscan as rs
 
 RUST_DIRS = ("src", "tests", "examples", "benches")
@@ -399,6 +400,7 @@ def all_findings(root, cfg, edges=None, names=None):
     out += list(rule_readmes(scan, cfg, root))
     out += list(rule_root_logic(scan, cfg))
     out += list(rule_path_attrs(scan))
+    out += list(calls.rule_restricted_calls(scan, cfg))
     out += list(rule_lint_allows(scan))
     out += list(rule_lints_table(root))
     out += list(rule_lint_flags(root))

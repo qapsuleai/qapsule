@@ -139,7 +139,7 @@ impl Replica {
         let Some(s) = self.s.as_mut() else {
             return pending(item, "no_document");
         };
-        let (doc, rd, plane, cache) = s.eval_parts();
+        let (doc, rd, plane, cache) = s.parts();
         // The bar series of every operand must be resolved from the document's anchor,
         // and the authority's values computed from the same anchor.
         let mut bss: Vec<String> = Vec::new();

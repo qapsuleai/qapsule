@@ -23,22 +23,25 @@
 //!   authority's final and a clean side; values shown are its own.
 
 mod follow;
+mod follower;
 mod judge;
 
 use std::collections::{BTreeMap, BTreeSet};
 
 use qp_schema::data::{BindingState, DataEvent};
 use qp_schema::protocol::{
-    ClaimEvidence, ClaimRef, ClaimState, DocumentRef, Event, EvidenceValue, LogEntry, Maturity,
-    Principal, ProtocolError, QueryResult, Role, Seq, ServerMsg, SessionInit,
+    ClaimEvidence, ClaimRef, ClaimState, Event, EvidenceValue, LogEntry, Maturity, ProtocolError,
+    QueryResult, Seq, ServerMsg,
 };
-use qp_schema::{Author, Bar, Condition, Document, Series};
+use qp_schema::{Bar, Condition, Document, Series};
 use serde::Serialize;
 
 use qp_authority::{anchor_of, closed, eval_at, Session, Subsystems};
 use qp_plane::plane::{DataError, Provider};
 use qp_plane::values::bar_series;
 use qp_subsystem::SessionView;
+
+use follower::Follower;
 
 /// At most this many claims are remembered (oldest dropped first).
 const MAX_CLAIMS: usize = 4096;
@@ -142,7 +145,7 @@ pub struct Replica {
     principal: String,
     /// The provider until the document arrives (then it lives in the session's plane).
     provider: Option<Provider>,
-    s: Option<Session>,
+    s: Option<Follower>,
     /// (R4/H-FP) The calendar of the session's headline pieces (kept across reloads).
     headline_cal: Option<qp_schema::Calendar>,
     seq: Seq,
@@ -180,40 +183,6 @@ impl std::fmt::Debug for Replica {
             .field("claims", &self.claims.len())
             .finish_non_exhaustive()
     }
-}
-
-/// A follower session over `doc` whose bound series are resolved by `provider` with
-/// `principal`'s entitlement, from the document's anchors (no stamping, no engine entry).
-fn follower(
-    doc: Document,
-    principal: &str,
-    provider: Provider,
-    subs: Subsystems,
-) -> Result<Session, String> {
-    let init = SessionInit {
-        document: DocumentRef::Inline(Box::new(doc.clone())),
-        principals: vec![Principal {
-            id: principal.to_owned(),
-            author: Author::Human {
-                name: principal.to_owned(),
-            },
-            role: Role::Viewer,
-            on_behalf: None,
-        }],
-        clock: 0,
-        epoch: 0,
-        proposal_ttl_ms: None,
-        data: None,
-        capsules: None,
-        replay: None,
-        feed_rule: None,
-        agent_policy: None,
-        comment_strictness: None,
-    };
-    // Built without a provider: every binding is pending, so nothing is stamped.
-    let mut s = Session::build_follower(init, subs)?;
-    s.follow_start(doc, provider, principal);
-    Ok(s)
 }
 
 impl Replica {
@@ -321,7 +290,7 @@ impl Replica {
     /// The mirrored document (`None` before the first `document` answer).
     #[must_use]
     pub fn document(&self) -> Option<&Document> {
-        self.s.as_ref().map(Session::document)
+        self.s.as_deref().map(Session::document)
     }
 
     /// The follower session (read access to the replica's own data through its methods:
@@ -329,7 +298,7 @@ impl Replica {
     /// (`qp_session::FOLLOWER`, without the reading subsystem; RF1 S3.2): a `query` or an
     /// `input` sent to it with `handle_raw` is answered `unsupported`.
     pub fn session_mut(&mut self) -> Option<&mut Session> {
-        self.s.as_mut()
+        self.s.as_deref_mut()
     }
 
     /// (R4/H-FP) The exchange calendar of its session's headline pieces

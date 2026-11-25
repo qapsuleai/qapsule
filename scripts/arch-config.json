@@ -150,7 +150,28 @@
     "path.outside",
     "lint.inner",
     "lints.workspace",
-    "lint.flags"
+    "lint.flags",
+    "calls.restricted"
+  ],
+  "restricted_calls": [
+    {
+      "id": "A71",
+      "methods": [
+        "build_follower",
+        "follow_start",
+        "take_provider",
+        "mirror_apply",
+        "mirror_commit",
+        "follow_data",
+        "follow_resync",
+        "eval_parts"
+      ],
+      "callers": [
+        "crates/qp-authority/",
+        "crates/qp-replica/src/replica/follower.rs"
+      ],
+      "reason": "RL1/Ö2 (A71; rounds/RF1/REPORT.md §16 öneri 2 ve 6): otoritenin komut yolu dışından yazan gizli izleyici yöntemleri yalnız yansının izleyici tipinden (Follower) çağrılır; barındırıcılar (Replica::session_mut ile Session tutsalar da) çağıramaz. qp-authority/src değişmeden (RL1 VERIFY 4) makine kuralıyla kapatıldı; görünürlükle kapatma önerisi rounds/RL1/REPORT.md."
+    }
   ],
   "generated_files": [
     {

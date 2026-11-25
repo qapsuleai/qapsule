@@ -22,7 +22,8 @@ dependencies; dev-dependencies are not layered; inside a layer only along its de
 `order`, bottom first, K-2), file.hard / file.soft (src files, raw
 lines; files whose first lines say "üretilmiştir" or "@generated" are exempt), test.file,
 fn.lines (non-test functions), dir.files, crate.lines / shell.lines (non-test src lines),
-name.forbidden, readme.crate / readme.module, root.logic (lib.rs / mod.rs hold only
+name.forbidden, readme.crate / readme.module, calls.restricted (`restricted_calls`: listed
+methods only from listed callers), root.logic (lib.rs / mod.rs hold only
 module declarations and re-exports), doc.size. Hard rules never take a baseline.
 Configuration: scripts/arch-config.json; baseline: scripts/arch-baseline.json (ratchet).
 """

@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""qmcpx: the measured agent's command for the RL1 agent-writability check (GOAL §7).
+
+A thin layer over the R5B client `rounds/R5B/experiments/harness/driver/qmcp` (loaded, not
+copied: same Streamable HTTP transport, same `X-Qp-Principal` / `X-Qp-Run` headers, same
+Mcp-Session-Id file). It adds what this measurement needs and nothing else:
+
+  qmcpx list                          program tools (name, description, parameters)
+  qmcpx schema <tool>                 a tool's full input schema
+  qmcpx call <tool> '<json>'          calls a tool, prints the reply (structuredContent)
+  qmcpx call <tool> @args.json        ... arguments from a JSON file
+  qmcpx call <tool> --source-file F ['<json>']
+                                      ... `source` = the text of F (no JSON escaping of the
+                                      program text; the rest of the arguments from <json>)
+  qmcpx submit <file>                 a submission (at most QMCPX_MAX_SUBMIT per task): the
+                                      file (text `.qp` or IR `.json`, a program or a reject)
+                                      is copied to submissions/N.<ext> and checked with
+                                      `check_program` over MCP; the reply is N.reply.json
+
+Every call (and every submission) is one JSON line in $QMCPX_DIR/transcript.jsonl with the
+full arguments and the full reply: the scorer reads replies from there (error codes, invented
+names, rejects). `submit` is local bookkeeping, not a server tool: the engine has no submit
+(RX4 had one; PS §3.3 has `add_program`, which refuses signal/state programs, E_TRY_ONLY).
+
+Environment: QMCP_URL, QMCP_PRINCIPAL, QMCP_RUN, QMCP_STATE (as qmcp); QMCPX_DIR (run
+folder, required); QMCPX_INPUTS (JSON list, default ["rx4"]: the bound bar series for
+`submit`); QMCPX_MAX_SUBMIT (default 3).
+
+Exit status: 0 a reply was printed (even a qp/0 `error`: that is an answer to read);
+1 transport error; 2 bad usage or no submissions left.
+"""
+import importlib.machinery
+import importlib.util
+import json
+import os
+import shutil
+import sys
+import time
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+QMCP = os.path.join(ROOT, "rounds", "R5B", "experiments", "harness", "driver", "qmcp")
+PROGRAM_TOOLS = ("check_program", "try_program", "explain_program", "add_program")
+
+
+def load_qmcp(path=QMCP):
+    loader = importlib.machinery.SourceFileLoader("qmcp_client", path)
+    spec = importlib.util.spec_from_loader("qmcp_client", loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+    mod.LOG = ""  # the transcript below replaces the size-only client log
+    return mod
+
+
+def run_dir():
+    d = os.environ.get("QMCPX_DIR")
+    if not d:
+        print("qmcpx: QMCPX_DIR is not set", file=sys.stderr)
+        sys.exit(2)
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+def transcript(row):
+    p = os.path.join(run_dir(), "transcript.jsonl")
+    seq = 0
+    if os.path.exists(p):
+        with open(p, encoding="utf-8") as f:
+            seq = sum(1 for _ in f)
+    row = dict(row, seq=seq, run=os.environ.get("QMCP_RUN", ""))
+    with open(p, "a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def reply_of(res):
+    """The qp/0 reply of a tool result: structuredContent, else the text parsed as JSON."""
+    if isinstance(res.get("structuredContent"), dict):
+        return res["structuredContent"]
+    texts = [c.get("text", "") for c in res.get("content", []) if c.get("type") == "text"]
+    try:
+        return json.loads("\n".join(texts))
+    except ValueError:
+        return {"text": "\n".join(texts), "isError": bool(res.get("isError"))}
+
+
+def call(Q, tool, args):
+    t0 = time.monotonic()
+    try:
+        res = Q.rpc("tools/call", {"name": tool, "arguments": args})
+    except Q.Fail as e:
+        transcript({"tool": tool, "args": args, "reply": None, "transport_error": str(e),
+                    "ms": int((time.monotonic() - t0) * 1000)})
+        print(f"qmcpx: {e}", file=sys.stderr)
+        return None
+    rep = reply_of(res)
+    transcript({"tool": tool, "args": args, "reply": rep,
+                "ms": int((time.monotonic() - t0) * 1000)})
+    return rep
+
+
+def parse_call_args(rest):
+    src_file, json_text = None, None
+    i = 0
+    while i < len(rest):
+        if rest[i] == "--source-file" and i + 1 < len(rest):
+            src_file = rest[i + 1]
+            i += 2
+            continue
+        json_text = rest[i]
+        i += 1
+    if json_text and json_text.startswith("@"):
+        with open(json_text[1:], encoding="utf-8") as f:
+            json_text = f.read()
+    args = json.loads(json_text) if json_text else {}
+    if not isinstance(args, dict):
+        raise ValueError("arguments must be a JSON object")
+    if src_file:
+        with open(src_file, encoding="utf-8") as f:
+            args["source"] = f.read()
+    return args
+
+
+def submission_args(path):
+    """(kind, ext, check_program arguments) of a submission file."""
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    inputs = json.loads(os.environ.get("QMCPX_INPUTS", '["rx4"]'))
+    stripped = text.lstrip()
+    if path.endswith(".json") or stripped.startswith("{"):
+        obj = json.loads(text)
+        kind = "reject" if isinstance(obj, dict) and "reject" in obj else "program"
+        return kind, "json", {"program": obj, "inputs": inputs}
+    first = next((ln.strip() for ln in text.splitlines()
+                  if ln.strip() and not ln.strip().startswith("#")), "")
+    kind = "reject" if first.startswith("reject ") or first == "reject" else "program"
+    return kind, "qp", {"source": text, "inputs": inputs}
+
+
+def cmd_submit(Q, path):
+    d = run_dir()
+    sd = os.path.join(d, "submissions")
+    os.makedirs(sd, exist_ok=True)
+    n = 1 + sum(1 for f in os.listdir(sd) if f.split(".")[0].isdigit() and ".reply." not in f)
+    limit = int(os.environ.get("QMCPX_MAX_SUBMIT", "3"))
+    if n > limit:
+        transcript({"tool": "submit", "args": {"file": path}, "refused": "limit", "n": n})
+        print(json.dumps({"submit": "refused", "reason": f"at most {limit} submissions; "
+                          "the last one counts"}))
+        return 2
+    try:
+        kind, ext, args = submission_args(path)
+    except (OSError, ValueError) as e:
+        transcript({"tool": "submit", "args": {"file": path}, "refused": f"unreadable: {e}"})
+        print(f"qmcpx: cannot read submission {path}: {e}", file=sys.stderr)
+        return 2
+    dst = os.path.join(sd, f"{n}.{ext}")
+    shutil.copyfile(path, dst)
+    t0 = time.monotonic()
+    try:
+        res = Q.rpc("tools/call", {"name": "check_program", "arguments": args})
+        rep = reply_of(res)
+    except Q.Fail as e:
+        rep = None
+        print(f"qmcpx: {e}", file=sys.stderr)
+    with open(os.path.join(sd, f"{n}.reply.json"), "w", encoding="utf-8") as f:
+        json.dump(rep, f, ensure_ascii=False, indent=1)
+    transcript({"tool": "submit", "n": n, "kind": kind, "file": dst, "args": args,
+                "reply": rep, "ms": int((time.monotonic() - t0) * 1000)})
+    print(json.dumps({"submission": n, "remaining": limit - n, "kind": kind, "check": rep},
+                     ensure_ascii=False, separators=(",", ":")))
+    return 0 if rep is not None else 1
+
+
+def main(argv, qmcp_path=QMCP):
+    if not argv or argv[0] not in ("list", "schema", "call", "submit"):
+        print(__doc__)
+        return 2
+    Q = load_qmcp(qmcp_path)
+    cmd = argv[0]
+    try:
+        if cmd == "list":
+            transcript({"tool": "_list"})
+            return Q.cmd_list("names" if "--names" in argv else "text")
+        if cmd == "schema":
+            if len(argv) < 2:
+                return 2
+            transcript({"tool": "_schema", "args": {"tool": argv[1]}})
+            return Q.cmd_schema(argv[1])
+        if cmd == "submit":
+            if len(argv) < 2:
+                return 2
+            return cmd_submit(Q, argv[1])
+        if len(argv) < 2:
+            return 2
+        try:
+            args = parse_call_args(argv[2:])
+        except (OSError, ValueError) as e:
+            transcript({"tool": argv[1], "args_error": str(e)})
+            print(f"qmcpx: arguments: {e}", file=sys.stderr)
+            return 2
+        rep = call(Q, argv[1], args)
+        if rep is None:
+            return 1
+        print(json.dumps(rep, ensure_ascii=False, separators=(",", ":")))
+        return 0
+    except Q.Fail as e:
+        print(f"qmcpx: {e}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -36,14 +36,29 @@ Bağımlılık yalnız aşağı doğrudur; yukarı bağımlılık denetimde hata
 yalnız bildirilmiş, döngüsüz bir sırayla olur (`scripts/arch-config.json`; K87). Geliştirme
 bağımlılıkları (testler, örnekler) katmanlanmaz.
 
+Katman içi sıra (alttan üste; RF1'den sonraki hal, makine biçimi `arch-config.json` `order`):
+
 ```
-kabuklar        qp-cli, qp-wasm, shells/*            (yalnız bağlama; alan mantığı yok)
-uyarlayıcılar   qp-mcp, qp-live, qp-matriks, qp-source (dış dünya: protokol, ağ, dosya)
-oturum          qp-session                           (otorite, komut yolu, günlük)
-alan            qp-capsule, qp-grammar, qp-facts, (yeni) hesap dili, sicil, ajan sözleşmesi
-çekirdek        qp-compute, qp-calendar, qp-render
+kabuklar        qp-wasm < qp-cli, shells/*           (yalnız bağlama; alan mantığı yok)
+uyarlayıcılar   qp-live < qp-matriks < qp-mcp < qp-shellcore < qp-host
+                                                     (dış dünya: protokol, ağ, dosya; barındırma)
+oturum          qp-plane < qp-ops < qp-subsystem < qp-watch < qp-read < qp-authority
+                < qp-replica < qp-viewer < qp-replayhost < qp-session
+                                                     (veri düzlemi, işlemler, alt sistem
+                                                     sözleşmesi, alt sistemler, otorite çekirdeği,
+                                                     istemciler, bileşim)
+alan            qp-source (İ1) < qp-facts < qp-look < qp-glyph < qp-grammar < qp-designs
+                < qp-capsule < qp-voice              (+ ileride hesap dili, sicil, çizim)
+çekirdek        qp-calendar < qp-compute < qp-render
 şema            qp-schema                            (tipler; hiçbir şeye bağımlı değil)
 ```
+
+- Otorite çekirdeği (`qp-authority`) hiçbir alt sistem crate'ini tanımaz; alt sistemler
+  `qp-subsystem` sözleşmesiyle yazılır, bileşim (`qp-session`) kayıt satırıyla bağlar
+  (`docs/ARCHITECTURE.md` "Yeni alt sistem nasıl eklenir"). Sıra yönü: izleme ve okuma
+  otoritenin altında, onu tanımazlar. Otoritenin istemcileri (yansı, barındırıcı) üstünde.
+  Görüntüleyici bir alt sistemdir ama açık taraf için yansı tuttuğu için yansının üstünde
+  durur; otoriteye kayıttan başka yoldan çağrı yapmaz.
 
 - Kabuk kuralı: kabuk crate'inde alan kararı veren kod bulunmaz. Kabuk büyüyorsa mantık
   yanlış katmandadır. Bütçe: kabuk crate'i en çok 4 bin satır.

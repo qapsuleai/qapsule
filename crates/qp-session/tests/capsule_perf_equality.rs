@@ -403,8 +403,12 @@ fn bound_with_flow_and_readers_unchanged() {
     // the `preview` query and the `comments` topic (62 bytes in each of connection a's two
     // answers; R5/M18 value "a 634 4940146 c47e2bdca42286fd"); every other connection, the
     // log and the document unchanged.
+    // (RL1/I1) Re-recorded: `describe` lists the three program ops and the three program
+    // queries (100 bytes per answer: a-d +200, e and g +100; R5B value
+    // "a 634 4940270 20e846849c2a7dfd"); f, h, i, the log and the document unchanged
+    // (evidence: rounds/RL1/experiments/i1/describe-diff.md).
     for entitled in [
-        "a 634 4940270 20e846849c2a7dfd",
+        "a 634 4940470 8d55ffff35a0be09",
         "f 1 33828 64e687e9ac6e5803",
         "i 1 33374 3d07f785ac18cb32",
     ] {
@@ -423,7 +427,9 @@ fn bound_with_flow_and_readers_unchanged() {
         // R5/M18: `describe` lists the `stories` query and topic (10 answers x 20 bytes).
         // "lines 2996 21664711 1dac723c21e8a2fd log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
         // R5B: `describe` lists the R5B ops, query and topic (10 answers x 62 bytes).
-        "lines 2996 21665331 8aaee75f77cb9a7d log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
+        // "lines 2996 21665331 8aaee75f77cb9a7d log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
+        // RL1/I1: `describe` lists the program ops and queries (10 answers x 100 bytes).
+        "lines 2996 21666331 c7bda3374b79dab1 log 1206570 e3754e6847abf125 doc 672043 92a079cb66258785"
     );
 }
 
@@ -451,6 +457,8 @@ fn inline_unchanged() {
         // R5/M18: `describe` lists the `stories` query and topic (10 answers x 20 bytes).
         // R5B: `describe` lists the R5B ops, query and topic (10 answers x 62 bytes):
         // "lines 3739 13109730 467306a49cf583c6 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
-        "lines 3739 13110350 caf938f8baba2b42 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
+        // "lines 3739 13110350 caf938f8baba2b42 log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
+        // RL1/I1: `describe` lists the program ops and queries (10 answers x 100 bytes):
+        "lines 3739 13111350 a66ea79b25144eca log 611848 8fa8658745f376d0 doc 287101 1c632884ddcf7d58"
     );
 }

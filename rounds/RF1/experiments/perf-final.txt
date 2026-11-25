@@ -1,0 +1,245 @@
+# refactor-perf 2026-11-25T08:28Z Darwin arm64 commit bd5bf705
+## K17 sweep_bench
+machine: aarch64-macos, cpu: Apple M4 Max, threads: 16
+bars=10000 reps=15 (single thread, release)
+study       variants    min ms    med ms    max ms  digest
+sma             1000      4.45      4.49      4.60  d9a393c2f397ae9e
+ema             1000      3.94      4.05      4.12  f9be271e91103539
+rsi             1000      9.50      9.57     10.01  9515526d5288453b
+macd            1000      8.00      8.26      8.68  d5a6c407256992e6
+bollinger       1000      8.59      8.78      9.28  7e683c082fb95dc9
+
+## WASM (verify step 8)
+raw=2355036 gzip9=773715
+## WASM shell package (web, replica)
+raw=9004524 gzip9=2485151
+## K52 metrics.mjs (CPU x4)
+{
+ "cpu_throttling": 4,
+ "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+ "bundle": {
+  "wasm_gzip": 2485151,
+  "wasm_raw": 9004524
+ },
+ "counts": {
+  "data_frames": 127,
+  "data_passes": 127,
+  "faces_painted": 393,
+  "faces_skipped_hidden": 10042,
+  "msg_frames": 293,
+  "paint_passes": 267,
+  "passes_per_data_frame": 1,
+  "rate_frames_min": 10,
+  "scene_builds": 119,
+  "scenes_painted": 10,
+  "tick_plus_pass_ms": 3.738
+ },
+ "device": {
+  "cores": 16,
+  "device_memory_gb": 32,
+  "dpr": 1,
+  "scale": 1,
+  "screen_h": 844,
+  "screen_w": 390
+ },
+ "feed": 40,
+ "frame_ms": {
+  "drag": {
+   "long": 0,
+   "max": 9.3,
+   "mean": 8.328,
+   "n": 112,
+   "p50": 8.3,
+   "p95": 9.2,
+   "p99": 9.2,
+   "very_long": 0
+  },
+  "idle": {
+   "long": 0.011,
+   "max": 74.9,
+   "mean": 8.526,
+   "n": 999,
+   "p50": 8.3,
+   "p95": 9.2,
+   "p99": 16.6,
+   "very_long": 0.004
+  },
+  "scroll": {
+   "long": 0.022,
+   "max": 24.5,
+   "mean": 8.561,
+   "n": 183,
+   "p50": 8.3,
+   "p95": 9.3,
+   "p99": 17.1,
+   "very_long": 0.005
+  },
+  "zoom": {
+   "long": 0,
+   "max": 9.4,
+   "mean": 8.345,
+   "n": 53,
+   "p50": 8.3,
+   "p95": 9.3,
+   "p99": 9.4,
+   "very_long": 0
+  }
+ },
+ "kind": "qapsule-demo-metrics",
+ "look": {
+  "alphabet": null,
+  "face": "zemre",
+  "feed": "elikov",
+  "outcome": "tg5",
+  "transition": "surek"
+ },
+ "memory_bytes": {
+  "js_heap": {
+   "last": 10000000,
+   "max": 10000000
+  },
+  "wasm": {
+   "last": 9699328,
+   "max": 9699328
+  }
+ },
+ "mode": {
+  "jit": {
+   "iterations": 1000000,
+   "off_above_ms": 15,
+   "probe_ms": 10.5,
+   "state": "likely_on"
+  },
+  "secure_context": true,
+  "webgpu": true
+ },
+ "open_flags": [],
+ "open_ms": {
+  "connected": 173.1,
+  "feed": 227.7,
+  "first_capsule": 286.7,
+  "start_frame": 138.8,
+  "wasm_ready": 129.4
+ },
+ "open_repeats": {
+  "feed": 261
+ },
+ "paint": {
+  "fallback": null,
+  "requested": "canvas",
+  "used": "canvas"
+ },
+ "refresh": {
+  "hz": 120,
+  "median_ms": 8.3,
+  "ms": 8.333,
+  "n": 999,
+  "rule": "long: interval > 1.5 x refresh ms; very_long: > 2.5 x",
+  "source": "idle"
+ },
+ "replay": {
+  "instruments": 30,
+  "speed": 16,
+  "step": 126,
+  "synthetic": true
+ },
+ "span_ms": {
+  "canvas_font": {
+   "max": 8.9,
+   "mean": 8.9,
+   "n": 1,
+   "p50": 8.9,
+   "p95": 8.9,
+   "p99": 8.9
+  },
+  "canvas_part": {
+   "max": 1.7,
+   "mean": 0.305,
+   "n": 298,
+   "p50": 0.1,
+   "p95": 1,
+   "p99": 1.2
+  },
+  "change_check": {
+   "max": 0.9,
+   "mean": 0.029,
+   "n": 553,
+   "p50": 0,
+   "p95": 0.2,
+   "p99": 0.7
+  },
+  "data_pass": {
+   "max": 39.4,
+   "mean": 3.594,
+   "n": 127,
+   "p50": 3.3,
+   "p95": 4.8,
+   "p99": 6.4
+  },
+  "face": {
+   "max": 28.1,
+   "mean": 0.75,
+   "n": 393,
+   "p50": 0.7,
+   "p95": 1.6,
+   "p99": 2.1
+  },
+  "frame_to_paint": {
+   "max": 82.3,
+   "mean": 8.221,
+   "n": 266,
+   "p50": 7.2,
+   "p95": 15.4,
+   "p99": 24.3
+  },
+  "msg": {
+   "max": 22.4,
+   "mean": 1.265,
+   "n": 294,
+   "p50": 0.9,
+   "p95": 3.4,
+   "p99": 11.1
+  },
+  "paint_pass": {
+   "max": 39.4,
+   "mean": 3.169,
+   "n": 267,
+   "p50": 2.8,
+   "p95": 4.7,
+   "p99": 11.1
+  },
+  "pass_wait": {
+   "max": 42.9,
+   "mean": 5.082,
+   "n": 266,
+   "p50": 4.4,
+   "p95": 10.8,
+   "p99": 15.5
+  },
+  "scene": {
+   "max": 28.4,
+   "mean": 5.31,
+   "n": 10,
+   "p50": 2.3,
+   "p95": 28.4,
+   "p99": 28.4
+  },
+  "scene_build": {
+   "max": 21.4,
+   "mean": 0.986,
+   "n": 119,
+   "p50": 0.8,
+   "p95": 1.3,
+   "p99": 5.4
+  },
+  "tick": {
+   "max": 1.6,
+   "mean": 0.144,
+   "n": 126,
+   "p50": 0.1,
+   "p95": 0.5,
+   "p99": 0.9
+  }
+ },
+ "warnings": []
+}

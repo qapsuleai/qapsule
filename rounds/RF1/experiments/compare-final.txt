@@ -1,0 +1,2 @@
+compare: 270 items byte-identical to the baseline
+rc=0

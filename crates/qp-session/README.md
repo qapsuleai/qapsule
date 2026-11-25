@@ -3,20 +3,22 @@
 **Bileşim** (`docs/CONCEPTS.md` "Bileşim"): `qp/0` otoritesinin dışa açık yüzü. Otorite
 çekirdeği `qp-authority`'dedir ve hiçbir alt sistemi tanımaz; standart alt sistemler buraya
 birer kayıt satırıyla girer (`src/compose.rs`, `LIST`; `rounds/RF1/PLAN.md` §3.3 satır 8,
-§7). RF1 S3.1'de kayıtlı: `qp-watch` (izleme niyeti).
+§7). Kayıtlı: `qp-watch` (izleme niyeti, S3.1), `qp-read` (okuma ve sunum, S3.2),
+`qp-viewer` (görüntüleyici bağlantıları, S3.3).
 
 **Katman:** oturum (`docs/ENGINEERING.md` §2); katman içi sırada en üstte
-(`qp-plane < qp-ops < qp-subsystem < qp-watch < qp-authority < qp-session`).
+(`… < qp-read < qp-authority < qp-replica < qp-viewer < qp-replayhost < qp-session`).
 
-**Bağımlılıklar:** `qp-authority` (otorite), `qp-subsystem` (sözleşme), `qp-watch` (alt
-sistem), `qp-source` (sağlayıcı tipleri, kurucuların imzası); uygunluk koşucusu (`conform`)
+**Bağımlılıklar:** `qp-authority` (otorite), `qp-subsystem` (sözleşme), `qp-watch`, `qp-read`,
+`qp-viewer` (alt sistemler), `qp-replica`, `qp-replayhost` (otoritenin istemcileri), `qp-source` (sağlayıcı tipleri, kurucuların imzası); uygunluk koşucusu (`conform`)
 için `qp-ops`, `qp-plane`, `qp-schema`, `serde`, `serde_json`, `tempfile`. Sınamalar ve
 örnekler için (`dev-dependencies`): `qp-capsule`, `qp-compute`, `qp-grammar`, `qp-look`,
 `qp-designs`, `schemars`.
 
 **Bileşim (`src/compose.rs`):** `STANDARD` (standart alt sistemler, kayıt sırasıyla),
-`FOLLOWER` (izleyicilerin listesi: `STANDARD` eksi okuma, sıra aynı; RF1 S3.2) ve onlarla
-kurulan otoriteler. Her biri `qp-authority` tipini sarar (`Deref`/`DerefMut`; bugünkü çağrı
+`FOLLOWER` (izleyicilerin listesi: `STANDARD` eksi okuma ve görüntüleyici, sıra aynı; RF1 S3.2,
+S3.3) ve onlarla kurulan otoriteler. Her biri `qp-authority`, `qp-replica`, `qp-viewer` ya da
+`qp-replayhost` tipini sarar (`Deref`/`DerefMut`; bugünkü çağrı
 yerleri değişmez) ve aynı adlı kurucularla `STANDARD`'ı (izleyicilere `FOLLOWER`'ı) verir.
 İzleyici oturumu (`Replica::session_mut`, `OpenSide::replica_mut`) sorgu ya da girdi almaz:
 `handle_raw` ile gönderilirse `unsupported` döner.
@@ -35,7 +37,7 @@ görüntüleyicinin açık tarafı) listeyi ondan alır (`qp_authority::Subsyste
 sistemsiz otorite; barındırıcının ve yansının içindeki oturumun tipi), `Subsystems`; ve
 `qp-authority`'nin kök yüzeyinin bilerek yapılmış yeniden dışa aktarımı, aynı adlarla:
 `permissions`, `confine`, `default_limits`, `read_json`; `ReplicaOptions`, `document_digest`,
-`view_digest`; `demo_init`; `hit_scene`, `screen_frame`, `explain_scene`, `HIT_WIDTH`,
+`view_digest` (`qp-replica`); `demo_init` (`qp-replayhost`); `hit_scene`, `screen_frame`, `explain_scene`, `HIT_WIDTH`,
 `HIT_HEIGHT`; `CoinFlipRule`, `CommentAudit`, `CompileOptions`, `SettleRequest`,
 `MAX_DISPUTE_DIGESTS`, `MAX_OPEN_DISPUTES`, `MAX_DISPUTES_PER_CONN`; modüller `capsule`,
 `replica`, `viewer`, `replayhost`, `agent`, `voices`, `tape` (gizli; bunların beşi yukarıdaki

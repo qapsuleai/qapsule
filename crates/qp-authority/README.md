@@ -9,8 +9,9 @@ iletisiyle gelir; rastgelelik yok.
 
 **Katman:** oturum (`docs/ENGINEERING.md` §2); katman içi sırada `qp-subsystem`'den sonra,
 `qp-session` bileşiminden önce. Hiçbir alt sistem crate'ini tanımaz: kurucuları alt sistem
-listesini (`Subsystems`) parametre alır, doğurduğu otoritelere (barındırıcının yeniden kurduğu
-oturum, yansının izleyicisi, görüntüleyicinin açık tarafı, kayıt oynatıcı) aynısını verir. RF1 S3.0'da
+listesini (`Subsystems`) parametre alır. İstemcileri (`qp-replica`, `qp-viewer`'ın açık tarafı,
+`qp-replayhost`) onun üstündedir; otoriteyi kendilerine verilen listeyle kurar, ona yalnız dışa
+açık ve dar gizli yöntemlerle ulaşır (RF1 S3.3). RF1 S3.0'da
 `qp-session`'ın içeriği saf taşımayla buraya geldi; çağıranlar `qp-session` bileşiminin
 yeniden dışa aktardığı yolları kullanır (`rounds/RF1/PLAN.md` §3.3).
 
@@ -20,9 +21,12 @@ kurucusu, saf kapsül dizinleri), `qp-schema`, `qp-calendar`, `qp-compute`, `qp-
 `qp-subsystem` (alt sistem sözleşmesi); `schemars`, `serde`, `serde_json`,
 `serde_path_to_error`.
 
-**Dışa açık yüzey (`lib.rs`; `qp-session` bunları aynı adlarla yeniden dışa aktarır):** `Session`, `Subsystems`, `permissions`, `confine`; `Replica`,
-`ReplicaOptions`, `document_digest`, `view_digest`; `ReplayHost`, `demo_init`; modüller `capsule`, `replica`, `viewer`, `replayhost`,
-`agent`, `voices` (`qp_voice`). RF1 S2'den beri `replay`, `apply_*`,
+**Dışa açık yüzey (`lib.rs`; `qp-session` bunları aynı adlarla yeniden dışa aktarır):** `Session`, `Subsystems`, `Lists`, `permissions`, `confine`;
+modüller `capsule`, `agent`, `voices` (`qp_voice`). RF1 S3.3'ten beri `Replica`, `ReplicaOptions`,
+`document_digest`, `view_digest`, `tape` `qp-replica`'da; `viewer` `qp-viewer`'da; `ReplayHost`,
+`demo_init` `qp-replayhost`'ta. İstemcilerin gizli yöntemleri: `authority/session/follow.rs`
+(yansı), `seq_to`, `conn_agent_origin`, `reader_parts_of` (barındırıcı); gizli kök yeniden dışa
+aktarımı `anchor_of`, `closed`, `eval_at`, `feeds_of`. RF1 S2'den beri `replay`, `apply_*`,
 `ENGINE_PRINCIPAL`, `DocProvider`, `profile_for`, `canon_document`, `thresholds` `qp-ops`'ta;
 `DataError`, `HostNotice`, `did_you_mean`, `edit_distance`, `headparts` `qp-plane`'de.
 RF1 S3.2'den beri sorgular ve girdi hareketleri okuma alt sistemindedir (`qp-read`; `hit_scene`,
@@ -39,12 +43,13 @@ RF1 S3.2'den beri sorgular ve girdi hareketleri okuma alt sistemindedir (`qp-rea
 - `data/` — canlı yol (bağ sorguları S3.2'de `qp-read`'e çıktı).
 - `read/` — otoritenin kendi derlemesi: `provider`, `scene`, `scene_as_reader`. Sorgu,
   anlamsal okuma, önizleme, açıklama ve etkileşim S3.2'de `qp-read` alt sistemine çıktı.
-- `replica/` — yansı, görüntüleyici (`viewer`), kayıt oynatıcı (`tape`).
-- `host/` — yeniden oynatma barındırıcısı (`replayhost`); uygunluk koşucusu (`conform`) S3.0'da
-  bileşime (`qp-session`) taşındı.
+- `authority/session/push.rs` — kayıtlı konulara abonelik ve itilen konular (görüntüleyici alt
+  sistemi her girdiden sonra okuyucunun dünyasında sorulur; S3.3).
+- `authority/session/follow.rs` — izleyicinin (yansı) otoriteye uyguladığı dar adımlar (S3.3).
 
 **Ne değildir:** kabuk, uyarlayıcı (CLI/MCP/WASM), kapsül motoru, veri kaynağı, çizici.
 
-**Bilinen borç:** crate bütçenin üstünde (`crate.lines`, bütçe 12 bin) — İ3; okuma S3.2'de
-çıktı, S3.3 yansı, görüntüleyici ve barındırmayı dışarı alır (`rounds/RF1/PLAN.md` §3.3).
+**Bilinen borç:** crate bütçenin üstünde (`crate.lines`, bütçe 12 bin) — İ3, tavan 12.744
+(≤ 13.000, mandal); okuma S3.2'de, yansı, görüntüleyici ve barındırma S3.3'te çıktı. Kalan ayrım
+(kapsül yaşamı, iddia/itiraz/yorum, canlı yol) `docs/DEBT.md`'de.
 Bütünleşme sınamaları ve örnekler `qp-session`'da (`tests/` 39 dosya, `dir.files`).

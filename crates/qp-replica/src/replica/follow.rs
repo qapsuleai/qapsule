@@ -129,9 +129,9 @@ impl Replica {
             None => self
                 .s
                 .take()
-                .map_or(Provider::None, |mut s| s.take_provider()),
+                .map_or(Provider::None, Follower::into_provider),
         };
-        match follower(doc, &self.principal, provider, self.subs) {
+        match Follower::start(doc, &self.principal, provider, self.subs) {
             Ok(mut s) => {
                 s.set_headline_calendar(self.headline_cal.clone());
                 self.s = Some(s);
@@ -178,7 +178,7 @@ impl Replica {
         let Some(s) = self.s.as_mut() else {
             return false;
         };
-        let Ok(inverse) = s.mirror_apply(&e.changes) else {
+        let Ok(inverse) = s.apply(&e.changes) else {
             return false;
         };
         e.inverse = inverse;
@@ -201,7 +201,7 @@ impl Replica {
             }
         }
         self.seq = e.seq;
-        s.mirror_commit(e);
+        s.commit(e);
         let learn = std::mem::take(&mut self.pending_learn);
         for (c, ev) in learn {
             self.learn(c, ClaimState::Asserted, ev, false);
@@ -223,7 +223,7 @@ impl Replica {
             }
             return Ok(());
         };
-        let ids = s.follow_data(ev)?;
+        let ids = s.data(ev)?;
         if ids.is_empty() {
             return Ok(());
         }
@@ -235,7 +235,7 @@ impl Replica {
     /// settled fetch it put into its provider, or after the provider caught up).
     pub fn resync(&mut self) {
         if let Some(s) = self.s.as_mut() {
-            s.follow_resync();
+            s.resync();
         }
         self.reconcile();
     }

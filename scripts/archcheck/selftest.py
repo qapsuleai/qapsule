@@ -25,7 +25,9 @@ CFG = {
     "doc_globs": ["*.md", "docs/**/*.md"],
     "hard_rules": ["layer.up", "layer.lateral", "layer.order", "layer.unknown", "file.hard",
                    "name.forbidden", "readme.crate", "root.logic", "path.outside",
-                   "lint.inner", "lints.workspace", "lint.flags"],
+                   "lint.inner", "lints.workspace", "lint.flags", "calls.restricted"],
+    "restricted_calls": [{"id": "T", "methods": ["mirror_apply", "eval_parts"],
+                          "callers": ["crates/qp-s/src/m.rs", "crates/qp-a/"]}],
     "generated_files": [],
     "exceptions": [],
 }
@@ -62,6 +64,13 @@ def _clean(root):
        'let _r = r#"} fn y() {"#; /* } { */ \'{\' }\n'
        "pub fn g<'a>(x: &'a str) -> &'a str { x }\n"
        "#[cfg(test)]\nmod tests {\n" + "".join(f"    // filler {i}\n" for i in range(20)) + "}\n")
+    # calls.restricted: the allowed callers call; elsewhere only a definition, a comment
+    # and a string name the restricted methods.
+    _w(root, "crates/qp-s/src/m.rs", "pub fn small(s: &mut S) { s.mirror_apply(); }\n")
+    _w(root, "crates/qp-a/src/m.rs", "pub fn small(s: &mut S) { S::eval_parts(s); }\n")
+    _w(root, "crates/qp-c/src/m.rs",
+       "// s.mirror_apply() here would be a call\n"
+       "pub fn mirror_apply() { let _s = \"x.eval_parts()\"; }\n")
     # qp-b -> qp-c is sideways but along the declared order of `mid` (qp-c below qp-b)
     edges = [("qp-b", "qp-a", "normal"), ("qp-s", "qp-b", "normal"), ("qp-a", "qp-s", "dev"),
              ("qp-b", "qp-c", "normal")]
@@ -85,6 +94,7 @@ EXPECT = {
     "root.logic": "crates/qp-a/src/topic/mod.rs",
     "doc.size": "docs/BIG.md",
     "path.outside": "crates/qp-a/src/escape.rs->../../qp-b/hidden.rs",
+    "calls.restricted": "crates/qp-c/src/f0.rs::mirror_apply",
 }
 EXPECT_EXTRA = [
     ("root.logic", "crates/qp-c/src/lib.rs"),          # an inline `mod x { fn … }` body
@@ -97,6 +107,8 @@ EXPECT_EXTRA = [
     ("lint.allow", "qp-c"),                               # `clippy :: unwrap_used` with spaces
     ("lint.flags", ".cargo/config.toml"),                 # -A clippy::… in rustflags
     ("fn.lines", "crates/qp-b/src/fake/tests.rs::not_a_test"),  # tests.rs not cfg(test) by its parent
+    ("calls.restricted", "crates/qp-c/src/f0.rs::eval_parts"),   # UFCS path, not a method call
+    ("calls.restricted", "crates/qp-b/tests/caller.rs::mirror_apply"),  # tests are checked too
 ]
 
 
@@ -110,6 +122,8 @@ def _dirty(root):
     _w(root, "crates/qp-b/src/long.rs", _fn("long", 12))
     for i in range(3):
         _w(root, f"crates/qp-c/src/f{i}.rs", "// x\n")
+    _w(root, "crates/qp-c/src/f0.rs", "fn h(s: &mut S) { s\n    .mirror_apply(); let _f = S::eval_parts; }\n")
+    _w(root, "crates/qp-b/tests/caller.rs", "fn t(s: &mut S) { s.mirror_apply(); }\n")
     _w(root, "crates/qp-b/src/pad.rs", "".join(f"// {i}\n" for i in range(29)))
     _w(root, "crates/qp-b/src/pad2.rs", "".join(f"// {i}\n" for i in range(29)))
     _w(root, "crates/qp-s/src/pad.rs", "".join(f"// {i}\n" for i in range(29)))

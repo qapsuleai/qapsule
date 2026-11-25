@@ -132,3 +132,8 @@ sınaması bir fazı, bir sorguyu ve bir konuyu da kullansın; yalnız işlem ka
 - **Güncelleme (S3.3, kapanış denetimi notu).** S3.3'ten sonra `FOLLOWER` = `STANDARD` eksi
   okuma eksi görüntüleyici (izleyicilerin görüntüleyici bağlantısı yok; `audit-s33`). S4
   notundaki `qp-ops` `lint.allow` 21 sonraki dalgalarda 20'ye sıkıştı (taban çizgisi).
+- **Ölçüt 3 (Arkin'in kararı, 2026-11-25).** Round oturumu sordu: kabuk WASM paketi +%2,45
+  (İ8) yüzünden GOAL ölçüt 3 (WASM ±%2) harfiyen tutmuyor; ne yapılsın? Arkin'in cevabı:
+  **"İ8 ile karşılanmış say."** Ölçüt 3, adı konmuş ve Arkin'in kararına bağlı istisnayla (İ8)
+  karşılanmış sayılır (ölçüt 11 bu yolu tanır). Varsayılan WASM paketi ±%2 içinde (+%0,39).
+  Ana akış kararları (Ö119–Ö126, A70–A73) round'un değil ana akışın işidir.

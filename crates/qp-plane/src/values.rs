@@ -493,6 +493,7 @@ pub fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<Computed
             inputs,
             params,
             output,
+            ..
         } => {
             let input = inputs
                 .first()
@@ -504,11 +505,9 @@ pub fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<Computed
             let computed = Computed::new(times(bars), outputs, main_output(study, output.as_ref()));
             let rc = cache.insert(id, computed, Some(live));
             // A study computed on demand joins its bar series' kept-current list.
-            if let Some(i) = cache.slot_of(id) {
-                if let Some(list) = cache.deps.get_mut(input.as_str()) {
-                    if !list.contains(&i) {
-                        list.push(i);
-                    }
+            if let (Some(i), Some(list)) = (cache.slot_of(id), cache.deps.get_mut(input.as_str())) {
+                if !list.contains(&i) {
+                    list.push(i);
                 }
             }
             Ok(rc)

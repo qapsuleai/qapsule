@@ -124,38 +124,41 @@ fn reduce(vals: &[Option<f64>], t: &[i64], from: usize, how: Reduce) -> Reduced 
 }
 
 impl Rd<'_> {
+    /// Answer to `describe`.
+    fn describe(&self, ci: usize) -> QueryResult {
+        let op_schema = schemars::schema_for!(Op).to_value();
+        let q_schema = schemars::schema_for!(Query).to_value();
+        let t_schema = schemars::schema_for!(Topic).to_value();
+        let role = self.conns[ci].role;
+        QueryResult::Description {
+            description: Description {
+                thresholds: qp_ops::canon::thresholds(),
+                protocol: PROTOCOL_VERSION.to_owned(),
+                doc: rd!(self).id.clone(),
+                ops: variant_names(&op_schema, "op"),
+                queries: variant_names(&q_schema, "kind"),
+                topics: variant_names(&t_schema, "kind"),
+                studies: qp_compute::STUDY_NAMES
+                    .iter()
+                    .map(|s| {
+                        (
+                            (*s).to_owned(),
+                            qp_compute::default_params(s).unwrap_or_default(),
+                        )
+                    })
+                    .collect(),
+                principals: self.principals.to_vec(),
+                role,
+                permissions: self.conns[ci].permissions.clone(),
+            },
+        }
+    }
+
     #[allow(clippy::too_many_lines)]
     pub(crate) fn query(&mut self, ci: usize, q: &Query) -> PResult<QueryResult> {
         let qp = "/query";
         match q {
-            Query::Describe {} => {
-                let op_schema = schemars::schema_for!(Op).to_value();
-                let q_schema = schemars::schema_for!(Query).to_value();
-                let t_schema = schemars::schema_for!(Topic).to_value();
-                let role = self.conns[ci].role;
-                Ok(QueryResult::Description {
-                    description: Description {
-                        thresholds: qp_ops::canon::thresholds(),
-                        protocol: PROTOCOL_VERSION.to_owned(),
-                        doc: rd!(self).id.clone(),
-                        ops: variant_names(&op_schema, "op"),
-                        queries: variant_names(&q_schema, "kind"),
-                        topics: variant_names(&t_schema, "kind"),
-                        studies: qp_compute::STUDY_NAMES
-                            .iter()
-                            .map(|s| {
-                                (
-                                    (*s).to_owned(),
-                                    qp_compute::default_params(s).unwrap_or_default(),
-                                )
-                            })
-                            .collect(),
-                        principals: self.principals.to_vec(),
-                        role,
-                        permissions: self.conns[ci].permissions.clone(),
-                    },
-                })
-            }
+            Query::Describe {} => Ok(self.describe(ci)),
             Query::Get { id } => {
                 let Some(c) = find_collection(self.doc, id) else {
                     return Err(
@@ -422,6 +425,9 @@ impl Rd<'_> {
                 qp,
             ),
             Query::Capsule { capsule } => self.capsule_query(ci, capsule, qp),
+            // (RL1) Served by the `qp-program` subsystem when it is registered.
+            Query::CheckProgram { .. } | Query::TryProgram { .. } => Err(unserved_program(qp)),
+            Query::ExplainProgram { .. } => Err(unserved_program(qp)),
             Query::Ledger {
                 key,
                 meaning,
@@ -555,4 +561,14 @@ impl Rd<'_> {
             }
         }
     }
+}
+
+/// A program query without the `qp-program` subsystem.
+fn unserved_program(qp: &str) -> qp_schema::protocol::ProtocolError {
+    E::new(
+        ErrorCode::Unsupported,
+        "program queries are not served here: no subsystem owns them",
+    )
+    .at(qp)
+    .build()
 }

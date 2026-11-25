@@ -44,6 +44,9 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::AddNarrative { about, .. } => format!("add_narrative about {about}"),
         Op::AddWatch { .. } => "add_watch".to_owned(),
         Op::RemoveWatch { intent } => format!("remove_watch {intent}"),
+        Op::AddProgram { .. } => "add_program".to_owned(),
+        Op::SetProgramParams { program, .. } => format!("set_program_params {program}"),
+        Op::RemoveProgram { program } => format!("remove_program {program}"),
         Op::AddComment { about, .. } => format!(
             "add_comment about {}",
             about
@@ -85,17 +88,23 @@ pub(crate) fn summarize(op: &Op) -> String {
         Op::SetSensitivity {
             principal,
             sensitivity,
-        } => {
-            let level = sensitivity.map_or("default", |s| match s {
-                qp_schema::capsule::Sensitivity::Important => "important",
-                qp_schema::capsule::Sensitivity::Balanced => "balanced",
-                qp_schema::capsule::Sensitivity::All => "all",
-            });
-            match principal {
-                Some(w) => format!("set_sensitivity {w} {level}"),
-                None => format!("set_sensitivity {level}"),
-            }
-        }
+        } => sensitivity_summary(principal.as_deref(), *sensitivity),
+    }
+}
+
+/// Summary of a `set_sensitivity` op.
+fn sensitivity_summary(
+    principal: Option<&str>,
+    sensitivity: Option<qp_schema::capsule::Sensitivity>,
+) -> String {
+    let level = sensitivity.map_or("default", |s| match s {
+        qp_schema::capsule::Sensitivity::Important => "important",
+        qp_schema::capsule::Sensitivity::Balanced => "balanced",
+        qp_schema::capsule::Sensitivity::All => "all",
+    });
+    match principal {
+        Some(w) => format!("set_sensitivity {w} {level}"),
+        None => format!("set_sensitivity {level}"),
     }
 }
 

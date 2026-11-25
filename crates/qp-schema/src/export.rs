@@ -4,8 +4,8 @@
 use std::path::{Path, PathBuf};
 
 use crate::{
-    capsule, comment, data, market, protocol, scene, Calendar, Capsule, Command, Document, Fact,
-    Finding, Instrument, Intent, Ledger, Series, StudyOutput, View,
+    capsule, comment, data, market, program, protocol, scene, Calendar, Capsule, Command, Document,
+    Fact, Finding, Instrument, Intent, Ledger, Series, StudyOutput, View,
 };
 
 fn schema_of<T: schemars::JsonSchema>() -> serde_json::Value {
@@ -46,6 +46,7 @@ pub fn json_schemas() -> Vec<(&'static str, serde_json::Value)> {
         ("MarketStatus", schema_of::<market::MarketStatus>()),
         ("Comment", schema_of::<protocol::Comment>()),
         ("CommentDraft", schema_of::<comment::CommentDraft>()),
+        ("Program", schema_of::<program::Program>()),
     ]
 }
 

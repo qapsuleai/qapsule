@@ -325,4 +325,82 @@ pub enum Query {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         height: Option<u32>,
     },
+    /// (RL1, PS §3.2) Check a program (IR or text) without running it: every error,
+    /// warnings, cost, outputs, identity, limits; the IR when text was given. Program
+    /// errors are in the answer (`program_check`). Exactly one of `program`, `source`.
+    CheckProgram {
+        /// The program as IR (the `Program` schema), read as JSON.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        program: Option<serde_json::Value>,
+        /// The program as text.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        source: Option<String>,
+        /// The bar series to bind; clock and budget checks are bound-independent if absent.
+        /// Also takes a selector (§17).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        #[schemars(with = "Vec<SeriesRef>")]
+        inputs: Vec<String>,
+        /// Values to bind.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        params: BTreeMap<String, crate::program::ProgramParamValue>,
+        /// Language of the messages (`en` if absent).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        lang: Option<Language>,
+    },
+    /// (RL1, PS §3.2) Try a program over the bound series' closed bars (replay mode):
+    /// summaries per output, simulated signal records, work used (`program_try`).
+    /// Exactly one of `program`, `source`, `instance`.
+    TryProgram {
+        /// The program as IR (the `Program` schema), read as JSON.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        program: Option<serde_json::Value>,
+        /// The program as text.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        source: Option<String>,
+        /// A program instance of the document.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        instance: Option<String>,
+        /// The bar series.
+        /// Also takes a selector (§17).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        #[schemars(with = "Vec<SeriesRef>")]
+        inputs: Vec<String>,
+        /// Values to bind.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        params: BTreeMap<String, crate::program::ProgramParamValue>,
+        /// Bars to read; the last `program.try.max_bars` if absent.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        range: Option<Range>,
+        /// Language of the messages (`en` if absent).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        lang: Option<Language>,
+    },
+    /// (RL1, PS §3.2) Explain a program: canonical text, identities, per node cost and,
+    /// with `at`, a value's provenance (`program_explain`). Exactly one of `program`,
+    /// `source`, `instance`.
+    ExplainProgram {
+        /// The program as IR (the `Program` schema), read as JSON.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        program: Option<serde_json::Value>,
+        /// The program as text.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        source: Option<String>,
+        /// A program instance of the document.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        instance: Option<String>,
+        /// The bar series.
+        /// Also takes a selector (§17).
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        #[schemars(with = "Vec<SeriesRef>")]
+        inputs: Vec<String>,
+        /// Values to bind.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        params: BTreeMap<String, crate::program::ProgramParamValue>,
+        /// The value to trace.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        at: Option<crate::program::ExplainAt>,
+        /// Language of the messages (`en` if absent).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        lang: Option<Language>,
+    },
 }

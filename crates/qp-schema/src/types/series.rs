@@ -208,6 +208,10 @@ pub enum SeriesSource {
         /// Which output of a multi-output study, if any.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         output: Option<String>,
+        /// (RL1, PS §1.1) The program behind a program output series; present iff
+        /// `study` is `"program"`. Written only by program operations.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        program: Option<Box<crate::program::ProgramRef>>,
     },
 }
 

@@ -72,6 +72,7 @@ fn put_series_source(
             inputs,
             params,
             output,
+            ..
         } => {
             let full = check_study(doc, study, inputs, params, &src, "study")?;
             if let Some(o) = output {
@@ -95,6 +96,7 @@ fn put_series_source(
                 inputs: inputs.clone(),
                 params: full,
                 output: output.clone(),
+                program: None,
             };
         }
         SeriesSource::Bind { .. } => {
@@ -144,6 +146,7 @@ pub(super) fn add_study(
             inputs: inputs.clone(),
             params: full,
             output: None,
+            program: None,
         },
         data: None,
     };
@@ -198,6 +201,7 @@ pub(super) fn set_params(
         inputs,
         params: old,
         output,
+        ..
     } = &s.source
     else {
         return Err(invalid(
@@ -238,6 +242,7 @@ pub(super) fn set_params(
         inputs: inputs.clone(),
         params: full,
         output: output.clone(),
+        program: None,
     };
     Ok(vec![ChangeOp::PutSeries {
         series: ns,

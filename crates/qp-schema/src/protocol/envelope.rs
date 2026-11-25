@@ -534,4 +534,49 @@ pub struct ProtocolError {
     /// (R5B, §25.4) For `comment_rejected`: every reason, machine-readable.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub reasons: Vec<crate::comment::Reason>,
+    /// (RL1, PS §3.1) For a program operation: every program error (the top-level fields
+    /// carry the first one).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub errors: Vec<ProgramError>,
+}
+
+/// (RL1) A position in program text (PR §11.1): 1-based line and column, column and
+/// length in Unicode characters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Span {
+    /// Line, 1-based.
+    pub line: u32,
+    /// Column, 1-based.
+    pub col: u32,
+    /// Length.
+    pub len: u32,
+}
+
+/// (RL1) One error or warning of a program (PR §11.1).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ProgramError {
+    /// The closed protocol code; absent on a warning.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<ErrorCode>,
+    /// Sub-code (`E_...`; `W_...` for a warning).
+    pub reason: String,
+    /// What went wrong, in one sentence (`lang`).
+    pub message: String,
+    /// JSON pointer into the IR (relative to the program root).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub at: Option<String>,
+    /// Position in the text, for text input.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub span: Option<Span>,
+    /// Accepted values or forms, when a short list.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub expected: Vec<String>,
+    /// Close names (at most 5).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub did_you_mean: Vec<String>,
+    /// How to fix it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hint: Option<String>,
 }

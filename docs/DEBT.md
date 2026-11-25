@@ -269,11 +269,11 @@ Hedef: ihlali düzelt, izni kaldır.
 
 | Kalem | Değer |
 |---|---|
-| `qp-compute` | 27 |
+| `qp-compute` | 30 — K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
 | `qp-authority` | 25 |
 | `qp-live` | 23 |
+| `qp-ops` | 23 — K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
 | `qp-host` | 21 |
-| `qp-ops` | 20 |
 | `qp-mcp` | 17 |
 | `qp-shellcore` | 17 |
 | `qp-capsule` | 14 |
@@ -289,7 +289,7 @@ Hedef: ihlali düzelt, izni kaldır.
 | `qp-matriks` | 3 |
 | `qp-replayhost` | 3 |
 | `qp-cli` | 2 |
-| `qp-plane` | 1 |
+| `qp-plane` | 2 — K93 (A72): clippy unimplemented/unreachable açıldı; mevcut unreachable! öğe başına izinle (RL1/Ö3) |
 | `qp-render` | 1 |
 
 ## `test.file` — Test dosyası 800 satırı aşıyor (M5 kesildi)

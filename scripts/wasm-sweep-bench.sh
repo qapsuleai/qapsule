@@ -6,6 +6,6 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 out="$root/target/wasm-bench/pkg"
 wasm_pack="$(command -v wasm-pack || echo "$HOME/.cargo/bin/wasm-pack")"
-"$wasm_pack" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$out" >/dev/null 2>&1 \
-  || "$wasm_pack" build crates/qp-wasm --target nodejs --profile wasm --no-opt --out-dir "$out"
+"$wasm_pack" build crates/qp-wasm --target nodejs --profile wasm --out-dir "$out" >/dev/null 2>&1 \
+  || "$wasm_pack" build crates/qp-wasm --target nodejs --profile wasm --out-dir "$out"
 node crates/qp-wasm/bench/sweep_bench.mjs "$out"

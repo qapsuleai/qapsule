@@ -238,14 +238,16 @@ def judge_baseline(old, new, v, new_crates=frozenset()):
         oi = orules.get(rule, {}).get("items", {})
         ni = nrules[rule].get("items", {})
         gone = {k: _val(oi[k]) for k in oi.keys() - ni.keys()}
+        cited_rise = 0  # a raise approved by its own decision does not void the spread rule
         for k in sorted(ni.keys() & oi.keys()):
             a, b = _val(oi[k]), _val(ni[k])
             if b > a:
-                v.loosen(k, f"baseline {rule} {k}: {a} -> {b}", *_entry_text(ni[k]))
+                if v.loosen(k, f"baseline {rule} {k}: {a} -> {b}", *_entry_text(ni[k])):
+                    cited_rise += b - a
             elif b < a:
                 v.ok("tighter", f"baseline {rule} {k}: {a} -> {b}")
         accepted = 0
-        total_ok = sum(_val(x) for x in ni.values()) <= sum(_val(x) for x in oi.values())
+        total_ok = sum(_val(x) for x in ni.values()) - cited_rise <= sum(_val(x) for x in oi.values())
         for k in sorted(ni.keys() - oi.keys()):
             b, crate = _val(ni[k]), _crate(k)
             mate = next((g for g in sorted(gone) if _tail(rule, g) == _tail(rule, k) and b <= gone[g]

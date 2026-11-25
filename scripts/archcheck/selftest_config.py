@@ -101,6 +101,18 @@ def run(CFG, check):
 
     cases += [("lint.allow spread onto a new crate passes", spread("qp-n", newc) == 0),
               ("D1: lint.allow spread onto an existing crate fails", spread("qp-a") >= 1)]
+    # RL1 D2: a cited raise on an existing crate must not void the spread onto a new crate
+    two = copy.deepcopy(base)
+    two["rules"]["lint.allow"] = {"count": 2, "items": {"qp-b": 5, "qp-a": 1}}
+
+    def spread_raise(note):
+        b = copy.deepcopy(base)
+        b["rules"]["lint.allow"] = {"count": 3, "items": {"qp-b": 3, "qp-n": 2,
+                                                          "qp-a": {"value": 2, "note": note}}}
+        return fails(newc, b, base_cfg, two)
+
+    cases += [("a cited raise beside a spread onto a new crate passes", spread_raise("K93") == 0),
+              ("an uncited raise beside a spread onto a new crate fails", spread_raise("x") >= 1)]
     # S3.0: an exception moved onto a crate this change introduces (same id, rule, max)
     exc = {"id": "X", "rule": "crate.lines", "item": "qp-a", "max": 100, "status": "onaylandı (K85)"}
     old_x = dict(base_cfg, exceptions=[exc])

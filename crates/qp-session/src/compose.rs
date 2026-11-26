@@ -13,9 +13,10 @@ use qp_subsystem::Subsystem;
 
 /// The standard subsystems, in registration order: one line per subsystem.
 static LIST: &[&dyn Subsystem] = &[
-    &qp_watch::WATCH,   // izleme niyeti (RF1 S3.1)
-    &qp_read::READ,     // okuma ve sunum (RF1 S3.2)
-    &qp_viewer::VIEWER, // görüntüleyici bağlantıları (RF1 S3.3)
+    &qp_watch::WATCH,     // izleme niyeti (RF1 S3.1)
+    &qp_program::PROGRAM, // programlar (RL1, PROGRAMS-SESSION §2)
+    &qp_read::READ,       // okuma ve sunum (RF1 S3.2)
+    &qp_viewer::VIEWER,   // görüntüleyici bağlantıları (RF1 S3.3)
 ];
 
 /// The standard subsystems every authority of the composition is built with.
@@ -287,9 +288,16 @@ mod lists {
             l.list().iter().map(|s| s.name()).collect()
         };
         let mut want = names(STANDARD);
-        want.retain(|n| *n != qp_read::READ.name() && *n != qp_viewer::VIEWER.name());
+        // (RL1, PS §2.1) Programs expand on the command path only: a follower computes
+        // their series through the data plane.
+        want.retain(|n| {
+            *n != qp_read::READ.name()
+                && *n != qp_viewer::VIEWER.name()
+                && *n != qp_program::PROGRAM.name()
+        });
         assert_eq!(names(FOLLOWER), want);
         assert!(names(STANDARD).contains(&"read"));
         assert!(names(STANDARD).contains(&"viewer"));
+        assert!(names(STANDARD).contains(&"program"));
     }
 }

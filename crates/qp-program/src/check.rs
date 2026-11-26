@@ -1,0 +1,246 @@
+//! The `Check` phase (PS §2.1, §2.3): the program-series guards over every op (and over
+//! the ops of a proposal being accepted), then the command — its program ops, the ops of
+//! the proposal it accepts (owned by the person its proposer acts for) or an `undo` that may restore program
+//! series — expanded on a copy under the host's limits (`SessionView::param`, PR §8.4):
+//! the program's limits and every restored or written owner's live budget, with the
+//! log's program bytes from the slot ([`LogBytes`], kept in `AfterCommit`). On an
+//! acceptance the speaker is the proposer's principal (the author of the entry that made
+//! the proposal), as the authority expands it.
+
+use std::cell::Cell;
+
+use qp_lang::{Lang, Limit, Limits, Reason};
+use qp_ops::expand::{expand_ops_with, Ctx};
+use qp_plane::plane::Reader;
+use qp_schema::protocol::{Op, ProtocolError, Role};
+use qp_schema::Author;
+use qp_subsystem::{SessionCtx, SessionView};
+
+use crate::budget::{over_budget, LogBytes};
+use crate::expand::Rules;
+use crate::guard::{guard_op, guards};
+use crate::ops::expand_with;
+use crate::refuse::{refuse, under, Located};
+
+/// Whether `op` is a program op.
+fn is_program_op(op: &Op) -> bool {
+    matches!(
+        op,
+        Op::AddProgram { .. } | Op::SetProgramParams { .. } | Op::RemoveProgram { .. }
+    )
+}
+
+/// Who writes the ops being checked: the speaker and, on an acceptance, the decider.
+struct Writer {
+    speaker: String,
+    author: Author,
+    approved_by: Option<Author>,
+    is_owner: bool,
+    /// The seq in assigned ids (an accepted proposal's own).
+    id_seq: Option<u64>,
+}
+
+/// The principal id of `a` among the session's principals (else its name).
+fn principal_of(view: &dyn SessionView, a: &Author) -> String {
+    let name = match a {
+        Author::Human { name } | Author::Agent { name, .. } | Author::Engine { name, .. } => name,
+    };
+    match view.principal(name) {
+        Some(p) if &p.author == a => p.id.clone(),
+        _ => name.clone(),
+    }
+}
+
+/// The principal that made proposal `pid`: the author of the log entry that put it
+/// pending (the log records principals; the proposal only its `Author`).
+fn proposer_of(view: &dyn SessionView, pid: &str) -> Option<String> {
+    view.log().iter().find_map(|e| {
+        e.changes
+            .iter()
+            .any(|c| {
+                matches!(c, qp_schema::protocol::ChangeOp::PutProposal { proposal, .. }
+                    if proposal.id == pid && proposal.decided_by.is_none())
+            })
+            .then(|| e.author.clone())
+    })
+}
+
+/// The program ops to check and who writes them; `None`: nothing of ours.
+fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op>, Writer)> {
+    let c = view.conn(conn)?;
+    let me = view.principal(c.principal)?;
+    if let [Op::AcceptProposal { proposal, .. }] = ops {
+        let pr = view
+            .document()
+            .proposals
+            .iter()
+            .find(|p| &p.id == proposal)?;
+        if !pr
+            .ops
+            .iter()
+            .any(|o| is_program_op(o) || matches!(o, Op::Undo { .. }))
+        {
+            return None;
+        }
+        let proposer = proposer_of(view, proposal)
+            .unwrap_or_else(|| principal_of(view, &pr.provenance.author));
+        let is_owner = view
+            .principal(&proposer)
+            .is_some_and(|p| p.role == Role::Owner);
+        let w = Writer {
+            speaker: proposer,
+            author: pr.provenance.author.clone(),
+            approved_by: Some(me.author.clone()),
+            is_owner,
+            id_seq: proposal.strip_prefix("prop-").and_then(|s| s.parse().ok()),
+        };
+        return Some((pr.ops.clone(), w));
+    }
+    if !ops
+        .iter()
+        .any(|o| is_program_op(o) || matches!(o, Op::Undo { .. }))
+    {
+        return None;
+    }
+    let w = Writer {
+        speaker: me.id.clone(),
+        author: me.author.clone(),
+        approved_by: None,
+        is_owner: me.role == Role::Owner,
+        id_seq: None,
+    };
+    Some((ops.to_vec(), w))
+}
+
+/// The ops of the proposal `ops` accepts, if it is a lone `accept_proposal`.
+fn accepted<'d>(view: &'d dyn SessionView, ops: &[Op]) -> Option<&'d [Op]> {
+    let [Op::AcceptProposal { proposal, .. }] = ops else {
+        return None;
+    };
+    let doc = view.document();
+    doc.proposals
+        .iter()
+        .find(|p| &p.id == proposal)
+        .map(|p| p.ops.as_slice())
+}
+
+/// The message language of connection `conn`.
+fn lang_of(view: &dyn SessionView, conn: &str) -> Lang {
+    match view.conn(conn).and_then(|c| c.hello.lang) {
+        Some(qp_schema::protocol::Language::Tr) => Lang::Tr,
+        _ => Lang::En,
+    }
+}
+
+/// At most `program.max_ops_per_command` program ops in one command (PR §8.4).
+///
+/// # Errors
+/// `E_TOO_LARGE` at the first op over the limit.
+#[allow(clippy::result_large_err)]
+fn op_cap(ops: &[Op], rules: &Rules) -> Result<(), ProtocolError> {
+    let max = usize::try_from(rules.limits.get(Limit::MaxOpsPerCommand)).unwrap_or(usize::MAX);
+    let Some((i, _)) = ops
+        .iter()
+        .enumerate()
+        .filter(|(_, o)| is_program_op(o))
+        .nth(max)
+    else {
+        return Ok(());
+    };
+    let mut e = Reason::TooLarge.error(
+        None,
+        format!("a command carries at most {max} program operations"),
+    );
+    e.expected = vec![max.to_string()];
+    e.hint = Some("Split the program operations over several commands.".to_owned());
+    Err(refuse(vec![Located {
+        err: e,
+        path: format!("/ops/{i}"),
+    }]))
+}
+
+/// The `Check` phase of connection `conn`'s command `ops`.
+///
+/// # Errors
+/// A guard, a program limit or the live budget refuses it.
+#[allow(clippy::result_large_err)]
+pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<(), ProtocolError> {
+    let view = ctx.view;
+    let accepting = accepted(view, ops);
+    let in_proposal = |mut e: ProtocolError| {
+        if accepting.is_some() {
+            e.message = format!("the proposal cannot be applied now: {}", e.message);
+        }
+        e
+    };
+    // Every op against the document as it is, up front (whatever the dry run below
+    // reaches) …
+    guards(view.document(), ops)?;
+    if let Some(inner) = accepting {
+        guards(view.document(), inner).map_err(in_proposal)?;
+    }
+    // … and, when the command can make program series, each op again against the
+    // document the ops before it left (in the dry run).
+    let Some((ops, w)) = program_ops(view, conn, ops) else {
+        return Ok(());
+    };
+    let rules = Rules {
+        limits: Limits::from_params(|k| view.param(k)),
+        lang: lang_of(view, conn),
+    };
+    op_cap(&ops, &rules)?;
+    let can_decide = view.conn(conn).is_some_and(|c| c.permissions.decide);
+    let mut qctx = Ctx {
+        author: w.author,
+        approved_by: w.approved_by,
+        at: view.clock(),
+        seq: view.seq() + 1,
+        id_seq: w.id_seq.unwrap_or(view.seq() + 1),
+        n: 0,
+        created: Vec::new(),
+        speaker: &w.speaker,
+        is_owner: w.is_owner,
+        can_decide,
+        log: view.log(),
+        undoes: None,
+        data: Some(Reader {
+            rd: view.reading(),
+            plane: view.plane(),
+        }),
+        plane: view.plane(),
+    };
+    // Only a program op's refusal is ours: any other error is the command path's to give.
+    let ours = Cell::new(false);
+    let reg = ctx.registry;
+    let res = expand_ops_with(view.document(), &ops, "/ops", &mut qctx, |d, op, p, c| {
+        // The guards against the document the ops before this one left.
+        if let Err(e) = guard_op(d, op, p) {
+            ours.set(true);
+            return Err(in_proposal(e));
+        }
+        ours.set(is_program_op(op));
+        if is_program_op(op) {
+            expand_with(d, op, p, c, rules)
+        } else {
+            reg.expand_op(d, op, p, c)
+        }
+    });
+    let ex = match res {
+        Ok(ex) => ex,
+        Err(e) if ours.get() => return Err(e),
+        Err(_) => return Ok(()),
+    };
+    // The whole command against every owner it writes or restores, with the log's bytes.
+    let log = view.log();
+    // Read only: the slot is written at `init` and `AfterCommit`.
+    let prior = match ctx.slots.get::<LogBytes>() {
+        Some(lb) if !view.in_public() => lb.of(log),
+        _ => LogBytes::scan(log).of(log),
+    };
+    let errs = over_budget(&ex.doc, &prior, &ex.changes, &rules.limits, rules.lang);
+    if errs.is_empty() {
+        Ok(())
+    } else {
+        Err(refuse(under(&errs, "/ops/0", "/ops/0")))
+    }
+}

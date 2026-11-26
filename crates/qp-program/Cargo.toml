@@ -1,0 +1,20 @@
+[package]
+name = "qp-program"
+description = "Qapsule programs in a session (RL1, docs/PROGRAMS-SESSION.md): add_program/set_program_params/remove_program expansion and policy, the Check phase (limits, live budget, program-series guards), and the check_program/try_program/explain_program queries."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+qp-lang = { version = "0.0.0", path = "../qp-lang" }
+qp-lang-text = { version = "0.0.0", path = "../qp-lang-text" }
+qp-ops = { version = "0.0.0", path = "../qp-ops" }
+qp-plane = { version = "0.0.0", path = "../qp-plane" }
+qp-schema = { version = "0.0.0", path = "../qp-schema" }
+qp-subsystem = { version = "0.0.0", path = "../qp-subsystem" }
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
+
+[lints]
+workspace = true

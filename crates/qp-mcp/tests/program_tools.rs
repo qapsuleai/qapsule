@@ -159,7 +159,6 @@ fn program_add_with_text_that_does_not_lower_sends_nothing() {
 }
 
 #[test]
-#[ignore = "needs qp-program (rl1/program)"]
 fn program_check_forwards_text_and_ir() {
     let h = hub();
     let mut s = served(&h, "scout");
@@ -193,7 +192,6 @@ fn program_check_forwards_text_and_ir() {
 }
 
 #[test]
-#[ignore = "needs qp-program (rl1/program)"]
 fn program_try_and_explain_forward() {
     let h = hub();
     let mut s = served(&h, "scout");
@@ -217,7 +215,6 @@ fn program_try_and_explain_forward() {
 }
 
 #[test]
-#[ignore = "needs qp-program (rl1/program)"]
 fn program_add_from_an_agent_is_a_proposal() {
     let h = hub();
     let mut s = served(&h, "scout");

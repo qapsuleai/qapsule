@@ -279,6 +279,7 @@ pub const REGISTRY: &[&ParamDef] = &[
     &program::PROGRAM_TEXT_MAX_SOURCE_CHARS,
     &program::PROGRAM_TEXT_MAX_TOKEN_CHARS,
     &program::PROGRAM_TEXT_MAX_DEPTH,
+    &program::PROGRAM_MAX_OPS_PER_COMMAND,
 ];
 
 /// The definition with this key, if any.

@@ -55,10 +55,12 @@ pub enum Limit {
     TextMaxTokenChars,
     /// `program.text.max_depth` (text language, `E_TOO_LARGE`).
     TextMaxDepth,
+    /// `program.max_ops_per_command` (session, `E_TOO_LARGE`).
+    MaxOpsPerCommand,
 }
 
 /// Number of limit keys.
-const N: usize = 20;
+const N: usize = 21;
 
 impl Limit {
     /// Every key, in `docs/PARAMETERS.md` order.
@@ -83,6 +85,7 @@ impl Limit {
         Limit::TextMaxSourceChars,
         Limit::TextMaxTokenChars,
         Limit::TextMaxDepth,
+        Limit::MaxOpsPerCommand,
     ];
 
     /// The registry row (`qp_schema::params::program`).

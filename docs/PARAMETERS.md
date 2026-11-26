@@ -187,6 +187,7 @@ kapsamı doküman içinde sahip başınadır; dokümanlar arası kişi başına 
 | `program.text.max_source_chars` | int | chars | 1.. | 65536 | system | release only | no | Characters of a program text at most (`E_TOO_LARGE`); eight times `program.max_ir_bytes` for comments and spelling. | RL1 |
 | `program.text.max_token_chars` | int | chars | 1.. | 1024 | system | release only | no | Characters of one token (name, number, string) of a program text at most (`E_TOO_LARGE`). | RL1 |
 | `program.text.max_depth` | int | count | 1.. | 64 | system | release only | no | Expression nesting of a program text at most, parentheses included (`E_TOO_LARGE`). | RL1 |
+| `program.max_ops_per_command` | int | count | 1..64 | 8 | system | release only | no | Program operations (`add_program`, `set_program_params`, `remove_program`) in one command at most (`E_TOO_LARGE`). | RL1 |
 
 Dil sabitleri (kutu kenarı 1…8, durum boyutu 1…4, düğüm ağırlıkları) parametre değildir;
 değişmeleri dil sürümünü değiştirir (`docs/PROGRAMS.md` §8.4).

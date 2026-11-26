@@ -27,6 +27,6 @@ D5 (`describe` ekleri), D6 (çalıştırıcı kabuk paketinde, İ8 yeniden), D7 
 | # | Soru | Öneri |
 |---|------|-------|
 | A74 | Eksik kancalar (D1 şart 3; `rounds/RL1/experiments/hooks/HOOKS.md`): `ValueSource`, bar başı olay değerlendirmesi, `param_for` + `Ctx` uzantısı, kamu dünyasında `Check`. `qp-authority` İ3 tavanında (12.744); her net satır karar ister. | R7'den önce: `ValueSource` sözleşmeden çıksın; bar başı olay `qp-program` `AfterData` yoluyla (0 çekirdek satırı); `param_for` + `Ctx` uzantısı (≈ +21, bayt eşit) RS1'den önce. |
-| A75 | K17 program yolunda tutmuyor (§14 sma, 10.000 × 1.000: yerel 264 ms, wasm32 392 ms; var olan tarama 4,6 ms). Program taramaları K17 kapsamında mı? | Kapsamdaysa çalıştırıcıya toplu tarama kipi ya da §14 biçimli programları tarama çekirdeğine yönlendirme (R7 ya da RP işi). |
+| A75 | Program parametre taraması API'si (`qp_lang::sweep`, K17 içinde: yerel 12–24 ms, WASM 17–30 ms) henüz yüzeyde yok. | `qp compute --sweep`'e program kipi ve `sweep_program` sorgusu; R7 ya da RS1. |
 | A76 | `qp serve`'de `agent_policy` verilmeden hiçbir bağlantı ajan sayılmıyor (R5B tasarımı); program kuralları MCP'de ve `agent_policy` ile tutuyor. | Ajan kuralı `qp serve`'de de varsayılan olsun ya da açıkça belgelensin. |
 | A77 | Kesilen: iç içe gösterge adresi (K63) programa çevirisi. | R7'nin ilk işlerinden; dil zaten ifade ediyor, eksik yalnız adres ayrıştırıcısı. |

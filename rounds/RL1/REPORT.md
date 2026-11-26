@@ -119,7 +119,7 @@ cross_below`; durum `streak bars_since once rearm cooldown`; `defined`; `align`;
 | 14 | MCP araçları, `qp program`; ajan belgeleri | ✅ | M denetimi; `docs/AGENTS.md`, `agents/programci.md` |
 | 15 | RX4 uygunluğu; her fark açıklanmış | ✅ | 52/52 eşit, 4/4 ret (`experiments/rx4/RESULT.md`) |
 | 16 | Ajan teyidi; kötü niyet | ✅ | §8, §9 |
-| 17 | K17, K52, WASM (İ8), tik maliyeti | ⚠️ | §10: K17 var olan yolda tutuyor; **program yoluyla tarama K17'yi aşıyor** (264 ms / 392 ms) — yeni bir yolun ölçümü, gerileme değil; WASM D6 içinde |
+| 17 | K17, K52, WASM (İ8), tik maliyeti | ✅ | §10: K17 var olan taramada ve program taramasında (`qp_lang::sweep`, beş §14 programı yerel 12–24 ms, WASM 17–30 ms) tutuyor; K52 uyarısız; WASM D6/D7 içinde; tik ölçüldü |
 | 18 | Bağımsız denetim, belgeler, temizlik | ✅ | `AUDIT.md`, §14 (Disk); CI 45814608591 yeşil (`d3f02eba`, Linux x86_64, 47 dk) |
 
 ## 7. RX4 uygunluğu
@@ -169,14 +169,16 @@ alma, aynı komutta koruma atlatma); hepsi birleştirmeden önce düzeltildi.
 | Varsayılan modül (adım 8) | ham 2.602.684 / gzip 817.223 B (RF1: 2.354.884 / 773.639; +%10,5 / +%5,6) | ±%2 kuralı aşıldı → Arkin: yeni taban (D7) |
 | Kabuk paketi (adım 18) | ham 7.167.360 / gzip 2.078.388 B | D6 İ8 7.332.886 / 2.128.236 (pay %2,3) |
 | K17 var olan tarama | yerel 4,1–9,5 ms, WASM 10,9–20 ms | 50 / 150 ms ✅ |
-| K17 program yoluyla (§14 sma, 10.000 bar × 1.000 değer) | yerel 264 ms, wasm32 392 ms; özet tarama ile bit eşit | 50 / 150 ms ❌ |
+| K17 program taraması (`qp_lang::sweep`, beş §14 programı, 10.000 bar × 1.000 değer) | yerel 12–24 ms, wasm32 17–30 ms; her varyasyon tek tek koşuyla bit eşit (ilk ölçüm, varyasyon başı çalıştırıcıyla: 264 / 392 ms) | 50 / 150 ms ✅ |
 | K52 (30 program açıkken) | tik p95 değişmedi (0,4 / 1,3 ms); ilk sahne kurulumu p95 27–30 → 43–45 ms (p50 aynı) | uyarı yok |
 | Tik (program serisi) | yerel 0,7–2,7 µs / 32 seri; WASM ≤ 4,1 µs | — |
 | Çalıştırıcı | 25–66 ns/bar (§12.5 programları), XIST takvimli 286–304 ns/bar | — |
 
-K17'nin program yolundaki açığı: çalıştırıcı her varyasyonu ayrı koşuyor; var olan tarama
-çekirdeği paylaşımlı. Öneri: §14 biçimli programları tarama çekirdeğine yönlendirmek ya da
-çalıştırıcıya toplu tarama kipi (Öneriler 4).
+K17 program yolunda ilk ölçümde tutmuyordu (çalıştırıcı her varyasyonu ayrı koşuyordu). Kapanışta
+düzeltildi: `qp_lang::sweep` parametreye bağlı olmayan düğümleri bir kez hesaplar, taranan
+çekirdekleri `qp_compute::sweep_each` ile paylaşımlı koşar, gerisinde varyasyon başına çalıştırıcıya
+döner (`SweepPath` nedenini söyler); bağımsız denetimde KABUL (`experiments/perf/RESULT.md`).
+Sınır: tarama yalnız seri çıktısı döndürür; komut satırı ve MCP'de henüz yok (Öneriler 4).
 
 ## 11. Alt sistem sözleşmesi ve çekirdek
 
@@ -263,8 +265,8 @@ Kesme sırasındaki öbür maddeler (kutulama ve durum tanımı, kanonik metin y
 3. **Program serisinin günlük maliyeti:** her `set_program_params` ara gösterimi çıktı başına
    yeniden yazar; sayılan bayt yalnız `changes` (istek, ters değişim ve bekleyen öneriler
    sayılmıyor, bekleyen öneri sayısına sınır yok).
-4. **K17 program yolu:** toplu tarama kipi ya da §14 biçimli programları tarama çekirdeğine
-   yönlendirme.
+4. **Program taraması yüzeyi:** `qp compute --sweep`'e program kipi ve `sweep_program` sorgusu
+   (API `qp_lang::sweep` hazır).
 5. **K52 ilk sahne kurulumu** program serisiyle uzuyor (p95 27–30 → 43–45 ms); nedeni ölçülmeli.
 6. **`program_try` kapalı pencerede son barı düşürüyor** (`window.to_t` ile bağlı seri;
    `claims::closed` o barı kapalı sayıyor). Ayrıca `E_TRY_ONLY` ipucu araç adını `try_program`
@@ -288,6 +290,6 @@ Kesme sırasındaki öbür maddeler (kutulama ve durum tanımı, kanonik metin y
 ## Açık sorular (Arkin)
 
 1. HOOKS.md önerileri (R7'den önce).
-2. K17'nin program yolu için hedef: program taramaları K17 kapsamında mı?
+2. Program taramasının yüzeye açılması (Öneriler 4) R7'de mi RS1'de mi?
 3. Öneri 7 (`qp serve`'de ajan kuralı varsayılan mı).
 4. Metin dilin varsayılan sınırları kayıt defterinden mi okunsun (bugün `TextLimits` varsayılanı yapısal sabit; CLI ve oturum `program.text.*` anahtarlarından okuyor).

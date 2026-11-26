@@ -12,6 +12,7 @@ qp-calendar = { version = "0.0.0", path = "../qp-calendar" }
 qp-capsule = { version = "0.0.0", path = "../qp-capsule" }
 qp-compute = { version = "0.0.0", path = "../qp-compute" }
 qp-grammar = { version = "0.0.0", path = "../qp-grammar" }
+qp-lang = { version = "0.0.0", path = "../qp-lang" }
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
 qp-source = { version = "0.0.0", path = "../qp-source" }
 qp-voice = { version = "0.0.0", path = "../qp-voice" }

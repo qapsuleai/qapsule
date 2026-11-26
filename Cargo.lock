@@ -2114,6 +2114,7 @@ dependencies = [
  "qp-capsule",
  "qp-compute",
  "qp-grammar",
+ "qp-lang",
  "qp-schema",
  "qp-source",
  "qp-voice",

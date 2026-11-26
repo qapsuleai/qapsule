@@ -7,8 +7,11 @@ use std::rc::Rc;
 use qp_schema::{Bar, CompareOp, Condition, Document, Series, SeriesSource};
 
 mod computed;
+mod program;
+mod stream;
 
 pub use computed::Computed;
+use stream::{room, run_study, times, update_columns, update_study, Live};
 
 /// How the bars of one bar series changed (the incremental live path, §18.8).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,20 +45,11 @@ impl Delta {
     }
 }
 
-/// Streaming state of a study series (`qp-compute`): the study after every bar of its
-/// input, the last bar revisable.
-struct Live {
-    study: Box<dyn qp_compute::Study>,
-    /// For each output column in `Computed::outputs` order, its slot in `out`.
-    perm: Vec<usize>,
-    out: Vec<Option<f64>>,
-}
-
 /// One cached series.
 struct Slot {
     id: String,
     val: Rc<Computed>,
-    /// Study series only.
+    /// Study and program series only.
     live: Option<Live>,
     /// The cache's `tick` when a delta last changed this slot.
     touched: u64,
@@ -304,124 +298,6 @@ fn study_input<'a>(doc: &'a Document, id: &str) -> Option<&'a str> {
     }
 }
 
-/// Bar columns in `Computed::outputs` order (`c h l o v`).
-fn bar_cols(b: &Bar) -> [f64; 5] {
-    [b.c, b.h, b.l, b.o, b.v]
-}
-
-/// Updates a bar series' columns; false if they cannot be updated in place.
-fn update_columns(slot: &mut Slot, bars: &[Bar], delta: Delta) -> bool {
-    let n = bars.len();
-    let c = Rc::make_mut(&mut slot.val);
-    match delta {
-        Delta::Appended { from } if c.t.len() == from && from <= n => {
-            for b in &bars[from..] {
-                c.t.push(b.t);
-                for (col, v) in c.outputs.values_mut().zip(bar_cols(b)) {
-                    col.push(Some(v));
-                }
-            }
-            true
-        }
-        Delta::Revised { index } if c.t.len() == n && index < n => {
-            let b = &bars[index];
-            c.t[index] = b.t;
-            for (col, v) in c.outputs.values_mut().zip(bar_cols(b)) {
-                col[index] = Some(v);
-            }
-            true
-        }
-        _ => false,
-    }
-}
-
-/// Advances a study series; false if it must be recomputed (correction, rebuild, out of
-/// step).
-fn update_study(slot: &mut Slot, bars: &[Bar], delta: Delta) -> bool {
-    let n = bars.len();
-    let Some(live) = slot.live.as_mut() else {
-        return false;
-    };
-    let c = Rc::make_mut(&mut slot.val);
-    match delta {
-        Delta::Appended { from } if c.t.len() == from && from <= n => {
-            for b in &bars[from..] {
-                live.study.push(&[b.c], &mut live.out);
-                c.t.push(b.t);
-                for (col, &k) in c.outputs.values_mut().zip(&live.perm) {
-                    col.push(live.out[k]);
-                }
-            }
-            true
-        }
-        Delta::Revised { index } if c.t.len() == n && index + 1 == n => {
-            let b = &bars[index];
-            live.study.update_last(&[b.c], &mut live.out);
-            for (col, &k) in c.outputs.values_mut().zip(&live.perm) {
-                col[index] = live.out[k];
-            }
-            true
-        }
-        _ => false,
-    }
-}
-
-/// Capacity for a column of `n` bars: room for live growth, so that new bars do not
-/// reallocate every column of every study at once (a multi-millisecond tick at 500
-/// studies) until the series has grown by a quarter.
-fn room(n: usize) -> usize {
-    n + n / 4 + 64
-}
-
-fn times(bars: &[Bar]) -> Vec<i64> {
-    let mut t = Vec::with_capacity(room(bars.len()));
-    t.extend(bars.iter().map(|b| b.t));
-    t
-}
-
-/// Output name -> one value per bar.
-type Outputs = BTreeMap<String, Vec<Option<f64>>>;
-
-/// Runs a study over bars from scratch: its values and its streaming state (bit-identical
-/// to `qp_compute::compute_bars`: same study, same pushes).
-fn run_study(
-    study: &str,
-    params: &BTreeMap<String, f64>,
-    bars: &[Bar],
-) -> Result<(Outputs, Live), String> {
-    let mut st =
-        qp_compute::create(study, params, qp_compute::Field::Close).map_err(|e| e.to_string())?;
-    let names = st.outputs();
-    let mut cols: Vec<Vec<Option<f64>>> = names
-        .iter()
-        .map(|_| Vec::with_capacity(room(bars.len())))
-        .collect();
-    let mut out = vec![None; names.len()];
-    for b in bars {
-        st.push(&[b.c], &mut out);
-        for (col, v) in cols.iter_mut().zip(&out) {
-            col.push(*v);
-        }
-    }
-    let outputs: BTreeMap<String, Vec<Option<f64>>> = names
-        .iter()
-        .zip(cols)
-        .map(|(n, c)| ((*n).to_owned(), c))
-        .collect();
-    let perm = outputs
-        .keys()
-        .map(|k| names.iter().position(|n| n == k).unwrap_or(0))
-        .collect();
-    Ok((
-        outputs,
-        Live {
-            study: st,
-            perm,
-            out,
-        },
-    ))
-}
-
 pub fn find_series<'a>(doc: &'a Document, id: &str) -> Option<&'a Series> {
     doc.series.iter().find(|s| s.id == id)
 }
@@ -493,16 +369,35 @@ pub fn values(doc: &Document, cache: &mut Cache, id: &str) -> Result<Rc<Computed
             inputs,
             params,
             output,
-            ..
+            program,
         } => {
             let input = inputs
                 .first()
                 .ok_or_else(|| format!("study series `{id}` has no input"))?;
-            let bars = find_series(doc, input)
+            let inp = find_series(doc, input);
+            let bars = inp
                 .and_then(Series::bars)
                 .ok_or_else(|| format!("input `{input}` of `{id}` is not a bar series"))?;
-            let (outputs, live) = run_study(study, params, bars)?;
-            let computed = Computed::new(times(bars), outputs, main_output(study, output.as_ref()));
+            let (computed, live) = match (program, inp) {
+                (Some(p), Some(inp)) => {
+                    let output = output
+                        .as_deref()
+                        .filter(|_| study == "program")
+                        .ok_or_else(|| format!("program series `{id}` is not well formed"))?;
+                    let (c, live) = program::run(&program::ProgInput {
+                        program: p,
+                        output,
+                        input: inp,
+                        bars,
+                    })?;
+                    (c, Live::Program(Box::new(live)))
+                }
+                _ => {
+                    let (outputs, live) = run_study(study, params, bars)?;
+                    let main = main_output(study, output.as_ref());
+                    (Computed::new(times(bars), outputs, main), live)
+                }
+            };
             let rc = cache.insert(id, computed, Some(live));
             // A study computed on demand joins its bar series' kept-current list.
             if let (Some(i), Some(list)) = (cache.slot_of(id), cache.deps.get_mut(input.as_str())) {
@@ -546,6 +441,12 @@ fn last_two(v: &[Option<f64>]) -> (Option<f64>, Option<f64>) {
     (prev, last)
 }
 
+/// The main values up to the evaluable length (an event series: its closed bars).
+fn evaluable(c: &Computed) -> &[Option<f64>] {
+    let v = c.main_values();
+    v.get(..c.len()).unwrap_or(v)
+}
+
 /// Evaluates a condition at the last bar. Returns `(true_now, last bar index, its time)`;
 /// `None` when it cannot be evaluated (text, missing series, no values).
 pub fn eval_condition(
@@ -579,9 +480,9 @@ pub fn eval_on(
     if n == 0 {
         return None;
     }
-    let (lp, ll) = last_two(left.main_values());
+    let (lp, ll) = last_two(evaluable(left));
     let (rp, rl) = match right {
-        Some(r) => last_two(r.main_values()),
+        Some(r) => last_two(evaluable(r)),
         None => (Some(value), Some(value)),
     };
     let bar = (n - 1) as u64;

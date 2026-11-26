@@ -60,7 +60,7 @@ sinyalini alır ve kaynağı okur. Akış açamayan istemci `notifications` arac
 
 | Ad | Dosya | Tarif |
 |----|-------|-------|
-| `thin` | `thin.rs` | Protokolü birebir yansıtan, şemadan üretilmiş araçlar (RD1). Varsayılan. |
+| `thin` | `thin.rs` | Protokolü birebir yansıtan, şemadan üretilmiş araçlar (RD1). Varsayılan. (RL1) Ajan ucunda bunlardan sonra dört program aracı (`thin/program.rs`): `program_check`, `program_try`, `program_explain` (metin ya da ara gösterim → `check_program`/`try_program`/`explain_program` sorgusu), `program_add` (metni ara gösterime indirir, tek `add_program` komutu; ajandan öneri olur). Karar aracı yok; RD1 uygunluk uyarlayıcısında (`with_decisions`) listelenmez. |
 | `task` | `task.rs` | (M28 b) Görev düzeyi 9 araç: `whats_new`, `find`, `explain`, `instrument`, `track_record`, `watch`, `comment`, `propose`, `glossary`; karar aracı yok; kapsül veren araçlarda `format` (`card`/`json`/`layered`). |
 | `query` | `query.rs` | (M28 c) İki araç: `ask` (küçük sorgu dili: `find` isim, `where` düz süzgeçler/seçiciler, `select`, `expand`, `limit`, `format` = `card`/`json`/`layered`) ve `act` (`comment`, `watch`, `unwatch`, `propose`, `preview`; karar yok). |
 | `mixed` | `mixed.rs` | (M28 d) Karma: görev araçları `overview`, `find`, `capsule`, `watch`, `write` (yorum ya da görünüm önerisi; karar yok) + kaçış aracı `query` (protokolün `Query` şemasıyla her sorgu). Kapsül veren araçlarda `format`: `card` (varsayılan), `json`, `layered` (+`detail`) — M29. |

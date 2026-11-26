@@ -1,16 +1,17 @@
-# Başvuru ajanları (R5B R1–R3)
+# Başvuru ajanları (R5B R1–R3, RL1)
 
-Bu klasör Qapsule'e MCP ile bağlanan üç **başvuru ajanını** ve onları ölçen küçük
+Bu klasör Qapsule'e MCP ile bağlanan **başvuru ajanlarını** ve onları ölçen küçük
 düzeneği taşır. Ürün değildir: ajan yüzeyinin (`qp mcp serve`) gerçek bir ajanla iş
 gördüğünü gösteren örnek ve ölçüm aracıdır (`rounds/R5B/GOAL.md` kapsam 5, ölçüt 8–9).
 
-## Üç ajan
+## Ajanlar
 
 | Ajan | Rol dosyası | Ne yapar | Yazdığı |
 |------|-------------|----------|---------|
 | **Yorumcu** | `yorumcu.md` | Bir kapsülü, kanıtını ve (verilmişse) Matriks bağlamını okuyup kısa, kaynaklı bir yorum yazar. | `add_comment` (motor doğrular) |
 | **Nöbetçi** | `nobetci.md` | Kişinin izleme isteklerini niyet olarak kurar, motorun eşleşmelerini okur, yalnız anlamlı olanları bildirir. | `add_watch`; bildirim listesi |
 | **Soru cevaplayan** | `soru.md` | "SYN02'de ne oluyor?", "bugün elimdekilerde ne değişti?" gibi soruları kaynak göstererek cevaplar. | yalnız cevap (`{"answer","cites","external"?}`) |
+| **Programcı** (RL1) | `programci.md` | Kişinin kuralını hesap diline çevirir; `program_check` → `program_try` → `program_add` (öneri). Kodda model çağrısı yok; yalnız rol talimatı (sürücüsü bu klasörde değil). | `add_program` önerisi |
 
 ## İlkeler
 
@@ -32,7 +33,7 @@ gördüğünü gösteren örnek ve ölçüm aracıdır (`rounds/R5B/GOAL.md` kap
 
 | Yol | Ne |
 |-----|----|
-| `yorumcu.md`, `nobetci.md`, `soru.md` | Rol talimatları (istemin başına aynen konur) |
+| `yorumcu.md`, `nobetci.md`, `soru.md`, `programci.md` | Rol talimatları (istemin başına aynen konur) |
 | `tasks.json` | Görev kümesi: 8 Yorumcu (Y01–Y08; 3'ü konuk adına), 7 Soru (S01–S07; 2'si konuk), Nöbetçi senaryosu (N01–N03 izleme kurma, N04 pencere raporu) |
 | `expected.json` | Doğru cevaplar — **motordan** (`run.py expected`; iki çalıştırma bayt eşit) |
 | `run.py` | Sürücü: sunucu, istem dosyası, durdurma, motorla denetim |

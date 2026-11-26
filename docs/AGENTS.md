@@ -17,6 +17,7 @@ deterministik motordan gelir; ajan bunları üretemez. Ajan emir göndermez, iş
 | `add_watch` / `remove_watch`: niyet ("SYN03'te aşağı kırılım olursa haber ver"); eşleşme motorda | Kişi başına 32'den fazla niyet |
 | Görünüm ve çizim **önerisi** (bekleyen öneri olur) | **Öneriyi onaylamak ya da reddetmek** — yalnız insan kökenli komut; ajanın MCP ucunda bu araçlar yok, genel `command` aracıyla gelirse `forbidden` / `human_only` (test: `crates/qp-mcp/tests/human_decision.rs`) |
 | `preview`: bir önerinin ekransız görüntüsü | Replay'i ilerletmek (yalnız `host` / `owner`) |
+| Program denetlemek, denemek, **öneri** olarak eklemek (RL1, aşağıda "Programlar") | Programı doğrudan eklemek ya da silmek |
 
 ## Güvenlik varsayılanları
 
@@ -135,11 +136,61 @@ yorumunu hiç almaz; ayrıca kısıtlı
 okura giden yorumdaki her sayı (tarih ve saat biçimi dahil, maskesiz okunarak) okurun
 gördüğü bir değer olmalıdır; sözcükle yazılmış ondalık hiç geçmez.
 
+## Programlar (RL1)
+
+Ajan hesap dilinde (`qp-ir/0`, `docs/PROGRAMS.md`; metin dil §12) bir **program** yazabilir:
+"20 barın en yükseğini kapanışla geçince olay" gibi bir kuralı, kendi ürettiği değil motorun
+hesapladığı seriler olarak. Oturum tarafı `docs/PROGRAMS-SESSION.md`. Akış her zaman
+**denetle → dene → öneri olarak ekle**'dir:
+
+| Adım | `thin` aracı | Ne döner |
+|---|---|---|
+| 1. Denetle | `program_check {program, inputs?, params?, lang?}` | `program_check`: `ok`, **bütün hatalar birden** (`reason` alt kodu, `at` ara gösterim işaretçisi, metinde `span` satır:sütun, `did_you_mean`, `hint`), uyarılar, maliyet, çıktılar; metin verildiyse `ir`. Program hatası protokol hatası değildir, cevabın içindedir |
+| 2. Dene | `program_try {program \| instance, inputs, params?, range?}` | `program_try` (yeniden oynatma kipi): çıktı başına sayılar ve ilk/son öğeler, sinyal kayıtları `mode: "replay"`, `label: "simulated"`; `work {used, limit}`, bütçe dolarsa `stopped`. Hiçbir şey yazmaz |
+| 3. Ekle | `program_add {program, inputs, id?, params?, show?, reason?}` | Metin burada ara gösterime iner, tek bir `add_program` komutu gider. MCP bağlantısı ajan kökenlidir: **öneri olur** (`ack.status: "proposed"`); `mode: "direct"` → `forbidden` / `proposal_only` |
+| Açıkla | `program_explain {program \| instance, at?}` | Kanonik metin, `program_id`, düğüm başına maliyet; `at {output, t}` ile bir değerin kökeni |
+
+- `program` metin (dizgi) ya da ara gösterim (nesne) olabilir. Üretilen `query_check_program`,
+  `query_try_program`, `query_explain_program`, `op_add_program` araçları da durur (metni
+  `source` alanında alırlar; `op_add_program` yalnız ara gösterim alır).
+- **Karar yok.** Öneriyi yalnız insan kabul eder ya da reddeder (§25.2); MCP ucunda karar
+  aracı yoktur. Programı silmek (`remove_program`) ajana hiç açık değildir
+  (`agent_cannot_write`); parametre değişikliği (`set_program_params`) yine yalnız öneridir.
+- **Ret biçimi.** İstenen kural dilde yazılamıyorsa (yarının kapanışı gibi geleceğe bakan bir
+  şey) program uydurma; kodlu ret yaz: metinde `reject E_LOOKAHEAD "neden"`, ara gösterimde
+  `{"reject":{"code":"E_LOOKAHEAD","reason":"…"}}`. `program_check` onu geçerli ret diye
+  tanır (`ok: true`, `reject {code}`); ret dokümana eklenmez.
+- **Yalnız seri ve olay dokümana girer.** Sinyal ve durum çıktılı program yalnız denenir
+  (`program_add` → `E_TRY_ONLY`).
+- **Bütçe hataları** (`code: "limit"`): `E_COST_LIMIT` (bar başına maliyet), `E_WINDOW_LIMIT`
+  (dönem), `E_TOO_LARGE` (bayt, çıktı, parametre, metin boyu), `E_TOO_MANY_NODES`, `E_BUDGET`
+  (kişi başına canlı bütçe ya da günlük baytı; öneri kabulünde yeniden denetlenir, aşarsa
+  öneri bekler). `expected` sınırı, `hint` ne yapılacağını söyler; denemede iş bütçesi
+  dolarsa hata değil `stopped` gelir (öncesi geçerlidir).
+- **Olay serisinin iki sınırı:** art arda olay barları tek bildirim verir; tek girdide birden
+  çok bar kapanırsa aradaki tek barlık olay bildirimsiz geçer (seri ve kanıt yine doğru).
+  `program_try` bunları `consecutive` ve `isolated` sayılarıyla gösterir (PS §1.2).
+
+Komut satırında aynı çekirdek, oturumsuz (kayıt defteri varsayılan sınırlarıyla):
+
+```sh
+qp program check [--json] [--lang tr|en] prog.qp          # 0: geçerli ya da ret, 1: hata
+qp program run [--json] [--full] --data seri.json prog.qp # kapalı pencere; --full bar başına
+qp program explain [--json] [--lang tr|en] prog.qp
+```
+
+Dosya JSON nesnesiyse ara gösterim, değilse metin sayılır; veri `fixtures/bars` biçimi. Çıkış
+kodları: 0 cevap basıldı, 1 programda hata (cevap basılır; `run`/`explain`'de ret de 1),
+2 kullanım, dosya ya da veri hatası. Aynı girdide `qp program check --json` ile
+`program_check`'in `data`'sı aynıdır (VERIFY 16, `crates/qp-cli/tests/program.rs`).
+
 ## Başvuru ajanları
 
 `agents/` klasörü (ürün değil, örnek ve ölçüm düzeneği): **Yorumcu** (kapsül + kanıt + dış
 bağlam → doğrulanmış yorum), **Nöbetçi** (niyetleri kurar, eşleşmeleri izler, yalnız anlamlı
-olanı bildirir), **Soru cevaplayan** (kaynak göstererek cevap). Çalıştırma: `agents/README.md`.
+olanı bildirir), **Soru cevaplayan** (kaynak göstererek cevap), **Programcı** (RL1: isteği
+programa çevirir, denetler, dener, öneri olarak ekler; `agents/programci.md`). Çalıştırma:
+`agents/README.md`.
 Matriks bağlamı `agents/tools/mxmcp` ile (önbellekli, sayaçlı; sonuçlar yalnız
 `fixtures/local/` altında).
 

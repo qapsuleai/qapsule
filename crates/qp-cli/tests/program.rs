@@ -109,18 +109,24 @@ fn check_answers_every_case_with_its_exit_code() {
     assert_eq!(code, 2);
 }
 
-#[test]
-fn run_full_lists_every_output_bar_by_bar() {
-    let dir = tempfile::tempdir().unwrap();
+/// The sample bar series file and its bar times.
+fn sample() -> (String, Vec<i64>) {
     let data = root().join("fixtures/bars/sample.json");
     let bars: Value = serde_json::from_str(&std::fs::read_to_string(&data).unwrap()).unwrap();
-    let times: Vec<i64> = bars["data"]["bars"]
+    let times = bars["data"]["bars"]
         .as_array()
         .unwrap()
         .iter()
         .map(|b| b["t"].as_i64().unwrap())
         .collect();
-    let d = data.to_str().unwrap();
+    (data.to_str().unwrap().to_owned(), times)
+}
+
+#[test]
+fn run_full_lists_series_and_events_bar_by_bar() {
+    let dir = tempfile::tempdir().unwrap();
+    let (d, times) = sample();
+    let d = d.as_str();
     let f = write(dir.path(), "a.qp", SERIES_EVENT);
     let (code, out) = run(&["run", "--json", "--full", "--data", d, f.to_str().unwrap()]);
     assert_eq!(code, 0, "{out}");
@@ -138,6 +144,13 @@ fn run_full_lists_every_output_bar_by_bar() {
     let et: Vec<i64> = serde_json::from_value(e["t"].clone()).unwrap();
     assert_eq!(ev.iter().map(|&i| times[i]).collect::<Vec<_>>(), et);
     assert!(ev.windows(2).all(|w| w[0] < w[1]));
+}
+
+#[test]
+fn run_full_lists_signal_records_and_state_keys() {
+    let dir = tempfile::tempdir().unwrap();
+    let (d, times) = sample();
+    let d = d.as_str();
     // Signal records (PR §6 form + bar indexes) and state keys with counts.
     let f = write(dir.path(), "s.qp", SIGNAL_STATE);
     let (code, out) = run(&["run", "--json", "--full", "--data", d, f.to_str().unwrap()]);
@@ -163,6 +176,14 @@ fn run_full_lists_every_output_bar_by_bar() {
         .map(|c| c["count"].as_u64().unwrap())
         .sum();
     assert_eq!(counted, keys.iter().filter(|k| !k.is_null()).count() as u64);
+}
+
+#[test]
+fn run_without_full_is_the_try_summary_and_errors_do_not_run() {
+    let dir = tempfile::tempdir().unwrap();
+    let (d, _) = sample();
+    let d = d.as_str();
+    let f = write(dir.path(), "s.qp", SIGNAL_STATE);
     // Without --full: the try summary.
     let (code, out) = run(&["run", "--json", "--data", d, f.to_str().unwrap()]);
     assert_eq!(code, 0, "{out}");

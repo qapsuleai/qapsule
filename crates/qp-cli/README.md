@@ -7,13 +7,16 @@ crate'lerdeki işe bağlar; alan kararı vermez.
 ## Ne var
 - `src/main.rs`: `Cli` / `Command` (`#[command(name = "qp", version)]`), argüman yapıları,
   komutların dağıtımı.
-- `src/cmd/`: komut başına bağlama dosyaları (`replay`, `scene`, `compute`, `schema`, `serve`).
+- `src/cmd/`: komut başına bağlama dosyaları (`replay`, `scene`, `compute`, `schema`, `serve`,
+  `program`). (RL1) `qp program check | run | explain <dosya>`: hesap dili programı oturumsuz
+  (`docs/PROGRAMS-SESSION.md` §3.3; kayıt defteri varsayılan sınırları; çıkış 0 cevap, 1
+  programda hata, 2 kullanım/dosya/veri hatası).
 - Barındırma komutları (`demo`, `drive`, `sim`, `live`, `mcp serve`, `replay --raw`) RG1'de
   `qp-host`'a taşındı; burada yalnız `use qp_host::{demo, live, mcp_serve, sim}` ile çağrılır.
 - `tests/`: `qp` ikilisini koşan bütünleşik testler (`assert_cmd`).
 
 ## Bağımlılıklar
-Normal: `qp-host`, `qp-session`, `qp-mcp`, `qp-schema` (`validate`), `qp-render`, `qp-grammar`,
+Normal: `qp-host`, `qp-lang`, `qp-lang-text` (RL1 `qp program`), `qp-session`, `qp-mcp`, `qp-schema` (`validate`), `qp-render`, `qp-grammar`,
 `qp-compute`, `qp-source`, `clap`, `serde_json`. Geliştirme: testlerin kullandığı `qp-live`
 (`mock`), `qp-matriks`, `qp-calendar`, `flate2`, `prost`, `assert_cmd`, `tempfile`.
 

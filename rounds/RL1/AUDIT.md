@@ -152,3 +152,28 @@ Cargo.lock .github` boş. Değişen yalnız dört belge: `STATUS.md`, `docs/deci
 
 Yeni soru eklendi: REPORT'un açık soruları arasında 4. madde metin dil varsayılan sınırları (B6).
 Varsayılan modül sorusu (benim 4. sorum) D7 ile kapandı.
+
+## Ek: K17 program taraması
+
+**Denetlenen:** `main` @ `01071d0f`. Bu ek iki değişikliği kapsıyor: `rl1/k17-sweep`'in
+birleştirilmesi (`1151bb29`) ve belge güncellemesi (`01071d0f`).
+
+- **Kapsam:** `1a98f8f6`'dan bu yana `fixtures/`, `crates/qp-authority/src`, `crates/qp-session/src`
+  ve `Cargo.lock` farkı boş. Kod değişikliği yalnız `qp-lang`'de: yeni `exec/sweep.rs`,
+  `exec/sweep_lane.rs`, `tests/sweep.rs`, `examples/program_sweep.rs` ve README'ler. Yeni dosyalarda
+  `exp/ln/powf/powi/mul_add`, saat, rastgelelik ya da iş parçacığı yok.
+- **Sınama:** `cargo test -p qp-lang --test sweep`'i ayrı `target/wt/audit-d2` klasöründe koştum
+  (sonra sildim): 5/5 geçiyor. Sınamalar şunlar: `five_programs_one_param_each_bit_equal_shared`,
+  `fallback_per_variation_is_bit_equal`, `several_params_at_once_and_a_base_binding`,
+  `mixed_program_several_swept_kernels_and_undefined_inputs` ve
+  `errors_come_before_any_variation`.
+- **Yapı:** `scripts/arch-check` 0 hata; taban çizgisi aynı (`file.soft` 31, `fn.lines` 173).
+- **Ölçüm:** REPORT §6 satır 17 ve §10 artık şunu yazıyor: program taraması yerel 12–24 ms,
+  wasm32 17–30 ms; bütçe 50 / 150 ms. İlk ölçüm (264 / 392 ms) de açıkça duruyor. Süreleri kendim
+  ölçmedim; `perf/RESULT.md`'den ve dalın bağımsız denetiminden (KABUL) okudum. Bit eşitliği
+  sınamalarla doğrulandı.
+- **Disk:** `target/` 1,8 GB. Bu klasör (`target/debug`, `flycheck0`) benim değil, büyük
+  olasılıkla düzenleyici ya da başka bir oturum; 6 GB bütçenin içinde. `target/wt` boş.
+
+Ölçüt 17 artık ✅ (önceki not kalktı). A75'in sorusu K17 açısından cevaplandı.
+**Hüküm değişmedi: KABUL.**

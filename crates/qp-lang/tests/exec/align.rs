@@ -160,3 +160,65 @@ fn a_gap_closes_the_higher_bar_at_the_next_bar() {
     assert_eq!(d[last_of_day], None);
     assert_eq!(d[last_of_day + 1], Some(b[last_of_day].c));
 }
+
+/// `bucket(close@4h, [100])` brought down with `align`, next to a base-clock bucket.
+fn aligned_bucket() -> serde_json::Value {
+    prog(
+        json!([
+            {"id": "c", "op": "input", "field": "close"},
+            {"id": "hc", "op": "input", "field": "close", "tf": "4h"},
+            {"id": "hb", "op": "bucket", "x": "hc", "edges": [100]},
+            {"id": "ha", "op": "align", "x": "hb"},
+            {"id": "lb", "op": "bucket", "x": "c", "edges": [100]}
+        ]),
+        json!([
+            {"name": "h", "kind": "state", "dims": [{"name": "hi", "node": "ha"}]},
+            {"name": "both", "kind": "state", "dims": [{"name": "hi", "node": "ha"},
+                                                       {"name": "lo", "node": "lb"}]}
+        ]),
+    )
+}
+
+#[test]
+fn a_higher_timeframe_bucket_aligns_into_a_state() {
+    // Twelve hourly UTC bars = three 4h bars closing on bars 3 (90), 7 (110), 11 (100).
+    let closes = [
+        95., 96., 97., 90., 105., 104., 103., 110., 99., 98., 101., 100.,
+    ];
+    let b: Vec<Bar> = closes
+        .iter()
+        .enumerate()
+        .map(|(i, &c)| Bar {
+            t: T0 + i as i64 * HOUR,
+            o: c,
+            h: c,
+            l: c,
+            c,
+            v: 1.0,
+        })
+        .collect();
+    let x = run_aligned(&checked(&aligned_bucket()), &b, Align::Utc);
+    let (h, both) = (x.output("h").unwrap(), x.output("both").unwrap());
+    let hi: Vec<Option<Vec<u32>>> = (0..b.len())
+        .map(|i| x.state_at(h, i).map(<[u32]>::to_vec))
+        .collect();
+    // Closed 4h bar only: none before bar 3, then the last closed bar's bin.
+    let want = [None, None, None, Some(0), Some(0), Some(0), Some(0)]
+        .into_iter()
+        .chain([Some(1); 5])
+        .map(|k| k.map(|k| vec![k]))
+        .collect::<Vec<_>>();
+    assert_eq!(hi, want);
+    let keys: Vec<Option<Vec<u32>>> = (0..b.len())
+        .map(|i| x.state_at(both, i).map(<[u32]>::to_vec))
+        .collect();
+    assert_eq!(keys[2], None, "an empty dimension empties the key");
+    assert_eq!(keys[3], Some(vec![0, 0]));
+    assert_eq!(keys[6], Some(vec![0, 1]));
+    assert_eq!(keys[8], Some(vec![1, 0]));
+    assert_eq!(keys[11], Some(vec![1, 1]));
+    // Provenance (PR §9): the higher bar's first base bar.
+    for (i, lo) in [(3, 0), (6, 0), (7, 4), (10, 4), (11, 8)] {
+        assert_eq!(x.lineage(h, i).unwrap().lo, lo, "bar {i}");
+    }
+}

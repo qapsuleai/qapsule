@@ -109,6 +109,36 @@ fn types_flow_through_lag_align_and_bucket() {
 }
 
 #[test]
+fn align_brings_a_higher_timeframe_cat_down_but_lag_does_not_take_cat() {
+    // PR §4.6: `align` yields `x`'s type, so a `4h` bucket feeds a base-clock state.
+    let p = prog(
+        json!([{"id": "h", "op": "input", "field": "close", "tf": "4h"},
+               {"id": "b", "op": "bucket", "x": "h", "edges": [100]},
+               {"id": "a", "op": "align", "x": "b"},
+               {"id": "d", "op": "defined", "x": "a"}]),
+        json!([{"name": "st", "kind": "state", "dims": [{"name": "lvl", "node": "a"}]},
+               {"name": "e", "kind": "event", "node": "d"}]),
+    );
+    let c = checked(&p, Some("1h"));
+    assert_eq!(c.nodes[1].outputs, vec![Ty::Cat]);
+    assert_eq!(c.nodes[1].clock.name(), "4h");
+    assert_eq!(c.nodes[2].outputs, vec![Ty::Cat]);
+    assert_eq!(c.nodes[2].clock, Clock::Base);
+    assert_eq!(
+        c.outputs[0].spec,
+        OutputSpec::State(vec![("lvl".to_owned(), Slot { node: 2, out: 0 })])
+    );
+    // The aligned cat is still a cat: not a number.
+    let mut num = p.clone();
+    num["outputs"] = json!([{"name": "s", "kind": "series", "node": "a"}]);
+    only(&chk_bound(&num, "1h"), "E_TYPE", "/outputs/0/node");
+    // PR §3.1 keeps `cat` out of `lag` (only `defined`, `align` and state outputs).
+    let mut lag = p.clone();
+    lag["nodes"][2] = json!({"id": "a", "op": "lag", "x": "b", "n": 1});
+    only(&chk_bound(&lag, "1h"), "E_TYPE", "/nodes/2/x");
+}
+
+#[test]
 fn the_check_is_deterministic() {
     let p = prog(
         json!([{"id": "c", "op": "input", "field": "close"},

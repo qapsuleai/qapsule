@@ -1,5 +1,6 @@
 //! Types and clocks of a node from its inputs (PR §3, §4): `num`, `bool`, `cat` (only
-//! into `defined` and state outputs), and one clock per node (`align` the only way down).
+//! into `defined`, `align` and state outputs), and one clock per node (`align` the only way
+//! down).
 
 use super::clock::merge;
 use super::nodes::Parsed;
@@ -71,7 +72,8 @@ fn signature(op: &Op) -> (Want, Out, bool) {
             CondKind::Once => (Want::Bool, Out::Fixed(vec![Ty::Bool]), true),
         },
         Op::Rearm { .. } | Op::Cooldown { .. } => (Want::Bool, Out::Fixed(vec![Ty::Bool]), true),
-        Op::Align { .. } => (Want::NumOrBool, Out::Same, false),
+        // PR §4.6: the result has `x`'s type, so a higher-timeframe `cat` comes down too.
+        Op::Align { .. } => (Want::Any, Out::Same, false),
         Op::Bucket { .. } => (Want::Num, Out::Fixed(vec![Ty::Cat]), false),
         Op::Const(Literal::Bool(_)) => (Want::Any, Out::Fixed(vec![Ty::Bool]), false),
         Op::Input(_)

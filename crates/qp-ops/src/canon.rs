@@ -98,6 +98,15 @@ pub(crate) enum Data<'a> {
 /// Fields of a series: `o h l c v` for bars, the outputs of a study, `v` for points.
 pub(crate) fn series_fields(s: &Series) -> Vec<String> {
     match (&s.source, &s.data) {
+        // (RL1, PS §1.1) A program output series has its one output as its field.
+        (
+            SeriesSource::Study {
+                program: Some(_),
+                output: Some(o),
+                ..
+            },
+            _,
+        ) => vec![o.clone()],
         (SeriesSource::Study { study, .. }, _) => study_outputs(study),
         (_, Some(SeriesData::Points { .. })) => vec!["v".to_owned()],
         _ => ["o", "h", "l", "c", "v"].map(str::to_owned).to_vec(),

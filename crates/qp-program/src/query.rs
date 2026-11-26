@@ -156,7 +156,30 @@ fn check_answer(view: &dyn SessionView, conn: &str, a: &Asked<'_>) -> PResult<Qu
     let (rep, _) = report(view, who, &r, a)?;
     let mut ans = rep.to_answer();
     ans.ir = r.lowered;
+    if let Some(w) = live_budget_warning(&rep) {
+        ans.warnings.push(w);
+    }
     Ok(QueryResult::ProgramCheck(Box::new(ans)))
+}
+
+/// A warning when the program's live cost alone is over the per-owner live limit
+/// (`program.live.doc.max_cost_per_bar`): it checks, but `add_program` would refuse it
+/// (`E_BUDGET`). Warnings carry no code (PR §11.3).
+fn live_budget_warning(rep: &CheckReport) -> Option<qp_schema::protocol::ProgramError> {
+    let live = rep.cost.as_ref()?.live_per_bar;
+    let limit = rep.limits.get(qp_lang::Limit::LiveDocMaxCostPerBar);
+    (live > limit).then(|| qp_schema::protocol::ProgramError {
+        code: None,
+        reason: "W_LIVE_BUDGET".to_owned(),
+        message: format!(
+            "live cost {live} per bar is over the per-owner live limit {limit}: add_program refuses it"
+        ),
+        at: None,
+        span: None,
+        expected: vec![limit.to_string()],
+        did_you_mean: Vec::new(),
+        hint: Some("Lower windows or outputs; try_program still runs it.".to_owned()),
+    })
 }
 
 /// The resolved, checked program of a try or an explanation, or its refusal.

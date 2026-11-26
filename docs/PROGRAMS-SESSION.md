@@ -152,13 +152,19 @@ izleyici program serilerini `qp-plane` üstünden hesaplar).
 
 Ajanın eklediği program öneridir; **kararı insan verir** (`PROTOCOL.md` §25.2): var olan
 `accept_proposal`/`reject_proposal`, yalnız insan kökenli komutla. MCP ucunda karar aracı yok.
-Kamu dünyası ve okuyucu izdüşümü `add_study` serileriyle aynı kuraldan geçer.
+Kamu dünyası ve okuyucu izdüşümü `add_study` serileriyle aynı kuraldan geçer. Ajan kuralı
+`agent_policy` (R5B) ile ya da işaretli bağlantıda (MCP ucu) geçerlidir: `agent_policy`'siz düz
+`qp serve` hiçbir bağlantıyı ajan saymaz (R5B taşıma tasarımı); orada yazma yetkili her
+bağlantı program işlemlerini doğrudan gönderebilir.
 
 ### 2.3 Bütçe ve sahip
 
-- **Sahip** (`owner`) = kabul edilen öneride karar veren insan (`Ctx::approved_by`), doğrudan
-  komutta konuşan (`Ctx::speaker`). Ajan doğrudan program yazamadığından sahip her zaman bir
-  insandır; ikisi de `Ctx`'te, belirlenimci.
+- **Sahip** (`owner`) = konuşanın adına çalıştığı kişi (`person_of(Ctx::speaker)`): doğrudan
+  komutta konuşan insanın kendisi; kabul edilen öneride öneriyi veren (otorite öneriyi onun
+  adına açar) — `on_behalf` kişisi olan ajan için o kişi, kendi adına öneren insan için kendisi.
+  Karar veren insan `approved_by` olarak kaydedilir; sahipliği belirlemez (açılım bağlamı karar
+  verenin ilke kimliğini taşımaz). `on_behalf`'sız bir ajanın kabul edilen programı ajanın
+  kendisine sayılır. Belirlenimci.
 - **Denetim yeri:** `Check` fazında, `SessionView::param` ile (PR §8.2): örnek sayısı, `Σ
   live_per_bar`, günlük baytı (sahibin program serisi yazan girdilerinin değişim baytları,
   `SessionView` günlüğünden). Öneri oluşurken de öneriyi verenin dokümanına karşı denetlenir.
@@ -279,6 +285,11 @@ bir kez `Check` fazında, otoritenin günlüğünü izleyen yuvadan (`AfterCommi
 (kamu dünyasının yansı yolu dahil) `Check`'e ulaşmaz, yalnız örnek sayısını, maliyeti ve kendi
 baytını sayar — her girdi otoritenin dünyasında işlendiğinden bu sayım iki dünya için de en
 sıkısıdır. Komut başına en çok `program.max_ops_per_command` program işlemi (`E_TOO_LARGE`).
+Başka bir yazarın `set_program_params`'ı sahibin `max_log_bytes`'ını tüketir; günlük baytı hiç
+azalmaz (`remove_program` geri vermez). Sayılan bayt yalnız girdilerin `changes`'idir: `request`,
+`inverse` ve öneriler (`put_proposal`) sayılmaz; bekleyen öneri sayısına tavan yok (Öneriler).
+Komutun korumaları işlem işlem, önceki işlemlerin bıraktığı dokümana karşı sınanır (kabul
+edilen önerinin işlemleri dahil).
 Uygulama notu (§2.3): kabul edilen öneride sahip, öneriyi verenin adına çalıştığı kişidir
 (`person_of`; ajanın `on_behalf`'ı, insanın kendisi); karar veren `approved_by` olarak kalır.
 Açılım bağlamı karar verenin ilke kimliğini taşımadığından (`Ctx::approved_by` yalnız `Author`)

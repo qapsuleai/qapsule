@@ -17,52 +17,62 @@ use crate::refuse::one;
 #[allow(clippy::result_large_err)]
 pub(crate) fn guards(doc: &Document, ops: &[Op]) -> Result<(), ProtocolError> {
     for (i, op) in ops.iter().enumerate() {
-        let p = ptr("/ops", i);
-        let direct = |path: &str, id: &str, how: &str| -> ProtocolError {
-            let mut e = one(
-                Reason::ProgramSeries,
-                path,
-                format!("`{id}` is a program series: {how}"),
-            );
-            e.hint = Some(
+        guard_op(doc, op, &ptr("/ops", i))?;
+    }
+    Ok(())
+}
+
+/// The guards of one op at message path `p`, against `doc` (the document as the ops
+/// before it in the command left it).
+///
+/// # Errors
+/// `E_PROGRAM_SERIES` or `E_EVENT_OPERAND` at the op's field.
+#[allow(clippy::result_large_err)]
+pub(crate) fn guard_op(doc: &Document, op: &Op, p: &str) -> Result<(), ProtocolError> {
+    let direct = |path: &str, id: &str, how: &str| -> ProtocolError {
+        let mut e = one(
+            Reason::ProgramSeries,
+            path,
+            format!("`{id}` is a program series: {how}"),
+        );
+        e.hint = Some(
                 "Program series change only through add_program, set_program_params and remove_program."
                     .to_owned(),
             );
-            e
-        };
-        match op {
-            Op::PutSeries { series } => {
-                if claims_program(series) || is_program_series(doc, &series.id) {
-                    let path = ptr(&p, "series");
-                    return Err(direct(&path, &series.id, "put_series cannot write it"));
-                }
+        e
+    };
+    match op {
+        Op::PutSeries { series } => {
+            if claims_program(series) || is_program_series(doc, &series.id) {
+                let path = ptr(p, "series");
+                return Err(direct(&path, &series.id, "put_series cannot write it"));
             }
-            Op::SetParams { series, .. } if is_program_series(doc, series) => {
-                return Err(direct(
-                    &ptr(&p, "series"),
-                    series,
-                    "its values change with set_program_params",
-                ));
-            }
-            Op::Remove { id } if is_program_series(doc, id) => {
-                return Err(direct(
-                    &ptr(&p, "id"),
-                    id,
-                    "it goes with its instance (remove_program)",
-                ));
-            }
-            Op::AddIntent {
-                trigger: Some(c), ..
-            } => event_operand(doc, c, &ptr(&p, "trigger"))?,
-            Op::AddFinding { invalidation, .. } => {
-                event_operand(doc, invalidation, &ptr(&p, "invalidation"))?
-            }
-            Op::UpdateFinding {
-                invalidation: Some(c),
-                ..
-            } => event_operand(doc, c, &ptr(&p, "invalidation"))?,
-            _ => {}
         }
+        Op::SetParams { series, .. } if is_program_series(doc, series) => {
+            return Err(direct(
+                &ptr(p, "series"),
+                series,
+                "its values change with set_program_params",
+            ));
+        }
+        Op::Remove { id } if is_program_series(doc, id) => {
+            return Err(direct(
+                &ptr(p, "id"),
+                id,
+                "it goes with its instance (remove_program)",
+            ));
+        }
+        Op::AddIntent {
+            trigger: Some(c), ..
+        } => event_operand(doc, c, &ptr(p, "trigger"))?,
+        Op::AddFinding { invalidation, .. } => {
+            event_operand(doc, invalidation, &ptr(p, "invalidation"))?
+        }
+        Op::UpdateFinding {
+            invalidation: Some(c),
+            ..
+        } => event_operand(doc, c, &ptr(p, "invalidation"))?,
+        _ => {}
     }
     Ok(())
 }

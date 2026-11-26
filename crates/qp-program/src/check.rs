@@ -18,7 +18,7 @@ use qp_subsystem::{SessionCtx, SessionView};
 
 use crate::budget::{over_budget, LogBytes};
 use crate::expand::Rules;
-use crate::guard::guards;
+use crate::guard::{guard_op, guards};
 use crate::ops::expand_with;
 use crate::refuse::{refuse, under, Located};
 
@@ -166,14 +166,20 @@ fn op_cap(ops: &[Op], rules: &Rules) -> Result<(), ProtocolError> {
 #[allow(clippy::result_large_err)]
 pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<(), ProtocolError> {
     let view = ctx.view;
-    guards(view.document(), ops)?;
-    if let Some(inner) = accepted(view, ops) {
-        guards(view.document(), inner).map_err(|mut e| {
+    let accepting = accepted(view, ops);
+    let in_proposal = |mut e: ProtocolError| {
+        if accepting.is_some() {
             e.message = format!("the proposal cannot be applied now: {}", e.message);
-            e
-        })?;
-    }
+        }
+        e
+    };
+    // Without a program op (or an undo) nothing in the command makes a program series:
+    // the guards against the document as it is. With one, per op in the dry run below.
     let Some((ops, w)) = program_ops(view, conn, ops) else {
+        guards(view.document(), ops)?;
+        if let Some(inner) = accepting {
+            guards(view.document(), inner).map_err(in_proposal)?;
+        }
         return Ok(());
     };
     let rules = Rules {
@@ -205,6 +211,11 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
     let ours = Cell::new(false);
     let reg = ctx.registry;
     let res = expand_ops_with(view.document(), &ops, "/ops", &mut qctx, |d, op, p, c| {
+        // The guards against the document the ops before this one left.
+        if let Err(e) = guard_op(d, op, p) {
+            ours.set(true);
+            return Err(in_proposal(e));
+        }
         ours.set(is_program_op(op));
         if is_program_op(op) {
             expand_with(d, op, p, c, rules)
@@ -219,9 +230,10 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
     };
     // The whole command against every owner it writes or restores, with the log's bytes.
     let log = view.log();
-    let prior = match ctx.slots.get_mut::<LogBytes>() {
-        Some(lb) if !view.in_public() => lb.current(log).clone(),
-        _ => LogBytes::scan(log).current(log).clone(),
+    // Read only: the slot is written at `init` and `AfterCommit`.
+    let prior = match ctx.slots.get::<LogBytes>() {
+        Some(lb) if !view.in_public() => lb.of(log),
+        _ => LogBytes::scan(log).of(log),
     };
     let errs = over_budget(&ex.doc, &prior, &ex.changes, &rules.limits, rules.lang);
     if errs.is_empty() {

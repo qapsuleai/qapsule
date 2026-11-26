@@ -14,7 +14,6 @@ fn texts(h: &mut H) -> String {
 /// Gated: the scene compiles once the data plane computes program series (`qp-plane`,
 /// RL1 task P/plane, a parallel branch); until then the layer's field is unknown.
 #[test]
-#[ignore = "needs qp-plane program series values (parallel RL1 branch); passes after merge"]
 fn the_legend_names_the_program_series() {
     let mut h = H::new();
     let r = h.add("p1", SMA_TEXT);

@@ -92,6 +92,19 @@ pub(crate) fn resolve(
         .expected(["program", "source", "instance"])
         .build());
     }
+    if a.inputs.len() > 1 {
+        return Err(E::new(
+            ErrorCode::Invalid,
+            format!(
+                "a program takes exactly one bar series, got {}",
+                a.inputs.len()
+            ),
+        )
+        .at("/query/inputs")
+        .reason("E_NOT_BAR_SERIES")
+        .expected(["one bar series"])
+        .build());
+    }
     let mut params = serde_json::to_value(a.params).unwrap_or(Value::Null);
     let mut r = Resolved {
         raw: Value::Null,

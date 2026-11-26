@@ -6,6 +6,7 @@
 
 mod accept;
 mod agent;
+mod audit;
 mod legend;
 mod long;
 mod ops;

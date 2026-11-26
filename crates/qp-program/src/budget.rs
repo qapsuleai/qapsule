@@ -101,12 +101,14 @@ impl LogBytes {
         self.last_seq = log.last().map(|e| e.seq);
     }
 
-    /// The bytes per owner of `log` (counted again first unless it counted all of it).
-    pub(crate) fn current(&mut self, log: &[LogEntry]) -> &BTreeMap<String, u64> {
-        if !self.counted(log, log.len()) {
-            *self = LogBytes::scan(log);
+    /// The bytes per owner of `log`: its count when it counted all of `log`, else a
+    /// fresh scan (not stored: only `init` and `AfterCommit` write the slot).
+    pub(crate) fn of(&self, log: &[LogEntry]) -> BTreeMap<String, u64> {
+        if self.counted(log, log.len()) {
+            self.per_owner.clone()
+        } else {
+            LogBytes::scan(log).per_owner
         }
-        &self.per_owner
     }
 }
 
@@ -247,20 +249,21 @@ mod tests {
             lb.on_commit(&log);
         }
         assert_eq!(lb, LogBytes::scan(&log), "incremental = a full scan");
-        assert_eq!(lb.current(&log).get("arkin"), Some(&(50 * one)));
+        assert_eq!(lb.of(&log).get("arkin"), Some(&(50 * one)));
         // An undo writes the series again: its bytes count too.
         log.push(entry(51, series("b", "arkin")));
         lb.on_commit(&log);
-        assert_eq!(lb.current(&log).get("arkin"), Some(&(51 * one)));
+        assert_eq!(lb.of(&log).get("arkin"), Some(&(51 * one)));
         // Cleared (a follower restart): rebuilt, not stale.
         log.clear();
-        assert!(lb.current(&log).is_empty());
+        assert!(lb.of(&log).is_empty());
         // Replaced by another log of the same length: rebuilt by its last seq.
         let a: Vec<LogEntry> = (1..=3).map(|k| entry(k, series("a", "arkin"))).collect();
         let b: Vec<LogEntry> = (7..=9).map(|k| entry(k, series("a", "deniz"))).collect();
-        let mut lb = LogBytes::scan(&a);
-        assert!(lb.current(&b).get("arkin").is_none());
-        assert!(lb.current(&b).get("deniz").is_some());
+        let lb = LogBytes::scan(&a);
+        assert!(!lb.of(&b).contains_key("arkin"));
+        assert!(lb.of(&b).contains_key("deniz"));
+        assert_eq!(lb, LogBytes::scan(&a), "reading never writes");
         // A commit after a missed one: scanned again.
         let mut lb = LogBytes::scan(&a[..1]);
         lb.on_commit(&a);

@@ -31,7 +31,7 @@ kayıt defteri, `ProgramTry`, `SignalRecord`), `qp-calendar` (`Interval`, seans 
 - `program_id`, `instance_id`, `sha256`, `sha256_hex`.
 - Çalıştırıcı: `Executor` (`new`, `run_closed`, `push`, `update_last`, `push_closed`,
   `close_live`; imleç `value_at`, `doc_value_at`, `events_at`, `signals_at`, `state_at`,
-  `lineage`, `provenance`, `record_at`, `closed_len`, `t_at`, `known_at`, `work`,
+  `lineage`, `provenance`, `record_at`, `closed_len`, `t_at`, `index_of`, `known_at`, `work`,
   `stopped`, `dropped`, `canonical`), `ExecOptions`, `Align`, `WorkBudget`, `Stopped`,
   `ExecError`, `Lineage`, `SignalHit`; `try_program`, `try_window`, `TryRequest`,
   `RecordCtx`; `program_digest`, `DIGEST_SUITE`.

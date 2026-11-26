@@ -154,6 +154,7 @@ fn records_have_the_pr6_form() {
         anchor_t: Some(T0),
         feeds: Vec::new(),
     };
+    assert_eq!((x.index_of(T0 + HOUR), x.index_of(T0 + 1)), (Some(1), None));
     let r = x.record_at(&c, x.output("sig").unwrap(), 0, &ctx).unwrap();
     assert_eq!(r.id, format!("p1.sig@{T0}"));
     assert_eq!(

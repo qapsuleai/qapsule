@@ -56,6 +56,12 @@ impl Executor {
         self.t.get(i).copied()
     }
 
+    /// The closed bar opened at `t` (`explain_program`'s `at.t`), if any.
+    #[must_use]
+    pub fn index_of(&self, t: i64) -> Option<usize> {
+        self.t.binary_search(&t).ok()
+    }
+
     /// Close time (`known_t`, PR §1) of closed bar `i`: the calendar close, `t` + the
     /// interval in UTC, or the next bar's `t` without an interval (`None` until known).
     #[must_use]

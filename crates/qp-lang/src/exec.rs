@@ -13,6 +13,8 @@ mod node;
 mod plan;
 mod record;
 mod summary;
+mod sweep;
+mod sweep_lane;
 mod tf;
 
 pub use cursor::Lineage;
@@ -20,6 +22,7 @@ pub use digest::{program_digest, DIGEST_SUITE};
 pub use engine::Executor;
 pub use record::SignalHit;
 pub use summary::{try_program, try_window, RecordCtx, TryRequest};
+pub use sweep::{sweep, sweep_param, SweepError, SweepPath, Variation};
 pub use tf::Align;
 
 use crate::limits::{Limit, Limits};

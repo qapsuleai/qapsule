@@ -97,3 +97,46 @@ binde birinin altında; (b)'deki tarayıcı ölçümü de bunu doğruluyor.
 **İ8 içinde:** tavanın %2,3 / %2,3 altında; PA kapısından bu yana +13.325 / +2.060 B (PB'nin
 protokol tipleri). Varsayılan modül (verify adım 8, `--profile wasm`, wasm-pack'siz): ham
 2.602.756, gzip 817.223 (İ8 ölçüsü değil; RF1 2.345.821 / 769.836).
+
+## K17 program taraması (düzeltme)
+
+Görev K17 (`rl1/k17-sweep`): `qp_lang::sweep` / `sweep_param` (`crates/qp-lang/src/exec/sweep.rs`,
+`sweep_lane.rs`). Program küme başına bir kez denetlenir; işlemi her varyasyonda aynı olan
+düğümler (taranan değere bağlı olmayanlar) **bir kez** koşar (tek çalıştırıcı, paylaşılan
+yuvalar); taranan değere bağlı `sma`/`ema`/`rsi`/`macd`/`bollinger` düğümleri taranmayan
+girdileri üstünde `qp_compute::sweep::sweep_each`'ten (şerit/SoA çekirdekleri, ortak alt hesap;
+K17 çalışma tezgâhının yolu) geçer; öbür pencere çekirdekleri (`highest`, `lowest`, `stdev`,
+`percentrank`) paylaşılan girdide doğrudan `peek`+`commit` ile adımlanır. Tanımsız girdiler
+sıkıştırılır (`Chain` kuralı: tanımsız girdi → tanımsız çıktı, işleme yok). Taranan bir
+çekirdeğin üstündeki adım (ör. `sub(close, sma)`), üst periyot ya da çalışma bütçesi varsa
+varyasyon başına çalıştırıcıya düşer (`SweepPath::PerVariation(neden)`). Yalnız seri çıktıları.
+
+Ölçüm: `cargo run --release -p qp-lang --example program_sweep -- --reps 15` (yerel) ve aynı
+örnek wasm32-wasip1 + `node:wasi` (verify'ın özet adımının düzeneği; node v24.3.0, `--reps 7`,
+2 koşu). 10.000 bar (`bench_closes(10_000, 20_261_114)`) × 1.000 küme (`bench_grid`: sma/ema/rsi
+period 2..1001; macd fast × slow × signal; bollinger period × k), tek çekirdek, ms; **denetim +
+tarama** (kullanıcının ödediği) ve ayrıca yalnız denetimin payı. Her varyasyonun her çıktısı
+`sweep_each` ile karşılaştırıldı (sütun FNV'si eşit), özetler iki hedefte aynı.
+
+| Program | yerel med (min / max) | yerel: denetim payı | WASM med (2 koşu) | WASM: denetim payı | K17 | özet |
+|---|---:|---:|---:|---:|---|---|
+| sma | 12,36 (12,09 / 13,04) | 7,22 | 21,96 / 21,46 | 8,5 | tutuyor | `e5926b04a31be359` |
+| ema | 12,03 (11,40 / 12,92) | 7,14 | 17,22 / 16,91 | 8,5 | tutuyor | `91ba0e23d7247ca9` |
+| rsi | 17,43 (17,07 / 18,49) | 6,94 | 26,89 / 27,01 | 8,5 | tutuyor | `dfbb3691b02c0bb0` |
+| macd | 23,09 (22,47 / 25,07) | 13,59 | 26,47 / 26,34 | 15,8 | tutuyor | `429b9b865f26656f` |
+| bollinger | 24,37 (23,31 / 27,59) | 13,58 | 28,39 / 29,57 | 16,5 | tutuyor | `0eb3c6a3ebbb92b0` |
+
+- Önceki program yolu (varyasyon başına `Executor::run_closed`, `sma`, `--exec`): yerel
+  282–288 ms (bu koşu) → 12,4 ms (≈ 23×). WASM 392 → 21,5–22 ms.
+- En kötü yerel 24,4 ms ≤ 50, en kötü WASM 29,6 ms ≤ 150: **beş programın hepsi K17 içinde.**
+  Kalan sürenin yarısı denetimdir (küme başına ≈ 7 µs; çok parametreli macd/bollinger ≈ 14 µs);
+  tarama çekirdeği §(a)'daki `sweep_bench` sayılarıyla aynı düzeyde.
+- Bit eşitlik sınamaları (`crates/qp-lang/tests/sweep.rs`, 5 sınama): beş §14 programı, her
+  parametre ayrı ve birlikte (macd/bollinger ızgaraları), taban parametre bağlama; karışık
+  program (iki taranan çekirdek + iki doğrudan çekirdek, ısınan `sma` ve sonlu olmayan
+  kapanışlarla tanımsız girdiler, taranmayan çekirdek çıktısı, çıktı seçimi); yedek yol
+  (taranan çekirdeğin üstünde adım, çalışma bütçesi, taranan girdi üstünde çekirdek); hatalar.
+  Her varyasyon kendi `Executor::run_closed`'una karşı her barda bit eşit.
+- CLI/MCP program taraması sunmuyor (`qp compute --sweep` yalnız `add_study` çalışmalarını
+  tarar, `qp-cli` bu görevin yazma alanı dışında): genel API + örnek. Öneri: `qp compute
+  --sweep`'e program kipi ve bir MCP/protokol `sweep_program` sorgusu (R7/RS1).

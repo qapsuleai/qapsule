@@ -35,6 +35,10 @@ kayıt defteri, `ProgramTry`, `SignalRecord`), `qp-calendar` (`Interval`, seans 
   `stopped`, `dropped`, `canonical`), `ExecOptions`, `Align`, `WorkBudget`, `Stopped`,
   `ExecError`, `Lineage`, `SignalHit`; `try_program`, `try_window`, `TryRequest`,
   `RecordCtx`; `program_digest`, `DIGEST_SUITE`.
+- Tarama (K17): `sweep(ir, &CheckCtx, sets, bars, &ExecOptions, visit)`, `sweep_param(…, key,
+  values, …)` → `SweepPath` (`Shared { swept, direct }` ya da `PerVariation(neden)`); her
+  `Variation` (`index`, `checked`, `names`, `value`, `column`) yalnız seri çıktıları taşır ve
+  o kümeyle `Executor::run_closed` ile bit eşittir. Örnek: `examples/program_sweep.rs`.
 - `Reason` (alt kod ↔ kapalı kod tablosu), `Lang`, `did_you_mean`, `suggest`,
   `edit_distance`, `is_node_id`, `is_lower_name`, `MAX_SUGGEST`, `MAX_CANDIDATES`, `OP_NAMES`, `OUTPUT_KINDS`,
   `BAR_FIELDS`, `TURKISH_NAMES`.

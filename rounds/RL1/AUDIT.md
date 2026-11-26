@@ -133,3 +133,22 @@ yazılmış. Kesme sırasının öbür maddeleri yapılmış: kutulama (`bucket`
 - `target/wt/audit-d` (19 GB) silindi. `du -sh target` sonrası 1,8 MB.
 - Scratchpad'deki `compare.sh` ağacı, fark dosyası ve günlükler silindi.
 - Ürün kodu değişmedi; birleştirme ve gönderim yapılmadı. Bu denetimin tek değişikliği bu dosya.
+
+## Koşulların yeniden denetimi
+
+**Denetlenen:** `main` @ `a0b75652` (`d3f02eba` + `a0b75652`, denetim cevapları). Derleme
+gerekmedi: `git diff 8abeeeda a0b75652 --stat -- crates scripts fixtures shells Cargo.toml
+Cargo.lock .github` boş. Değişen yalnız dört belge: `STATUS.md`, `docs/decisions/rounds/RL1.md`,
+`rounds/RL1/DECISION.md`, `rounds/RL1/REPORT.md`. Bu yüzden yukarıdaki ölçümler geçerli.
+
+### Hüküm: **KABUL**
+
+| Koşul | Hüküm | Kanıt |
+|---|---|---|
+| K1 | ✅ | REPORT §14 "Disk" eklendi; üç liste de var: silinenler, bilerek bırakılanlar (`rl1/*` dalları, `fixtures/local/` 1,5 GB, kanıt dosyaları) ve kalan boyutlar. Verdiği değerler benim ölçümlerimle aynı: `target/` 1,8 MB, worktree listesinde yalnız ana ağaç, `Prompt.txt` izlenmiyor. §6 satır 18 artık §14'ü gösteriyor. |
+| K2 | ✅ | D7 (Arkin) eklendi: varsayılan modülün yeni tabanı 2.602.684 / 817.223 B, ±%2 kuralı bu tabana göre sürüyor. Benim adım 8 ölçümüm 2.602.684 / 817.143 B; gzip farkı 80 B, kuralın çok içinde. REPORT §10'da satırı var; STATUS ve Ö134 güncel. |
+| K3 | ✅ | REPORT §4'e iki satır eklendi. PB satırı "ilk denetim RET, sonra KABUL" diyor. C satırı "KABUL; verify 22/22" diyor. U3 satırı artık "→ düzeltildi (PB, `E_NOT_BAR_SERIES`)". |
+| K4 | ✅ | `scripts/qgh run view 45814608591`: `conclusion: success`, `headSha: d3f02eba…`, `verify` işi 46 dk 46 sn sürdü. İşin günlüğünde `config: PASS` (CI'da tam geçmişle), `program: PASS`, `digest: PASS` ve `verify: OK` var. Tek uyarı Node.js 20 kullanımdan kaldırma notu; bilgi düzeyinde. |
+
+Yeni soru eklendi: REPORT'un açık soruları arasında 4. madde metin dil varsayılan sınırları (B6).
+Varsayılan modül sorusu (benim 4. sorum) D7 ile kapandı.

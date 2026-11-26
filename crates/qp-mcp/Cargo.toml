@@ -9,6 +9,7 @@ publish.workspace = true
 
 [dependencies]
 qp-designs = { version = "0.0.0", path = "../qp-designs" }
+qp-lang-text = { version = "0.0.0", path = "../qp-lang-text" }
 qp-schema = { version = "0.0.0", path = "../qp-schema" }
 qp-render = { version = "0.0.0", path = "../qp-render" }
 qp-plane = { version = "0.0.0", path = "../qp-plane" }

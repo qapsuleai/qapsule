@@ -1,7 +1,10 @@
 //! (M28 a) The thin surface: the protocol mirrored one to one (RD1). The tools are the
 //! ones [`crate::tools`] generates from the protocol schema (`op_<name>`, `query_<kind>`,
 //! `replay_<kind>`, the generic message tools); a call becomes exactly one `qp/0`
-//! message and its reply is the result. Behaviour as before R5B.
+//! message and its reply is the result. Behaviour as before R5B. (RL1) The agent's
+//! endpoint also lists the program tools ([`program`]) after the generated ones.
+
+pub mod program;
 
 use serde_json::{json, Map, Value};
 
@@ -192,11 +195,18 @@ impl ToolSurface for Thin {
                 annotations: annotations(t),
                 output_schema: (!self.formats(&t.name)).then(tools::output_schema),
             })
+            .chain(self.agent.then(program::tools).into_iter().flatten())
             .collect()
     }
 
     fn call(&mut self, ctx: &mut Ctx<'_>, name: &str, args: Value) -> Result<Value, RpcError> {
         if self.agent && HUMAN_DECISION_TOOLS.contains(&name) {
+            return Err(RpcError::new(-32602, format!("Unknown tool: {name}")));
+        }
+        if self.agent && program::PROGRAM_TOOLS.contains(&name) {
+            if let Some(r) = program::call(ctx, name, args) {
+                return r;
+            }
             return Err(RpcError::new(-32602, format!("Unknown tool: {name}")));
         }
         let msg = build_message(name, args, || ctx.request_id())?;

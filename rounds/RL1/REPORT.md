@@ -52,10 +52,221 @@ tanımı dokümana girmez (yalnız denetle/dene/yeniden oynatma); `since_t`, `pr
 | U1 RX4 | 26 görev × 2 veri kümesi: **52/52 eşit**, 4/4 ret görevi eşit. İlk koşuda G8-02/03 farklıydı: denetleyici `align(cat)`'i reddediyordu (uygulama hatası, şartname §4.6) → düzeltildi. G2-01/02'de bit eşitliği kısmi: Qapsule `sma` kayan toplam (PR §15 satır 20). `experiments/rx4/RESULT.md`. | düzeltme KABUL |
 | U3 kötü niyet | 115 deneme (CLI, `qp serve`, MCP): 109 OK; çökme/takılma yok (200 bin derin JSON, 50 MB IR dahil); statik sınır, çalışma bütçesi (bar 18914'te kodlu durma), kişi başı sınırlar (32 örnek, 2000 maliyet, günlük baytı, komut başı 8 işlem), geleceğe bakma reddi ve önek kararlılığı tuttu. FAIL (düşük): `try/check_program` ikinci girdiyi sessizce yok sayıyor → düzeltiliyor. `experiments/abuse/REPORT.md`. | ayrı denetçi |
 
+## 5. Dil bir sayfada
+
+Program, tek tipli bir veri akışı ara gösterimidir (`qp-ir/0`, `docs/PROGRAMS.md`): adlı, tipli,
+aralıklı **parametreler**; topolojik sıralı **düğümler** (her düğüm yalnız kendinden öncekine
+başvurur, döngü yapı gereği yok); **çıktılar** (seri, olay, sinyal, durum tanımı). Günlüğe yalnız
+ara gösterim yazılır; metin dil yalnız yazım yüzeyidir, iki yönlü (metin → ara gösterim, ara
+gösterim → kanonik metin). Program kimliği kanonik biçimin SHA-256'sı; örnek kimliği = program +
+bağlı parametreler.
+
+Gösterge (seri):
+
+```
+param fast int = 12 in 2..200
+param slow int = 26 in 2..400
+diff = ema(close, fast) - ema(close, slow)
+series spread = diff
+series trigger = ema(diff, 9)
+```
+
+Koşul (olay; canlı yolda var olan `threshold` koşulu, kesin barda):
+
+```
+param len int = 20 in 2..500
+top = highest(high, len)[1]
+event kirilim = close > top and defined(top)
+```
+
+Sinyal (sonuç kuralı zorunlu; yalnız "dene" ve yeniden oynatmada kayıt, `mode: "replay"`):
+
+```
+r = rsi(close, 14)
+entry = cooldown(cross_below(r, 30), 12)
+signal rsi_dip = entry side al target 3% stop 1.5% max_bars 24 source "rsi_dip" "1"
+```
+
+Üst periyot seansa hizalı (`close@1d`, `align(...)`); ret: `reject E_LOOKAHEAD "…"`.
+
+**Düğümler (43):** `input const bar_index time`; çekirdekler `sma ema rsi macd bollinger highest
+lowest atr stdev percentrank` (`stdev`, `percentrank` yeni; hepsi `qp-compute`'ta aynı kurallarla);
+aritmetik `add sub mul div min max neg abs`; `lag`; `gt ge lt le eq ne and or not`; `cross_above
+cross_below`; durum `streak bars_since once rearm cooldown`; `defined`; `align`; `line`; `bucket`.
+
+**Bilerek yok:** döngü, kullanıcı işlevi, atamayla durum (`var`), çoklu sembol, emir, oluşan bar
+(`partial`), "tut" sinyali, `exp/ln/pow`, Pine. Kesilen: iç içe gösterge adresi (aşağıda).
+
+## 6. Sonuçlar (kabul ölçütleri)
+
+| # | Ölçüt | Durum | Kanıt |
+|---|---|---|---|
+| 1 | Ön işler | ✅ | §1; Ö1 RESULT, Ö2/Ö3 denetimleri |
+| 2 | Kavramlar, PROGRAMS, PROTOCOL koddan önce | ✅ | `ae5ad278` < ilk `qp-lang` commit'i |
+| 3 | Tipler; dışa aktarım yalnız ekleme; dökümler/altınlar/özet bayt eşit | ✅ | I1 denetimi; `experiments/perf/COMPARE.md` (270 kalemden 245 eşit, 25 farkın hepsi ekleme) |
+| 4 | Bütün hatalar birden, konum + öneri; kod başına sınama | ✅ | `qp-lang/tests/codes.rs`, `all_at_once.rs` |
+| 5 | Belirlenimcilik; üç mimaride özet | ✅ | program özeti `4e77c249…` arm64 = x86_64 = wasm32; rl1 çekirdek özeti `e196f240…` |
+| 6 | Önek kararlılığı; olay yalnız kesin barda | ✅ | `qp-lang/tests/exec/prefix.rs` (240 rastgele program); denetçi sondası (XIST/UTC, `line`, `align`) |
+| 7 | Beş `add_study` hesabı bit eşit | ✅ | `qp-lang/tests/exec` eşdeğerlik (toplu, akışkan, düzeltme) |
+| 8 | Üst periyot seansa hizalı | ✅ | XIST günlük/4s (yarım gün, tatil), 7/24 UTC sınamaları |
+| 9 | Parametreli program, iki örnek | ✅ | `qp-lang/tests/params.rs` |
+| 10 | Metin ↔ ara gösterim gidiş-dönüş; hata konumu; ret | ✅ | `qp-lang-text` (3. denetimde KABUL) |
+| 11 | Maliyet önce; bütçe işi sayar; kişi başı toplam `Check`'te; sınırlar kayıt defterinde | ✅ | 21 `program.*` satırı; U3 |
+| 12 | Oturum: ekle/değiştir/kaldır/denetle/dene; seri grafikte ve koşulda; olay kesin barda; yeniden oynatma; ajan önerisi | ✅ | PA, PB denetimleri; dökümler 71–77 |
+| 13 | `qp-authority/src` farkı | ✅ (D2) | yalnız iki öznitelik değişikliği (+2/−2, yeni satır yok; Arkin'in kararı D2); yeni istisna yok |
+| 14 | MCP araçları, `qp program`; ajan belgeleri | ✅ | M denetimi; `docs/AGENTS.md`, `agents/programci.md` |
+| 15 | RX4 uygunluğu; her fark açıklanmış | ✅ | 52/52 eşit, 4/4 ret (`experiments/rx4/RESULT.md`) |
+| 16 | Ajan teyidi; kötü niyet | ✅ | §8, §9 |
+| 17 | K17, K52, WASM (İ8), tik maliyeti | ⚠️ | §10: K17 var olan yolda tutuyor; **program yoluyla tarama K17'yi aşıyor** (264 ms / 392 ms) — yeni bir yolun ölçümü, gerileme değil; WASM D6 içinde |
+| 18 | Bağımsız denetim, belgeler, temizlik | ✅ | `AUDIT.md`, §13 |
+
+## 7. RX4 uygunluğu
+
+26 görev × 2 veri kümesi (seen, heldout), UTC hizalı kapalı pencere: **52/52 eşit**, ret
+görevleri 4/4 eşit (`experiments/rx4/RESULT.md`). İlk koşudaki tek fark (G8-02/03) bir uygulama
+hatasıydı (`align(cat)`), düzeltildi. Kısmi bit eşitlik (G2-01/02): Qapsule `sma`'sı kayan toplam,
+RX4 başvurusu baştan toplam; bilinçli sapma (PR §15 satır 20; `add_study` bit eşitliği bunu
+zorunlu kılar).
+
+## 8. Ajan yazabilirlik teyidi
+
+RX4 kümesinden 20 görev (4 ret, 1 tuzak dahil), MCP ince yüzeyi üstünden, Claude Code alt
+ajanlarıyla (`experiments/agents/RESULT.md`):
+
+| Ölçüt | haiku | RX4 A-haiku | opus | RX4 A-opus |
+|---|---:|---:|---:|---:|
+| İlk denemede doğru | 20/20 | 20/20 | 20/20 | 20/20 |
+| Hata iletisinden sonra doğru | 2/2 | — | 1/1 | — |
+| Ret gereken yerde ret | 4/4 | 4/4 | 4/4 | 4/4 |
+| Uydurma işlev adı | 0 | 0 | 0 | 0 |
+| Sessiz yanlış | 0 | 0 | 0 | 0 |
+
+RX4 ile aynı bantta. Bütün teslimler metin dilde. Belirteç medyanı (~338 bin) RX4'ten yüksek;
+çoğu alt ajanın sabit başlangıç yükü (doğruluk değil maliyet farkı).
+
+## 9. Bütçe ve kötü niyet
+
+Maliyet çalıştırmadan önce: düğüm türü × parametre × bar sayısı (PR §8.1; bar başı sınır
+`program.max_cost_per_bar` 666). Çalışma bütçesi işi sayar: bar × ağırlık + doğan kayıt + açık
+kayıt + okuma; aşınca kodlu durur (`stopped {bar, t, work, limit}`). Kişi başı (doküman içinde):
+örnek sayısı, canlı bar maliyeti, günlük baytı (`AfterCommit`'te güncellenen yuva), komut başı
+program işlemi; hepsi `Check` fazında, kabulde ve geri almada yeniden. Sınırlar kayıt
+defterinde (21 `program.*` anahtarı).
+
+Kötü niyet (ayrı denetçi, `experiments/abuse/REPORT.md`): 115 deneme, 109 OK + L20 (PA sonrası
+yeniden koşuldu, OK). Çökme/takılma yok (200 bin derin JSON, 50 MB IR, 60 bin parantez). Bulunan
+iki düşük önemli hata (çok girdili `try/check` sessizce ilkini alıyordu) düzeltildi. Round boyunca
+otomatik güvenlik incelemesi ve denetçiler kötü niyet yüzeyinde ayrıca on üç bulgu çıkardı (metin
+dilinde yığın taşması, denetleyicide üstel özyineleme ve geç sınır, bütçede sahip kimliği, geri
+alma, aynı komutta koruma atlatma); hepsi birleştirmeden önce düzeltildi.
+
+## 10. Performans ve WASM
+
+| Ölçüm | Değer | Bütçe |
+|---|---|---|
+| Kabuk paketi (adım 18) | ham 7.167.360 / gzip 2.078.388 B | D6 İ8 7.332.886 / 2.128.236 (pay %2,3) |
+| K17 var olan tarama | yerel 4,1–9,5 ms, WASM 10,9–20 ms | 50 / 150 ms ✅ |
+| K17 program yoluyla (§14 sma, 10.000 bar × 1.000 değer) | yerel 264 ms, wasm32 392 ms; özet tarama ile bit eşit | 50 / 150 ms ❌ |
+| K52 (30 program açıkken) | tik p95 değişmedi (0,4 / 1,3 ms); ilk sahne kurulumu p95 27–30 → 43–45 ms (p50 aynı) | uyarı yok |
+| Tik (program serisi) | yerel 0,7–2,7 µs / 32 seri; WASM ≤ 4,1 µs | — |
+| Çalıştırıcı | 25–66 ns/bar (§12.5 programları), XIST takvimli 286–304 ns/bar | — |
+
+K17'nin program yolundaki açığı: çalıştırıcı her varyasyonu ayrı koşuyor; var olan tarama
+çekirdeği paylaşımlı. Öneri: §14 biçimli programları tarama çekirdeğine yönlendirmek ya da
+çalıştırıcıya toplu tarama kipi (Öneriler 4).
+
+## 11. Alt sistem sözleşmesi ve çekirdek
+
+- **Yetmedi, iki yerde** (D1): `ConditionKind` (yeni koşul kolu çekirdekteki iki kapalı eşlemeyi
+  kırar, canlı yol belleği türsüz koşulu değerlendirmez) ve `ValueSource` (çizim, önbellek,
+  bağımlılık, yetki onu görmez). Çözüm: program çıktısı hesap serisi; olay = kapanmış bar serisi +
+  var olan `threshold` koşulu. Bilinen sınırlar: art arda olaylarda tek bildirim, toplu bar
+  eklemede 0,1,0 deseni bildirimsiz (seri ve kanıt doğru; `check`/"dene" söyler).
+- **Eksik kancalar, çözümleriyle:** `experiments/hooks/HOOKS.md` (D1 şart 3). Özet: `ValueSource`
+  sözleşmeden çıkarılsın (0 çekirdek satırı; uzantı yolu "qp-plane'de hesaplanan doküman serisi");
+  bar başı olay değerlendirmesi `qp-program`'ın `AfterData` fazıyla 0 çekirdek satırıyla
+  yapılabilir, çekirdek sicili gerekirse `ConditionKind::edges` ≈ +55–70 satır (bayt eşit ama İ3
+  kararı ister); `param_for` + `Ctx` uzantısı ≈ +21 satır, bayt eşit, RS1 kişi başı bütçesi için
+  gerekli; `Condition::Ext` R7 için gerekmiyor (+4 satır olurdu). **Not:** `qp-authority` İ3
+  tavanında (12.744); her net satır karar ister. R7'den önce karar.
+- Ayrıca eksik: `SessionView::param` otoritede `None` (kayıt defteri varsayılanları geçerli);
+  kararı verenin ilke kimliği açılım bağlamında yok (sahip, önerenin adına çalıştığı kişi olarak
+  çözüldü); kamu dünyası yansısı `Check`'e uğramıyor (PS §6).
+- **Çekirdeğe dokunuldu mu:** `qp-authority/src`'de yalnız D2'nin iki öznitelik değişikliği (lint
+  izni, yeni satır yok). `qp-session/src`'de yalnız `compose.rs` kayıt satırı. Bileşim dışında
+  dokunulan: `qp-plane` (program serisi hesabı), `qp-ops` (`canon.rs` program serisinin alanı;
+  yeni kollar "burada sunulmaz"), `qp-read`, `qp-schema`.
+
+## 12. R7 ve RS1 bu dile nereden bağlanacak
+
+- **R7 çizim seviyeleri:** `line {a:{t,price}, b:{t,price}}` düğümü; çapalar parametre olabilir
+  (sürükleme = `set_program_params`, aynı seri kimliği, yeni örnek, `since_t` geçmişe bildirim
+  doğurmaz). İzleme görevleri: olay çıktısı + `threshold` (D1); dokunma türü koşullar en küçük
+  periyodun kapanmış barında. Bar başı değerlendirme ya da çekirdek sicili gerekiyorsa HOOKS.md
+  kararı. Program yazma ekranı R7'de.
+- **RS1 sicil:** sinyal kaydı biçimi RX5 `LedgerEntry` adlarıyla (`born_t`, `known_t`, kimlik `t`
+  ile, `mode`), sonuç kuralı doğumda; bugün yalnız `"replay"`, canlı yol aynı kodla `"live"`
+  yazacak. `program_id` kararlılık kuralları (PR §2) sicil kimliğini korur. Kişi başı bütçe için
+  `param_for` kancası. Durum tanımı (`state`) X34/1'in taban oranına yeter. Notlar: PS §8.
+
+## 13. Kendi ajanınla beş dakikada deneme
+
+1. `cargo build -p qp-cli` (ya da `scripts/qp-mcp.sh`'nin kullandığı ikili).
+2. Komut satırı: aşağıdakini `deneme.qp` diye kaydet ve
+   `target/debug/qp program check deneme.qp`,
+   `target/debug/qp program run --data fixtures/bars/sample.json deneme.qp`,
+   `target/debug/qp program explain deneme.qp`:
+   ```
+   r = rsi(close, 14)
+   series rsi14 = r
+   event asiri = cross_above(r, 70)
+   ```
+3. Ajanla: `.mcp.json`'daki `qapsule` sunucusunu `QP_MCP_SURFACE=thin` ile aç; ajana "RSI 70'i
+   yukarı kestiğinde olay kuran bir program yaz, önce `program_check`, sonra `program_try`, sonra
+   `program_add` ile öner" de. Öneri `ack.status: "proposed"` döner; kararı sen verirsin
+   (`accept_proposal` insan kökenli). Dil kartı: `rounds/RL1/experiments/agents/LANG-CARD.md`;
+   ajan rolü: `agents/programci.md`; ayrıntı `docs/AGENTS.md` "Programlar".
+
 ## Kesilenler
 
-(henüz yok)
+1. **İç içe gösterge adresi** (`ISCTR:5m:EMA[RSI:18]:20` → program; K63): kesme sırasının ilki;
+   zaman öbür kesilemez işlere (uygunluk, ajan teyidi, güvenlik düzeltmeleri) verildi. Dil bunu
+   ifade ediyor (`ema(rsi(close, 18), 20)`); eksik olan yalnız adres ayrıştırıcısı. R7'ye.
+
+Kesme sırasındaki öbür maddeler (kutulama ve durum tanımı, kanonik metin yönü, `percentrank` /
+`stdev`, küçük modelle teyit) **yapıldı**.
 
 ## Öneriler
 
-(round sırasında doldurulur)
+1. **Görünürlükle izleyici kapatma (Ö2):** `qp_authority::Follower` yeni tipi ya da yetenek
+   belirteci; bugün `calls.restricted` makine kuralı koruyor (makro ile atlatılabilir).
+2. **HOOKS.md kararı R7'den önce** (`ValueSource` çıkarılsın; bar başı olay için `AfterData`
+   yolu; `param_for` + `Ctx` uzantısı).
+3. **Program serisinin günlük maliyeti:** her `set_program_params` ara gösterimi çıktı başına
+   yeniden yazar; sayılan bayt yalnız `changes` (istek, ters değişim ve bekleyen öneriler
+   sayılmıyor, bekleyen öneri sayısına sınır yok).
+4. **K17 program yolu:** toplu tarama kipi ya da §14 biçimli programları tarama çekirdeğine
+   yönlendirme.
+5. **K52 ilk sahne kurulumu** program serisiyle uzuyor (p95 27–30 → 43–45 ms); nedeni ölçülmeli.
+6. **`program_try` kapalı pencerede son barı düşürüyor** (`window.to_t` ile bağlı seri;
+   `claims::closed` o barı kapalı sayıyor). Ayrıca `E_TRY_ONLY` ipucu araç adını `try_program`
+   diyor, MCP aracı `program_try`.
+7. **`qp serve` ajan kuralı:** `agent_policy` verilmeden hiçbir bağlantı ajan sayılmıyor (R5B
+   tasarımı); varsayılan yapılsın ya da belgelensin (PS §2.2'ye not yazıldı).
+8. **Sahip bütçesi:** başka yazarın `set_program_params`'ı sahibin `max_log_bytes`'ını tüketir;
+   günlük baytı küçülmez.
+9. **XIST takvimli üst periyot** bar başına iki `bar_at` çağrısı ve ayırma (≈ 300 ns/bar);
+   önbellekleme.
+10. **Paylaşılan `CARGO_TARGET_DIR`** worktree'ler arasında aynı crate'in eserlerini karıştırıp
+    yanlış derleme sonucu veriyor (bu round'da ölçüldü); K56 metni "iş başına klasör" diye
+    güncellensin (`rounds/RL1/AGENT-RULES.md`).
+11. **binaryen indirmesi:** CI'da `~/.cache/.wasm-pack` önbelleğe alınsın (Ö1 denetimi).
+12. **`scripts/refactor/snapshot.sh`** rl1 ve program özetlerini kaydetmiyor.
+13. **SHA-256 ve en yakın ad** `qp-lang`'de yeniden yazıldı (katman sırası); ileride `qp-schema`'ya
+    inebilir.
+
+## Açık sorular (Arkin)
+
+1. HOOKS.md önerileri (R7'den önce).
+2. K17'nin program yolu için hedef: program taramaları K17 kapsamında mı?
+3. Öneri 7 (`qp serve`'de ajan kuralı varsayılan mı).

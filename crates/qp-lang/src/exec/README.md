@@ -16,6 +16,12 @@
   kuralı), durum anahtarı.
 - `cursor.rs` — çıktı imleci (`value_at`, `events_at`, `signals_at`, `state_at`, `lineage`,
   `provenance`), okumalar bütçede; `canonical` (bayt eşitlik ve özet metni).
+- `sweep.rs` — program parametre taraması (K17): `sweep`, `sweep_param`, `Variation`,
+  `SweepPath`, `SweepError`; çözümleme (taranan değerlere bağlı düğümler) ve varyasyon başına
+  çalıştırıcı yedeği.
+- `sweep_lane.rs` — taramanın ortak yolu: taranmayan düğümler bir kez, taranan çekirdek
+  düğümleri `qp_compute::sweep` (şerit çekirdekleri, ortak alt hesap) ya da paylaşılan girdide
+  doğrudan adım; tanımsız girdiler sıkıştırılır (`Chain` kuralı).
 - `summary.rs` — `try_program` özeti (saf işlev) ve PR §6 biçiminde sinyal kaydı.
 - `digest.rs` — üç mimari belirlenimcilik özeti (`fixtures/compute/digest-program.txt`).
 

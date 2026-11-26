@@ -22,8 +22,9 @@ pub use checked::{
     OutputSpec, Rule, Slot, Tf, Ty, UnaryKind, WindowKind,
 };
 pub use exec::{
-    program_digest, try_program, try_window, Align, ExecError, ExecOptions, Executor, Lineage,
-    RecordCtx, SignalHit, Stopped, TryRequest, WorkBudget, DIGEST_SUITE,
+    program_digest, sweep, sweep_param, try_program, try_window, Align, ExecError, ExecOptions,
+    Executor, Lineage, RecordCtx, SignalHit, Stopped, SweepError, SweepPath, TryRequest, Variation,
+    WorkBudget, DIGEST_SUITE,
 };
 pub use identity::{instance_id, program_id};
 pub use limits::{Limit, Limits};

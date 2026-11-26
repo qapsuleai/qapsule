@@ -169,7 +169,9 @@ hesapladığı seriler olarak. Oturum tarafı `docs/PROGRAMS-SESSION.md`. Akış
   dolarsa hata değil `stopped` gelir (öncesi geçerlidir).
 - **Olay serisinin iki sınırı:** art arda olay barları tek bildirim verir; tek girdide birden
   çok bar kapanırsa aradaki tek barlık olay bildirimsiz geçer (seri ve kanıt yine doğru).
-  `program_try` bunları `consecutive` ve `isolated` sayılarıyla gösterir (PS §1.2).
+  `program_try` bunları olay çıktısı başına gösterir: `events` (olay barı), `runs` (art arda
+  öbek = bildirim sayısı), `isolated` (toplu eklemede kaybolabilecek tek barlık öbek) sayıları
+  ve `consecutive` bayrağı (`runs < events` ise `true`) (PS §1.2).
 
 Komut satırında aynı çekirdek, oturumsuz (kayıt defteri varsayılan sınırlarıyla):
 
@@ -179,7 +181,10 @@ qp program run [--json] [--full] --data seri.json prog.qp # kapalı pencere; --f
 qp program explain [--json] [--lang tr|en] prog.qp
 ```
 
-Dosya JSON nesnesiyse ara gösterim, değilse metin sayılır; veri `fixtures/bars` biçimi. Çıkış
+Dosya `{` ya da `[` ile başlıyorsa JSON (ara gösterim) okunur, bozuksa kodlu `E_PARSE` + ipucu
+(metin sayılmaz); değilse metindir. Dosya boyu okunmadan önce sınanır: en çok
+`max(program.text.max_source_chars × 4, program.max_ir_bytes)` bayt (varsayılan 262 144), aşan
+`E_TOO_LARGE`. Veri `fixtures/bars` biçimi. Çıkış
 kodları: 0 cevap basıldı, 1 programda hata (cevap basılır; `run`/`explain`'de ret de 1),
 2 kullanım, dosya ya da veri hatası. Aynı girdide `qp program check --json` ile
 `program_check`'in `data`'sı aynıdır (VERIFY 16, `crates/qp-cli/tests/program.rs`).

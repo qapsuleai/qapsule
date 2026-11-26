@@ -261,3 +261,32 @@ fn cli_check_equals_mcp_program_check() {
         assert_eq!(&cli, mcp, "{name}");
     }
 }
+
+#[test]
+fn oversized_files_and_broken_json_are_coded_errors() {
+    let dir = tempfile::tempdir().unwrap();
+    // The cap: max(program.text.max_source_chars × 4, program.max_ir_bytes) = 262144.
+    let big = format!("# {}\nseries x = close\n", "a".repeat(262_144));
+    let f = write(dir.path(), "big.qp", &big);
+    let (code, v) = check_json(&f, None);
+    assert_eq!(code, 1, "{v}");
+    assert_eq!(v["errors"][0]["reason"], "E_TOO_LARGE", "{v}");
+    assert_eq!(v["errors"][0]["code"], "limit", "{v}");
+    assert_eq!(v["errors"][0]["expected"][0], "262144", "{v}");
+    // Starts like JSON but nests deeper than the parser takes: E_PARSE with a hint.
+    let deep = format!("{}{}", "[".repeat(200), "]".repeat(200));
+    let f = write(dir.path(), "deep.json", &deep);
+    let (code, v) = check_json(&f, None);
+    assert_eq!(code, 1, "{v}");
+    assert_eq!(v["errors"][0]["reason"], "E_PARSE", "{v}");
+    assert!(v["errors"][0]["hint"].is_string(), "{v}");
+    let f = write(dir.path(), "trunc.json", "{\"version\":\"qp-ir/0\",");
+    let (code, v) = check_json(&f, None);
+    assert_eq!(code, 1);
+    assert_eq!(v["errors"][0]["reason"], "E_PARSE", "{v}");
+    // `run` stops the same way before reading data-dependent work.
+    let (d, _) = sample();
+    let (code, out) = run(&["run", "--json", "--data", &d, f.to_str().unwrap()]);
+    assert_eq!(code, 1);
+    assert!(out.contains("E_PARSE"), "{out}");
+}

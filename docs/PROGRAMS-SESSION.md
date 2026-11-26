@@ -225,8 +225,11 @@ da JSON; `run` = `try_program` çekirdeği, kapalı pencere).
   `t`, sinyal `records` (PR §6 kayıt biçimi + `bar`, `exit_bar` indeksleri), durum `keys` (bar
   başına dizi ya da `null`) ve `counts`.
 - `qp program explain [--json] [--lang tr|en] <dosya>`: `program_explain` cevabı.
-- *(RL1/M uygulama notu)* Dosya içeriği JSON nesnesi olarak okunabiliyorsa ara gösterim,
-  değilse metindir. Sınırlar kayıt defteri varsayılanlarıdır. `run --full` cevabı
+- *(RL1/M uygulama notu)* Dosya `{` ya da `[` ile başlıyorsa JSON (ara gösterim) okunur;
+  ayrıştırılamazsa (ör. 128'den derin iç içelik) kodlu `E_PARSE` + ipucu, metin sayılmaz;
+  değilse metindir. Boyut okumadan önce sınanır ve okuma sınırlıdır: en çok
+  `max(program.text.max_source_chars × 4, program.max_ir_bytes)` bayt, aşan `E_TOO_LARGE`
+  (`expected` = sınır). Sınırlar kayıt defteri varsayılanlarıdır. `run --full` cevabı
   `{"kind":"program_run", program_id, bars, from_t, to_t, outputs, work, stopped?}`; durum
   `counts` = `[{key, count}]` (anahtar sırasıyla); pencere ve iş bütçesi `try_program`'ınkiyle
   aynı (`program.try.*`). Çıkış: 0 cevap basıldı; 1 programda hata (`program_check` cevabı

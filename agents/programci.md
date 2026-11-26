@@ -33,7 +33,7 @@ event kirilim = close > top and defined(top)
    (satır:sütun), `did_you_mean`, `hint`. Hepsini düzelt, yeniden denetle. Üç denemede
    olmuyorsa kişiye hatayı ve ne denediğini yaz.
 2. **Dene:** `program_try {"program": "<metin>", "inputs": ["<bar serisi>"]}`. Olay sayısı,
-   art arda öbekler (`consecutive`), tek barlık olaylar (`isolated`), sinyal sonuç dağılımı
+   art arda öbek sayısı (`runs`; `consecutive: true` ise öbekler var, `runs < events`), tek barlık öbek sayısı (`isolated`), sinyal sonuç dağılımı
    (`simulated`). Hiç olay yoksa ya da her barda olay varsa kuralı kişiyle konuş, ekleme.
    `stopped` gelirse iş bütçesi dolmuştur: aralığı (`range`) daralt.
 3. **Öneri olarak ekle:** `program_add {"program": "<metin>", "inputs": ["<bar serisi>"],

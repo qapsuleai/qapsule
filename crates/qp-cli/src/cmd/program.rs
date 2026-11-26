@@ -1,8 +1,10 @@
 //! `qp program check | run | explain <file>` (RL1, PS §3.3): the program queries without a
-//! session. The file is text or IR JSON (a file whose content parses as a JSON object is
-//! IR; anything else is text). Limits are the parameter registry's defaults, text limits
-//! its `program.text.*` keys, so `qp program check` answers exactly what `check_program`
-//! answers in a session with default parameters (VERIFY 16).
+//! session. The file is text or IR JSON: a file that starts with `{` or `[` is JSON (if
+//! it does not parse, the answer is the coded `E_PARSE` with a hint; it is never read as
+//! text), anything else is text. The file's size is checked before it is read
+//! ([`file_cap`]); a larger file is the coded `E_TOO_LARGE`. Limits are the parameter
+//! registry's defaults, text limits its `program.text.*` keys, so `qp program check`
+//! answers exactly what `check_program` answers in a session with default parameters (VERIFY 16).
 //!
 //! Exit codes: 0 — the answer was printed (`check`: a program that checks, or a coded
 //! refusal; `run` / `explain`: it ran); 1 — the program has errors (the `program_check`
@@ -13,7 +15,7 @@ mod full;
 
 use std::path::{Path, PathBuf};
 
-use qp_lang::{check, Binding, CheckCtx, CheckReport, Lang, Limit, Limits, Purpose};
+use qp_lang::{check, Binding, CheckCtx, CheckReport, Lang, Limit, Limits, Purpose, Reason};
 use qp_lang_text::{lower_with, SourceMap, TextLimits};
 use qp_schema::program::{Program, ProgramDoc};
 use qp_schema::protocol::{Language, ProgramError, QueryResult};
@@ -99,6 +101,47 @@ fn language(lang: Option<&str>) -> (Lang, Language) {
     }
 }
 
+/// The largest program file read, in bytes: `max(program.text.max_source_chars × 4,
+/// program.max_ir_bytes)` (a UTF-8 character is at most 4 bytes). Checked on the file's
+/// size before reading, and the read is bounded by it.
+pub(crate) fn file_cap(l: &Limits) -> u64 {
+    l.get(Limit::TextMaxSourceChars)
+        .saturating_mul(4)
+        .max(l.get(Limit::MaxIrBytes))
+}
+
+/// Reads at most `cap` bytes of `path`; a larger file is the coded `E_TOO_LARGE`.
+fn read_capped(path: &Path, cap: u64) -> Result<Result<String, ProgramError>, String> {
+    use std::io::Read as _;
+    let shown = path.display();
+    let too_large = |n: String| {
+        let mut e = Reason::TooLarge.error(
+            Some(String::new()),
+            format!("the program file is {n} bytes; at most {cap} are read"),
+        );
+        e.expected = vec![cap.to_string()];
+        e.hint = Some(
+            "the cap is max(program.text.max_source_chars × 4, program.max_ir_bytes)".to_owned(),
+        );
+        e
+    };
+    let meta = std::fs::metadata(path).map_err(|e| format!("cannot read {shown}: {e}"))?;
+    if meta.len() > cap {
+        return Ok(Err(too_large(meta.len().to_string())));
+    }
+    let f = std::fs::File::open(path).map_err(|e| format!("cannot read {shown}: {e}"))?;
+    let mut bytes = Vec::new();
+    f.take(cap.saturating_add(1))
+        .read_to_end(&mut bytes)
+        .map_err(|e| format!("cannot read {shown}: {e}"))?;
+    if bytes.len() as u64 > cap {
+        return Ok(Err(too_large(format!("more than {cap}"))));
+    }
+    String::from_utf8(bytes)
+        .map(Ok)
+        .map_err(|e| format!("{shown}: not UTF-8: {e}"))
+}
+
 /// A program file, read: the IR as the checker reads it, and for a text its source map
 /// and lowered program.
 pub(crate) struct Loaded {
@@ -113,14 +156,31 @@ fn load(
     lang: Language,
     l: &Limits,
 ) -> Result<Result<Loaded, Vec<ProgramError>>, String> {
-    let text = std::fs::read_to_string(path)
-        .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
-    if let Ok(raw @ Value::Object(_)) = serde_json::from_str::<Value>(&text) {
-        return Ok(Ok(Loaded {
-            raw,
-            map: None,
-            lowered: None,
-        }));
+    let text = match read_capped(path, file_cap(l))? {
+        Ok(t) => t,
+        Err(e) => return Ok(Err(vec![e])),
+    };
+    let head = text.trim_start();
+    if head.starts_with('{') || head.starts_with('[') {
+        return match serde_json::from_str::<Value>(&text) {
+            Ok(raw) => Ok(Ok(Loaded {
+                raw,
+                map: None,
+                lowered: None,
+            })),
+            Err(e) => {
+                let mut err = Reason::Parse.error(
+                    Some(String::new()),
+                    format!("the file starts like JSON but is not valid JSON: {e}"),
+                );
+                err.hint = Some(
+                    "an IR file must be one JSON object (nesting at most 128 deep); \
+                     a text program must not start with `{` or `[`"
+                        .to_owned(),
+                );
+                Ok(Err(vec![err]))
+            }
+        };
     }
     let lowered = match lower_with(&text, lang, &text_limits(l)) {
         Ok(x) => x,

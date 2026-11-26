@@ -580,8 +580,8 @@ fn samples() -> Vec<(&'static str, Value)> {
             "set_sensitivity",
             json!({"op":"set_sensitivity","sensitivity":null}),
         ),
-        // (RL1) Program ops: denied until the `qp-program` subsystem registers its policy
-        // (PS §2.2: add/set as proposals only, remove never); then `allowed` changes.
+        // (RL1) Program ops: the `qp-program` subsystem's policy (PS §2.2: add/set as
+        // proposals only, remove never).
         (
             "add_program",
             json!({"op":"add_program","program":{},"inputs":["px"]}),
@@ -604,7 +604,7 @@ fn allowed(name: &str) -> Option<qp_session::agent::AgentOp> {
         "put_view" | "insert_layer" | "delete_layer" | "move_layer" | "split_layer"
         | "set_encoding" | "insert_panel" | "delete_panel" | "move_panel" | "set_panel"
         | "set_scale" | "set_emphasis" | "set_view_range" | "add_narrative" | "show_finding"
-        | "add_study" => Some(Proposal),
+        | "add_study" | "add_program" | "set_program_params" => Some(Proposal),
         "add_comment" | "add_watch" | "remove_watch" => Some(Direct),
         _ => None,
     }

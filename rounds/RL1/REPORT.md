@@ -32,6 +32,15 @@ K13 korunur (olay serisi tam uzunlukta, canlı bar `null`, kapanmış uzunluk ay
 tanımı dokümana girmez (yalnız denetle/dene/yeniden oynatma); `since_t`, `program_id`,
 `instance_id`, `scope`, `known_t` eklendi. Şartname commit'i `ae5ad278`, ilk `qp-lang` kodundan önce.
 
+## 3. Tipler, çekirdekler, denetim, metin dil
+
+| İş | Sonuç | Denetim |
+|---|---|---|
+| I1 `qp-schema` | `qp_schema::program` (43 düğüm, 4 çıktı türü, parametre tipleri, kanonik/kimlik biçimi); `SeriesSource::Study.program`, `ProtocolError.errors` isteğe bağlı; 3 işlem, 3 sorgu. Şema dışa aktarımı yalnız ekleme (309 ekleme, 0 değişen/silinen). `describe` karakterizasyon kayıtları yalnız eklemeyle yeniden kaydedildi (D5). verify 21/21. | KABUL |
+| I2 `qp-compute` | `stdev`, `percentrank` (`highest lowest atr` zaten vardı). Toplu = akışkan = düzeltme bit eşit; yeni özet `digest-rl1.txt` üç mimaride eşit. `add_study` listesi değişmedi. | KABUL (+ CI'da wasm32 karşılaştırması atlanmasın düzeltmesi) |
+| LA `qp-lang` denetim | Bütün hatalar birden, konum + öneri; kod başına sınama; statik maliyet; `program_id`/`instance_id` (elle yazılmış SHA-256). Güvenlik incelemesi: `and` zincirinde üstel özyineleme, sınırların geç uygulanması, sınırsız öneri → düzeltildi (`fed10715`). | KABUL |
+| L `qp-lang-text` | Elle yazılmış ayrıştırıcı, kanonik yazıcı, kaynak haritası, ret biçimi, iki dilli iletiler; gidiş-dönüş özellik sınaması. İlk denetim RET (yığın taşması: 1000 `(` süreci düşürüyordu), ikinci RET (yazıcı/ayrıştırıcı derinlik farkı); üçüncüde KABUL. | KABUL (3. tur) |
+
 ## Kesilenler
 
 (henüz yok)

@@ -76,6 +76,14 @@
 #                hard thresholds for every registered non-legacy look in both schemes (legacy
 #                looks are printed, never failing), and the value tables of
 #                docs/design/CONTRACT.md equal the look record (scripts/design-contract --check)
+#  22 program    RL1 (VERIFY 1, 16): the computation language's crates' tests (qp-lang,
+#                qp-lang-text, qp-program); `qp program check` on every example of
+#                docs/PROGRAMS.md §12.5 (each a fenced block, and the `Ret:` refusal line)
+#                answers ok (exit 0); the CLI check equals the MCP `program_check` tool on
+#                the same inputs, an over-limit one (`W_LIVE_BUDGET`) included; the
+#                generator of conformance transcripts 71–77 re-derives them byte-equal and
+#                its assertions hold (events counted, try = document event series, a
+#                replica's digests). The program digest is in `digest`; ../refs is not read
 #
 # Environment:
 #   QP_VERIFY_BROWSER=1  force the browser step (fails if tools are missing)
@@ -633,6 +641,32 @@ step_config() {
   note "config/baseline diff against main printed; only tightening or cited loosening"
 }
 
+step_program() {
+  build_qp
+  cargo test -q -p qp-lang -p qp-lang-text -p qp-program
+  local d="$tmp/program" n=0 f
+  mkdir -p "$d"
+  # Every fenced block of PROGRAMS.md §12.5 is one example; the `Ret:` line's code is one.
+  awk -v d="$d" '
+    /^### 12\.5/ { on = 1; next }
+    on && /^##/ { on = 0 }
+    !on { next }
+    /^```/ { if (inb) { close(f); inb = 0 } else { k++; f = sprintf("%s/ex%02d.qp", d, k); inb = 1 }; next }
+    inb { print > f; next }
+    /^Ret: `/ { k++; s = $0; sub(/^Ret: `/, "", s); sub(/`[^`]*$/, "", s); print s > sprintf("%s/ex%02d.qp", d, k) }
+  ' docs/PROGRAMS.md
+  for f in "$d"/*.qp; do
+    [ -f "$f" ] || continue
+    n=$((n + 1))
+    "$qp" program check "$f" >"$f.out" || { cat "$f" "$f.out" >&2; fail "PROGRAMS.md §12.5 example $(basename "$f") does not check"; }
+  done
+  [ "$n" -ge 5 ] || fail "only $n examples found in PROGRAMS.md §12.5"
+  cargo test -q -p qp-cli --test program cli_check_equals_mcp_program_check
+  cargo run -q --release -p qp-session --example make_program_transcripts \
+    || fail "conformance transcripts 71-77 differ from their generator"
+  note "$n PROGRAMS.md §12.5 examples ok; CLI check = MCP program_check; transcripts 71-77 re-derived"
+}
+
 step_design() {
   command -v python3 >/dev/null 2>&1 || fail "python3 not found (scripts/design-contract needs it)"
   scripts/design-check || fail "design check failed (scripts/design-check)"
@@ -663,6 +697,7 @@ run_step demo step_demo
 run_step arch step_arch
 run_step config step_config
 run_step design step_design
+run_step program step_program
 total=$((SECONDS - total_start))
 
 failed=0

@@ -1,0 +1,867 @@
+{
+  "covers": [
+    "add_program",
+    "show",
+    "screen",
+    "hit",
+    "program"
+  ],
+  "description": "RL1 (PS §1.4): add_program's `show` adds a layer per output (series → line, event → bar; a new panel by default, or `show.panel`); the screen reading and the point query hit see the program series.",
+  "final": {
+    "log_len": 2
+  },
+  "init": {
+    "agent_policy": "r5b",
+    "clock": 1760000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "on_behalf": "arkin",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "feed",
+          "version": "0"
+        },
+        "id": "feed",
+        "role": "feed"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      }
+    ],
+    "proposal_ttl_ms": null
+  },
+  "name": "74-program-draw",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person on a desktop surface.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "desktop"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "created": [
+              "p1.avg",
+              "p1.up",
+              "l5",
+              "l6"
+            ],
+            "id": "c1",
+            "seq": 1,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "add_program with `show`: a line for the series output and a bar layer for the event output, in a new panel, labelled with the series ids.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "id": "p1",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "m",
+                    "op": "sma",
+                    "period": {
+                      "param": "len"
+                    },
+                    "x": "_1"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_2",
+                    "op": "input"
+                  },
+                  {
+                    "a": "_2",
+                    "b": "m",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "defined",
+                    "x": "m"
+                  },
+                  {
+                    "a": "_3",
+                    "b": "_4",
+                    "id": "_5",
+                    "op": "and"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "avg",
+                    "node": "m"
+                  },
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_5"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 5,
+                    "key": "len",
+                    "kind": "int",
+                    "max": 50,
+                    "min": 2
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "show": {
+                "view": "main"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "created": [
+              "p2.up",
+              "p2.level",
+              "l7",
+              "l8"
+            ],
+            "id": "c2",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "`show.panel: 0`: the level drawn on the price panel.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "id": "p2",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "const",
+                    "value": {
+                      "param": "lv"
+                    }
+                  },
+                  {
+                    "a": "_1",
+                    "b": "_2",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "const",
+                    "value": {
+                      "param": "lv"
+                    }
+                  },
+                  {
+                    "field": "close",
+                    "id": "_5",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_6",
+                    "op": "const",
+                    "value": 0.0
+                  },
+                  {
+                    "a": "_5",
+                    "b": "_6",
+                    "id": "_7",
+                    "op": "mul"
+                  },
+                  {
+                    "a": "_4",
+                    "b": "_7",
+                    "id": "_8",
+                    "op": "add"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_3"
+                  },
+                  {
+                    "kind": "series",
+                    "name": "level",
+                    "node": "_8"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 105.0,
+                    "key": "lv",
+                    "kind": "float",
+                    "max": 1000.0,
+                    "min": 0.0
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "show": {
+                "panel": 0,
+                "view": "main"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "collection": "views",
+              "item": {
+                "id": "main",
+                "layers": [
+                  {
+                    "encoding": {},
+                    "id": "l0",
+                    "mark": "candle",
+                    "panel": 0,
+                    "series": "px"
+                  },
+                  {
+                    "encoding": {
+                      "color": "#90a4ae"
+                    },
+                    "id": "l1",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "bb20"
+                  },
+                  {
+                    "encoding": {
+                      "color": "#7e57c2",
+                      "y": "rsi"
+                    },
+                    "id": "l2",
+                    "mark": "line",
+                    "panel": 1,
+                    "series": "rsi14"
+                  },
+                  {
+                    "encoding": {
+                      "color": "#9e9e9e",
+                      "y": "70"
+                    },
+                    "id": "l3",
+                    "mark": "rule",
+                    "origin": {
+                      "/encoding/y": {
+                        "kind": "threshold",
+                        "name": "rsi.overbought"
+                      }
+                    },
+                    "panel": 1
+                  },
+                  {
+                    "encoding": {},
+                    "id": "l4",
+                    "mark": "line",
+                    "panel": 2,
+                    "series": "macd"
+                  },
+                  {
+                    "encoding": {},
+                    "id": "l5",
+                    "label": "p1.avg",
+                    "mark": "line",
+                    "panel": 3,
+                    "series": "p1.avg"
+                  },
+                  {
+                    "encoding": {},
+                    "id": "l6",
+                    "label": "p1.up",
+                    "mark": "bar",
+                    "panel": 3,
+                    "series": "p1.up"
+                  },
+                  {
+                    "encoding": {},
+                    "id": "l7",
+                    "label": "p2.up",
+                    "mark": "bar",
+                    "panel": 0,
+                    "series": "p2.up"
+                  },
+                  {
+                    "encoding": {},
+                    "id": "l8",
+                    "label": "p2.level",
+                    "mark": "line",
+                    "panel": 0,
+                    "series": "p2.level"
+                  }
+                ],
+                "panels": [
+                  {
+                    "id": 0,
+                    "y": {
+                      "id": "y0",
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "y": {
+                      "domain": [
+                        0.0,
+                        100.0
+                      ],
+                      "id": "y1",
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 2,
+                    "y": {
+                      "id": "y2",
+                      "kind": "linear"
+                    }
+                  },
+                  {
+                    "id": 3,
+                    "y": {
+                      "id": "y3",
+                      "kind": "linear"
+                    }
+                  }
+                ],
+                "title": "THYAO 1G",
+                "x": {
+                  "id": "x",
+                  "kind": "time"
+                }
+              },
+              "kind": "item"
+            },
+            "id": "q1",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The view's layers.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "id": "main",
+            "kind": "get"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "screen",
+              "screens": [
+                {
+                  "capsules": [
+                    "cap-overbought"
+                  ],
+                  "interval": "1d",
+                  "last_close": 124.69,
+                  "panels": [
+                    {
+                      "layers": [
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "px"
+                          },
+                          "fields": [
+                            "o",
+                            "h",
+                            "l",
+                            "c"
+                          ],
+                          "id": "l0",
+                          "items": 120,
+                          "label": "THYAO 1d",
+                          "last": {
+                            "c": 124.69,
+                            "h": 126.61,
+                            "l": 124.47,
+                            "o": 125.26
+                          },
+                          "mark": "candle",
+                          "select": {
+                            "shows": {
+                              "kind": "bars"
+                            }
+                          }
+                        },
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "bb20"
+                          },
+                          "fields": [
+                            "upper",
+                            "middle",
+                            "lower"
+                          ],
+                          "id": "l1",
+                          "items": 360,
+                          "label": "BOLLINGER(20,2)",
+                          "last": {
+                            "lower": 121.43120925184256
+                          },
+                          "mark": "line",
+                          "select": {
+                            "shows": {
+                              "study": "bollinger"
+                            }
+                          }
+                        },
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "p2.up"
+                          },
+                          "fields": [
+                            "up"
+                          ],
+                          "id": "l7",
+                          "items": 119,
+                          "label": "p2.up",
+                          "last": {
+                            "base": 0.0,
+                            "up": 0.0
+                          },
+                          "mark": "bar",
+                          "select": {
+                            "label": "p2.up"
+                          }
+                        },
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "p2.level"
+                          },
+                          "fields": [
+                            "level"
+                          ],
+                          "id": "l8",
+                          "items": 120,
+                          "label": "p2.level",
+                          "last": {
+                            "level": 105.0
+                          },
+                          "mark": "line",
+                          "select": {
+                            "shows": {
+                              "latest": true,
+                              "study": "program"
+                            }
+                          }
+                        }
+                      ],
+                      "marks": [
+                        "candle",
+                        "line",
+                        "bar",
+                        "line"
+                      ],
+                      "panel": 0,
+                      "scale": {
+                        "domain": [
+                          -6.534000000000001,
+                          137.214
+                        ],
+                        "id": "y0",
+                        "kind": "linear"
+                      },
+                      "select": {
+                        "mark": "candle"
+                      },
+                      "series": [
+                        "px",
+                        "bb20",
+                        "p2.up",
+                        "p2.level"
+                      ]
+                    },
+                    {
+                      "layers": [
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "rsi14"
+                          },
+                          "fields": [
+                            "rsi"
+                          ],
+                          "id": "l2",
+                          "items": 120,
+                          "label": "RSI14",
+                          "last": {
+                            "rsi": 55.09991178461079
+                          },
+                          "mark": "line",
+                          "select": {
+                            "shows": {
+                              "study": "rsi"
+                            }
+                          }
+                        },
+                        {
+                          "constants": {
+                            "/encoding/y": {
+                              "origin": {
+                                "kind": "threshold",
+                                "name": "rsi.overbought"
+                              },
+                              "value": 70.0
+                            }
+                          },
+                          "data": {
+                            "kind": "constant"
+                          },
+                          "fields": [],
+                          "id": "l3",
+                          "items": 1,
+                          "last": {
+                            "y": 70.0
+                          },
+                          "mark": "rule",
+                          "select": {
+                            "mark": "rule",
+                            "value": 70.0
+                          }
+                        }
+                      ],
+                      "marks": [
+                        "line",
+                        "rule"
+                      ],
+                      "panel": 1,
+                      "scale": {
+                        "domain": [
+                          0.0,
+                          100.0
+                        ],
+                        "id": "y1",
+                        "kind": "linear"
+                      },
+                      "select": {
+                        "shows": {
+                          "study": "rsi"
+                        }
+                      },
+                      "series": [
+                        "rsi14"
+                      ]
+                    },
+                    {
+                      "layers": [
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "macd"
+                          },
+                          "fields": [
+                            "macd",
+                            "signal"
+                          ],
+                          "id": "l4",
+                          "items": 240,
+                          "label": "MACD(12,26,9)",
+                          "last": {
+                            "signal": 1.8263620522920787
+                          },
+                          "mark": "line",
+                          "select": {
+                            "shows": {
+                              "study": "macd"
+                            }
+                          }
+                        }
+                      ],
+                      "marks": [
+                        "line"
+                      ],
+                      "panel": 2,
+                      "scale": {
+                        "domain": [
+                          0.14307683580451638,
+                          3.0273748565281173
+                        ],
+                        "id": "y2",
+                        "kind": "linear"
+                      },
+                      "select": {
+                        "shows": {
+                          "study": "macd"
+                        }
+                      },
+                      "series": [
+                        "macd"
+                      ]
+                    },
+                    {
+                      "layers": [
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "p1.avg"
+                          },
+                          "fields": [
+                            "avg"
+                          ],
+                          "id": "l5",
+                          "items": 120,
+                          "label": "p1.avg",
+                          "last": {
+                            "avg": 124.62600000000005
+                          },
+                          "mark": "line",
+                          "select": {
+                            "shows": {
+                              "first": true,
+                              "study": "program"
+                            }
+                          }
+                        },
+                        {
+                          "data": {
+                            "kind": "series",
+                            "series": "p1.up"
+                          },
+                          "fields": [
+                            "up"
+                          ],
+                          "id": "l6",
+                          "items": 119,
+                          "label": "p1.up",
+                          "last": {
+                            "base": 0.0,
+                            "up": 0.0
+                          },
+                          "mark": "bar",
+                          "select": {
+                            "label": "p1.up"
+                          }
+                        }
+                      ],
+                      "marks": [
+                        "line",
+                        "bar"
+                      ],
+                      "panel": 3,
+                      "scale": {
+                        "domain": [
+                          -6.369400000000003,
+                          133.75740000000008
+                        ],
+                        "id": "y3",
+                        "kind": "linear"
+                      },
+                      "select": {
+                        "shows": {
+                          "first": true,
+                          "study": "program"
+                        }
+                      },
+                      "series": [
+                        "p1.avg",
+                        "p1.up"
+                      ]
+                    }
+                  ],
+                  "principal": "arkin",
+                  "surface": "desktop",
+                  "symbol": "THYAO",
+                  "viewport": {
+                    "from_bar": 80,
+                    "to_bar": 199,
+                    "view": "main"
+                  }
+                }
+              ]
+            },
+            "id": "q2",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The screen reading names the program series in their panels.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q2",
+          "query": {
+            "kind": "screen"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "hit": {
+                "bar": 143,
+                "item": {
+                  "bar": 143,
+                  "data": {
+                    "kind": "series",
+                    "series": "p1.avg"
+                  },
+                  "layer": "l5",
+                  "mark": "line",
+                  "t": 1753142400000,
+                  "values": {
+                    "avg": 112.23400000000008
+                  }
+                },
+                "panel": 3,
+                "t": 1753142400000,
+                "value": 119.2615241379311,
+                "view": "main"
+              },
+              "kind": "hit"
+            },
+            "id": "q3",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "A point on the program's line: the hit's item is its layer, data its series.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q3",
+          "query": {
+            "kind": "hit",
+            "view": "main",
+            "x": 600,
+            "y": 498
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,1432 @@
+{
+  "covers": [
+    "add_program",
+    "proposal",
+    "agent-cannot-write",
+    "human-decision",
+    "budget"
+  ],
+  "description": "RL1 (PS §2.2, §2.3): an agent's add_program is a proposal (`direct` → `proposal_only`); remove_program is `agent_cannot_write`; only a person decides, the entry is approved by the person and the program is owned by the person the agent works for; the live budget is re-checked when a proposal is accepted (`E_BUDGET`, it stays pending).",
+  "final": {
+    "log_len": 5
+  },
+  "init": {
+    "agent_policy": "r5b",
+    "clock": 1760000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "on_behalf": "arkin",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "feed",
+          "version": "0"
+        },
+        "id": "feed",
+        "role": "feed"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      }
+    ],
+    "proposal_ttl_ms": null
+  },
+  "name": "76-program-agent-proposal",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person (owner).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "An agent working for arkin.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "principal": "scout",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Send it with mode auto or propose; a person accepts or rejects it.",
+              "message": "an agent may `add_program` only as a proposal",
+              "path": "/ops/0",
+              "reason": "proposal_only"
+            },
+            "id": "c1",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "An agent's add_program sent `direct`: `forbidden`, `proposal_only`.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "c1",
+          "mode": "direct",
+          "ops": [
+            {
+              "id": "p1",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "m",
+                    "op": "sma",
+                    "period": {
+                      "param": "len"
+                    },
+                    "x": "_1"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_2",
+                    "op": "input"
+                  },
+                  {
+                    "a": "_2",
+                    "b": "m",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "defined",
+                    "x": "m"
+                  },
+                  {
+                    "a": "_3",
+                    "b": "_4",
+                    "id": "_5",
+                    "op": "and"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "avg",
+                    "node": "m"
+                  },
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_5"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 5,
+                    "key": "len",
+                    "kind": "int",
+                    "max": 50,
+                    "min": 2
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "show": {
+                "view": "main"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "created": [
+              "p1.avg",
+              "p1.up",
+              "l5",
+              "l6"
+            ],
+            "id": "c2",
+            "proposal": "prop-1",
+            "seq": 1,
+            "status": "proposed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "As `auto`: a proposal; nothing in the document yet.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "id": "p1",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "m",
+                    "op": "sma",
+                    "period": {
+                      "param": "len"
+                    },
+                    "x": "_1"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_2",
+                    "op": "input"
+                  },
+                  {
+                    "a": "_2",
+                    "b": "m",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "defined",
+                    "x": "m"
+                  },
+                  {
+                    "a": "_3",
+                    "b": "_4",
+                    "id": "_5",
+                    "op": "and"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "avg",
+                    "node": "m"
+                  },
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_5"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 5,
+                    "key": "len",
+                    "kind": "int",
+                    "max": 50,
+                    "min": 2
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "show": {
+                "view": "main"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Only a person decides proposals and findings, on a connection of their own; leave the proposal pending for them.",
+              "message": "`accept_proposal` is a human decision; this command is not of human origin",
+              "path": "/ops/0",
+              "reason": "human_only"
+            },
+            "id": "c3",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "It cannot decide its own proposal: `human_only`.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "c3",
+          "ops": [
+            {
+              "op": "accept_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "created": [
+              "p1.avg",
+              "p1.up",
+              "l5",
+              "l6"
+            ],
+            "id": "c4",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The person accepts.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c4",
+          "ops": [
+            {
+              "op": "accept_proposal",
+              "proposal": "prop-1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "entries": [
+                {
+                  "approved_by": "arkin",
+                  "at": 1760000000000,
+                  "author": "scout",
+                  "cause": "c4",
+                  "changes": [
+                    {
+                      "op": "put_series",
+                      "series": {
+                        "id": "p1.avg",
+                        "instrument": {
+                          "calendar": "XIST",
+                          "exchange": "BIST",
+                          "symbol": "THYAO"
+                        },
+                        "interval": "1d",
+                        "source": {
+                          "inputs": [
+                            "px"
+                          ],
+                          "kind": "study",
+                          "output": "avg",
+                          "params": {},
+                          "program": {
+                            "instance": "p1",
+                            "instance_id": "sha256:5bfcb7e981ec3b2000cfbc0c940fd9bb1117a59d4c21dcc71837a6561b8c6fda",
+                            "ir": {
+                              "nodes": [
+                                {
+                                  "field": "close",
+                                  "id": "_1",
+                                  "op": "input"
+                                },
+                                {
+                                  "id": "m",
+                                  "op": "sma",
+                                  "period": {
+                                    "param": "len"
+                                  },
+                                  "x": "_1"
+                                },
+                                {
+                                  "field": "close",
+                                  "id": "_2",
+                                  "op": "input"
+                                },
+                                {
+                                  "a": "_2",
+                                  "b": "m",
+                                  "id": "_3",
+                                  "op": "gt"
+                                },
+                                {
+                                  "id": "_4",
+                                  "op": "defined",
+                                  "x": "m"
+                                },
+                                {
+                                  "a": "_3",
+                                  "b": "_4",
+                                  "id": "_5",
+                                  "op": "and"
+                                }
+                              ],
+                              "outputs": [
+                                {
+                                  "kind": "series",
+                                  "name": "avg",
+                                  "node": "m"
+                                },
+                                {
+                                  "kind": "event",
+                                  "name": "up",
+                                  "node": "_5"
+                                }
+                              ],
+                              "params": [
+                                {
+                                  "default": 5,
+                                  "key": "len",
+                                  "kind": "int",
+                                  "max": 50,
+                                  "min": 2
+                                }
+                              ],
+                              "version": "qp-ir/0"
+                            },
+                            "owner": "arkin",
+                            "params": {
+                              "len": 5
+                            },
+                            "program_id": "sha256:493bea5ec53c3c06ae5ef0e8457e8c9052330c5a3af623906fe32a9a0de97796",
+                            "scope": "document",
+                            "since_t": 1760000000000
+                          },
+                          "study": "program"
+                        }
+                      }
+                    },
+                    {
+                      "op": "put_series",
+                      "series": {
+                        "id": "p1.up",
+                        "instrument": {
+                          "calendar": "XIST",
+                          "exchange": "BIST",
+                          "symbol": "THYAO"
+                        },
+                        "interval": "1d",
+                        "source": {
+                          "inputs": [
+                            "px"
+                          ],
+                          "kind": "study",
+                          "output": "up",
+                          "params": {},
+                          "program": {
+                            "instance": "p1",
+                            "instance_id": "sha256:5bfcb7e981ec3b2000cfbc0c940fd9bb1117a59d4c21dcc71837a6561b8c6fda",
+                            "ir": {
+                              "nodes": [
+                                {
+                                  "field": "close",
+                                  "id": "_1",
+                                  "op": "input"
+                                },
+                                {
+                                  "id": "m",
+                                  "op": "sma",
+                                  "period": {
+                                    "param": "len"
+                                  },
+                                  "x": "_1"
+                                },
+                                {
+                                  "field": "close",
+                                  "id": "_2",
+                                  "op": "input"
+                                },
+                                {
+                                  "a": "_2",
+                                  "b": "m",
+                                  "id": "_3",
+                                  "op": "gt"
+                                },
+                                {
+                                  "id": "_4",
+                                  "op": "defined",
+                                  "x": "m"
+                                },
+                                {
+                                  "a": "_3",
+                                  "b": "_4",
+                                  "id": "_5",
+                                  "op": "and"
+                                }
+                              ],
+                              "outputs": [
+                                {
+                                  "kind": "series",
+                                  "name": "avg",
+                                  "node": "m"
+                                },
+                                {
+                                  "kind": "event",
+                                  "name": "up",
+                                  "node": "_5"
+                                }
+                              ],
+                              "params": [
+                                {
+                                  "default": 5,
+                                  "key": "len",
+                                  "kind": "int",
+                                  "max": 50,
+                                  "min": 2
+                                }
+                              ],
+                              "version": "qp-ir/0"
+                            },
+                            "owner": "arkin",
+                            "params": {
+                              "len": 5
+                            },
+                            "program_id": "sha256:493bea5ec53c3c06ae5ef0e8457e8c9052330c5a3af623906fe32a9a0de97796",
+                            "scope": "document",
+                            "since_t": 1760000000000
+                          },
+                          "study": "program"
+                        }
+                      }
+                    },
+                    {
+                      "index": 3,
+                      "op": "put_panel",
+                      "panel": {
+                        "id": 3,
+                        "y": {
+                          "id": "y3",
+                          "kind": "linear"
+                        }
+                      },
+                      "view": "main"
+                    },
+                    {
+                      "index": 5,
+                      "layer": {
+                        "encoding": {},
+                        "id": "l5",
+                        "label": "p1.avg",
+                        "mark": "line",
+                        "panel": 3,
+                        "series": "p1.avg"
+                      },
+                      "op": "insert_layer",
+                      "view": "main"
+                    },
+                    {
+                      "index": 6,
+                      "layer": {
+                        "encoding": {},
+                        "id": "l6",
+                        "label": "p1.up",
+                        "mark": "bar",
+                        "panel": 3,
+                        "series": "p1.up"
+                      },
+                      "op": "insert_layer",
+                      "view": "main"
+                    },
+                    {
+                      "op": "put_proposal",
+                      "proposal": {
+                        "decided_by": {
+                          "kind": "human",
+                          "name": "arkin"
+                        },
+                        "decided_seq": 2,
+                        "id": "prop-1",
+                        "ops": [
+                          {
+                            "id": "p1",
+                            "inputs": [
+                              "px"
+                            ],
+                            "op": "add_program",
+                            "program": {
+                              "nodes": [
+                                {
+                                  "field": "close",
+                                  "id": "_1",
+                                  "op": "input"
+                                },
+                                {
+                                  "id": "m",
+                                  "op": "sma",
+                                  "period": {
+                                    "param": "len"
+                                  },
+                                  "x": "_1"
+                                },
+                                {
+                                  "field": "close",
+                                  "id": "_2",
+                                  "op": "input"
+                                },
+                                {
+                                  "a": "_2",
+                                  "b": "m",
+                                  "id": "_3",
+                                  "op": "gt"
+                                },
+                                {
+                                  "id": "_4",
+                                  "op": "defined",
+                                  "x": "m"
+                                },
+                                {
+                                  "a": "_3",
+                                  "b": "_4",
+                                  "id": "_5",
+                                  "op": "and"
+                                }
+                              ],
+                              "outputs": [
+                                {
+                                  "kind": "series",
+                                  "name": "avg",
+                                  "node": "m"
+                                },
+                                {
+                                  "kind": "event",
+                                  "name": "up",
+                                  "node": "_5"
+                                }
+                              ],
+                              "params": [
+                                {
+                                  "default": 5,
+                                  "key": "len",
+                                  "kind": "int",
+                                  "max": 50,
+                                  "min": 2
+                                }
+                              ],
+                              "version": "qp-ir/0"
+                            },
+                            "show": {
+                              "view": "main"
+                            }
+                          }
+                        ],
+                        "provenance": {
+                          "at": 1760000000000,
+                          "author": {
+                            "kind": "agent",
+                            "name": "scout"
+                          },
+                          "based_on": []
+                        },
+                        "state": "accepted"
+                      }
+                    }
+                  ],
+                  "inverse": [
+                    {
+                      "op": "put_proposal",
+                      "proposal": {
+                        "id": "prop-1",
+                        "ops": [
+                          {
+                            "id": "p1",
+                            "inputs": [
+                              "px"
+                            ],
+                            "op": "add_program",
+                            "program": {
+                              "nodes": [
+                                {
+                                  "field": "close",
+                                  "id": "_1",
+                                  "op": "input"
+                                },
+                                {
+                                  "id": "m",
+                                  "op": "sma",
+                                  "period": {
+                                    "param": "len"
+                                  },
+                                  "x": "_1"
+                                },
+                                {
+                                  "field": "close",
+                                  "id": "_2",
+                                  "op": "input"
+                                },
+                                {
+                                  "a": "_2",
+                                  "b": "m",
+                                  "id": "_3",
+                                  "op": "gt"
+                                },
+                                {
+                                  "id": "_4",
+                                  "op": "defined",
+                                  "x": "m"
+                                },
+                                {
+                                  "a": "_3",
+                                  "b": "_4",
+                                  "id": "_5",
+                                  "op": "and"
+                                }
+                              ],
+                              "outputs": [
+                                {
+                                  "kind": "series",
+                                  "name": "avg",
+                                  "node": "m"
+                                },
+                                {
+                                  "kind": "event",
+                                  "name": "up",
+                                  "node": "_5"
+                                }
+                              ],
+                              "params": [
+                                {
+                                  "default": 5,
+                                  "key": "len",
+                                  "kind": "int",
+                                  "max": 50,
+                                  "min": 2
+                                }
+                              ],
+                              "version": "qp-ir/0"
+                            },
+                            "show": {
+                              "view": "main"
+                            }
+                          }
+                        ],
+                        "provenance": {
+                          "at": 1760000000000,
+                          "author": {
+                            "kind": "agent",
+                            "name": "scout"
+                          },
+                          "based_on": []
+                        },
+                        "state": "pending"
+                      }
+                    },
+                    {
+                      "index": 6,
+                      "layer": "l6",
+                      "op": "delete_layer",
+                      "view": "main"
+                    },
+                    {
+                      "index": 5,
+                      "layer": "l5",
+                      "op": "delete_layer",
+                      "view": "main"
+                    },
+                    {
+                      "op": "delete_panel",
+                      "panel": 3,
+                      "view": "main"
+                    },
+                    {
+                      "id": "p1.up",
+                      "op": "delete"
+                    },
+                    {
+                      "id": "p1.avg",
+                      "op": "delete"
+                    }
+                  ],
+                  "request": [
+                    {
+                      "id": "p1",
+                      "inputs": [
+                        "px"
+                      ],
+                      "op": "add_program",
+                      "program": {
+                        "nodes": [
+                          {
+                            "field": "close",
+                            "id": "_1",
+                            "op": "input"
+                          },
+                          {
+                            "id": "m",
+                            "op": "sma",
+                            "period": {
+                              "param": "len"
+                            },
+                            "x": "_1"
+                          },
+                          {
+                            "field": "close",
+                            "id": "_2",
+                            "op": "input"
+                          },
+                          {
+                            "a": "_2",
+                            "b": "m",
+                            "id": "_3",
+                            "op": "gt"
+                          },
+                          {
+                            "id": "_4",
+                            "op": "defined",
+                            "x": "m"
+                          },
+                          {
+                            "a": "_3",
+                            "b": "_4",
+                            "id": "_5",
+                            "op": "and"
+                          }
+                        ],
+                        "outputs": [
+                          {
+                            "kind": "series",
+                            "name": "avg",
+                            "node": "m"
+                          },
+                          {
+                            "kind": "event",
+                            "name": "up",
+                            "node": "_5"
+                          }
+                        ],
+                        "params": [
+                          {
+                            "default": 5,
+                            "key": "len",
+                            "kind": "int",
+                            "max": 50,
+                            "min": 2
+                          }
+                        ],
+                        "version": "qp-ir/0"
+                      },
+                      "show": {
+                        "view": "main"
+                      }
+                    }
+                  ],
+                  "seq": 2,
+                  "summary": "accept prop-1: add_program -> p1.avg, p1.up, l5, l6"
+                }
+              ],
+              "kind": "log"
+            },
+            "id": "q1",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The entry: author `scout`, `approved_by` the person.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "kind": "log",
+            "limit": 1
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "collection": "series",
+              "item": {
+                "id": "p1.avg",
+                "instrument": {
+                  "calendar": "XIST",
+                  "exchange": "BIST",
+                  "symbol": "THYAO"
+                },
+                "interval": "1d",
+                "source": {
+                  "inputs": [
+                    "px"
+                  ],
+                  "kind": "study",
+                  "output": "avg",
+                  "params": {},
+                  "program": {
+                    "instance": "p1",
+                    "instance_id": "sha256:5bfcb7e981ec3b2000cfbc0c940fd9bb1117a59d4c21dcc71837a6561b8c6fda",
+                    "ir": {
+                      "nodes": [
+                        {
+                          "field": "close",
+                          "id": "_1",
+                          "op": "input"
+                        },
+                        {
+                          "id": "m",
+                          "op": "sma",
+                          "period": {
+                            "param": "len"
+                          },
+                          "x": "_1"
+                        },
+                        {
+                          "field": "close",
+                          "id": "_2",
+                          "op": "input"
+                        },
+                        {
+                          "a": "_2",
+                          "b": "m",
+                          "id": "_3",
+                          "op": "gt"
+                        },
+                        {
+                          "id": "_4",
+                          "op": "defined",
+                          "x": "m"
+                        },
+                        {
+                          "a": "_3",
+                          "b": "_4",
+                          "id": "_5",
+                          "op": "and"
+                        }
+                      ],
+                      "outputs": [
+                        {
+                          "kind": "series",
+                          "name": "avg",
+                          "node": "m"
+                        },
+                        {
+                          "kind": "event",
+                          "name": "up",
+                          "node": "_5"
+                        }
+                      ],
+                      "params": [
+                        {
+                          "default": 5,
+                          "key": "len",
+                          "kind": "int",
+                          "max": 50,
+                          "min": 2
+                        }
+                      ],
+                      "version": "qp-ir/0"
+                    },
+                    "owner": "arkin",
+                    "params": {
+                      "len": 5
+                    },
+                    "program_id": "sha256:493bea5ec53c3c06ae5ef0e8457e8c9052330c5a3af623906fe32a9a0de97796",
+                    "scope": "document",
+                    "since_t": 1760000000000
+                  },
+                  "study": "program"
+                }
+              },
+              "kind": "item"
+            },
+            "id": "q2",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "`owner` is the person the agent works for.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q2",
+          "query": {
+            "id": "p1.avg",
+            "kind": "get"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "error": {
+              "code": "forbidden",
+              "hint": "Agents write comments (`add_comment`), watches (`add_watch`) and view proposals; facts, findings, capsules, the ledger and stories come from the engine.",
+              "message": "an agent may not `remove_program`: facts, findings, series, capsules, the ledger and stories come from the engine",
+              "path": "/ops/0",
+              "reason": "agent_cannot_write"
+            },
+            "id": "c5",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "remove_program: never from an agent (`agent_cannot_write`), not even as a proposal.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "c5",
+          "mode": "propose",
+          "ops": [
+            {
+              "op": "remove_program",
+              "program": "p1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "id": "c6",
+            "proposal": "prop-3",
+            "seq": 3,
+            "status": "proposed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "New values: a proposal.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "c6",
+          "ops": [
+            {
+              "op": "set_program_params",
+              "params": {
+                "len": 8
+              },
+              "program": "p1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "s",
+          "msg": {
+            "created": [
+              "h0.s"
+            ],
+            "id": "c7",
+            "proposal": "prop-4",
+            "seq": 4,
+            "status": "proposed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "A costly program (≈ 600 per bar): proposed while there is room.",
+      "send": {
+        "conn": "s",
+        "msg": {
+          "id": "c7",
+          "ops": [
+            {
+              "id": "h0",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "stdev",
+                    "period": 600,
+                    "x": "_1"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "s",
+                    "node": "_2"
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "created": [
+              "h1.s",
+              "h2.s",
+              "h3.s"
+            ],
+            "id": "c8",
+            "seq": 5,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The person fills their live budget with three.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c8",
+          "ops": [
+            {
+              "id": "h1",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "stdev",
+                    "period": 600,
+                    "x": "_1"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "s",
+                    "node": "_2"
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            },
+            {
+              "id": "h2",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "stdev",
+                    "period": 600,
+                    "x": "_1"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "s",
+                    "node": "_2"
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            },
+            {
+              "id": "h3",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "stdev",
+                    "period": 600,
+                    "x": "_1"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "s",
+                    "node": "_2"
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "limit",
+              "errors": [
+                {
+                  "code": "limit",
+                  "expected": [
+                    "2000"
+                  ],
+                  "message": "`program.live.doc.max_cost_per_bar`: 2413 is above the limit 2000",
+                  "reason": "E_BUDGET"
+                }
+              ],
+              "expected": [
+                "2000"
+              ],
+              "message": "`program.live.doc.max_cost_per_bar`: 2413 is above the limit 2000",
+              "path": "/ops/0",
+              "reason": "E_BUDGET"
+            },
+            "id": "c9",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Accepting h0 now is over the budget: `E_BUDGET` (re-checked at acceptance).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c9",
+          "ops": [
+            {
+              "op": "accept_proposal",
+              "proposal": "prop-4"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "collection": "proposals",
+              "items": [
+                {
+                  "id": "prop-3",
+                  "ops": [
+                    {
+                      "op": "set_program_params",
+                      "params": {
+                        "len": 8
+                      },
+                      "program": "p1"
+                    }
+                  ],
+                  "provenance": {
+                    "at": 1760000000000,
+                    "author": {
+                      "kind": "agent",
+                      "name": "scout"
+                    },
+                    "based_on": []
+                  },
+                  "state": "pending"
+                },
+                {
+                  "id": "prop-4",
+                  "ops": [
+                    {
+                      "id": "h0",
+                      "inputs": [
+                        "px"
+                      ],
+                      "op": "add_program",
+                      "program": {
+                        "nodes": [
+                          {
+                            "field": "close",
+                            "id": "_1",
+                            "op": "input"
+                          },
+                          {
+                            "id": "_2",
+                            "op": "stdev",
+                            "period": 600,
+                            "x": "_1"
+                          }
+                        ],
+                        "outputs": [
+                          {
+                            "kind": "series",
+                            "name": "s",
+                            "node": "_2"
+                          }
+                        ],
+                        "version": "qp-ir/0"
+                      }
+                    }
+                  ],
+                  "provenance": {
+                    "at": 1760000000000,
+                    "author": {
+                      "kind": "agent",
+                      "name": "scout"
+                    },
+                    "based_on": []
+                  },
+                  "state": "pending"
+                }
+              ],
+              "kind": "items"
+            },
+            "id": "q3",
+            "now": 1760000000000,
+            "seq": 5,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "It stays pending.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q3",
+          "query": {
+            "collection": "proposals",
+            "kind": "list",
+            "state": "pending"
+          },
+          "type": "query"
+        }
+      }
+    }
+  ]
+}

@@ -33,11 +33,15 @@ const UNKNOWN_OP: &str = "r = rsj(close, 14)\nseries x = r\n";
 const REJECT_TEXT: &str = "reject E_LOOKAHEAD \"the next close is not known\"\n";
 const IR: &str = r#"{"version":"qp-ir/0","nodes":[{"id":"n0","op":"input","field":"close"},{"id":"n1","op":"rsi","x":"n0","period":14},{"id":"n2","op":"const","value":70.0},{"id":"n3","op":"cross_above","a":"n1","b":"n2"}],"outputs":[{"name":"up","kind":"event","node":"n3"}]}"#;
 const BAD_IR: &str = r#"{"version":"qp-ir/0","nodes":[{"id":"cd","op":"input","field":"close"},{"id":"next","op":"lag","x":"cd","n":-1}],"outputs":[{"name":"x","kind":"series","node":"next"}]}"#;
+/// Four outputs of 2000-bar `stdev` cones: live cost far over the per-owner live limit
+/// (`W_LIVE_BUDGET`, PR §11.3) and over the static limit (`E_COST_LIMIT`).
+const OVER_LIVE: &str = "a = sma(close, 2000)\nb = sma(high, 2000)\nc = sma(low, 2000)\nd = sma(open, 2000)\n\
+series w = stdev(a, 2000)\nseries x = stdev(b, 2000)\nseries y = stdev(c, 2000)\nseries z = stdev(d, 2000)\n";
 const REJECT_IR: &str =
     r#"{"reject":{"code":"E_LOOKAHEAD","reason":"tomorrow's close is not known"}}"#;
 
 /// The check cases: name, file content, language, expected exit code.
-const CASES: [(&str, &str, Option<&str>, i32); 7] = [
+const CASES: [(&str, &str, Option<&str>, i32); 8] = [
     ("text.qp", SERIES_EVENT, None, 0),
     ("signal.qp", SIGNAL_STATE, Some("tr"), 0),
     ("unknown.qp", UNKNOWN_OP, Some("tr"), 1),
@@ -45,6 +49,7 @@ const CASES: [(&str, &str, Option<&str>, i32); 7] = [
     ("ir.json", IR, None, 0),
     ("bad.json", BAD_IR, Some("en"), 1),
     ("reject.json", REJECT_IR, None, 0),
+    ("over.qp", OVER_LIVE, None, 1),
 ];
 
 fn write(dir: &Path, name: &str, content: &str) -> PathBuf {
@@ -258,6 +263,10 @@ fn cli_check_equals_mcp_program_check() {
             "_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28"}}}));
         let mcp = &out[0]["result"]["structuredContent"]["data"];
         assert_eq!(&cli, mcp, "{name}");
+        if name == "over.qp" {
+            let w = cli["warnings"].as_array().expect("warnings");
+            assert!(w.iter().any(|w| w["reason"] == "W_LIVE_BUDGET"), "{cli}");
+        }
     }
 }
 

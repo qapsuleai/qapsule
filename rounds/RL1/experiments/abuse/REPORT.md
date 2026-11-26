@@ -245,3 +245,15 @@ koşulmalı** (`run_session.py` içinde hazır).
 | X02 | 6-süreç | serve | iki oturumun sonu | süreç temiz çıkar (0) | A çıkış 0 (en çok 83.8 MB), B çıkış 0 (en çok 31.5 MB) | 7450 / 83.8 | **OK** |
 
 Süre: duvar saati (CLI: süreç; oturum: tek komut ya da döngünün toplamı). Bellek: CLI için süreç en yüksek RSS, oturum için o ana kadar `qp serve`in en yüksek RSS'i (`ps`). Debug derleme.
+
+## Ek (RL1/C, 2026-11-26): L20 yeniden koşuldu — **OK**
+
+PA + PB `main`'de birleştikten sonra (`64e30256` üstünde `rl1/close-c`), `run_session.py`'nin
+`lookahead_session`'ı tek başına, aynı girdiyle (`init-a.json`, saatlik belge içi `px`, saat = son
+bar + 2 saat) `qp serve` (release) üstünde koşuldu; öbür satırlar ve `results-session.json`
+yeniden üretilmedi. Gözlenen: `dene` olayları 2999; `set_program_params` anında bildirim **0**;
+1 bar eklenince **0** (kapanan barın `known_t` = son bar + 1 sa ≤ `since_t`); 2 bar daha eklenince
+**1** (`known_t` = son bar + 3 sa > `since_t` olan bar kapandı). Beklenen tam bu: değişimde ve
+`since_t` öncesi kapanan barda tetik yok, sonrasında var (olumlu denetim artık tetikliyor).
+Dökümde de aynı kural: 75 `program-event` (yeni düzeyde geriye dönük tetik yok, `since_t`
+sonrası kapanan barda `condition_met`). Özet tablo satırı (SINANAMADI 1) bu ekle kapanır.

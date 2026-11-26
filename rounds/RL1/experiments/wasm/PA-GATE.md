@@ -17,4 +17,12 @@ Tarih 2026-11-26, Apple M4 Max, aynı araçlar (wasm-pack 0.14.0, `--profile was
   ham +337.514, gzip +65.714 büyümüş. Aradaki paket içi değişiklikler: I1 (qp-ir tipleri ve
   protokol eklemeleri, `qp-schema`), I2 (`Stdev`, `PercentRank` çekirdekleri, `qp-compute`).
   Hangisinin ne kadar katkı verdiği ayrıca ölçülmedi.
-- D1 şart 1 gereği kodlama durduruldu; karar yürüten oturumda.
+- D1 şart 1 gereği kodlama durduruldu. Karar D6 (Arkin): çalıştırıcı kabuk paketinde kalır (yansı program serilerini kendisi hesaplar); yeni İ8 ham 7.332.886 B, gzip 2.128.236 B. Son ölçüm aşağıda.
+
+## Son ölçüm (D6 sonrası, `rl1/plane-prog` main 2fe8eaef üstüne, sınamalar ve tik ölçümü dahil)
+
+| Kuruluş | ham B | gzip -9 B |
+|---|---:|---:|
+| Yeni İ8 tavanı (D6) | 7.332.886 | 2.128.236 |
+| `rl1/plane-prog` son | 7.154.035 | 2.076.328 |
+| Pay | 178.851 (%2,4) | 51.908 (%2,4) |

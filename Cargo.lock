@@ -2116,6 +2116,7 @@ dependencies = [
  "qp-grammar",
  "qp-lang",
  "qp-schema",
+ "qp-session",
  "qp-source",
  "qp-voice",
  "serde",

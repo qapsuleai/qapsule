@@ -19,5 +19,9 @@ qp-voice = { version = "0.0.0", path = "../qp-voice" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
 
+[dev-dependencies]
+# Tests only: a program series under a live session (threshold on a closed event bar).
+qp-session = { path = "../qp-session" }
+
 [lints]
 workspace = true

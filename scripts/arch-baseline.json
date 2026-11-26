@@ -17,7 +17,7 @@
    }
   },
   "file.soft": {
-   "count": 32,
+   "count": 31,
    "items": {
     "crates/qp-authority/src/capsule/claims.rs": 630,
     "crates/qp-authority/src/capsule/comments.rs": 672,
@@ -36,7 +36,6 @@
     "crates/qp-ops/src/gops.rs": 723,
     "crates/qp-ops/src/select.rs": 643,
     "crates/qp-plane/src/plane.rs": 753,
-    "crates/qp-plane/src/values.rs": 602,
     "crates/qp-read/src/interact.rs": 685,
     "crates/qp-schema/src/protocol/ops.rs": 617,
     "crates/qp-session/src/conform.rs": 645,

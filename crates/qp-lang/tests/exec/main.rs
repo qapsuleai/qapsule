@@ -12,5 +12,6 @@ mod digest;
 mod hostile;
 mod modes;
 mod prefix;
+mod rx4_g8;
 mod signals;
 mod summary;

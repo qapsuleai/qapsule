@@ -10,11 +10,13 @@ use serde_json::{json, Value};
 use crate::support::*;
 
 /// A random valid program: base-clock arithmetic, kernels, history and state nodes over
-/// bar fields, sometimes a `4h` subtree brought down with `align`; four outputs.
+/// bar fields, sometimes a `4h` subtree (a number and a `cat`) brought down with `align`;
+/// four outputs.
 pub fn random_program(r: &mut Rng) -> Value {
     let mut nodes: Vec<Value> = Vec::new();
     let mut nums: Vec<String> = Vec::new();
     let mut bools: Vec<String> = Vec::new();
+    let mut dims = Vec::new();
     let mut id = 0;
     let mut fresh = |nodes: &mut Vec<Value>, mut v: Value| {
         id += 1;
@@ -37,8 +39,14 @@ pub fn random_program(r: &mut Rng) -> Value {
             &mut nodes,
             json!({"op": hk, "x": hc, "period": 1 + r.below(5)}),
         );
+        let hb = fresh(
+            &mut nodes,
+            json!({"op": "bucket", "x": hs, "edges": [50.0, 100.0]}),
+        );
         let al = fresh(&mut nodes, json!({"op": "align", "x": hs}));
         nums.push(al);
+        let ab = fresh(&mut nodes, json!({"op": "align", "x": hb}));
+        dims.push(json!({"name": "h", "node": ab}));
     }
     for _ in 0..(4 + r.below(10)) {
         let v = random_node(r, &nums, &bools);
@@ -64,6 +72,7 @@ pub fn random_program(r: &mut Rng) -> Value {
         &mut nodes,
         json!({"op": "bucket", "x": bx, "edges": [0.0, 50.0, 100.0]}),
     );
+    dims.insert(0, json!({"name": "b", "node": bk}));
     prog(
         Value::Array(nodes),
         json!([
@@ -72,7 +81,7 @@ pub fn random_program(r: &mut Rng) -> Value {
             {"name": "g", "kind": "signal", "node": g, "side": *r.pick(&["al", "sat"]),
              "rule": {"target_pct": 1.0, "stop_pct": 0.8, "max_bars": 1 + r.below(10)},
              "source": {"strategy": "gen", "version": "1"}},
-            {"name": "k", "kind": "state", "dims": [{"name": "b", "node": bk}]}
+            {"name": "k", "kind": "state", "dims": dims}
         ]),
     )
 }
@@ -165,6 +174,7 @@ fn same_prefix(full: &Executor, part: &Executor, n: usize, case: u64) {
 fn prefix_stability_over_random_programs() {
     let mut cases = 0;
     let mut nonempty = 0;
+    let mut aligned_cat = 0;
     for case in 0..240u64 {
         let mut r = Rng(0x9E37_79B9_7F4A_7C15 ^ (case * 0x1000_0000_01B3 + 1));
         let p = random_program(&mut r);
@@ -177,7 +187,13 @@ fn prefix_stability_over_random_programs() {
         same_prefix(&full, &part, n, case);
         cases += 1;
         nonempty += usize::from((0..n).any(|i| full.value_at(1, i) == Some(1.0)));
+        aligned_cat +=
+            usize::from((0..n).any(|i| full.state_at(3, i).is_some_and(|k| k.len() == 2)));
     }
     assert!(cases >= 200);
     assert!(nonempty > 20, "events occur in many cases ({nonempty})");
+    assert!(
+        aligned_cat > 20,
+        "aligned 4h bins occur in many cases ({aligned_cat})"
+    );
 }

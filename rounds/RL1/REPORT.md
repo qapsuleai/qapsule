@@ -120,7 +120,7 @@ cross_below`; durum `streak bars_since once rearm cooldown`; `defined`; `align`;
 | 15 | RX4 uygunluğu; her fark açıklanmış | ✅ | 52/52 eşit, 4/4 ret (`experiments/rx4/RESULT.md`) |
 | 16 | Ajan teyidi; kötü niyet | ✅ | §8, §9 |
 | 17 | K17, K52, WASM (İ8), tik maliyeti | ⚠️ | §10: K17 var olan yolda tutuyor; **program yoluyla tarama K17'yi aşıyor** (264 ms / 392 ms) — yeni bir yolun ölçümü, gerileme değil; WASM D6 içinde |
-| 18 | Bağımsız denetim, belgeler, temizlik | ✅ | `AUDIT.md`, §14 (Disk) |
+| 18 | Bağımsız denetim, belgeler, temizlik | ✅ | `AUDIT.md`, §14 (Disk); CI 45814608591 yeşil (`d3f02eba`, Linux x86_64, 47 dk) |
 
 ## 7. RX4 uygunluğu
 

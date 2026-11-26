@@ -1,0 +1,25 @@
+  .claude/worktrees/    44K
+  .claude/wt/           16K
+  depo toplamı          37G
+1. git worktree prune
+2. worktree'ler
+3. target/ (eski profiller ve artımlı önbellek)
+  siliniyor: target/flycheck0 (384K)
+  siliniyor: target/tmp (  0B)
+  siliniyor: target/wasm-replica (6.4M)
+  siliniyor: target/wasm32-wasip1 (124M)
+  siliniyor: target/.DS_Store (8.0K)
+  siliniyor: target/debug/incremental ( 18G)
+4. node_modules
+  ana ağaç node_modules kalır (--node-modules ile silinir)
+5. tarayıcı profilleri
+6. --deep: target/ bütçesi 6 GB
+     Removed 111535 files, 20.9GiB total
+  cargo clean yapıldı
+sonra:
+  target/              -
+  .claude/worktrees/    44K
+  .claude/wt/           16K
+  depo toplamı         2.1G
+git worktree list:
+/Users/arkns/Works/Mchart/qapsule  acb968ba [main]

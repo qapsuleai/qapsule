@@ -113,8 +113,8 @@ Programın adlı, tipli, aralıklı girdisidir. Tanım biçimi parametre kayıt 
 
 RX4 §3 aynen: `num` (`Option<f64>`), `bool` (`Option<bool>`), `cat` (`Option<u32>`, kutu
 indeksi). Aritmetik, karşılaştırma ve mantıkta boş yayılır; durum düğümleri boş `bool`'u
-yanlış sayar; çekirdekler boş girdiyi atlar. `cat` yalnız durum tanımı çıktısına ve
-`defined`'a girer; başka yerde `E_TYPE`.
+yanlış sayar; çekirdekler boş girdiyi atlar. `cat` yalnız durum tanımı çıktısına, `defined`'a ve
+`align`'a (üst periyot kutusunu tabana indirmek için, §4.6) girer; başka yerde `E_TYPE`.
 
 ### 3.2 Saat ve üst periyot hizası
 

@@ -18,11 +18,11 @@ use qp_plane::error::{ptr, PResult, E};
 use qp_plane::plane::{bars_for, is_bar_series};
 use qp_plane::values::find_series;
 use qp_schema::program::{ProgramParamValue, ProgramRef, ProgramScope, PROGRAM_STUDY};
-use qp_schema::protocol::{ChangeOp, ErrorCode, Op, Show};
+use qp_schema::protocol::{ChangeOp, ErrorCode, LogEntry, Op, Show};
 use qp_schema::{Author, Document, Series, SeriesSource};
 use serde_json::Value;
 
-use crate::budget::over_budget;
+use crate::budget::{logged, over_budget};
 use crate::inst::{instance_names, output_name, outputs_of, program_of};
 use crate::refuse::{refuse, session, under, Located};
 
@@ -35,16 +35,23 @@ pub(crate) struct Rules {
     pub(crate) lang: Lang,
 }
 
-/// The owner of what a command writes (PS §2.3): the person who accepted the proposal,
-/// else the speaker. One identity everywhere: the author's name as provenance records it
-/// (`approved_by` / `author`), the only identity `qp_ops::Ctx` carries for both (it has
-/// no principal list to map the decider's author to a principal id).
+/// The owner of what a command writes (PS §2.3): the person the decider of an accepted
+/// proposal acts for, else the person the speaker acts for (`person_of`: an agent's
+/// person; a person is their own). One identity everywhere: a principal's person id.
+///
+/// `qp_ops::Ctx` carries the decider only as an `Author`, not as a principal id (missing
+/// hook: the decider's principal in the expansion context). The decider's principal is
+/// taken as its author name; the `Check` phase, which knows the deciding connection's
+/// principal, refuses an acceptance where the two differ (`crate::check`).
 pub(crate) fn owner_of(ctx: &Ctx<'_>) -> String {
-    let a = ctx.approved_by.as_ref().unwrap_or(&ctx.author);
+    let who = ctx.approved_by.as_ref().map_or(ctx.speaker, author_name);
+    qp_ops::watch::person_of(ctx.plane, who).to_owned()
+}
+
+/// The name of author `a`.
+pub(crate) fn author_name(a: &Author) -> &str {
     match a {
-        Author::Human { name } | Author::Agent { name, .. } | Author::Engine { name, .. } => {
-            name.clone()
-        }
+        Author::Human { name } | Author::Agent { name, .. } | Author::Engine { name, .. } => name,
     }
 }
 
@@ -173,7 +180,7 @@ pub(crate) fn add_program(
     };
     let names: Vec<&str> = checked.outputs.iter().map(|o| o.name.as_str()).collect();
     let mut out = put_outputs(doc, &names, input, &pref, p)?;
-    budget_check(doc, &out, rules, p)?;
+    budget_check(doc, &out, ctx.log, rules, p)?;
     for c in &out {
         if let ChangeOp::PutSeries { series, .. } = c {
             ctx.n += 1;
@@ -276,14 +283,19 @@ fn instance_id(doc: &Document, id: Option<&String>, p: &str, ctx: &mut Ctx<'_>) 
     Ok(name)
 }
 
-/// The live budget after `new` (applied to a copy of `doc`).
+/// The live budget after `new` (applied to a copy of `doc`), with `log`'s program bytes.
 #[allow(clippy::result_large_err)]
-fn budget_check(doc: &Document, new: &[ChangeOp], rules: Rules, p: &str) -> PResult<()> {
+fn budget_check(
+    doc: &Document,
+    new: &[ChangeOp],
+    log: &[LogEntry],
+    rules: Rules,
+    p: &str,
+) -> PResult<()> {
     let mut after = doc.clone();
     qp_ops::apply_all(&mut after, new).map_err(|m| qp_plane::error::invalid(m, "/ops"))?;
-    // The log's bytes are the `Check` phase's (counted incrementally there, PS §2.3); the
-    // command path counts this op's own, so its cost does not grow with the log.
-    let errs = over_budget(&after, &BTreeMap::new(), new, &rules.limits, rules.lang);
+    // Every expansion path (each world, its own log) counts the log's program bytes.
+    let errs = over_budget(&after, &logged(log), new, &rules.limits, rules.lang);
     if errs.is_empty() {
         return Ok(());
     }
@@ -358,7 +370,7 @@ pub(crate) fn set_program_params(
         })
         .collect();
     debug_assert!(outs.iter().all(|s| output_name(s).is_some()));
-    budget_check(doc, &out, rules, p)?;
+    budget_check(doc, &out, ctx.log, rules, p)?;
     Ok(out)
 }
 

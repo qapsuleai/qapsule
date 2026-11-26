@@ -17,7 +17,7 @@ izleyici program serilerini veri düzlemiyle hesaplar).
 
 - İşlemler (`OpHandler`): `add_program` → çıktı başına `put_series` (`<örnek>.<çıktı>`,
   `study: "program"`, `program: ProgramRef` satır içi kanonik ara gösterimle; `since_t` açılım
-  saati, `owner` kabul edenin ya da konuşanın yazar adı — tek kimlik, köken kaydındaki gibi), `show` ile çıktı başına katman
+  saati, `owner` kabul edenin ya da konuşanın adına çalıştığı kişinin ilke kimliği, `person_of`), `show` ile çıktı başına katman
   (`series` → `line`, `event` → `bar`; etiket seri kimliği, lejant onu yazar);
   `set_program_params` → aynı seriler yeni değer, `instance_id`, `since_t` ile;
   `remove_program` → çıktı başına `remove` kuralı (`in_use`). Sinyal/durum çıktısı `E_TRY_ONLY`.
@@ -29,9 +29,10 @@ izleyici program serilerini veri düzlemiyle hesaplar).
   `E_EVENT_OPERAND` (kabul edilen önerinin işlemlerine de); komutun program işlemleri, kabul
   edilen önerinin işlemleri (karar veren sahip) ya da program serisi geri getirebilen `undo`
   bir kopyada barındırıcının sınırlarıyla (`SessionView::param`) açılır: program sınırları ve
-  yazılan/geri gelen her sahibin canlı bütçesi (`program.live.doc.*`). Günlük baytı yuvadaki
-  artımlı sayaçla (`LogBytes`, dünya başına; yalnız işlenmiş girdilerden türer) sayılır;
-  açılım yalnız kendi baytını sayar, maliyeti günlükle büyümez.
+  yazılan/geri gelen her sahibin canlı bütçesi (`program.live.doc.*`). Günlük baytı her
+  açılım yolunda o dünyanın kendi günlüğünden sayılır (tek geçiş; yalnız program serileri
+  ölçülür, sahip başına bütçeyle sınırlı). Kabulde açılımın yazacağı sahip (karar verenin
+  yazar adı ilke kimliği sayılır) karar veren bağlantının kişisi değilse `owner_unresolved`.
 - Sorgular (`QueryHandler`): `check_program` (ara gösterim ya da metin; metin hataları `span`
   taşır; `program.text.*` sınırları), `try_program` (okuyucunun kapanmış barları, veri yetkisi
   kapısı), `explain_program` (kanonik metin, düğüm başına maliyet, `at` ile köken).
@@ -43,8 +44,9 @@ hataları → protokol hatası, hepsi birden).
 
 **Kurallar:** hesap kodunda model, ağ, saat, rastgelelik yok; sınırlar yalnız kayıt
 defterinden (`qp_lang::Limits`). Açılım `qp_ops::Ctx`'te `param` olmadığından kayıt defteri
-varsayılanlarıyla denetler; barındırıcı değeri `Check` fazında (eksik kanca: açılımda
-`param_for`, PS §7/3).
+varsayılanlarıyla denetler; barındırıcı değeri `Check` fazında. Eksik kancalar: açılımda
+`param_for` (PS §7/3); açılım bağlamında karar verenin ilke kimliği (`Ctx::approved_by` yalnız
+`Author`); açılımın alt sistem durumuna erişimi (artımlı günlük baytı sayacı için).
 
 **Ne değildir:** program serilerinin değerlerini hesaplamaz (`qp-plane`); otorite değildir;
 yeni `ChangeOp`, koşul türü ya da koleksiyon eklemez.

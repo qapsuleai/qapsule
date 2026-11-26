@@ -116,3 +116,111 @@ fn a_direct_and_an_accepted_program_count_for_the_same_owner() {
     let all = fill(&mut fresh);
     assert_eq!(fill(&mut h), all - 2);
 }
+
+/// `thyao` with `aide`, an agent working for `arkin`, on connection `d`.
+fn with_aide() -> H {
+    let mut init: qp_schema::protocol::SessionInit =
+        qp_session::read_json(&crate::rig::root().join("fixtures/protocol/init/thyao.json"))
+            .unwrap();
+    init.agent_policy = Some("r5b".to_owned());
+    init.principals.push(
+        serde_json::from_value(json!({"id":"aide","author":{"kind":"agent","name":"aide"},
+            "role":"proposer","on_behalf":"arkin"}))
+        .unwrap(),
+    );
+    H::with(init, &[("a", "arkin"), ("d", "aide"), ("s", "scout")])
+}
+
+#[test]
+fn an_agent_is_charged_to_the_person_it_works_for() {
+    let mut h = with_aide();
+    let ir = h.ir(SMA_TEXT);
+    // Accepted: owned by arkin.
+    let r = h.cmd_mode(
+        "d",
+        "auto",
+        json!([{"op":"add_program","id":"q1","program":ir,"inputs":["px"]}]),
+    );
+    let pid = r["proposal"].as_str().unwrap().to_owned();
+    assert_eq!(
+        h.cmd("a", json!([{"op":"accept_proposal","proposal":pid}]))["status"],
+        "applied"
+    );
+    assert_eq!(h.series("q1.avg")["source"]["program"]["owner"], "arkin");
+    // Arkin's budget full: the aide's new proposal is refused at once (charged to
+    // arkin), while another agent's (charged to itself) is still made.
+    fill(&mut h);
+    let op = json!([{"op":"add_program","id":"q2","program":ir,"inputs":["px"]}]);
+    let r = h.cmd_mode("d", "auto", op.clone());
+    assert_eq!(reason(&r), "E_BUDGET", "{r}");
+    let r = h.cmd_mode("s", "auto", op);
+    assert_eq!(r["status"], "proposed", "{r}");
+}
+
+/// Transcript 39's two-world session (a licensed flow: a public world), whose owner's
+/// principal id (`arkin`) is not its author name (`Arkın`).
+fn two_worlds() -> H {
+    let t: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(
+            crate::rig::root().join("fixtures/protocol/conformance/39-capsule-entitlement.json"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let mut v = t["init"].clone();
+    v["principals"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"bot","author":{"kind":"agent","name":"bot"},"role":"proposer"}));
+    v["data"]["entitlements"]["bot"] = json!(["*"]);
+    v["agent_policy"] = json!("r5b");
+    H::with(
+        serde_json::from_value(v).unwrap(),
+        &[("a", "arkin"), ("s", "bot")],
+    )
+}
+
+#[test]
+fn both_worlds_keep_the_same_budget() {
+    let mut one = H::new();
+    let mut two = two_worlds();
+    let k = fill(&mut two);
+    assert_eq!(
+        k,
+        fill(&mut one),
+        "the public world refuses where the authority's does"
+    );
+    assert_eq!(
+        two.series("b0.avg")["source"]["program"]["owner"],
+        "arkin",
+        "a principal's person id, not its author name"
+    );
+    // Undo past the budget is refused in the two-world session too.
+    let r = two.cmd("a", json!([{"op":"remove_program","program":"b0"}]));
+    let seq = r["seq"].as_u64().unwrap();
+    let ir = two.ir(SMA_TEXT);
+    let r = two.cmd(
+        "a",
+        json!([{"op":"add_program","id":"refill","program":ir,"inputs":["px"]}]),
+    );
+    assert_eq!(r["status"], "applied", "{r}");
+    let r = two.cmd("a", json!([{"op":"undo","seq":seq}]));
+    assert_eq!(reason(&r), "E_BUDGET", "{r}");
+    two.assert_replay();
+}
+
+#[test]
+fn a_decider_whose_principal_the_expansion_cannot_name_is_refused() {
+    let mut h = two_worlds();
+    let ir = h.ir(SMA_TEXT);
+    let r = h.cmd_mode(
+        "s",
+        "auto",
+        json!([{"op":"add_program","id":"x","program":ir,"inputs":["px"]}]),
+    );
+    assert_eq!(r["status"], "proposed", "{r}");
+    let pid = r["proposal"].as_str().unwrap().to_owned();
+    let r = h.cmd("a", json!([{"op":"accept_proposal","proposal":pid}]));
+    assert_eq!(reason(&r), "owner_unresolved", "{r}");
+    assert!(h.series("x.avg").is_null());
+}

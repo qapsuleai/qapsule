@@ -11,12 +11,27 @@ use qp_schema::Document;
 
 use crate::inst::program_of;
 
-/// Bytes of a change that writes a program series: its owner and size.
+/// Counts the bytes written to it.
+struct Count(u64);
+
+impl std::io::Write for Count {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.0 += buf.len() as u64;
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+/// Bytes of a change that writes a program series: its owner and its JSON size (counted,
+/// not allocated).
 fn program_bytes(c: &ChangeOp) -> Option<(&str, u64)> {
     match c {
         ChangeOp::PutSeries { series, .. } => program_of(series).map(|p| {
-            let n = serde_json::to_vec(series).map_or(0, |v| v.len() as u64);
-            (p.owner.as_str(), n)
+            let mut n = Count(0);
+            let _ = serde_json::to_writer(&mut n, series);
+            (p.owner.as_str(), n.0)
         }),
         _ => None,
     }
@@ -29,49 +44,22 @@ pub(crate) fn owners(new: &[ChangeOp]) -> BTreeSet<String> {
         .collect()
 }
 
-/// Program bytes per owner in a log, counted incrementally (one per world: the authority
-/// and the public world keep separate logs). Derived from committed entries only, so
-/// updating it in the `Check` phase never records anything of a refused command; a log
-/// it does not continue (another world, a restart) is counted again from the start.
-#[derive(Debug, Default)]
-pub(crate) struct LogBytes {
-    worlds: [Counted; 2],
-}
-
-/// The count of one log: entries counted, the last one's seq, bytes per owner.
-#[derive(Debug, Default)]
-struct Counted {
-    len: usize,
-    last_seq: Option<u64>,
-    per_owner: BTreeMap<String, u64>,
-}
-
-impl LogBytes {
-    /// Bytes per owner of `log` (world `public`), counting only entries not seen before.
-    pub(crate) fn sync(&mut self, log: &[LogEntry], public: bool) -> &BTreeMap<String, u64> {
-        let c = &mut self.worlds[usize::from(public)];
-        let continues =
-            c.len <= log.len() && (c.len == 0 || log.get(c.len - 1).map(|e| e.seq) == c.last_seq);
-        if !continues {
-            *c = Counted::default();
-        }
-        for (o, n) in log[c.len..]
-            .iter()
-            .flat_map(|e| e.changes.iter())
-            .filter_map(program_bytes)
-        {
-            *c.per_owner.entry(o.to_owned()).or_default() += n;
-        }
-        c.len = log.len();
-        c.last_seq = log.last().map(|e| e.seq);
-        &c.per_owner
+/// Program bytes per owner in `log` (the world's own log: the authority's or the public
+/// world's). One walk over the entries' changes; only program series are measured, and
+/// each owner's are at most `program.live.doc.max_log_bytes` (this check keeps them
+/// there), so the work is bounded by the budget, not by the log's other entries' size.
+/// (No incremental count: the expansion, where this must hold on every path, gets no
+/// subsystem state; see the crate README.)
+pub(crate) fn logged(log: &[LogEntry]) -> BTreeMap<String, u64> {
+    let mut out: BTreeMap<String, u64> = BTreeMap::new();
+    for (o, n) in log
+        .iter()
+        .flat_map(|e| e.changes.iter())
+        .filter_map(program_bytes)
+    {
+        *out.entry(o.to_owned()).or_default() += n;
     }
-
-    /// Bytes per owner of `log`, counted once (no slot to keep the count in).
-    pub(crate) fn sync_owned(mut self, log: &[LogEntry]) -> BTreeMap<String, u64> {
-        self.sync(log, false);
-        std::mem::take(&mut self.worlds[0].per_owner)
-    }
+    out
 }
 
 /// `owner`'s use in `after` (the document with `new` applied): `prior` program bytes
@@ -202,27 +190,15 @@ mod tests {
     }
 
     #[test]
-    fn log_bytes_count_incrementally_and_restart_on_another_log() {
+    fn logged_counts_each_owners_program_bytes() {
         let one = serde_json::to_vec(&series("a", "arkin")).unwrap().len() as u64;
-        let mut log = vec![entry(1, series("a", "arkin"))];
-        let mut lb = LogBytes::default();
-        assert_eq!(lb.sync(&log, false).get("arkin"), Some(&one));
-        log.push(entry(2, series("a", "arkin")));
-        assert_eq!(lb.sync(&log, false).get("arkin"), Some(&(2 * one)));
-        assert_eq!(
-            lb.sync(&log, false).get("arkin"),
-            Some(&(2 * one)),
-            "not twice"
-        );
-        // Another log of the same length (another world, a new session): counted afresh.
-        let other = vec![
-            entry(7, series("a", "deniz")),
-            entry(8, series("b", "deniz")),
+        let log = vec![
+            entry(1, series("a", "arkin")),
+            entry(2, series("a", "arkin")),
+            entry(3, series("b", "deniz")),
         ];
-        let c = lb.sync(&other, false);
-        assert_eq!(c.get("arkin"), None);
-        assert!(c.get("deniz").is_some());
-        // The public world keeps its own count.
-        assert_eq!(lb.sync(&log, true).get("arkin"), Some(&(2 * one)));
+        let c = logged(&log);
+        assert_eq!(c.get("arkin"), Some(&(2 * one)));
+        assert_eq!(c.len(), 2);
     }
 }

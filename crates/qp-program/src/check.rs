@@ -2,10 +2,11 @@
 //! the ops of a proposal being accepted), then the command — its program ops, the ops of
 //! the proposal it accepts (the decider as owner) or an `undo` that may restore program
 //! series — expanded on a copy under the host's limits (`SessionView::param`, PR §8.4):
-//! the program's limits and every restored or written owner's live budget, the log's
-//! bytes counted incrementally ([`LogBytes`]). The dry run's document is dropped; the
-//! only slot state written is that count, derived from committed entries alone
-//! (ARCHITECTURE "Yazarken dikkat": nothing of a refused command is kept).
+//! the program's limits and every restored or written owner's live budget, with the
+//! log's program bytes. On an acceptance the owner the expansion will write (the decider's
+//! author name read as a principal, `crate::expand::owner_of`) must be the deciding
+//! connection's person, else it is refused (missing hook: the decider's principal in
+//! `qp_ops::Ctx`). Nothing is written here (ARCHITECTURE "Yazarken dikkat").
 
 use std::cell::Cell;
 
@@ -16,7 +17,8 @@ use qp_schema::protocol::{Op, ProtocolError, Role};
 use qp_schema::Author;
 use qp_subsystem::{SessionCtx, SessionView};
 
-use crate::budget::{over_budget, LogBytes};
+use crate::budget::{logged, over_budget};
+use crate::expand::author_name;
 use crate::expand::Rules;
 use crate::guard::guards;
 use crate::ops::expand_with;
@@ -117,6 +119,33 @@ fn lang_of(view: &dyn SessionView, conn: &str) -> Lang {
     }
 }
 
+/// On an acceptance: the person the expansion will charge (the decider's author name
+/// read as a principal) is the deciding connection's person.
+///
+/// # Errors
+/// `unsupported` when they differ (the expansion cannot know the decider's principal).
+#[allow(clippy::result_large_err)]
+fn decider_identity(view: &dyn SessionView, conn: &str, w: &Writer) -> Result<(), ProtocolError> {
+    let (Some(a), Some(c)) = (&w.approved_by, view.conn(conn)) else {
+        return Ok(());
+    };
+    let person = |p: &str| qp_ops::watch::person_of(view.plane(), p).to_owned();
+    let (exact, read) = (person(c.principal), person(author_name(a)));
+    if exact == read {
+        return Ok(());
+    }
+    Err(qp_plane::error::E::new(
+        qp_schema::protocol::ErrorCode::Unsupported,
+        format!(
+            "this proposal writes programs owned by its decider, and the decider's principal `{exact}` cannot be named from its author `{read}` on the command path"
+        ),
+    )
+    .at("/ops/0")
+    .reason("owner_unresolved")
+    .hint("Missing hook: the decider's principal id in the expansion context. Until then, a person whose principal id is their author name decides program proposals.")
+    .build())
+}
+
 /// The `Check` phase of connection `conn`'s command `ops`.
 ///
 /// # Errors
@@ -134,6 +163,7 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
     let Some((ops, w)) = program_ops(view, conn, ops) else {
         return Ok(());
     };
+    decider_identity(view, conn, &w)?;
     let rules = Rules {
         limits: Limits::from_params(|k| view.param(k)),
         lang: lang_of(view, conn),
@@ -175,16 +205,8 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
         Err(_) => return Ok(()),
     };
     // The whole command against every owner it writes or restores, with the log's bytes.
-    let public = view.in_public();
-    let fresh;
-    let prior = match ctx.slots.get_mut::<LogBytes>() {
-        Some(lb) => lb.sync(view.log(), public),
-        None => {
-            fresh = LogBytes::default().sync_owned(view.log());
-            &fresh
-        }
-    };
-    let errs = over_budget(&ex.doc, prior, &ex.changes, &rules.limits, rules.lang);
+    let prior = logged(view.log());
+    let errs = over_budget(&ex.doc, &prior, &ex.changes, &rules.limits, rules.lang);
     if errs.is_empty() {
         Ok(())
     } else {

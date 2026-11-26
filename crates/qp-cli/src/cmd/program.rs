@@ -275,6 +275,7 @@ fn check_cmd(a: &ProgramArgs) -> Result<Outcome, String> {
             let rep = report(&p, None, lang, l);
             let mut ans = rep.to_answer();
             ans.ir = p.lowered;
+            ans.warnings.extend(live_budget_warning(&rep));
             QueryResult::ProgramCheck(Box::new(ans))
         }
     };
@@ -288,6 +289,27 @@ fn check_cmd(a: &ProgramArgs) -> Result<Outcome, String> {
         print!("{}", check_text(c));
     }
     Ok(if ok { Outcome::Ok } else { Outcome::Invalid })
+}
+
+/// The warning `check_program` gives in a session (PR §11.3) when the program's live cost
+/// alone is over the per-owner live limit (`program.live.doc.max_cost_per_bar`, the
+/// registry's default here): it checks, but `add_program` would refuse it (`E_BUDGET`).
+/// Same bytes as the session's (VERIFY 16).
+fn live_budget_warning(rep: &CheckReport) -> Option<ProgramError> {
+    let live = rep.cost.as_ref()?.live_per_bar;
+    let limit = rep.limits.get(Limit::LiveDocMaxCostPerBar);
+    (live > limit).then(|| ProgramError {
+        code: None,
+        reason: "W_LIVE_BUDGET".to_owned(),
+        message: format!(
+            "live cost {live} per bar is over the per-owner live limit {limit}: add_program refuses it"
+        ),
+        at: None,
+        span: None,
+        expected: vec![limit.to_string()],
+        did_you_mean: Vec::new(),
+        hint: Some("Lower windows or outputs; try_program still runs it.".to_owned()),
+    })
 }
 
 /// A check answer as plain text: the verdict, then one line per error and warning.

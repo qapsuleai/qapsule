@@ -1,0 +1,542 @@
+[
+ {
+  "class": "4-günlük",
+  "id": "B01",
+  "input": "tek komutta 9 add_program (sınır 8)",
+  "expected": "limit/E_TOO_LARGE, hiçbiri uygulanmaz",
+  "observed": "error limit/E_TOO_LARGE at /ops/8",
+  "verdict": "OK",
+  "ms": 1.4,
+  "rss_mb": 27.0
+ },
+ {
+  "class": "4-günlük",
+  "id": "B02",
+  "input": "tek komutta 64 set_program_params",
+  "expected": "limit/E_TOO_LARGE (/ops/8)",
+  "observed": "error limit/E_TOO_LARGE at /ops/8",
+  "verdict": "OK",
+  "ms": 1.8,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B03",
+  "input": "arkin 40 kez add_program (sınır 32 örnek)",
+  "expected": "32 kabul, 33. limit/E_BUDGET",
+  "observed": "32 kabul, sonra error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": 610,
+  "rss_mb": 30.4
+ },
+ {
+  "class": "4-günlük",
+  "id": "B04",
+  "input": "sınırdayken: remove_program, yeni add_program (32), sonra remove'un undo'su (33. örnek)",
+  "expected": "undo limit/E_BUDGET",
+  "observed": "remove ack applied  created 0; add ack applied  created 1; undo error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": 2.6,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B05",
+  "input": "deniz (ikinci kişi) 32 örnek; doküman toplamı",
+  "expected": "kişi başı ayrı bütçe (32+32); doküman geneli tavan şartnamede yok",
+  "observed": "deniz 32 kabul; dokümanda 64 örnek",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B06",
+  "input": "deniz 4 × stdev(close,665) örneği (live_per_bar 666; kişi sınırı 2000)",
+  "expected": "3 kabul (1998), 4. limit/E_BUDGET",
+  "observed": "ack applied  created 1; ack applied  created 1; ack applied  created 1; error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B07",
+  "input": "tek örnek: per_bar 604 (≤666) ama 4 çıktı × koni 601 = live_per_bar 2404",
+  "expected": "limit/E_BUDGET (canlı maliyet kişi sınırını tek başına aşar)",
+  "observed": "error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": 1.8,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B08",
+  "input": "deniz bütçe doluyken h0'a boş set_program_params",
+  "expected": "kabul (maliyet değişmez) ya da kodlu ret; çökme yok",
+  "observed": "ack applied  created 0",
+  "verdict": "OK",
+  "ms": 3.5,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B09",
+  "input": "set_program_params döngüsü, ara gösterim 7948 B × 4 çıktı (günlük sınırı 4 MiB)",
+  "expected": "≈ 120 değişimden sonra limit/E_BUDGET",
+  "observed": "123 değişim kabul, sonra error limit/E_BUDGET at /ops/0; komut başına ort. 18.8 ms, en çok 105.1 ms",
+  "verdict": "OK",
+  "ms": 3901,
+  "rss_mb": 49.1
+ },
+ {
+  "class": "4-günlük",
+  "id": "B10",
+  "input": "bütçe dolunca undo (eski değerleri geri yazar)",
+  "expected": "limit/E_BUDGET (undo'nun baytı da sayılır)",
+  "observed": "error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": 3.4,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B11a",
+  "input": "bütçe doluyken ajan yeni set_program_params önerir",
+  "expected": "öneri oluşurken limit/E_BUDGET (PS §2.3)",
+  "observed": "error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B11",
+  "input": "dolmadan önce verilmiş ajan önerisi (set_program_params); bütçe dolunca insan tek başına kabul eder",
+  "expected": "kabul limit/E_BUDGET, öneri bekler",
+  "observed": "öneriler ['prop-140', 'prop-141', 'prop-142']; kabul error limit/E_BUDGET at /ops/0",
+  "verdict": "OK",
+  "ms": 8.0,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B12",
+  "input": "aynı, ama iki accept_proposal tek komutta (Check fazı yalnız tek başına kabulü denetler)",
+  "expected": "limit/E_BUDGET ya da kabul hiç olmaz",
+  "observed": "error invalid/None at /ops/0 — `accept_proposal` must be the only op of its command; (B12 sonrası)",
+  "verdict": "OK",
+  "ms": 0.2,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B13",
+  "input": "aynı, accept_proposal + zararsız bir işlem (add_comment) tek komutta",
+  "expected": "limit/E_BUDGET ya da kabul hiç olmaz",
+  "observed": "error schema/None at /ops/1 — missing field `cites`; bekleyen öneriler ['prop-140', 'prop-141', 'prop-142']; arkin'in günlükteki program baytı ≈ 4179027 (sınır 4194304)",
+  "verdict": "OK",
+  "ms": 1.2,
+  "rss_mb": null
+ },
+ {
+  "class": "4-günlük",
+  "id": "B14",
+  "input": "1,1 MB'lık komut satırı",
+  "expected": "limit (ileti boyutu)",
+  "observed": "error limit/None at None",
+  "verdict": "OK",
+  "ms": 0.5,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P01A",
+  "input": "ajan (proposer) add_program mode:direct",
+  "expected": "forbidden/proposal_only",
+  "observed": "error forbidden/None at /ops/0",
+  "verdict": "OK",
+  "ms": 0.4,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P02A",
+  "input": "ajan add_program → öneri; ajan kendi önerisini kabul; editör (deniz, decide yok) kabul; sahip kabul",
+  "expected": "öneri; ajan forbidden; deniz forbidden; arkin kabul, owner = arkin",
+  "observed": "ack proposed prop-267 created 2; ajan error forbidden/human_only at /ops/0; deniz error forbidden/None at /ops/0; arkin ack applied  created 2; owner arkin",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P03A",
+  "input": "ajan (proposer) remove_program; oturum A",
+  "expected": "forbidden/agent_cannot_write (öneri bile değil)",
+  "observed": "ack proposed prop-269 created 0",
+  "verdict": "KOŞULLU",
+  "ms": 0.5,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P04A",
+  "input": "yazma yetkili ajan (scout, editor) add_program; oturum A",
+  "expected": "öneri (PS §2.2: ajan yalnız önerir)",
+  "observed": "ack applied  created 1  [ajan kuralı bağlantı işaretine bağlı: `qp serve` işaretlemez, init'te agent_policy yok]",
+  "verdict": "KOŞULLU",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P05A",
+  "input": "yazma yetkili ajan remove_program; oturum A",
+  "expected": "forbidden/agent_cannot_write",
+  "observed": "ack applied  created 0",
+  "verdict": "KOŞULLU",
+  "ms": 0.6,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P06A",
+  "input": "insan put_series: program serisini sahibi `nobody` yapılmış kopyayla yazar (bütçe atlatma)",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P07A",
+  "input": "insan put_series: yeni kimlikle, program alanı taşıyan seri (denetimsiz ara gösterim)",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P08A",
+  "input": "ajan put_series program alanıyla",
+  "expected": "E_PROGRAM_SERIES ya da forbidden",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P09A",
+  "input": "set_params program serisine",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P10A",
+  "input": "remove tek çıktı",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/id",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P11A",
+  "input": "append_bars / update_last_bar program serisine",
+  "expected": "ret (bar serisi değil)",
+  "observed": "error invalid/None at /ops/0/series; error invalid/None at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P12A",
+  "input": "olay serisi compare işleneni (add_intent, add_finding)",
+  "expected": "unsupported/E_EVENT_OPERAND",
+  "observed": "error unsupported/E_EVENT_OPERAND at /ops/0/trigger/left; error unsupported/E_EVENT_OPERAND at /ops/0/invalidation/right",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P13A",
+  "input": "add_program sinyal çıktılı",
+  "expected": "unsupported/E_TRY_ONLY",
+  "observed": "error unsupported/E_TRY_ONLY at /ops/0/program/outputs/0/kind",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P14A",
+  "input": "add_program girdisi program serisi",
+  "expected": "invalid/E_NOT_BAR_SERIES",
+  "observed": "error invalid/E_NOT_BAR_SERIES at /ops/0/inputs/0",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P15A",
+  "input": "add_program `owner` alanı (sahip sahteciliği) / metin `source`",
+  "expected": "schema (bilinmeyen alan)",
+  "observed": "error schema/None at /ops/0/owner; error schema/None at /ops/0/source",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P16A",
+  "input": "yetkisiz okuyucu (can): try_program bx; try_program instance (bx'e bağlı); explain_program at; check_program inputs bx",
+  "expected": "try/explain no_entitlement; check bar verisi sızdırmaz",
+  "observed": "add ack applied  created 1; try no_entitlement/None; try-inst no_entitlement/None; explain-at no_entitlement/None; check bars=None",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P17A",
+  "input": "try_program uç aralık (i64 min .. u64 max); program+source birlikte",
+  "expected": "kodlu ret, çökme yok; ikisi birden invalid",
+  "observed": "error schema/None at /query/range/to_t; error invalid/None at /query",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P18A",
+  "input": "try_program / check_program iki girdiyle (px, bx); yetkisiz can için de",
+  "expected": "E_NOT_BAR_SERIES (PR §11.2 \"yok, iki tane\"; add_program öyle yapıyor)",
+  "observed": "try(arkin) {\"type\": \"result\", \"id\": \"q315\", \"seq\": 273, \"now\": 17148708; try(can) {\"type\": \"result\", \"id\": \"q317\", \"seq\": 273, \"now\": 17148708; check ok=True — fazla girdi sessizce yok sayılıyor (ilki kullanılıyor; sıra bx,px ise can no_entitlement alıyor: yetki atlatma yok)",
+  "verdict": "FAIL",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L20",
+  "input": "geriye dönük tetik: niyet `lv.e ge 1`; set_program_params her geçmiş barı olay yapar (dene: olay sayısı); sonra since_t'den önce ve sonra kapanan barlar",
+  "expected": "değişimde ve since_t öncesi kapanan barda bildirim yok; since_t sonrası kapanan barda var",
+  "observed": "dene olayları 2999; değişimde 0; 1 bar sonra 0; 3 bar sonra 0 — olumlu denetim de tetiklemedi: bu dalda (rl1/program) qp-plane program serisi hesabı (RL1/PA, main'de 356bb3dc) yok; `study`/`at` sorguları program serisini görmüyor. Geriye dönük tetik yokluğu bu yüzden kanıt değil; birleştirme sonrası yeniden koşulmalı",
+  "verdict": "SINANAMADI",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "6-süreç",
+  "id": "X01",
+  "input": "oturuma bozuk JSON, 120 derin ara gösterim, 100 000 derin JSON satırı, 50 000 parantez ve 15 000 terimli metin, 5000 düğümlü explain",
+  "expected": "her biri kodlu hata; süreç ayakta; sonraki sorgu cevaplanır",
+  "observed": "['parse/None', 'schema/E_TYPE', 'parse/None', 'limit/None', 'limit/None', 'limit/E_TOO_LARGE']; ayakta True; sonraki {\"type\": \"result\", \"id\": \"q325\", \"seq\": ",
+  "verdict": "OK",
+  "ms": 56,
+  "rss_mb": 83.8
+ },
+ {
+  "class": "5-politika",
+  "id": "P01B",
+  "input": "ajan (proposer) add_program mode:direct",
+  "expected": "forbidden/proposal_only",
+  "observed": "error forbidden/proposal_only at /ops/0",
+  "verdict": "OK",
+  "ms": 0.2,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P02B",
+  "input": "ajan add_program → öneri; ajan kendi önerisini kabul; editör (deniz, decide yok) kabul; sahip kabul",
+  "expected": "öneri; ajan forbidden; deniz forbidden; arkin kabul, owner = arkin",
+  "observed": "ack proposed prop-2 created 2; ajan error forbidden/human_only at /ops/0; deniz error forbidden/None at /ops/0; arkin ack applied  created 2; owner arkin",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P03B",
+  "input": "ajan (proposer) remove_program; oturum B",
+  "expected": "forbidden/agent_cannot_write (öneri bile değil)",
+  "observed": "error forbidden/agent_cannot_write at /ops/0",
+  "verdict": "OK",
+  "ms": 0.2,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P04B",
+  "input": "yazma yetkili ajan (scout, editor) add_program; oturum B",
+  "expected": "öneri (PS §2.2: ajan yalnız önerir)",
+  "observed": "ack proposed prop-4 created 1",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P05B",
+  "input": "yazma yetkili ajan remove_program; oturum B",
+  "expected": "forbidden/agent_cannot_write",
+  "observed": "error forbidden/agent_cannot_write at /ops/0",
+  "verdict": "OK",
+  "ms": 0.2,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P06B",
+  "input": "insan put_series: program serisini sahibi `nobody` yapılmış kopyayla yazar (bütçe atlatma)",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P07B",
+  "input": "insan put_series: yeni kimlikle, program alanı taşıyan seri (denetimsiz ara gösterim)",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P08B",
+  "input": "ajan put_series program alanıyla",
+  "expected": "E_PROGRAM_SERIES ya da forbidden",
+  "observed": "error forbidden/agent_cannot_write at /ops/0",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P09B",
+  "input": "set_params program serisine",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P10B",
+  "input": "remove tek çıktı",
+  "expected": "invalid/E_PROGRAM_SERIES",
+  "observed": "error invalid/E_PROGRAM_SERIES at /ops/0/id",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P11B",
+  "input": "append_bars / update_last_bar program serisine",
+  "expected": "ret (bar serisi değil)",
+  "observed": "error invalid/None at /ops/0/series; error invalid/None at /ops/0/series",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P12B",
+  "input": "olay serisi compare işleneni (add_intent, add_finding)",
+  "expected": "unsupported/E_EVENT_OPERAND",
+  "observed": "error unsupported/E_EVENT_OPERAND at /ops/0/trigger/left; error unsupported/E_EVENT_OPERAND at /ops/0/invalidation/right",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P13B",
+  "input": "add_program sinyal çıktılı",
+  "expected": "unsupported/E_TRY_ONLY",
+  "observed": "error unsupported/E_TRY_ONLY at /ops/0/program/outputs/0/kind",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P14B",
+  "input": "add_program girdisi program serisi",
+  "expected": "invalid/E_NOT_BAR_SERIES",
+  "observed": "error invalid/E_NOT_BAR_SERIES at /ops/0/inputs/0",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P15B",
+  "input": "add_program `owner` alanı (sahip sahteciliği) / metin `source`",
+  "expected": "schema (bilinmeyen alan)",
+  "observed": "error schema/None at /ops/0/owner; error schema/None at /ops/0/source",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P16B",
+  "input": "yetkisiz okuyucu (can): try_program bx; try_program instance (bx'e bağlı); explain_program at; check_program inputs bx",
+  "expected": "try/explain no_entitlement; check bar verisi sızdırmaz",
+  "observed": "add ack applied  created 1; try no_entitlement/None; try-inst no_entitlement/None; explain-at no_entitlement/None; check bars=None",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P17B",
+  "input": "try_program uç aralık (i64 min .. u64 max); program+source birlikte",
+  "expected": "kodlu ret, çökme yok; ikisi birden invalid",
+  "observed": "error schema/None at /query/range/to_t; error invalid/None at /query",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "P18B",
+  "input": "try_program / check_program iki girdiyle (px, bx); yetkisiz can için de",
+  "expected": "E_NOT_BAR_SERIES (PR §11.2 \"yok, iki tane\"; add_program öyle yapıyor)",
+  "observed": "try(arkin) {\"type\": \"result\", \"id\": \"q31\", \"seq\": 6, \"now\": 17148708000; try(can) {\"type\": \"result\", \"id\": \"q33\", \"seq\": 6, \"now\": 17148708000; check ok=True — fazla girdi sessizce yok sayılıyor (ilki kullanılıyor; sıra bx,px ise can no_entitlement alıyor: yetki atlatma yok)",
+  "verdict": "FAIL",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "6-süreç",
+  "id": "X02",
+  "input": "iki oturumun sonu",
+  "expected": "süreç temiz çıkar (0)",
+  "observed": "A çıkış 0 (en çok 83.8 MB), B çıkış 0 (en çok 31.5 MB)",
+  "verdict": "OK",
+  "ms": 7450,
+  "rss_mb": 83.8
+ }
+]

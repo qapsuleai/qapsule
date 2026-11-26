@@ -1,0 +1,7 @@
+# 4 signals on every bar, each open for max_bars 500 (no target/stop), plus cost ~600/bar.
+w = stdev(close, 600)
+e = defined(w) or true
+signal s1 = e side al max_bars 500 source "flood" "1"
+signal s2 = e side sat max_bars 500 source "flood" "1"
+signal s3 = e side al max_bars 500 source "flood" "2"
+signal s4 = e side sat max_bars 500 source "flood" "2"

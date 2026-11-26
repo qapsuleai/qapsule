@@ -1,0 +1,6 @@
+# anchors: one inside the data, one far beyond its end; and a line wholly in the future
+l = line(1705867200000, 100, 1722067200000, 120)
+f = line(1800000000000, 100, 1900000000000, 200)
+series sl = l
+series sf = f
+event above = close > l and defined(l)

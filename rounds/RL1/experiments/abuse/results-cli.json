@@ -1,0 +1,532 @@
+[
+ {
+  "class": "1-statik",
+  "id": "S01",
+  "input": "200 düğüm (sınır), abs zinciri",
+  "expected": "ok",
+  "observed": "exit 0, reasons [], cost 200",
+  "verdict": "OK",
+  "ms": 10,
+  "rss_mb": 12.7
+ },
+ {
+  "class": "1-statik",
+  "id": "S02",
+  "input": "201 düğüm",
+  "expected": "E_TOO_MANY_NODES",
+  "observed": "exit 1, reasons ['E_TOO_MANY_NODES']",
+  "verdict": "OK",
+  "ms": 8,
+  "rss_mb": 11.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S03",
+  "input": "stdev(close,665): per_bar tam 666 = sınır",
+  "expected": "ok",
+  "observed": "exit 0, reasons [], cost 666",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.8
+ },
+ {
+  "class": "1-statik",
+  "id": "S04",
+  "input": "stdev(close,666): per_bar 667 = sınır+1",
+  "expected": "E_COST_LIMIT",
+  "observed": "exit 1, reasons ['E_COST_LIMIT'], cost 667",
+  "verdict": "OK",
+  "ms": 6,
+  "rss_mb": 12.9
+ },
+ {
+  "class": "1-statik",
+  "id": "S05",
+  "input": "percentrank(close,666)",
+  "expected": "E_COST_LIMIT",
+  "observed": "exit 1, reasons ['E_COST_LIMIT'], cost 667",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 13.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S06",
+  "input": "stdev(close,2000) (azami pencere)",
+  "expected": "E_COST_LIMIT",
+  "observed": "exit 1, reasons ['E_COST_LIMIT'], cost 2001",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.9
+ },
+ {
+  "class": "1-statik",
+  "id": "S07",
+  "input": "sma(close,2001) (pencere+1)",
+  "expected": "E_WINDOW_LIMIT",
+  "observed": "exit 1, reasons ['E_WINDOW_LIMIT']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.8
+ },
+ {
+  "class": "1-statik",
+  "id": "S08",
+  "input": "üst periyot indirimi yok: 2×stdev(close@1d,333)",
+  "expected": "E_COST_LIMIT",
+  "observed": "exit 1, reasons ['E_COST_LIMIT'], cost 668",
+  "verdict": "OK",
+  "ms": 6,
+  "rss_mb": 13.2
+ },
+ {
+  "class": "1-statik",
+  "id": "S09",
+  "input": "5 çıktı (sınır 4)",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 6,
+  "rss_mb": 12.5
+ },
+ {
+  "class": "1-statik",
+  "id": "S10",
+  "input": "kanonik ara gösterim > 8192 bayt (150 düğüm, 60 karakterlik kimlik)",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 10.8
+ },
+ {
+  "class": "1-statik",
+  "id": "S11",
+  "input": "50 MB ara gösterim dosyası",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE'], rss 10.2 MB",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 10.2
+ },
+ {
+  "class": "1-statik",
+  "id": "S12",
+  "input": "200 000 derinlikte JSON `[`",
+  "expected": "E_PARSE",
+  "observed": "exit 1, reasons ['E_PARSE']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 10.5
+ },
+ {
+  "class": "1-statik",
+  "id": "S13",
+  "input": "60 000 iç içe parantez (metin)",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 10.8
+ },
+ {
+  "class": "1-statik",
+  "id": "S14",
+  "input": "7000 terimli `close + close + …` (sol derin ağaç)",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 13,
+  "rss_mb": 12.9
+ },
+ {
+  "class": "1-statik",
+  "id": "S15",
+  "input": "60 000 tekli eksi `----…close`",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 14,
+  "rss_mb": 18.3
+ },
+ {
+  "class": "1-statik",
+  "id": "S16",
+  "input": "15 000 `not` zinciri",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 15,
+  "rss_mb": 13.2
+ },
+ {
+  "class": "1-statik",
+  "id": "S17",
+  "input": "20 000 `[1]` gecikme zinciri",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 19,
+  "rss_mb": 19.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S18",
+  "input": "5000 karakterlik ad (metin)",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE', 'E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 8,
+  "rss_mb": 11.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S19",
+  "input": "65 karakterlik düğüm kimliği (ara gösterim; desen ≤ 64)",
+  "expected": "E_BAD_PARAM",
+  "observed": "exit 1, reasons ['E_BAD_PARAM']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.1
+ },
+ {
+  "class": "1-statik",
+  "id": "S20",
+  "input": "Unicode/sıfır genişlik/sağdan-sola ad: `çizgi`, `a\\u200bb`, `\\u202eevil`",
+  "expected": "E_PARSE",
+  "observed": "exit 1, reasons ['E_PARSE', 'E_PARSE', 'E_PARSE']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 11.1
+ },
+ {
+  "class": "1-statik",
+  "id": "S21",
+  "input": "çıktı adı emoji `📈`",
+  "expected": "",
+  "observed": "exit 1, reasons ['E_BAD_PARAM']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.1
+ },
+ {
+  "class": "1-statik",
+  "id": "S22",
+  "input": "17 parametre (sınır 16)",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE'], cost 1",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.3
+ },
+ {
+  "class": "1-statik",
+  "id": "S23",
+  "input": "`param p int = 10 in 1..1000000000000000000`, sma(close,p)",
+  "expected": "E_PARAM_RANGE",
+  "observed": "exit 1, reasons ['E_PARAM_RANGE']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 13.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S24",
+  "input": "parametreyle gizli maliyet: `param p int = 10 in 1..2000`, stdev(close,p)",
+  "expected": "ok",
+  "observed": "exit 0, reasons [], cost 11 (statik maliyet bağlanan değerle; S2x ve oturum B-sınıfı yeniden denetler)",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 13.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S25",
+  "input": "S24 + bağlanan değer p=2000 (ara gösterim + --params yok → CLI varsayılanı)",
+  "expected": "E_COST_LIMIT",
+  "observed": "exit 1, reasons ['E_COST_LIMIT'], cost 2001",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 13.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S26",
+  "input": "sonraki düğüme başvuru (döngü denemesi)",
+  "expected": "E_UNKNOWN_REF",
+  "observed": "exit 1, reasons ['E_UNKNOWN_REF']",
+  "verdict": "OK",
+  "ms": 6,
+  "rss_mb": 12.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S27",
+  "input": "kendine başvuru",
+  "expected": "E_UNKNOWN_REF",
+  "observed": "exit 1, reasons ['E_UNKNOWN_REF']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.0
+ },
+ {
+  "class": "1-statik",
+  "id": "S28",
+  "input": "199 bilinmeyen düğüm (hata seli)",
+  "expected": "E_UNKNOWN_OP",
+  "observed": "exit 1, reasons ['E_UNKNOWN_OP', 'E_UNKNOWN_OP', 'E_UNKNOWN_OP', 'E_UNKNOWN_OP'], truncated, 50 hata",
+  "verdict": "OK",
+  "ms": 23,
+  "rss_mb": 13.2
+ },
+ {
+  "class": "1-statik",
+  "id": "S29",
+  "input": "sayı taşması `1e400` sabit",
+  "expected": "",
+  "observed": "exit 1, reasons ['E_PARSE']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 10.2
+ },
+ {
+  "class": "1-statik",
+  "id": "S30",
+  "input": "metin 70 000 karakter (sınır 65 536) yorum satırları",
+  "expected": "E_TOO_LARGE",
+  "observed": "exit 1, reasons ['E_TOO_LARGE']",
+  "verdict": "OK",
+  "ms": 8,
+  "rss_mb": 10.8
+ },
+ {
+  "class": "1-statik",
+  "id": "S32",
+  "input": "185 düğümlü Fibonacci DAG (her düğüm önceki ikisini okur; saf koni yürüyüşü 2^n), 4 çıktı, 20 000 bar",
+  "expected": "doğrusal maliyet; hızlı biter",
+  "observed": "exit 0, cost 187/730, 530 ms",
+  "verdict": "OK",
+  "ms": 530,
+  "rss_mb": 32.6
+ },
+ {
+  "class": "1-statik",
+  "id": "S31-explain",
+  "input": "`qp program explain` sınır+1 programı (S04)",
+  "expected": "çalışmadan ret (çıkış 1)",
+  "observed": "exit 1, reasons ['E_COST_LIMIT']",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 12.9
+ },
+ {
+  "class": "1-statik",
+  "id": "S31-run",
+  "input": "`qp program run` sınır+1 programı (S04)",
+  "expected": "çalışmadan ret (çıkış 1)",
+  "observed": "exit 1, reasons ['E_COST_LIMIT']",
+  "verdict": "OK",
+  "ms": 8,
+  "rss_mb": 13.5
+ },
+ {
+  "class": "2-çalışma",
+  "id": "R01",
+  "input": "4 sinyal çıktısı her barda, max_bars 500, + stdev 600 maliyeti, 25 000 bar",
+  "expected": "çalışma bütçesiyle durur: stopped{reason: budget, bar, t, work, limit}",
+  "observed": "exit 0, stopped {'bar': 18914, 'limit': 50000000, 'reason': 'budget', 't': 1790157600000, 'work': 50002050}, work {'limit': 50000000, 'used': 49999420}, from_t 1722067200000",
+  "verdict": "OK",
+  "ms": 1121,
+  "rss_mb": 48.4
+ },
+ {
+  "class": "2-çalışma",
+  "id": "R02",
+  "input": "25 000 barlık dosya, okuma penceresi",
+  "expected": "son 20 000 bar: from_t = 1722067200000",
+  "observed": "from_t 1722067200000",
+  "verdict": "OK",
+  "ms": 1121,
+  "rss_mb": 48.4
+ },
+ {
+  "class": "2-çalışma",
+  "id": "R03",
+  "input": "R01 `--full`: durduktan sonra kayıt doğuyor mu",
+  "expected": "durma barından sonra kayıt yok",
+  "observed": "stopped.t 1790157600000, kayıt 75656, sonra doğan 0",
+  "verdict": "OK",
+  "ms": 5829,
+  "rss_mb": 958.3
+ },
+ {
+  "class": "2-çalışma",
+  "id": "R04",
+  "input": "4 boyutlu durum tanımı, 8'er kenar (≤ 9^4 anahtar)",
+  "expected": "biter ya da durur; çökme yok",
+  "observed": "exit 0, state [{'distinct': 575, 'name': 's', 'top': [{'count': 105, 'key': {'a': 0, 'b': 6, 'c': 6, 'd': 6}}, {'count': 102, 'key': {, stopped None",
+  "verdict": "OK",
+  "ms": 151,
+  "rss_mb": 32.1
+ },
+ {
+  "class": "2-çalışma",
+  "id": "R05",
+  "input": "her barda olay (const true), 20 000 bar",
+  "expected": "W_CONSECUTIVE_EVENTS; events 20000, runs 1",
+  "observed": "events 20000, runs 1, work {'limit': 50000000, 'used': 340020}",
+  "verdict": "OK",
+  "ms": 94,
+  "rss_mb": 31.1
+ },
+ {
+  "class": "6-süreç",
+  "id": "R06",
+  "input": "veri dosyası: f64::MAX kapanış + yinelenen t",
+  "expected": "kodlu ret ya da sonlu cevap; çökme yok",
+  "observed": "exit 2, qp: bar t=1704081600000 is not after the last bar t=1704081600000",
+  "verdict": "OK",
+  "ms": 9,
+  "rss_mb": 12.7
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L01",
+  "input": "lag -1 (ara gösterim)",
+  "expected": "E_LOOKAHEAD",
+  "observed": "exit 1, reasons ['E_LOOKAHEAD']",
+  "verdict": "OK",
+  "ms": 9,
+  "rss_mb": 12.1
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L02",
+  "input": "`partial: true` üst periyot girdisi",
+  "expected": "E_LOOKAHEAD",
+  "observed": "exit 1, reasons ['E_LOOKAHEAD']",
+  "verdict": "OK",
+  "ms": 9,
+  "rss_mb": 11.9
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L03",
+  "input": "metinde `close[-1]`",
+  "expected": "E_LOOKAHEAD",
+  "observed": "exit 1, reasons ['E_LOOKAHEAD']",
+  "verdict": "OK",
+  "ms": 8,
+  "rss_mb": 12.8
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L04",
+  "input": "`close@1h` 1h tabanlı veriyle `run` (taban = üst periyot; `check` bağsız saati denetlemez, PS §3.2)",
+  "expected": "E_UNKNOWN_TF, çalışmaz",
+  "observed": "exit 1, reasons ['E_UNKNOWN_TF']",
+  "verdict": "OK",
+  "ms": 10,
+  "rss_mb": 13.3
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L05",
+  "input": "`close@30m` 1h tabanlı veriyle `run` (tabandan küçük; `check` bağsız saati denetlemez, PS §3.2)",
+  "expected": "E_UNKNOWN_TF, çalışmaz",
+  "observed": "exit 1, reasons ['E_UNKNOWN_TF']",
+  "verdict": "OK",
+  "ms": 9,
+  "rss_mb": 13.3
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L06",
+  "input": "`align(close)` (tabanın hizası)",
+  "expected": "",
+  "observed": "exit 1, reasons ['E_CLOCK_MISMATCH']",
+  "verdict": "OK",
+  "ms": 8,
+  "rss_mb": 12.7
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L07",
+  "input": "`reject E_LOOKAHEAD` metni",
+  "expected": "ok",
+  "observed": "exit 0, reasons [], reject {'code': 'E_LOOKAHEAD', 'reason': 'next close unknown'}",
+  "verdict": "OK",
+  "ms": 7,
+  "rss_mb": 11.2
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L08",
+  "input": "`qp program run` ret dosyası",
+  "expected": "çalışacak program yok (çıkış 1)",
+  "observed": "exit 1",
+  "verdict": "OK",
+  "ms": 9,
+  "rss_mb": 12.0
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L09",
+  "input": "üst periyot: align(sma(close@1d,3)), align(close@4h), olay",
+  "expected": "ilk n bar n+k koşusuyla bayt eşit (sinyal: kapanmış sonuçlar alt küme)",
+  "observed": "çıktılar ['sd', 'sh', 'x']; fark yok",
+  "verdict": "OK",
+  "ms": 14,
+  "rss_mb": 14.6
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L10",
+  "input": "ema/rsi/percentrank/stdev/bollinger/macd",
+  "expected": "ilk n bar n+k koşusuyla bayt eşit (sinyal: kapanmış sonuçlar alt küme)",
+  "observed": "çıktılar ['b', 'e', 'p', 'r']; fark yok",
+  "verdict": "OK",
+  "ms": 18,
+  "rss_mb": 14.6
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L11",
+  "input": "line: çapalar verinin ötesinde (gelecek t)",
+  "expected": "ilk n bar n+k koşusuyla bayt eşit (sinyal: kapanmış sonuçlar alt küme)",
+  "observed": "çıktılar ['above', 'sf', 'sl']; fark yok",
+  "verdict": "OK",
+  "ms": 14,
+  "rss_mb": 14.5
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L12",
+  "input": "time/bar_index hileleri + bars_since/cooldown/rearm/streak",
+  "expected": "ilk n bar n+k koşusuyla bayt eşit (sinyal: kapanmış sonuçlar alt küme)",
+  "observed": "çıktılar ['e', 'o', 's', 't']; fark yok",
+  "verdict": "OK",
+  "ms": 17,
+  "rss_mb": 14.8
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L13",
+  "input": "sinyal (max_bars 48) + durum tanımı",
+  "expected": "ilk n bar n+k koşusuyla bayt eşit (sinyal: kapanmış sonuçlar alt küme)",
+  "observed": "çıktılar ['sg', 'st']; fark yok",
+  "verdict": "OK",
+  "ms": 19,
+  "rss_mb": 15.8
+ },
+ {
+  "class": "3-gelecek",
+  "id": "L14",
+  "input": "align(close@1d): bağımsız hesapla, gün kapanmadan değer yok",
+  "expected": "her bar = kapanışı ≤ bar kapanışı olan son günün kapanışı",
+  "observed": "farklı bar 0 (ilk [])",
+  "verdict": "OK",
+  "ms": 10,
+  "rss_mb": 13.2
+ }
+]

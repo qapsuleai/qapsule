@@ -1,0 +1,3 @@
+r = rsi(close, 14)
+signal sg = cross_above(r, 50) side al target 1% stop 1% max_bars 48 source "x" "1"
+state st { m = bucket(r, [30, 50, 70]) }

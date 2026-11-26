@@ -1,0 +1,1 @@
+series d = align(close@1d)

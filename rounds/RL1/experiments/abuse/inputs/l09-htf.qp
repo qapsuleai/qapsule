@@ -1,0 +1,5 @@
+d = align(sma(close@1d, 3))
+h = align(close@4h)
+series sd = d
+series sh = h
+event x = cross_above(close, d)

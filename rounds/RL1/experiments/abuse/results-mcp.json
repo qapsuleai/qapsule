@@ -1,0 +1,82 @@
+[
+ {
+  "class": "5-politika",
+  "id": "M01",
+  "input": "MCP (thin yüzey) araçları",
+  "expected": "program araçları listede",
+  "observed": "['op_add_program', 'op_set_program_params', 'op_remove_program', 'query_check_program', 'query_try_program', 'query_explain_program', 'program_check', 'program_try', 'program_explain', 'program_add']",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M02",
+  "input": "MCP op_add_program mode:direct",
+  "expected": "forbidden/proposal_only",
+  "observed": "error forbidden/proposal_only",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M03",
+  "input": "MCP op_add_program (öneri) sonra op_remove_program",
+  "expected": "öneri; remove forbidden/agent_cannot_write",
+  "observed": "ack proposed prop-2; error forbidden/agent_cannot_write",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M04",
+  "input": "MCP program_add (metin)",
+  "expected": "öneri",
+  "observed": "ack proposed prop-3",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M05",
+  "input": "MCP command accept_proposal (ajan karar veremez)",
+  "expected": "forbidden",
+  "observed": "error forbidden/human_only",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M06",
+  "input": "MCP command put_series program alanıyla (sahip `nobody`)",
+  "expected": "forbidden ya da E_PROGRAM_SERIES",
+  "observed": "error forbidden/agent_cannot_write",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M07",
+  "input": "MCP program_check 100 000 parantez",
+  "expected": "kodlu ret, süreç ayakta",
+  "observed": "error limit/None",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ },
+ {
+  "class": "5-politika",
+  "id": "M08",
+  "input": "MCP sunucusu kapanışı",
+  "expected": "temiz çıkış (0)",
+  "observed": "çıkış 0",
+  "verdict": "OK",
+  "ms": null,
+  "rss_mb": null
+ }
+]

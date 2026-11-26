@@ -1,0 +1,1 @@
+{"version":"qp-ir/0","nodes":[{"id":"d","op":"input","field":"close","tf":"1d","partial":true},{"id":"a","op":"align","x":"d"}],"outputs":[{"name":"today","kind":"series","node":"a"}]}

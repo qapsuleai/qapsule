@@ -1,0 +1,7 @@
+a = bars_since(time > 1705000000000)
+b = cooldown(bar_index > 900, 5)
+c = rearm(close > sma(close, 10), close < sma(close, 10))
+series s = a + streak(c)
+series t = time - bar_index
+event e = b
+event o = once(bar_index >= 1000)

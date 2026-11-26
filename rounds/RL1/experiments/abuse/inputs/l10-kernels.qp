@@ -1,0 +1,4 @@
+series e = ema(close, 20)
+series r = rsi(close, 14)
+series p = percentrank(close, 50)
+series b = bollinger(close, 20, 2).upper + macd(close, 12, 26, 9).histogram + stdev(close, 30)

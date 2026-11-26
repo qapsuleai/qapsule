@@ -11,7 +11,7 @@ Her round sonunda güncellenir.
 - **Sıradaki adım:** ana akış `rounds/RL1/REPORT.md` ve `AUDIT.md`'yi okur, "Önerilen (RL1)" satırlarını (`docs/decisions/rounds/RL1.md`, Ö127–Ö137, A74–A77) karara bağlar, R7'yi tasarlar. Bilinmesi gerekenler:
   - **R7'den önce karar:** eksik kancalar (A74; `rounds/RL1/experiments/hooks/HOOKS.md`). `qp-authority` İ3 tavanında (12.744); her net çekirdek satırı karar ister.
   - **K17 program yolunda tutmuyor** (A75): program taraması 264 ms yerel / 392 ms WASM (var olan tarama 4,6 ms).
-  - **WASM:** kabuk paketi 7.167.360 / 2.078.388 B; İ8 (D6) 7.332.886 / 2.128.236; pay %2,3. `wasm-opt` açık (Ö1).
+  - **WASM:** kabuk paketi 7.167.360 / 2.078.388 B; İ8 (D6) 7.332.886 / 2.128.236; pay %2,3. Varsayılan modül yeni taban 2.602.684 / 817.223 B, ±%2 (D7). `wasm-opt` açık (Ö1).
   - **Kesilen:** iç içe gösterge adresi (A77).
   - **R7 gramer payı:** `qp-grammar` 7.710 satır; R7 işaretleri için 4.290 satır pay var.
 

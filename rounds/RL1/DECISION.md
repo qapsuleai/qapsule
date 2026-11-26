@@ -88,3 +88,13 @@ hesaplar: çalıştırıcı pakette olmazsa web kabuğu program serisini çizeme
 wasm32'de kanıtlı: program özeti `4e77c249…` üç mimaride eşit). **Yeni İ8** = ölçülen (b) + %2,5:
 **ham 7.332.886 B, gzip 2.128.236 B.** Ö1 öncesi paket (9.004.332 / 2.485.078) bundan hâlâ %20,5 /
 %16,5 büyüktü. VERIFY 6 bu satıra göre ölçülür; round sonunda ölçüm yinelenir.
+
+## D7 — Varsayılan WASM modülü için yeni taban (Arkin, 2026-11-26)
+
+**Soru (kapanış denetimi K2):** Varsayılan modül (`qp_wasm.wasm`, verify adım 8; replica özelliksiz)
+RF1'den bu yana büyüdü: ham 2.354.884 → 2.602.684 B (+%10,5), gzip 773.639 → 817.223 B (+%5,6).
+RF1 İ8 ve D4 "varsayılan modül ±%2 içinde kalır" diyordu. Neden: I1'in protokol tipleri (yeni
+işlem, sorgu ve program tiplerinin serde kodu) ve program serisi hesabı (D6 ile aynı gerekçe).
+
+**Karar: yeni taban, ±%2 kuralı sürer.** Varsayılan modülün yeni tabanı **ham 2.602.684 B, gzip
+817.223 B**; ±%2 kuralı bundan sonra bu tabana göre işler.

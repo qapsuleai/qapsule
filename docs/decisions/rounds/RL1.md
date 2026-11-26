@@ -5,7 +5,7 @@
 RL1 bu satırları **önerir**; kesinleştirmez. Round içinde Arkin'in verdiği ve yürüten oturumun
 kaydettiği kararlar `rounds/RL1/DECISION.md`'de: D1 (program çıktısı hesap serisi, üç şart),
 D2 (`unreachable` lint'i ve iki öznitelik), D3 (`restricted_calls`), D4 (İ8 sıkılaştırma),
-D5 (`describe` ekleri), D6 (çalıştırıcı kabuk paketinde, İ8 yeniden). Kanıt `rounds/RL1/REPORT.md`,
+D5 (`describe` ekleri), D6 (çalıştırıcı kabuk paketinde, İ8 yeniden), D7 (varsayılan WASM modülü için yeni taban). Kanıt `rounds/RL1/REPORT.md`,
 `AUDIT.md`, `experiments/`.
 
 | # | Önerilen karar | Kanıt |
@@ -17,7 +17,7 @@ D5 (`describe` ekleri), D6 (çalıştırıcı kabuk paketinde, İ8 yeniden). Kan
 | Ö131 | **Bütçe işi sayar** ve sınırlar kayıt defterinde (21 `program.*` anahtarı): statik maliyet önce; çalışma bütçesi (bar × ağırlık + kayıt + açık kayıt + okuma); kişi başı doküman içi sınırlar `Check`'te, kabulde ve geri almada. | PARAMETERS.md; U3 (115 deneme). |
 | Ö132 | **Ajan programı öneridir:** `add_program` / `set_program_params` ajanda yalnız öneri, `remove_program` ajana kapalı, MCP'de karar aracı yok; sahip, önerenin adına çalıştığı kişi. | PB denetimi; döküm 76. |
 | Ö133 | **Üst periyot seansa hizalı** (`qp-calendar`), takvimsiz ya da 7/24'te UTC; üst periyot yalnız kapanmış bardan. | LB denetimi (XIST yarım gün, tatil). |
-| Ö134 | **Kabuk paketinde `wasm-opt`** (`-O1` + işlev ayıklama/sıralama) ve İ8 = ölçülen + %2,5 (D4, D6: 7.332.886 / 2.128.236). | Ö1 RESULT; PA kapısı. |
+| Ö134 | **Kabuk paketinde `wasm-opt`** (`-O1` + işlev ayıklama/sıralama) ve İ8 = ölçülen + %2,5 (D4, D6: 7.332.886 / 2.128.236); varsayılan modül yeni taban 2.602.684 / 817.223, ±%2 (D7). | Ö1 RESULT; PA kapısı. |
 | Ö135 | **İzleyici yöntemleri** `qp-replica` `Follower` tipinde; `arch-check` `calls.restricted` (D3). | Ö2 denetimi. |
 | Ö136 | **Lint'ler** `unimplemented`, `unreachable` açık, mevcutlar öğe başına izinle, mandallı (D2); `config-diff`'te atıflı artış yayılma kuralını bozmaz. | Ö3 denetimi. |
 | Ö137 | **Derleme klasörü iş başına** (`target/wt/<iş>`, K56'nın güncellemesi): worktree'ler arasında paylaşılan klasör aynı crate'in eserlerini karıştırıp yanlış derleme sonucu veriyor (bu round'da iki kez ölçüldü). | `rounds/RL1/AGENT-RULES.md`; I1 raporu. |

@@ -50,7 +50,9 @@ tanımı dokümana girmez (yalnız denetle/dene/yeniden oynatma); `since_t`, `pr
 | WASM (D1 şart 1) | `qp-lang` bağlanınca kabuk paketi ham 7.154.035 / gzip 2.076.328; main zaten I1 tipleri yüzünden D4'ün üstündeydi. Arkin: çalıştırıcı pakette, İ8 yeniden (D6: 7.332.886 / 2.128.236). Pay %2,4. | — |
 | M yüzeyler | `qp program check | run | explain`; MCP ince araçları `program_check/try/explain/add` (ajandan öneri; karar aracı yok); `docs/AGENTS.md` programlar bölümü, `agents/programci.md`. Araç tanımları yalnız ekleme (thin 72 → 76). | KABUL |
 | U1 RX4 | 26 görev × 2 veri kümesi: **52/52 eşit**, 4/4 ret görevi eşit. İlk koşuda G8-02/03 farklıydı: denetleyici `align(cat)`'i reddediyordu (uygulama hatası, şartname §4.6) → düzeltildi. G2-01/02'de bit eşitliği kısmi: Qapsule `sma` kayan toplam (PR §15 satır 20). `experiments/rx4/RESULT.md`. | düzeltme KABUL |
-| U3 kötü niyet | 115 deneme (CLI, `qp serve`, MCP): 109 OK; çökme/takılma yok (200 bin derin JSON, 50 MB IR dahil); statik sınır, çalışma bütçesi (bar 18914'te kodlu durma), kişi başı sınırlar (32 örnek, 2000 maliyet, günlük baytı, komut başı 8 işlem), geleceğe bakma reddi ve önek kararlılığı tuttu. FAIL (düşük): `try/check_program` ikinci girdiyi sessizce yok sayıyor → düzeltiliyor. `experiments/abuse/REPORT.md`. | ayrı denetçi |
+| U3 kötü niyet | 115 deneme (CLI, `qp serve`, MCP): 109 OK; çökme/takılma yok (200 bin derin JSON, 50 MB IR dahil); statik sınır, çalışma bütçesi (bar 18914'te kodlu durma), kişi başı sınırlar (32 örnek, 2000 maliyet, günlük baytı, komut başı 8 işlem), geleceğe bakma reddi ve önek kararlılığı tuttu. FAIL (düşük): `try/check_program` ikinci girdiyi sessizce yok sayıyordu → düzeltildi (PB, `E_NOT_BAR_SERIES`); L20 PA sonrası yeniden koşuldu, OK. `experiments/abuse/REPORT.md`. | ayrı denetçi |
+| PB `qp-program` | Alt sistem: `add/set/remove_program` açılımı (çıktı başına program serisi, isteğe bağlı katman), politika (ajan yalnız öneri; `remove` ajana kapalı), `Check` fazında korumalar (`E_PROGRAM_SERIES`, `E_EVENT_OPERAND`, `E_NOT_BAR_SERIES`, `E_TRY_ONLY`) ve kişi başı bütçe (kabulde ve geri almada yeniden; komut başı işlem sınırı), sorgular `check/try/explain_program`; bileşime bir satır. İlk denetim **RET** (aynı komutta önce program ekleyip sonra o seriyi koşulda kullanmak korumayı atlatıyordu); otomatik güvenlik incelemesi ayrıca sahip kimliği, geri alma ve günlük baytı sayacında altı bulgu çıkardı; hepsi düzeltildi. | 2. denetim KABUL; verify 21/21 |
+| C kapanış işleri | Uygunluk dökümleri 71–77 (üç taşımada), verify adımı `program` (22. adım), CLI `W_LIVE_BUDGET` eşliği, performans (`experiments/perf/RESULT.md`), VERIFY 2 karşılaştırması (`COMPARE.md`), L20 eki. | KABUL; verify 22/22 |
 
 ## 5. Dil bir sayfada
 
@@ -118,7 +120,7 @@ cross_below`; durum `streak bars_since once rearm cooldown`; `defined`; `align`;
 | 15 | RX4 uygunluğu; her fark açıklanmış | ✅ | 52/52 eşit, 4/4 ret (`experiments/rx4/RESULT.md`) |
 | 16 | Ajan teyidi; kötü niyet | ✅ | §8, §9 |
 | 17 | K17, K52, WASM (İ8), tik maliyeti | ⚠️ | §10: K17 var olan yolda tutuyor; **program yoluyla tarama K17'yi aşıyor** (264 ms / 392 ms) — yeni bir yolun ölçümü, gerileme değil; WASM D6 içinde |
-| 18 | Bağımsız denetim, belgeler, temizlik | ✅ | `AUDIT.md`, §13 |
+| 18 | Bağımsız denetim, belgeler, temizlik | ✅ | `AUDIT.md`, §14 (Disk) |
 
 ## 7. RX4 uygunluğu
 
@@ -164,6 +166,7 @@ alma, aynı komutta koruma atlatma); hepsi birleştirmeden önce düzeltildi.
 
 | Ölçüm | Değer | Bütçe |
 |---|---|---|
+| Varsayılan modül (adım 8) | ham 2.602.684 / gzip 817.223 B (RF1: 2.354.884 / 773.639; +%10,5 / +%5,6) | ±%2 kuralı aşıldı → Arkin: yeni taban (D7) |
 | Kabuk paketi (adım 18) | ham 7.167.360 / gzip 2.078.388 B | D6 İ8 7.332.886 / 2.128.236 (pay %2,3) |
 | K17 var olan tarama | yerel 4,1–9,5 ms, WASM 10,9–20 ms | 50 / 150 ms ✅ |
 | K17 program yoluyla (§14 sma, 10.000 bar × 1.000 değer) | yerel 264 ms, wasm32 392 ms; özet tarama ile bit eşit | 50 / 150 ms ❌ |
@@ -227,6 +230,21 @@ K17'nin program yolundaki açığı: çalıştırıcı her varyasyonu ayrı koş
    (`accept_proposal` insan kökenli). Dil kartı: `rounds/RL1/experiments/agents/LANG-CARD.md`;
    ajan rolü: `agents/programci.md`; ayrıntı `docs/AGENTS.md` "Programlar".
 
+## 14. Disk
+
+- **Silinenler:** `target/` 35 GB → 0 (`scripts/clean.sh --deep`: artımlı önbellek 18 GB, eski
+  hedef klasörleri, `cargo clean` 20,9 GiB; günlük `experiments/clean.log`); iş başına derleme
+  klasörleri (`target/wt/*`, her biri 2–21 GB) iş bitince silindi, son denetiminki 19 GB; bütün
+  worktree'ler (Ö1–Ö3, I1, I2, LA, LT, LB, PA, PB, M, C, düzeltme) birleşince kaldırıldı; U2 ham
+  koşuları (49 MB) ve oturum geçici dosyaları; `agents/__pycache__`.
+- **Bilerek bırakılanlar:** dallar (`rl1/*`, kod geçmişi için); `fixtures/local/` 1,5 GB (saklama
+  sınırı içinde, canlı kayıt 2 GB / önbellek 5 GB); kanıt dosyaları `rounds/RL1/experiments/`
+  (her biri < 1 MB, klasör < 20 MB; en büyüğü `rx4/data/seen.bars.json` 217 KB, sentetik).
+- **Kalan boyutlar:** `target/` 1,8 MB; `.claude/worktrees/` 44 KB (boş); `fixtures/local/` 1,5 GB;
+  depo toplamı 2,1 GB; depo dışı oturum klasörü 16 KB. `git worktree list` yalnız ana ağaç;
+  `git ls-files Prompt.txt` boş; `git status --porcelain --ignored` özetinde beklenmeyen artık yok
+  (yalnız `.DS_Store`, `settings.local.json`).
+
 ## Kesilenler
 
 1. **İç içe gösterge adresi** (`ISCTR:5m:EMA[RSI:18]:20` → program; K63): kesme sırasının ilki;
@@ -272,3 +290,4 @@ Kesme sırasındaki öbür maddeler (kutulama ve durum tanımı, kanonik metin y
 1. HOOKS.md önerileri (R7'den önce).
 2. K17'nin program yolu için hedef: program taramaları K17 kapsamında mı?
 3. Öneri 7 (`qp serve`'de ajan kuralı varsayılan mı).
+4. Metin dilin varsayılan sınırları kayıt defterinden mi okunsun (bugün `TextLimits` varsayılanı yapısal sabit; CLI ve oturum `program.text.*` anahtarlarından okuyor).

@@ -173,13 +173,15 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
         }
         e
     };
-    // Without a program op (or an undo) nothing in the command makes a program series:
-    // the guards against the document as it is. With one, per op in the dry run below.
+    // Every op against the document as it is, up front (whatever the dry run below
+    // reaches) …
+    guards(view.document(), ops)?;
+    if let Some(inner) = accepting {
+        guards(view.document(), inner).map_err(in_proposal)?;
+    }
+    // … and, when the command can make program series, each op again against the
+    // document the ops before it left (in the dry run).
     let Some((ops, w)) = program_ops(view, conn, ops) else {
-        guards(view.document(), ops)?;
-        if let Some(inner) = accepting {
-            guards(view.document(), inner).map_err(in_proposal)?;
-        }
         return Ok(());
     };
     let rules = Rules {

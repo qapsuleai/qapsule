@@ -39,6 +39,22 @@ fn guards_see_the_series_made_earlier_in_the_same_command() {
 }
 
 #[test]
+fn every_op_is_guarded_even_when_an_earlier_op_fails_the_dry_run() {
+    let mut h = H::new();
+    h.add("p1", SMA_TEXT);
+    let ir = h.ir(SMA_TEXT);
+    let bad = json!({"kind":"threshold","series":"nope","op":"gt","value":1});
+    let r = h.cmd(
+        "a",
+        json!([{"op":"add_program","id":"q4","program":ir,"inputs":["px"]},
+               {"op":"add_intent","text":"x","trigger":bad},
+               {"op":"remove","id":"p1.avg"}]),
+    );
+    assert_eq!(reason(&r), "E_PROGRAM_SERIES", "{r}");
+    assert_eq!(r["error"]["path"], "/ops/2/id", "{r}");
+}
+
+#[test]
 fn queries_take_exactly_one_bar_series() {
     let mut h = H::new();
     for kind in ["check_program", "try_program", "explain_program"] {

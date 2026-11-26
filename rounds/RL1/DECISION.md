@@ -98,3 +98,7 @@ işlem, sorgu ve program tiplerinin serde kodu) ve program serisi hesabı (D6 il
 
 **Karar: yeni taban, ±%2 kuralı sürer.** Varsayılan modülün yeni tabanı **ham 2.602.684 B, gzip
 817.223 B**; ±%2 kuralı bundan sonra bu tabana göre işler.
+
+**D2 eki (Arkin, 2026-11-26, kapanış):** Hedef metnindeki "qp-authority'ye satır eklenmedi" koşulu
+D2'nin iki öznitelik değişikliğiyle (+2/−2, net yeni satır yok) karşılanmış sayılır; farkı sıfıra
+indirmek için çekirdeği lint dışında tutan istisna seçilmedi. Round kapalı.

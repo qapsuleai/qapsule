@@ -1,0 +1,1810 @@
+{
+ "haiku": {
+  "rows": [
+   {
+    "run": "haiku-G1-01",
+    "model": "haiku",
+    "task": "G1-01",
+    "cluster": "G1",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 402176,
+    "tool_uses": 6,
+    "duration_ms": 23456
+   },
+   {
+    "run": "haiku-G1-03",
+    "model": "haiku",
+    "task": "G1-03",
+    "cluster": "G1",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338697,
+    "tool_uses": 5,
+    "duration_ms": 19417
+   },
+   {
+    "run": "haiku-G2-01",
+    "model": "haiku",
+    "task": "G2-01",
+    "cluster": "G2",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338924,
+    "tool_uses": 5,
+    "duration_ms": 16224
+   },
+   {
+    "run": "haiku-G2-03",
+    "model": "haiku",
+    "task": "G2-03",
+    "cluster": "G2",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 1,
+    "invented": [],
+    "calls": {
+     "program_check": 3,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 473869,
+    "tool_uses": 7,
+    "duration_ms": 29980
+   },
+   {
+    "run": "haiku-G3-01",
+    "model": "haiku",
+    "task": "G3-01",
+    "cluster": "G3",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 412009,
+    "tool_uses": 6,
+    "duration_ms": 33505
+   },
+   {
+    "run": "haiku-G3-02",
+    "model": "haiku",
+    "task": "G3-02",
+    "cluster": "G3",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338583,
+    "tool_uses": 5,
+    "duration_ms": 17209
+   },
+   {
+    "run": "haiku-G3-03",
+    "model": "haiku",
+    "task": "G3-03",
+    "cluster": "G3",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 341038,
+    "tool_uses": 5,
+    "duration_ms": 18092
+   },
+   {
+    "run": "haiku-G4-01",
+    "model": "haiku",
+    "task": "G4-01",
+    "cluster": "G4",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 343458,
+    "tool_uses": 5,
+    "duration_ms": 21209
+   },
+   {
+    "run": "haiku-G4-02",
+    "model": "haiku",
+    "task": "G4-02",
+    "cluster": "G4",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 340773,
+    "tool_uses": 5,
+    "duration_ms": 19778
+   },
+   {
+    "run": "haiku-G4-04",
+    "model": "haiku",
+    "task": "G4-04",
+    "cluster": "G4",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_LOOKAHEAD",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 278862,
+    "tool_uses": 4,
+    "duration_ms": 19980
+   },
+   {
+    "run": "haiku-G5-01",
+    "model": "haiku",
+    "task": "G5-01",
+    "cluster": "G5",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_LOOKAHEAD",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 277354,
+    "tool_uses": 5,
+    "duration_ms": 17013
+   },
+   {
+    "run": "haiku-G5-02",
+    "model": "haiku",
+    "task": "G5-02",
+    "cluster": "G5",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_UNSUPPORTED",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 279187,
+    "tool_uses": 5,
+    "duration_ms": 20376
+   },
+   {
+    "run": "haiku-G5-03",
+    "model": "haiku",
+    "task": "G5-03",
+    "cluster": "G5",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_UNKNOWN_OP",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 278771,
+    "tool_uses": 4,
+    "duration_ms": 19476
+   },
+   {
+    "run": "haiku-G7-01",
+    "model": "haiku",
+    "task": "G7-01",
+    "cluster": "G7",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 276881,
+    "tool_uses": 4,
+    "duration_ms": 14503
+   },
+   {
+    "run": "haiku-G7-03",
+    "model": "haiku",
+    "task": "G7-03",
+    "cluster": "G7",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 277460,
+    "tool_uses": 4,
+    "duration_ms": 16088
+   },
+   {
+    "run": "haiku-G7-05",
+    "model": "haiku",
+    "task": "G7-05",
+    "cluster": "G7",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 279676,
+    "tool_uses": 4,
+    "duration_ms": 15728
+   },
+   {
+    "run": "haiku-G8-01",
+    "model": "haiku",
+    "task": "G8-01",
+    "cluster": "G8",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 344700,
+    "tool_uses": 5,
+    "duration_ms": 21358
+   },
+   {
+    "run": "haiku-G8-03",
+    "model": "haiku",
+    "task": "G8-03",
+    "cluster": "G8",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 290077,
+    "tool_uses": 5,
+    "duration_ms": 29705
+   },
+   {
+    "run": "haiku-G9-02",
+    "model": "haiku",
+    "task": "G9-02",
+    "cluster": "G9",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 1,
+    "invented": [],
+    "calls": {
+     "program_check": 2,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 564471,
+    "tool_uses": 7,
+    "duration_ms": 97487
+   },
+   {
+    "run": "haiku-G9-03",
+    "model": "haiku",
+    "task": "G9-03",
+    "cluster": "G9",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 355328,
+    "tool_uses": 5,
+    "duration_ms": 32348
+   }
+  ],
+  "totals": {
+   "tasks": 20,
+   "first_try": 20,
+   "final": 20,
+   "m3": {
+    "first_wrong": 0,
+    "recovered": 0
+   },
+   "after_error": {
+    "tasks_with_error_reply": 2,
+    "final_correct": 2
+   },
+   "reject_needed": {
+    "tasks": 4,
+    "final_ok": 4,
+    "first_ok": 4,
+    "program_attempts": 0
+   },
+   "false_rejects": 0,
+   "silent_wrong": 0,
+   "m5_seen_ok_heldout_wrong": 0,
+   "errors": 0,
+   "no_submission": 0,
+   "submissions": 20,
+   "surface": {
+    "text": 20,
+    "ir": 0
+   },
+   "invented": {
+    "replies": 0,
+    "tasks": 0,
+    "names": {}
+   },
+   "failed_check_sessions": 2,
+   "submitted_without_check": 0,
+   "proposals": {
+    "documentable_tasks": 11,
+    "proposed": 11,
+    "try_only_replies": 0,
+    "add_errors": 0
+   },
+   "offsurface_calls": 0,
+   "decision_attempts": 0,
+   "tokens": {
+    "sessions": 20,
+    "sum": 6832294,
+    "median": 338810.5
+   },
+   "tool_uses_mean": 5.05,
+   "by_cluster": {
+    "G1": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    },
+    "G2": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    },
+    "G3": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G4": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G5": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G7": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G8": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    },
+    "G9": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    }
+   }
+  }
+ },
+ "opus": {
+  "rows": [
+   {
+    "run": "opus-G1-01",
+    "model": "opus",
+    "task": "G1-01",
+    "cluster": "G1",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 335646,
+    "tool_uses": 5,
+    "duration_ms": 24835
+   },
+   {
+    "run": "opus-G1-03",
+    "model": "opus",
+    "task": "G1-03",
+    "cluster": "G1",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 336532,
+    "tool_uses": 5,
+    "duration_ms": 25498
+   },
+   {
+    "run": "opus-G2-01",
+    "model": "opus",
+    "task": "G2-01",
+    "cluster": "G2",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 337361,
+    "tool_uses": 5,
+    "duration_ms": 23229
+   },
+   {
+    "run": "opus-G2-03",
+    "model": "opus",
+    "task": "G2-03",
+    "cluster": "G2",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338179,
+    "tool_uses": 5,
+    "duration_ms": 24400
+   },
+   {
+    "run": "opus-G3-01",
+    "model": "opus",
+    "task": "G3-01",
+    "cluster": "G3",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 339693,
+    "tool_uses": 5,
+    "duration_ms": 24642
+   },
+   {
+    "run": "opus-G3-02",
+    "model": "opus",
+    "task": "G3-02",
+    "cluster": "G3",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 336160,
+    "tool_uses": 5,
+    "duration_ms": 32365
+   },
+   {
+    "run": "opus-G3-03",
+    "model": "opus",
+    "task": "G3-03",
+    "cluster": "G3",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338391,
+    "tool_uses": 5,
+    "duration_ms": 27096
+   },
+   {
+    "run": "opus-G4-01",
+    "model": "opus",
+    "task": "G4-01",
+    "cluster": "G4",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338006,
+    "tool_uses": 5,
+    "duration_ms": 30918
+   },
+   {
+    "run": "opus-G4-02",
+    "model": "opus",
+    "task": "G4-02",
+    "cluster": "G4",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338800,
+    "tool_uses": 5,
+    "duration_ms": 27964
+   },
+   {
+    "run": "opus-G4-04",
+    "model": "opus",
+    "task": "G4-04",
+    "cluster": "G4",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_LOOKAHEAD",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 334253,
+    "tool_uses": 5,
+    "duration_ms": 26433
+   },
+   {
+    "run": "opus-G5-01",
+    "model": "opus",
+    "task": "G5-01",
+    "cluster": "G5",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_LOOKAHEAD",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 315459,
+    "tool_uses": 5,
+    "duration_ms": 24183
+   },
+   {
+    "run": "opus-G5-02",
+    "model": "opus",
+    "task": "G5-02",
+    "cluster": "G5",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_UNSUPPORTED",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 259413,
+    "tool_uses": 4,
+    "duration_ms": 19143
+   },
+   {
+    "run": "opus-G5-03",
+    "model": "opus",
+    "task": "G5-03",
+    "cluster": "G5",
+    "reject_task": true,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "reject",
+      "code": "E_UNKNOWN_OP",
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 272755,
+    "tool_uses": 4,
+    "duration_ms": 22735
+   },
+   {
+    "run": "opus-G7-01",
+    "model": "opus",
+    "task": "G7-01",
+    "cluster": "G7",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 344076,
+    "tool_uses": 5,
+    "duration_ms": 24385
+   },
+   {
+    "run": "opus-G7-03",
+    "model": "opus",
+    "task": "G7-03",
+    "cluster": "G7",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 344178,
+    "tool_uses": 5,
+    "duration_ms": 21829
+   },
+   {
+    "run": "opus-G7-05",
+    "model": "opus",
+    "task": "G7-05",
+    "cluster": "G7",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 351864,
+    "tool_uses": 5,
+    "duration_ms": 25934
+   },
+   {
+    "run": "opus-G8-01",
+    "model": "opus",
+    "task": "G8-01",
+    "cluster": "G8",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 339857,
+    "tool_uses": 5,
+    "duration_ms": 24049
+   },
+   {
+    "run": "opus-G8-03",
+    "model": "opus",
+    "task": "G8-03",
+    "cluster": "G8",
+    "reject_task": false,
+    "documentable": false,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 0,
+     "acked": 0,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 338893,
+    "tool_uses": 5,
+    "duration_ms": 26650
+   },
+   {
+    "run": "opus-G9-02",
+    "model": "opus",
+    "task": "G9-02",
+    "cluster": "G9",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 1,
+    "invented": [],
+    "calls": {
+     "program_check": 2,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 409110,
+    "tool_uses": 6,
+    "duration_ms": 46476
+   },
+   {
+    "run": "opus-G9-03",
+    "model": "opus",
+    "task": "G9-03",
+    "cluster": "G9",
+    "reject_task": false,
+    "documentable": true,
+    "submissions": [
+     {
+      "n": 1,
+      "surface": "text",
+      "kind": "program",
+      "sets": {
+       "seen": "eşit",
+       "heldout": "eşit"
+      },
+      "status": "correct"
+     }
+    ],
+    "first": "correct",
+    "final": "correct",
+    "error_replies_before_final": 0,
+    "invented": [],
+    "calls": {
+     "program_check": 1,
+     "program_try": 1,
+     "submit": 1,
+     "program_add": 1
+    },
+    "offsurface": [],
+    "decision_attempts": 0,
+    "checked_before_submit": true,
+    "proposals": {
+     "calls": 1,
+     "acked": 1,
+     "try_only": 0,
+     "errors": 0
+    },
+    "tokens": 340948,
+    "tool_uses": 5,
+    "duration_ms": 25603
+   }
+  ],
+  "totals": {
+   "tasks": 20,
+   "first_try": 20,
+   "final": 20,
+   "m3": {
+    "first_wrong": 0,
+    "recovered": 0
+   },
+   "after_error": {
+    "tasks_with_error_reply": 1,
+    "final_correct": 1
+   },
+   "reject_needed": {
+    "tasks": 4,
+    "final_ok": 4,
+    "first_ok": 4,
+    "program_attempts": 0
+   },
+   "false_rejects": 0,
+   "silent_wrong": 0,
+   "m5_seen_ok_heldout_wrong": 0,
+   "errors": 0,
+   "no_submission": 0,
+   "submissions": 20,
+   "surface": {
+    "text": 20,
+    "ir": 0
+   },
+   "invented": {
+    "replies": 0,
+    "tasks": 0,
+    "names": {}
+   },
+   "failed_check_sessions": 1,
+   "submitted_without_check": 0,
+   "proposals": {
+    "documentable_tasks": 11,
+    "proposed": 11,
+    "try_only_replies": 0,
+    "add_errors": 0
+   },
+   "offsurface_calls": 0,
+   "decision_attempts": 0,
+   "tokens": {
+    "sessions": 20,
+    "sum": 6689574,
+    "median": 338285.0
+   },
+   "tool_uses_mean": 4.95,
+   "by_cluster": {
+    "G1": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    },
+    "G2": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    },
+    "G3": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G4": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G5": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G7": {
+     "tasks": 3,
+     "first_try": 3,
+     "final": 3
+    },
+    "G8": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    },
+    "G9": {
+     "tasks": 2,
+     "first_try": 2,
+     "final": 2
+    }
+   }
+  }
+ }
+}

@@ -100,7 +100,10 @@ fn main() {
     std::hint::black_box(sink);
     let (a, b, c) = median(run);
     let (d, e, f) = median(full);
-    println!("bars={n} variants={} reps={reps} (single thread)", grid.len());
+    println!(
+        "bars={n} variants={} reps={reps} (single thread)",
+        grid.len()
+    );
     println!("executor only      min {a:.2}  med {b:.2}  max {c:.2} ms");
     println!("check + executor   min {d:.2}  med {e:.2}  max {f:.2} ms");
     println!("digest {digest:016x}");

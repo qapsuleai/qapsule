@@ -17,7 +17,7 @@ izleyici program serilerini veri düzlemiyle hesaplar).
 
 - İşlemler (`OpHandler`): `add_program` → çıktı başına `put_series` (`<örnek>.<çıktı>`,
   `study: "program"`, `program: ProgramRef` satır içi kanonik ara gösterimle; `since_t` açılım
-  saati, `owner` kabul eden insan ya da konuşanın kişisi), `show` ile çıktı başına katman
+  saati, `owner` kabul edenin ya da konuşanın yazar adı — tek kimlik, köken kaydındaki gibi), `show` ile çıktı başına katman
   (`series` → `line`, `event` → `bar`; etiket seri kimliği, lejant onu yazar);
   `set_program_params` → aynı seriler yeni değer, `instance_id`, `since_t` ile;
   `remove_program` → çıktı başına `remove` kuralı (`in_use`). Sinyal/durum çıktısı `E_TRY_ONLY`.
@@ -26,9 +26,12 @@ izleyici program serilerini veri düzlemiyle hesaplar).
   aynı kuraldan geçer (varsayılan `to_public`).
 - `Check` fazı: program serisine `put_series`/`set_params`/`remove` → `E_PROGRAM_SERIES`;
   olay serisi `compare` işleneni (`add_intent`, `add_finding`, `update_finding`) →
-  `E_EVENT_OPERAND`; komutun (ya da kabul edilen önerinin, karar veren sahip olarak) program
-  işlemleri bir kopyada barındırıcının sınırlarıyla (`SessionView::param`) açılır: program
-  sınırları ve sahibin canlı bütçesi (`program.live.doc.*`). Yuvaya yazmaz.
+  `E_EVENT_OPERAND` (kabul edilen önerinin işlemlerine de); komutun program işlemleri, kabul
+  edilen önerinin işlemleri (karar veren sahip) ya da program serisi geri getirebilen `undo`
+  bir kopyada barındırıcının sınırlarıyla (`SessionView::param`) açılır: program sınırları ve
+  yazılan/geri gelen her sahibin canlı bütçesi (`program.live.doc.*`). Günlük baytı yuvadaki
+  artımlı sayaçla (`LogBytes`, dünya başına; yalnız işlenmiş girdilerden türer) sayılır;
+  açılım yalnız kendi baytını sayar, maliyeti günlükle büyümez.
 - Sorgular (`QueryHandler`): `check_program` (ara gösterim ya da metin; metin hataları `span`
   taşır; `program.text.*` sınırları), `try_program` (okuyucunun kapanmış barları, veri yetkisi
   kapısı), `explain_program` (kanonik metin, düğüm başına maliyet, `at` ile köken).

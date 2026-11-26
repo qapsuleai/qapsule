@@ -1,8 +1,11 @@
-//! The `Check` phase (PS §2.1, §2.3): the program-series guards over every op, then the
-//! program ops of the command — or of the proposal it accepts, with the decider as owner —
-//! expanded on a copy under the host's limits (`SessionView::param`, PR §8.4): the
-//! program's limits and the owner's live budget. Nothing is written here (ARCHITECTURE
-//! "Yazarken dikkat": no slot state; the dry run's document is dropped).
+//! The `Check` phase (PS §2.1, §2.3): the program-series guards over every op (and over
+//! the ops of a proposal being accepted), then the command — its program ops, the ops of
+//! the proposal it accepts (the decider as owner) or an `undo` that may restore program
+//! series — expanded on a copy under the host's limits (`SessionView::param`, PR §8.4):
+//! the program's limits and every restored or written owner's live budget, the log's
+//! bytes counted incrementally ([`LogBytes`]). The dry run's document is dropped; the
+//! only slot state written is that count, derived from committed entries alone
+//! (ARCHITECTURE "Yazarken dikkat": nothing of a refused command is kept).
 
 use std::cell::Cell;
 
@@ -13,9 +16,11 @@ use qp_schema::protocol::{Op, ProtocolError, Role};
 use qp_schema::Author;
 use qp_subsystem::{SessionCtx, SessionView};
 
+use crate::budget::{over_budget, LogBytes};
 use crate::expand::Rules;
 use crate::guard::guards;
 use crate::ops::expand_with;
+use crate::refuse::{refuse, under};
 
 /// Whether `op` is a program op.
 fn is_program_op(op: &Op) -> bool {
@@ -56,7 +61,11 @@ fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op
             .proposals
             .iter()
             .find(|p| &p.id == proposal)?;
-        if !pr.ops.iter().any(is_program_op) {
+        if !pr
+            .ops
+            .iter()
+            .any(|o| is_program_op(o) || matches!(o, Op::Undo { .. }))
+        {
             return None;
         }
         let proposer = principal_of(view, &pr.provenance.author);
@@ -72,7 +81,10 @@ fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op
         };
         return Some((pr.ops.clone(), w));
     }
-    if !ops.iter().any(is_program_op) {
+    if !ops
+        .iter()
+        .any(|o| is_program_op(o) || matches!(o, Op::Undo { .. }))
+    {
         return None;
     }
     let w = Writer {
@@ -85,6 +97,26 @@ fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op
     Some((ops.to_vec(), w))
 }
 
+/// The ops of the proposal `ops` accepts, if it is a lone `accept_proposal`.
+fn accepted<'d>(view: &'d dyn SessionView, ops: &[Op]) -> Option<&'d [Op]> {
+    let [Op::AcceptProposal { proposal, .. }] = ops else {
+        return None;
+    };
+    let doc = view.document();
+    doc.proposals
+        .iter()
+        .find(|p| &p.id == proposal)
+        .map(|p| p.ops.as_slice())
+}
+
+/// The message language of connection `conn`.
+fn lang_of(view: &dyn SessionView, conn: &str) -> Lang {
+    match view.conn(conn).and_then(|c| c.hello.lang) {
+        Some(qp_schema::protocol::Language::Tr) => Lang::Tr,
+        _ => Lang::En,
+    }
+}
+
 /// The `Check` phase of connection `conn`'s command `ops`.
 ///
 /// # Errors
@@ -93,20 +125,20 @@ fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op
 pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<(), ProtocolError> {
     let view = ctx.view;
     guards(view.document(), ops)?;
+    if let Some(inner) = accepted(view, ops) {
+        guards(view.document(), inner).map_err(|mut e| {
+            e.message = format!("the proposal cannot be applied now: {}", e.message);
+            e
+        })?;
+    }
     let Some((ops, w)) = program_ops(view, conn, ops) else {
         return Ok(());
     };
-    let lang = view
-        .conn(conn)
-        .and_then(|c| c.hello.lang)
-        .map_or(Lang::En, |l| match l {
-            qp_schema::protocol::Language::Tr => Lang::Tr,
-            qp_schema::protocol::Language::En => Lang::En,
-        });
     let rules = Rules {
         limits: Limits::from_params(|k| view.param(k)),
-        lang,
+        lang: lang_of(view, conn),
     };
+    let can_decide = view.conn(conn).is_some_and(|c| c.permissions.decide);
     let mut qctx = Ctx {
         author: w.author,
         approved_by: w.approved_by,
@@ -117,7 +149,7 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
         created: Vec::new(),
         speaker: &w.speaker,
         is_owner: w.is_owner,
-        can_decide: false,
+        can_decide,
         log: view.log(),
         undoes: None,
         data: Some(Reader {
@@ -137,8 +169,25 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
             reg.expand_op(d, op, p, c)
         }
     });
-    match res {
-        Err(e) if ours.get() => Err(e),
-        _ => Ok(()),
+    let ex = match res {
+        Ok(ex) => ex,
+        Err(e) if ours.get() => return Err(e),
+        Err(_) => return Ok(()),
+    };
+    // The whole command against every owner it writes or restores, with the log's bytes.
+    let public = view.in_public();
+    let fresh;
+    let prior = match ctx.slots.get_mut::<LogBytes>() {
+        Some(lb) => lb.sync(view.log(), public),
+        None => {
+            fresh = LogBytes::default().sync_owned(view.log());
+            &fresh
+        }
+    };
+    let errs = over_budget(&ex.doc, prior, &ex.changes, &rules.limits, rules.lang);
+    if errs.is_empty() {
+        Ok(())
+    } else {
+        Err(refuse(under(&errs, "/ops/0", "/ops/0")))
     }
 }

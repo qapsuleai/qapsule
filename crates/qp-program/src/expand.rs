@@ -36,13 +36,15 @@ pub(crate) struct Rules {
 }
 
 /// The owner of what a command writes (PS §2.3): the person who accepted the proposal,
-/// else the speaker's person (an agent's person; a person is their own).
+/// else the speaker. One identity everywhere: the author's name as provenance records it
+/// (`approved_by` / `author`), the only identity `qp_ops::Ctx` carries for both (it has
+/// no principal list to map the decider's author to a principal id).
 pub(crate) fn owner_of(ctx: &Ctx<'_>) -> String {
-    match &ctx.approved_by {
-        Some(Author::Human { name } | Author::Agent { name, .. } | Author::Engine { name, .. }) => {
+    let a = ctx.approved_by.as_ref().unwrap_or(&ctx.author);
+    match a {
+        Author::Human { name } | Author::Agent { name, .. } | Author::Engine { name, .. } => {
             name.clone()
         }
-        None => qp_ops::watch::person_of(ctx.plane, ctx.speaker).to_owned(),
     }
 }
 
@@ -171,7 +173,7 @@ pub(crate) fn add_program(
     };
     let names: Vec<&str> = checked.outputs.iter().map(|o| o.name.as_str()).collect();
     let mut out = put_outputs(doc, &names, input, &pref, p)?;
-    budget_check(doc, &out, ctx, rules, p)?;
+    budget_check(doc, &out, rules, p)?;
     for c in &out {
         if let ChangeOp::PutSeries { series, .. } = c {
             ctx.n += 1;
@@ -274,18 +276,14 @@ fn instance_id(doc: &Document, id: Option<&String>, p: &str, ctx: &mut Ctx<'_>) 
     Ok(name)
 }
 
-/// The live budget after `new` (applied to a copy of `doc`), against `ctx`'s log.
+/// The live budget after `new` (applied to a copy of `doc`).
 #[allow(clippy::result_large_err)]
-fn budget_check(
-    doc: &Document,
-    new: &[ChangeOp],
-    ctx: &Ctx<'_>,
-    rules: Rules,
-    p: &str,
-) -> PResult<()> {
+fn budget_check(doc: &Document, new: &[ChangeOp], rules: Rules, p: &str) -> PResult<()> {
     let mut after = doc.clone();
     qp_ops::apply_all(&mut after, new).map_err(|m| qp_plane::error::invalid(m, "/ops"))?;
-    let errs = over_budget(&after, ctx.log, new, &rules.limits, rules.lang);
+    // The log's bytes are the `Check` phase's (counted incrementally there, PS §2.3); the
+    // command path counts this op's own, so its cost does not grow with the log.
+    let errs = over_budget(&after, &BTreeMap::new(), new, &rules.limits, rules.lang);
     if errs.is_empty() {
         return Ok(());
     }
@@ -360,7 +358,7 @@ pub(crate) fn set_program_params(
         })
         .collect();
     debug_assert!(outs.iter().all(|s| output_name(s).is_some()));
-    budget_check(doc, &out, ctx, rules, p)?;
+    budget_check(doc, &out, rules, p)?;
     Ok(out)
 }
 

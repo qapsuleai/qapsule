@@ -22,6 +22,9 @@ impl Subsystem for Programs {
     fn name(&self) -> &'static str {
         "program"
     }
+    fn init(&self, ctx: &mut SessionCtx<'_>) {
+        ctx.slots.put(crate::budget::LogBytes::default());
+    }
     fn phases(&self) -> &'static [Phase] {
         &[Phase::Check]
     }

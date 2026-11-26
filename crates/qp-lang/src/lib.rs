@@ -1,11 +1,13 @@
 //! Qapsule compute language (`qp-ir/0`, `docs/PROGRAMS.md`): the checker, the error model,
-//! the static cost, program and instance identities, and the language's limits. The
-//! executor and the text language come later in this crate (RL1 tasks LB, L).
+//! the static cost, program and instance identities, the language's limits, and the
+//! executor (streaming, live transient, higher timeframes, provenance, work budget) with
+//! the `try_program` summary.
 
 mod budget;
 mod check;
 mod checked;
 mod diag;
+mod exec;
 mod identity;
 mod limits;
 mod message;
@@ -18,6 +20,10 @@ pub use check::{check, check_program, Binding, CheckCtx, CheckReport, Purpose};
 pub use checked::{
     Anchor, BinaryKind, Checked, CheckedNode, CheckedOutput, Clock, CondKind, Literal, Op,
     OutputSpec, Rule, Slot, Tf, Ty, UnaryKind, WindowKind,
+};
+pub use exec::{
+    program_digest, try_program, try_window, Align, ExecError, ExecOptions, Executor, Lineage,
+    RecordCtx, SignalHit, Stopped, TryRequest, WorkBudget, DIGEST_SUITE,
 };
 pub use identity::{instance_id, program_id};
 pub use limits::{Limit, Limits};

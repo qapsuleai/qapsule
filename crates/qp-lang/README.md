@@ -1,8 +1,10 @@
 # qp-lang
 
 **Hesap dili** (`qp-ir/0`, `docs/PROGRAMS.md`; kavramlar `docs/CONCEPTS.md` "Hesap dili
-(RL1)"). Bu crate'te bugün: **denetim** (`check`), hata modeli, statik maliyet, program ve
-örnek kimliği, dilin sınırları. Çalıştırıcı (RL1 LB) ve metin dil (L) sonra gelir.
+(RL1)"). Bu crate'te: **denetim** (`check`), hata modeli, statik maliyet, program ve örnek
+kimliği, dilin sınırları ve **çalıştırıcı** (`Executor`: akışkan, canlı barda geçici değer,
+üst periyot hizası, köken, çalışma bütçesi) ile `try_program` özeti. Metin dil ayrı crate'te
+(`qp-lang-text`).
 Denetim ham JSON'u okur ve bütün hataları birden döndürür (ilk hatada durmaz): Qapsule'ün
 kapalı kodu + alt kod (`E_…`/`W_…`), JSON işaretçisi, `expected`, `did_you_mean`, `hint`,
 iki dilde ileti. Hatasız programda çalıştırıcıya çözülmüş, tiplenmiş, saatlenmiş,
@@ -11,7 +13,8 @@ parametreleri bağlanmış bir program (`Checked`) verir.
 **Katman:** alan, sıranın başı (`docs/PROGRAMS-SESSION.md` §5; yalnız şema ve çekirdeğe bağlı).
 
 **Bağımlılıklar:** `qp-schema` (ara gösterim tipleri, `ProgramError`, `ProgramCheck`,
-kayıt defteri), `qp-calendar` (`Interval`), `serde_json`. Yeni dış bağımlılık yok.
+kayıt defteri, `ProgramTry`, `SignalRecord`), `qp-calendar` (`Interval`, seans hizası),
+`qp-compute` (çekirdekler), `serde_json`. Yeni dış bağımlılık yok.
 
 **Dışa açık yüzey (`lib.rs`):**
 
@@ -26,17 +29,26 @@ kayıt defteri), `qp-calendar` (`Interval`), `serde_json`. Yeni dış bağımlı
   `Limits::from_params(|key| …)`, `Limit::def()` kayıt satırı.
 - `check_live_budget`, `LiveUsage` — kişi başı canlı bütçe (`E_BUDGET`, PR §8.2).
 - `program_id`, `instance_id`, `sha256`, `sha256_hex`.
+- Çalıştırıcı: `Executor` (`new`, `run_closed`, `push`, `update_last`, `push_closed`,
+  `close_live`; imleç `value_at`, `doc_value_at`, `events_at`, `signals_at`, `state_at`,
+  `lineage`, `provenance`, `record_at`, `closed_len`, `t_at`, `known_at`, `work`,
+  `stopped`, `dropped`, `canonical`), `ExecOptions`, `Align`, `WorkBudget`, `Stopped`,
+  `ExecError`, `Lineage`, `SignalHit`; `try_program`, `try_window`, `TryRequest`,
+  `RecordCtx`; `program_digest`, `DIGEST_SUITE`.
 - `Reason` (alt kod ↔ kapalı kod tablosu), `Lang`, `did_you_mean`, `suggest`,
   `edit_distance`, `is_node_id`, `is_lower_name`, `MAX_SUGGEST`, `MAX_CANDIDATES`, `OP_NAMES`, `OUTPUT_KINDS`,
   `BAR_FIELDS`, `TURKISH_NAMES`.
 
 **Düzen (`src/`):** `check/` denetimin adımları (kök, parametreler, düğüm alanları, tip ve
-saat, çıktılar, maliyet, uyarılar); kökte hata modeli (`reason`, `message`, `diag`),
-`checked` (çıktı tipleri), `limits`, `budget`, `identity`, `sha256`, `names`.
+saat, çıktılar, maliyet, uyarılar); `exec/` çalıştırıcının adımları (plan, düğüm adımı,
+çekirdekler, üst periyot, akışkan çekirdek, kayıtlar, imleç, `dene` özeti, özet);
+kökte hata modeli (`reason`, `message`, `diag`), `checked` (çıktı tipleri), `limits`,
+`budget`, `identity`, `sha256`, `names`.
 
-**Ne değildir:** çalıştırıcı değildir (bar itmez, değer hesaplamaz); metin ayrıştırmaz;
-oturuma, protokole ya da dokümana dokunmaz (`E_NOT_BAR_SERIES`, `E_PROGRAM_SERIES`,
-`E_EVENT_OPERAND` `qp-program`'ın; burada yalnız `Reason` eşlemesi var).
+**Ne değildir:** metin ayrıştırmaz; oturuma, protokole ya da dokümana dokunmaz: barları,
+sahibi, bağlı seriyi ve beslemeleri çağıran verir (`since_t` kuralını `doc_value_at`
+uygular). `E_NOT_BAR_SERIES`, `E_PROGRAM_SERIES`, `E_EVENT_OPERAND` `qp-program`'ındır;
+burada yalnız `Reason` eşlemesi var.
 
 **Kurallar:** hesap kodunda model, ağ, saat, rastgelelik yok; aynı girdi → aynı rapor.
 Hiçbir sınır koda gömülmez: `Limits` değerlerini ve varsayılanlarını kayıt defterinin

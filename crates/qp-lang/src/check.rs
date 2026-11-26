@@ -188,3 +188,10 @@ impl Cx<'_> {
         self.limits.get(l)
     }
 }
+
+/// Which nodes of `c` the `roots` depend on (themselves included): the executor runs only
+/// the cones of the outputs it is asked for (PS §1.3).
+pub(crate) fn cone_of(c: &Checked, roots: &[crate::checked::Slot]) -> Vec<bool> {
+    let inputs: Vec<Vec<crate::checked::Slot>> = c.nodes.iter().map(|n| n.op.inputs()).collect();
+    cost::cone(&inputs, roots)
+}

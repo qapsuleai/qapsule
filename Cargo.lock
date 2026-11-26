@@ -1929,6 +1929,8 @@ dependencies = [
  "qp-designs",
  "qp-grammar",
  "qp-host",
+ "qp-lang",
+ "qp-lang-text",
  "qp-live",
  "qp-look",
  "qp-matriks",
@@ -2080,6 +2082,7 @@ name = "qp-mcp"
 version = "0.0.0"
 dependencies = [
  "qp-designs",
+ "qp-lang-text",
  "qp-plane",
  "qp-render",
  "qp-schema",

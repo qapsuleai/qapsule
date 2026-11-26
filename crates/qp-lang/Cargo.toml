@@ -9,6 +9,7 @@ publish.workspace = true
 
 [dependencies]
 qp-calendar = { path = "../qp-calendar" }
+qp-compute = { path = "../qp-compute" }
 qp-schema = { path = "../qp-schema" }
 # float_roundtrip: canonical JSON (program_id) must write f64 bit-exactly (PR §2).
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }

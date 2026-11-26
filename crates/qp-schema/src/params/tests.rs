@@ -133,8 +133,8 @@ fn params_defaults_equal_named_constants() {
         &OUTCOME_BARRIER_C_NEUTRAL,
         OUTCOME_BARRIER_C_NEUTRAL_DEFAULT
     ));
-    // Every registry row is covered above.
-    assert_eq!(REGISTRY.len(), 16);
+    // Every registry row is covered above, or is an RL1 row (no owner constant).
+    assert_eq!(REGISTRY.len(), 16 + super::program::PROGRAM_ROWS.len());
 }
 
 fn is_key(key: &str) -> bool {
@@ -164,4 +164,15 @@ fn params_registry_is_well_formed() {
     }
     assert_eq!(by_key("no.such_key"), None);
     assert!(keys.len() >= 10);
+}
+
+#[test]
+fn params_rl1_rows_are_registered_in_order() {
+    let tail = &REGISTRY[REGISTRY.len() - super::program::PROGRAM_ROWS.len()..];
+    for (a, b) in tail.iter().zip(super::program::PROGRAM_ROWS) {
+        assert_eq!(*a, b);
+        assert!(a.key.starts_with("program."), "{}", a.key);
+        assert_eq!(a.since, "RL1");
+        assert_eq!(a.kind, ParamKind::Int);
+    }
 }

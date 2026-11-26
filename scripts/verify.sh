@@ -24,7 +24,8 @@
 #                (aarch64 or x86_64), x86_64 via Rosetta on Apple silicon if available,
 #                and wasm32 in Node (same tool rule as the browser step); RL1: also
 #                fixtures/compute/digest-rl1.txt (stdev, percentrank) on the host, x86_64
-#                and wasm32-wasip1 under node:wasi
+#                and wasm32-wasip1 under node:wasi, and the program executor's digest
+#                fixtures/compute/digest-program.txt (qp-lang) on the same three
 #  13 protocol   fixtures/protocol/valid/* validate and fixtures/protocol/invalid/* are
 #                rejected by the generated protocol schemas; transcripts and init validate
 #  14 conform    qp/0 conformance transcripts pass in-process, over `qp serve` and over MCP
@@ -379,6 +380,12 @@ step_digest() {
   gotl="$(cargo run -q --release -p qp-compute --example digest -- rl1)"
   echo "host $(uname -m) rl1 kernels: $gotl (expected $wantl)"
   [ "$gotl" = "$wantl" ] || fail "host rl1 digest $gotl != $wantl"
+  # RL1/LB: the program executor (qp-lang) has its own digest, on the same architectures.
+  local wantp gotp
+  wantp="$(tr -d '[:space:]' <fixtures/compute/digest-program.txt)"
+  gotp="$(cargo run -q --release -p qp-lang --example digest)"
+  echo "host $(uname -m) programs: $gotp (expected $wantp)"
+  [ "$gotp" = "$wantp" ] || fail "host program digest $gotp != $wantp"
   ran="$(uname -m)"
   if [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ] \
     && rustup target list --installed 2>/dev/null | grep -q '^x86_64-apple-darwin$' \
@@ -389,6 +396,9 @@ step_digest() {
     gotl="$(cargo run -q --release -p qp-compute --example digest --target x86_64-apple-darwin -- rl1)"
     echo "x86_64 (Rosetta) rl1 kernels: $gotl"
     [ "$gotl" = "$wantl" ] || fail "x86_64 rl1 digest $gotl != $wantl"
+    gotp="$(cargo run -q --release -p qp-lang --example digest --target x86_64-apple-darwin)"
+    echo "x86_64 (Rosetta) programs: $gotp"
+    [ "$gotp" = "$wantp" ] || fail "x86_64 program digest $gotp != $wantp"
     ran="$ran, x86_64"
   fi
   if [ "$mode" != 0 ] && command -v node >/dev/null 2>&1 \
@@ -397,18 +407,23 @@ step_digest() {
     gotl="$(node --no-warnings -e "const {WASI}=require('node:wasi');const w=new WASI({version:'preview1',args:['digest','rl1'],env:{}});WebAssembly.instantiate(require('fs').readFileSync(process.argv[1]),w.getImportObject()).then(({instance})=>w.start(instance))" "$target_dir/wasm32-wasip1/release/examples/digest.wasm")"
     echo "wasm32-wasip1 (node $(node --version)) rl1 kernels: $gotl"
     [ "$gotl" = "$wantl" ] || fail "wasm32 rl1 digest $gotl != $wantl"
+    cargo build -q --release -p qp-lang --example digest --target wasm32-wasip1
+    gotp="$(node --no-warnings -e "const {WASI}=require('node:wasi');const w=new WASI({version:'preview1',args:['digest'],env:{}});WebAssembly.instantiate(require('fs').readFileSync(process.argv[1]),w.getImportObject()).then(({instance})=>w.start(instance))" "$target_dir/wasm32-wasip1/release/examples/digest.wasm")"
+    echo "wasm32-wasip1 (node $(node --version)) programs: $gotp"
+    [ "$gotp" = "$wantp" ] || fail "wasm32 program digest $gotp != $wantp"
   elif [ "$mode" = 1 ]; then
     fail "wasm32 rl1 digest: QP_VERIFY_BROWSER=1 but node or the wasm32-wasip1 target is missing"
   else
     echo "wasm32 rl1 kernels: skipped (QP_VERIFY_BROWSER=${mode:-unset}, node or wasm32-wasip1 missing)"
     wantl="$wantl (wasm32 rl1 skipped)"
+    wantp="$wantp (wasm32 programs skipped)"
   fi
   local have_tools=1
   command -v node >/dev/null 2>&1 || have_tools=0
   if ! command -v wasm-pack >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/wasm-pack" ]; then have_tools=0; fi
   if [ "$mode" = 0 ] || { [ "$mode" != 1 ] && [ "$have_tools" = 0 ]; }; then
     echo "wasm32: skipped (QP_VERIFY_BROWSER=${mode:-unset}, tools: $have_tools)"
-    note "$ran: $want; wasm32 skipped; rl1 $wantl"
+    note "$ran: $want; wasm32 skipped; rl1 $wantl; programs $wantp"
     return 0
   fi
   local wp pkg="$target_dir/wasm-bench/pkg"
@@ -417,7 +432,7 @@ step_digest() {
   got="$(node -e "console.log(require('$pkg/qp_wasm.js').compute_digest())")"
   echo "wasm32 (node $(node --version)): $got"
   [ "$got" = "$want" ] || fail "wasm32 digest $got != $want"
-  note "$ran, wasm32: $want; rl1 $wantl"
+  note "$ran, wasm32: $want; rl1 $wantl; programs $wantp"
 }
 
 step_protocol() {

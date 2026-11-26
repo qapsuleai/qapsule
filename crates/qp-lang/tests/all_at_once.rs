@@ -113,7 +113,7 @@ fn messages_in_two_languages_same_codes() {
 fn answer_carries_errors_limits_and_outputs() {
     let a = chk(&many_errors()).to_answer();
     assert!(!a.ok);
-    assert_eq!(a.limits.len(), 17);
+    assert_eq!(a.limits.len(), 20);
     let v = serde_json::to_value(&a).unwrap_or_default();
     assert_eq!(v["errors"][0]["code"], "schema");
     assert_eq!(v["limits"]["program.max_cost_per_bar"], 666);

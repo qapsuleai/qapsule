@@ -2020,6 +2020,7 @@ name = "qp-lang"
 version = "0.0.0"
 dependencies = [
  "qp-calendar",
+ "qp-compute",
  "qp-schema",
  "serde_json",
 ]

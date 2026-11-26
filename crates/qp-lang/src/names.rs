@@ -5,6 +5,8 @@
 //! The rule is the same as `qp_plane::suggest`; it is restated here because `qp-lang` sits
 //! below the session layer and may not depend on `qp-plane` (`docs/ENGINEERING.md` §2).
 
+use std::collections::BTreeSet;
+
 /// Every node `op` of `qp-ir/0`, in PR §4 order.
 pub const OP_NAMES: [&str; 43] = [
     "input",
@@ -108,13 +110,24 @@ pub const TURKISH_NAMES: [(&str, &str); 40] = [
 pub fn edit_distance(a: &str, b: &str) -> usize {
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
+    distance(&a, &b, usize::MAX)
+}
+
+/// Levenshtein distance of `a` and `b`, or any value above `k` once it is known to exceed
+/// `k` (a row whose minimum is above `k` stops the walk).
+fn distance(a: &[char], b: &[char], k: usize) -> usize {
     let mut prev: Vec<usize> = (0..=b.len()).collect();
     let mut cur = vec![0; b.len() + 1];
     for (i, ca) in a.iter().enumerate() {
         cur[0] = i + 1;
+        let mut row_min = cur[0];
         for (j, cb) in b.iter().enumerate() {
             let sub = prev[j] + usize::from(ca != cb);
             cur[j + 1] = sub.min(prev[j + 1] + 1).min(cur[j] + 1);
+            row_min = row_min.min(cur[j + 1]);
+        }
+        if row_min > k {
+            return row_min;
         }
         std::mem::swap(&mut prev, &mut cur);
     }
@@ -123,39 +136,47 @@ pub fn edit_distance(a: &str, b: &str) -> usize {
 
 /// Longest name (in characters) that gets or gives suggestions: names in the language
 /// are at most 64 characters, and the distance is quadratic.
-const MAX_SUGGEST: usize = 64;
+pub const MAX_SUGGEST: usize = 64;
+
+/// Candidates one suggestion search looks at most (the first ones the caller gives): a
+/// search costs at most `MAX_CANDIDATES` distances of `MAX_SUGGEST`² steps, whatever the
+/// program size or the raised limits.
+pub const MAX_CANDIDATES: usize = 1024;
 
 /// Up to five candidates close to `given` (exact matches excluded, duplicates removed),
-/// by distance, then name. Names longer than 64 characters get and give none.
+/// by distance, then name, among the first [`MAX_CANDIDATES`] candidates. Names longer
+/// than [`MAX_SUGGEST`] characters get and give none.
 #[must_use]
 pub fn did_you_mean<'a, I>(given: &str, candidates: I) -> Vec<String>
 where
     I: IntoIterator<Item = &'a str>,
 {
-    let mut scored: Vec<(usize, &str)> = Vec::new();
-    let n = given.chars().take(MAX_SUGGEST + 1).count();
-    if n > MAX_SUGGEST {
+    let g: Vec<char> = given.chars().take(MAX_SUGGEST + 1).collect();
+    if g.len() > MAX_SUGGEST {
         return Vec::new();
     }
-    for c in candidates {
-        if c == given || scored.iter().any(|(_, s)| *s == c) {
+    let mut scored: BTreeSet<(usize, &str)> = BTreeSet::new();
+    let mut seen: BTreeSet<&str> = BTreeSet::new();
+    for c in candidates.into_iter().take(MAX_CANDIDATES) {
+        if c == given || !seen.insert(c) {
             continue;
         }
-        let m = c.chars().take(MAX_SUGGEST + 1).count();
-        if m > MAX_SUGGEST {
+        let cc: Vec<char> = c.chars().take(MAX_SUGGEST + 1).collect();
+        if cc.len() > MAX_SUGGEST {
             continue;
         }
         let substring = !given.is_empty() && (c.contains(given) || given.contains(c));
         // The distance is at least the length difference: skip hopeless pairs early.
-        if n.abs_diff(m) > 3 && !substring {
+        if g.len().abs_diff(cc.len()) > 3 && !substring {
             continue;
         }
-        let d = edit_distance(given, c);
+        // A substring is offered at any distance (ranked by its exact one); otherwise
+        // the walk may stop as soon as the distance exceeds 3.
+        let d = distance(&g, &cc, if substring { usize::MAX } else { 3 });
         if d <= 3 || substring {
-            scored.push((d, c));
+            scored.insert((d, c));
         }
     }
-    scored.sort_unstable();
     scored
         .into_iter()
         .take(5)

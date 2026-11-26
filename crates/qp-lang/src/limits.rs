@@ -1,16 +1,15 @@
 //! The limits of the language (PR §8.4; `docs/PARAMETERS.md` "RL1"): every bound the
-//! checker, the executor and the budget use, filled by the caller from the parameter
-//! registry (`SessionView::param(key)`); a missing or invalid value takes the default.
+//! checker, the executor, the budget and the text language use, filled by the caller from
+//! the parameter registry (`SessionView::param(key)`); a missing or invalid value takes
+//! the default.
 //!
-//! Defaults come from `qp_schema::params::REGISTRY` when it has the key. The RL1 rows are
-//! not in the registry yet (`docs/PARAMETERS.md` says they enter it directly; the registry
-//! is `qp-schema`'s, outside this crate), so [`Limit::row`] holds the documented
-//! default and range — the one place in code — and a test fails as soon as a registry row
-//! disagrees with it. When the rows land, the table can shrink to the keys.
+//! The single source is the registry: each [`Limit`] names its row in
+//! `qp_schema::params::program` and reads the key, default and range from it. No default
+//! is restated here.
 
 use std::collections::BTreeMap;
 
-use qp_schema::params::{by_key, ParamValue};
+use qp_schema::params::{program as rows, ParamDef, ParamValue};
 use qp_schema::program::ProgramParamValue;
 
 /// One RL1 limit key.
@@ -50,10 +49,16 @@ pub enum Limit {
     WorkOpenRecord,
     /// `program.work.read`.
     WorkRead,
+    /// `program.text.max_source_chars` (text language, `E_TOO_LARGE`).
+    TextMaxSourceChars,
+    /// `program.text.max_token_chars` (text language, `E_TOO_LARGE`).
+    TextMaxTokenChars,
+    /// `program.text.max_depth` (text language, `E_TOO_LARGE`).
+    TextMaxDepth,
 }
 
 /// Number of limit keys.
-const N: usize = 17;
+const N: usize = 20;
 
 impl Limit {
     /// Every key, in `docs/PARAMETERS.md` order.
@@ -75,57 +80,38 @@ impl Limit {
         Limit::WorkRecord,
         Limit::WorkOpenRecord,
         Limit::WorkRead,
+        Limit::TextMaxSourceChars,
+        Limit::TextMaxTokenChars,
+        Limit::TextMaxDepth,
     ];
 
-    /// `(key, documented default, min, max)` of the registry row (`docs/PARAMETERS.md`).
+    /// The registry row (`qp_schema::params::program`).
     #[must_use]
-    pub const fn row(self) -> (&'static str, u64, u64, Option<u64>) {
-        match self {
-            Limit::MaxNodes => ("program.max_nodes", 200, 1, None),
-            Limit::MaxWindow => ("program.max_window", 2000, 1, Some(100_000)),
-            Limit::MaxOutputs => ("program.max_outputs", 4, 1, None),
-            Limit::MaxParams => ("program.max_params", 16, 0, None),
-            Limit::MaxIrBytes => ("program.max_ir_bytes", 8192, 256, None),
-            Limit::MaxCostPerBar => ("program.max_cost_per_bar", 666, 1, None),
-            Limit::SignalMaxHorizonBars => ("program.signal.max_horizon_bars", 500, 1, None),
-            Limit::CheckMaxErrors => ("program.check.max_errors", 50, 1, None),
-            Limit::LiveDocMaxInstances => ("program.live.doc.max_instances", 32, 0, None),
-            Limit::LiveDocMaxCostPerBar => ("program.live.doc.max_cost_per_bar", 2000, 0, None),
-            Limit::LiveDocMaxLogBytes => ("program.live.doc.max_log_bytes", 4_194_304, 0, None),
-            Limit::TryMaxBars => ("program.try.max_bars", 20_000, 1, None),
-            Limit::TryMaxWork => ("program.try.max_work", 50_000_000, 1, None),
-            Limit::TryMaxItems => ("program.try.max_items", 10, 1, Some(100)),
-            Limit::WorkRecord => ("program.work.record", 16, 0, None),
-            Limit::WorkOpenRecord => ("program.work.open_record", 1, 0, None),
-            Limit::WorkRead => ("program.work.read", 1, 0, None),
-        }
+    pub const fn def(self) -> &'static ParamDef {
+        rows::PROGRAM_ROWS[self as usize]
     }
 
     /// The registry key.
     #[must_use]
     pub const fn key(self) -> &'static str {
-        self.row().0
+        self.def().key
     }
 
-    /// The default: the registry row's when the registry has the key, else the
-    /// documented one.
+    /// The registry default (every RL1 row is a non-negative integer).
     #[must_use]
-    pub fn default_value(self) -> u64 {
-        match by_key(self.key()).map(|d| d.default) {
-            Some(ParamValue::Int(v)) => u64::try_from(v).unwrap_or(self.row().1),
-            _ => self.row().1,
+    #[allow(clippy::cast_sign_loss)]
+    pub const fn default_value(self) -> u64 {
+        match self.def().default {
+            ParamValue::Int(v) if v >= 0 => v as u64,
+            _ => 0,
         }
     }
 
-    /// The allowed range `[min, max]` (registry row's when present).
+    /// The allowed range `[min, max]` of the registry row.
     #[must_use]
-    #[allow(clippy::cast_precision_loss)]
     pub fn range(self) -> (f64, f64) {
-        let (_, _, min, max) = self.row();
-        let doc = (min as f64, max.map_or(f64::INFINITY, |m| m as f64));
-        by_key(self.key()).map_or(doc, |d| {
-            (d.min.unwrap_or(doc.0), d.max.unwrap_or(f64::INFINITY))
-        })
+        let d = self.def();
+        (d.min.unwrap_or(0.0), d.max.unwrap_or(f64::INFINITY))
     }
 
     /// Index into [`Limits`].
@@ -194,16 +180,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn documented_defaults_agree_with_registry_rows() {
+    fn limits_name_their_registry_rows() {
         for l in Limit::ALL {
-            if let Some(def) = by_key(l.key()) {
-                assert_eq!(
-                    def.default,
-                    ParamValue::Int(l.row().1 as i64),
-                    "{}",
-                    l.key()
-                );
-            }
+            let def = qp_schema::params::by_key(l.key()).expect("registered");
+            assert_eq!(def, l.def());
+            assert_eq!(def.default, ParamValue::Int(l.default_value() as i64));
         }
         assert_eq!(Limits::default().get(Limit::MaxCostPerBar), 666);
     }
@@ -219,6 +200,6 @@ mod tests {
         assert_eq!(l.get(Limit::MaxNodes), 10);
         assert_eq!(l.get(Limit::MaxWindow), 2000);
         assert_eq!(l.get(Limit::MaxOutputs), 4);
-        assert_eq!(l.to_map().len(), 17);
+        assert_eq!(l.to_map().len(), N);
     }
 }

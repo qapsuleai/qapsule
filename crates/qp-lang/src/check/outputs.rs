@@ -4,7 +4,7 @@
 use qp_schema::program::{ProgramOutputInfo, ProgramOutputKind, Side, SignalSource};
 use serde_json::Value;
 
-use super::args::{int_arg, num_value, resolve_ref, IntRole, NumRole};
+use super::args::{int_arg, num_value, resolve_ref, IntRole, NumRole, MAX_DIMS};
 use super::fields::Fields;
 use super::{Cx, Purpose};
 use crate::checked::{CheckedOutput, Clock, OutputSpec, Rule, Slot, Ty};
@@ -269,9 +269,9 @@ fn state(cx: &mut Cx<'_>, f: &mut Fields<'_>, out: &str) -> Option<OutputSpec> {
         cx.d.at(Reason::Type, &at, &Msg::NotArray("dims".to_owned()));
         return None;
     };
-    if items.is_empty() || items.len() > 4 {
+    if items.is_empty() || items.len() > MAX_DIMS {
         cx.d.at(Reason::BadParam, &at, &Msg::DimsCount(items.len()))
-            .expected(["1..=4"]);
+            .expected([format!("1..={MAX_DIMS}")]);
         return None;
     }
     let mut seen = Vec::new();

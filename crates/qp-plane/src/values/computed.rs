@@ -14,6 +14,9 @@ pub struct Computed {
     /// Position of `main` among the keys of `outputs` (they never change once computed:
     /// the live path reads the main output without a string lookup).
     pub(super) main_ix: Option<usize>,
+    /// (RL1, PS §1.2) An event series' closed length: the evaluable bars (its live bar
+    /// holds no value). `None` for every other series.
+    pub(super) closed: Option<usize>,
 }
 
 impl Computed {
@@ -24,12 +27,16 @@ impl Computed {
             outputs,
             main,
             main_ix,
+            closed: None,
         }
     }
 
+    /// Evaluable bars: the closed length of an event series (PS §1.2), else the bar
+    /// count. Conditions and evidence read the last value at `len() - 1`; the vectors
+    /// themselves always hold one value per bar (`t.len()`, K13).
     #[inline]
     pub fn len(&self) -> usize {
-        self.t.len()
+        self.closed.unwrap_or(self.t.len())
     }
 
     /// (RF1 S2) Whether there are no bars (`Computed` is `pub` across the crate boundary;
@@ -37,7 +44,7 @@ impl Computed {
     #[inline]
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.t.is_empty()
+        self.len() == 0
     }
 
     #[inline]

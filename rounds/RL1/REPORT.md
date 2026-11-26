@@ -1,6 +1,6 @@
 # RL1 — Rapor (hesap dili)
 
-Durum: sürüyor.
+Durum: tamamlandı (2026-11-26); bağımsız kapanış denetimi `AUDIT.md`.
 
 ## 0. Başlangıç
 
@@ -264,6 +264,8 @@ Kesme sırasındaki öbür maddeler (kutulama ve durum tanımı, kanonik metin y
 12. **`scripts/refactor/snapshot.sh`** rl1 ve program özetlerini kaydetmiyor.
 13. **SHA-256 ve en yakın ad** `qp-lang`'de yeniden yazıldı (katman sırası); ileride `qp-schema`'ya
     inebilir.
+14. **`live_budget_warning`** CLI'da ve `qp-program`'da ayrı kopya; eşitlik sınaması tutuyor, ama tek
+    yere (ör. `qp-lang`) taşınsın (C denetimi).
 
 ## Açık sorular (Arkin)
 

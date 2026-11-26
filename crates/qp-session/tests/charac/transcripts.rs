@@ -73,7 +73,9 @@ fn charac_session_transcripts_data() {
 #[test]
 fn charac_session_transcripts_surface() {
     let mut book = Book::new("transcripts-surface");
-    let f = files("49", "99");
+    // RF1's lock ends at 70; RL1's program transcripts (71–77) are checked by `qp conform`
+    // and their generator, not added to this refactor characterization.
+    let f = files("49", "71");
     assert_eq!(f.len(), 22);
     for p in f {
         run(&mut book, &p);

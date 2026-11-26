@@ -1,0 +1,1156 @@
+{
+  "covers": [
+    "event",
+    "condition_met",
+    "since_t",
+    "append_bars",
+    "E_EVENT_OPERAND",
+    "program"
+  ],
+  "description": "RL1 (PS §1.2): an event output under `threshold ge 1` — met when the event bar closes, evidence `final`; consecutive event bars give one notification; several bars in one entry pass without one (loss bound); a history correction rebuilds the series and re-checks claims; new values trigger nothing retroactively (`since_t`); `compare` with an event series is `E_EVENT_OPERAND`.",
+  "final": {
+    "log_len": 4
+  },
+  "init": {
+    "clock": 1760000000000,
+    "data": {
+      "entitlements": {
+        "arkin": [
+          "*"
+        ],
+        "host": [
+          "*"
+        ]
+      },
+      "feeds": [
+        {
+          "bars": [
+            {
+              "c": 100.0,
+              "h": 100.5,
+              "l": 99.5,
+              "o": 100.0,
+              "t": 1759708800000,
+              "v": 1000.0
+            },
+            {
+              "c": 101.0,
+              "h": 101.5,
+              "l": 100.5,
+              "o": 101.0,
+              "t": 1759795200000,
+              "v": 1000.0
+            },
+            {
+              "c": 102.0,
+              "h": 102.5,
+              "l": 101.5,
+              "o": 102.0,
+              "t": 1759881600000,
+              "v": 1000.0
+            },
+            {
+              "c": 103.0,
+              "h": 103.5,
+              "l": 102.5,
+              "o": 103.0,
+              "t": 1759968000000,
+              "v": 1000.0
+            },
+            {
+              "c": 104.0,
+              "h": 104.5,
+              "l": 103.5,
+              "o": 104.0,
+              "t": 1760054400000,
+              "v": 1000.0
+            }
+          ],
+          "feed": {
+            "interval": "1d",
+            "symbol": "THYAO"
+          }
+        }
+      ]
+    },
+    "document": {
+      "id": "doc-event",
+      "schema_version": "0",
+      "series": [
+        {
+          "id": "px",
+          "instrument": {
+            "symbol": "THYAO"
+          },
+          "interval": "1d",
+          "source": {
+            "interval": "1d",
+            "kind": "bind",
+            "symbol": "THYAO",
+            "window": {
+              "last": 10
+            }
+          }
+        },
+        {
+          "data": {
+            "bars": [
+              {
+                "c": 100.0,
+                "h": 100.5,
+                "l": 99.5,
+                "o": 100.0,
+                "t": 1759708800000,
+                "v": 1000.0
+              },
+              {
+                "c": 101.0,
+                "h": 101.5,
+                "l": 100.5,
+                "o": 101.0,
+                "t": 1759795200000,
+                "v": 1000.0
+              },
+              {
+                "c": 102.0,
+                "h": 102.5,
+                "l": 101.5,
+                "o": 102.0,
+                "t": 1759881600000,
+                "v": 1000.0
+              },
+              {
+                "c": 103.0,
+                "h": 103.5,
+                "l": 102.5,
+                "o": 103.0,
+                "t": 1759968000000,
+                "v": 1000.0
+              },
+              {
+                "c": 104.0,
+                "h": 104.5,
+                "l": 103.5,
+                "o": 104.0,
+                "t": 1760054400000,
+                "v": 1000.0
+              }
+            ],
+            "kind": "bars"
+          },
+          "id": "qx",
+          "instrument": {
+            "symbol": "QX"
+          },
+          "interval": "1d",
+          "source": {
+            "kind": "inline"
+          }
+        }
+      ],
+      "title": "Olay"
+    },
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      }
+    ]
+  },
+  "name": "75-program-event",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 1,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "h",
+          "msg": {
+            "seq": 1,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "The host (moves the clock).",
+      "send": {
+        "conn": "h",
+        "msg": {
+          "principal": "host",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "created": [
+              "p1.up",
+              "p1.level",
+              "q1.up",
+              "q1.level"
+            ],
+            "id": "c1",
+            "seq": 2,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "`event up = close > lv` (lv 105) on the bound `px` and on the inline `qx`; `since_t` is the clock.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "id": "p1",
+              "inputs": [
+                "px"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "const",
+                    "value": {
+                      "param": "lv"
+                    }
+                  },
+                  {
+                    "a": "_1",
+                    "b": "_2",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "const",
+                    "value": {
+                      "param": "lv"
+                    }
+                  },
+                  {
+                    "field": "close",
+                    "id": "_5",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_6",
+                    "op": "const",
+                    "value": 0.0
+                  },
+                  {
+                    "a": "_5",
+                    "b": "_6",
+                    "id": "_7",
+                    "op": "mul"
+                  },
+                  {
+                    "a": "_4",
+                    "b": "_7",
+                    "id": "_8",
+                    "op": "add"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_3"
+                  },
+                  {
+                    "kind": "series",
+                    "name": "level",
+                    "node": "_8"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 105.0,
+                    "key": "lv",
+                    "kind": "float",
+                    "max": 1000.0,
+                    "min": 0.0
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            },
+            {
+              "id": "q1",
+              "inputs": [
+                "qx"
+              ],
+              "op": "add_program",
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "const",
+                    "value": {
+                      "param": "lv"
+                    }
+                  },
+                  {
+                    "a": "_1",
+                    "b": "_2",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "const",
+                    "value": {
+                      "param": "lv"
+                    }
+                  },
+                  {
+                    "field": "close",
+                    "id": "_5",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_6",
+                    "op": "const",
+                    "value": 0.0
+                  },
+                  {
+                    "a": "_5",
+                    "b": "_6",
+                    "id": "_7",
+                    "op": "mul"
+                  },
+                  {
+                    "a": "_4",
+                    "b": "_7",
+                    "id": "_8",
+                    "op": "add"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_3"
+                  },
+                  {
+                    "kind": "series",
+                    "name": "level",
+                    "node": "_8"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 105.0,
+                    "key": "lv",
+                    "kind": "float",
+                    "max": 1000.0,
+                    "min": 0.0
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The existing `threshold ge 1` condition on the event output.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c",
+          "topic": {
+            "condition": {
+              "kind": "threshold",
+              "op": "ge",
+              "series": "p1.up",
+              "value": 1.0
+            },
+            "kind": "condition"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "k",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Claims.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "k",
+          "topic": {
+            "kind": "claims"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "d",
+            "status": "subscribed",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "The same on `qx`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "d",
+          "topic": {
+            "condition": {
+              "kind": "threshold",
+              "op": "ge",
+              "series": "q1.up",
+              "value": 1.0
+            },
+            "kind": "condition"
+          },
+          "type": "subscribe"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "fields": {
+            "c": 106.0,
+            "h": 106.5
+          },
+          "kind": "patch",
+          "t": 1760054400000
+        },
+        "feed": {
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 1
+      },
+      "expect": [],
+      "note": "The live bar crosses 105: an event series has no value on the live bar (`null`), no condition."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 106.5,
+            "h": 107.0,
+            "l": 106.0,
+            "o": 106.5,
+            "t": 1760140800000,
+            "v": 1000.0
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 2
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 4,
+              "evidence": {
+                "anchor_t": 1759708800000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "final",
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "prev": 0.0,
+                    "series": "p1.up",
+                    "t": 1760054400000,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "kind": "condition_met",
+              "seq": 2,
+              "t": 1760054400000
+            },
+            "sub": "c",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "claim": {
+                "kind": "condition",
+                "sub": "c"
+              },
+              "evidence": {
+                "anchor_t": 1759708800000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "final",
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "prev": 0.0,
+                    "series": "p1.up",
+                    "t": 1760054400000,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "kind": "claim",
+              "seq": 2,
+              "state": "asserted"
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "The next bar closes it: `condition_met` at the event bar, evidence `final` at once."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 99.0,
+            "h": 99.5,
+            "l": 98.5,
+            "o": 99.0,
+            "t": 1760227200000,
+            "v": 1000.0
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 3
+      },
+      "expect": [],
+      "note": "The bar after is an event bar too (consecutive): recorded, no second notification."
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 99.5,
+            "h": 100.0,
+            "l": 99.0,
+            "o": 99.5,
+            "t": 1760313600000,
+            "v": 1000.0
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 4
+      },
+      "expect": [],
+      "note": "No event."
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "values",
+              "values": {
+                "from_bar": 0,
+                "outputs": {
+                  "up": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    0.0,
+                    null
+                  ]
+                },
+                "series": "p1.up",
+                "t": [
+                  1759708800000,
+                  1759795200000,
+                  1759881600000,
+                  1759968000000,
+                  1760054400000,
+                  1760140800000,
+                  1760227200000,
+                  1760313600000
+                ]
+              }
+            },
+            "id": "q1",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Every event bar in the series; `null` on the live bar.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "kind": "study",
+            "series": "p1.up"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "fields": {
+            "c": 100.0,
+            "l": 99.5
+          },
+          "kind": "patch",
+          "t": 1760054400000
+        },
+        "feed": {
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 5
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "claim": {
+                "kind": "condition",
+                "sub": "c"
+              },
+              "evidence": {
+                "anchor_t": 1759708800000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "final",
+                "series": "px",
+                "t": 1760054400000,
+                "values": [
+                  {
+                    "prev": 0.0,
+                    "series": "p1.up",
+                    "t": 1760054400000,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "kind": "claim",
+              "seq": 2,
+              "state": "withdrawn"
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "A correction of history (bar 4 no longer above): the series is rebuilt and the recorded claims re-checked."
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "values",
+              "values": {
+                "from_bar": 0,
+                "outputs": {
+                  "up": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    null
+                  ]
+                },
+                "series": "p1.up",
+                "t": [
+                  1759708800000,
+                  1759795200000,
+                  1759881600000,
+                  1759968000000,
+                  1760054400000,
+                  1760140800000,
+                  1760227200000,
+                  1760313600000
+                ]
+              }
+            },
+            "id": "q2",
+            "now": 1760000000000,
+            "seq": 2,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Bar 4 is no event now.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q2",
+          "query": {
+            "kind": "study",
+            "series": "p1.up"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c2",
+            "seq": 3,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "Several bars in one entry on `qx`: the 0,1,0 pattern passes without notification (the documented loss bound).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c2",
+          "ops": [
+            {
+              "bars": [
+                {
+                  "c": 106.0,
+                  "h": 106.5,
+                  "l": 105.5,
+                  "o": 106.0,
+                  "t": 1760140800000,
+                  "v": 1000.0
+                },
+                {
+                  "c": 100.0,
+                  "h": 100.5,
+                  "l": 99.5,
+                  "o": 100.0,
+                  "t": 1760227200000,
+                  "v": 1000.0
+                },
+                {
+                  "c": 100.0,
+                  "h": 100.5,
+                  "l": 99.5,
+                  "o": 100.0,
+                  "t": 1760313600000,
+                  "v": 1000.0
+                }
+              ],
+              "op": "append_bars",
+              "series": "qx"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "values",
+              "values": {
+                "from_bar": 0,
+                "outputs": {
+                  "up": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    null
+                  ]
+                },
+                "series": "q1.up",
+                "t": [
+                  1759708800000,
+                  1759795200000,
+                  1759881600000,
+                  1759968000000,
+                  1760054400000,
+                  1760140800000,
+                  1760227200000,
+                  1760313600000
+                ]
+              }
+            },
+            "id": "q3",
+            "now": 1760000000000,
+            "seq": 3,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "The series still records the event bar.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q3",
+          "query": {
+            "kind": "study",
+            "series": "q1.up"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "unsupported",
+              "errors": [
+                {
+                  "code": "unsupported",
+                  "message": "`p1.up` is an event series: it enters a condition only as a threshold series",
+                  "reason": "E_EVENT_OPERAND"
+                }
+              ],
+              "hint": "Use {\"kind\":\"threshold\",\"series\":\"p1.up\",\"op\":\"ge\",\"value\":1}.",
+              "message": "`p1.up` is an event series: it enters a condition only as a threshold series",
+              "path": "/ops/0/trigger/right",
+              "reason": "E_EVENT_OPERAND"
+            },
+            "id": "c3",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "An event series as a `compare` operand: `E_EVENT_OPERAND`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c3",
+          "ops": [
+            {
+              "op": "add_intent",
+              "text": "x",
+              "trigger": {
+                "kind": "compare",
+                "left": "p1.level",
+                "op": "gt",
+                "right": "p1.up"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [],
+      "note": "After bar 6 closed, before bar 7 closes.",
+      "send": {
+        "conn": "h",
+        "msg": {
+          "now": 1760317200000,
+          "type": "clock"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "id": "c4",
+            "seq": 4,
+            "status": "applied",
+            "type": "ack"
+          }
+        }
+      ],
+      "note": "New level 98: the last closed bar (99) would be above, but it closed before the new `since_t`: no retroactive trigger.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c4",
+          "ops": [
+            {
+              "op": "set_program_params",
+              "params": {
+                "lv": 98.0
+              },
+              "program": "p1"
+            }
+          ],
+          "type": "command"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "values",
+              "values": {
+                "from_bar": 0,
+                "outputs": {
+                  "up": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    null
+                  ]
+                },
+                "series": "p1.up",
+                "t": [
+                  1759708800000,
+                  1759795200000,
+                  1759881600000,
+                  1759968000000,
+                  1760054400000,
+                  1760140800000,
+                  1760227200000,
+                  1760313600000
+                ]
+              }
+            },
+            "id": "q4",
+            "now": 1760317200000,
+            "seq": 4,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Bars known before `since_t` are 0.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q4",
+          "query": {
+            "kind": "study",
+            "series": "p1.up"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "data": {
+        "change": {
+          "bar": {
+            "c": 99.8,
+            "h": 100.3,
+            "l": 99.3,
+            "o": 99.8,
+            "t": 1760400000000,
+            "v": 1000.0
+          },
+          "kind": "bar"
+        },
+        "feed": {
+          "interval": "1d",
+          "symbol": "THYAO"
+        },
+        "seq": 6
+      },
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "bar": 7,
+              "evidence": {
+                "anchor_t": 1759708800000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "final",
+                "series": "px",
+                "t": 1760313600000,
+                "values": [
+                  {
+                    "prev": 0.0,
+                    "series": "p1.up",
+                    "t": 1760313600000,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "kind": "condition_met",
+              "seq": 4,
+              "t": 1760313600000
+            },
+            "sub": "c",
+            "type": "notify"
+          }
+        },
+        {
+          "conn": "a",
+          "msg": {
+            "event": {
+              "claim": {
+                "kind": "condition",
+                "sub": "c"
+              },
+              "evidence": {
+                "anchor_t": 1759708800000,
+                "clean": true,
+                "feeds": [
+                  {
+                    "interval": "1d",
+                    "symbol": "THYAO"
+                  }
+                ],
+                "maturity": "final",
+                "series": "px",
+                "t": 1760313600000,
+                "values": [
+                  {
+                    "prev": 0.0,
+                    "series": "p1.up",
+                    "t": 1760313600000,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "kind": "claim",
+              "seq": 4,
+              "state": "asserted"
+            },
+            "sub": "k",
+            "type": "notify"
+          }
+        }
+      ],
+      "note": "Bar 7 (99.5 > 98) closes after `since_t`: `condition_met`."
+    }
+  ]
+}

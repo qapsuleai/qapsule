@@ -1,0 +1,1335 @@
+{
+  "covers": [
+    "check_program",
+    "program-errors",
+    "warnings",
+    "cost",
+    "reject"
+  ],
+  "description": "RL1 (PS §3.2, PR §11): check_program — every error at once (`span` in text, `at` in IR, `did_you_mean`), reasons, warnings (`W_CONSECUTIVE_EVENTS`, `W_LIVE_BUDGET`), cost, the IR of a text, a coded refusal; add_program's `errors[]`.",
+  "final": {
+    "log_len": 0
+  },
+  "init": {
+    "agent_policy": "r5b",
+    "clock": 1760000000000,
+    "document": "fixtures/protocol/docs/thyao.json",
+    "epoch": 0,
+    "principals": [
+      {
+        "author": {
+          "kind": "human",
+          "name": "arkin"
+        },
+        "id": "arkin",
+        "role": "owner"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "scout"
+        },
+        "id": "scout",
+        "on_behalf": "arkin",
+        "role": "proposer"
+      },
+      {
+        "author": {
+          "kind": "agent",
+          "name": "editor"
+        },
+        "id": "editor",
+        "role": "editor"
+      },
+      {
+        "author": {
+          "kind": "human",
+          "name": "viewer"
+        },
+        "id": "viewer",
+        "role": "viewer"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "feed",
+          "version": "0"
+        },
+        "id": "feed",
+        "role": "feed"
+      },
+      {
+        "author": {
+          "kind": "engine",
+          "name": "host",
+          "version": "0"
+        },
+        "id": "host",
+        "role": "host"
+      }
+    ],
+    "proposal_ttl_ms": null
+  },
+  "name": "72-program-check",
+  "steps": [
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "seq": 0,
+            "type": "welcome"
+          }
+        }
+      ],
+      "note": "A person.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "principal": "arkin",
+          "protocol": "qp/0",
+          "surface": {
+            "kind": "headless"
+          },
+          "type": "hello"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "cost": {
+                "bars": 200,
+                "limit": 666,
+                "live_per_bar": 9,
+                "per_bar": 7,
+                "total": 1400
+              },
+              "ir": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "m",
+                    "op": "sma",
+                    "period": {
+                      "param": "len"
+                    },
+                    "x": "_1"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_2",
+                    "op": "input"
+                  },
+                  {
+                    "a": "_2",
+                    "b": "m",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "defined",
+                    "x": "m"
+                  },
+                  {
+                    "a": "_3",
+                    "b": "_4",
+                    "id": "_5",
+                    "op": "and"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "avg",
+                    "node": "m"
+                  },
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_5"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 5,
+                    "key": "len",
+                    "kind": "int",
+                    "max": 50,
+                    "min": 2
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": true,
+              "outputs": [
+                {
+                  "documentable": true,
+                  "kind": "series",
+                  "name": "avg"
+                },
+                {
+                  "documentable": true,
+                  "kind": "event",
+                  "name": "up"
+                }
+              ],
+              "params": [
+                {
+                  "default": 5,
+                  "key": "len",
+                  "kind": "int",
+                  "max": 50,
+                  "min": 2
+                }
+              ],
+              "program_id": "sha256:493bea5ec53c3c06ae5ef0e8457e8c9052330c5a3af623906fe32a9a0de97796",
+              "warnings": [
+                {
+                  "at": "/outputs/1/node",
+                  "expected": [
+                    "cross_above",
+                    "cross_below",
+                    "once",
+                    "rearm",
+                    "cooldown"
+                  ],
+                  "message": "event `up` may fire on consecutive bars; live notifications merge them",
+                  "reason": "W_CONSECUTIVE_EVENTS",
+                  "span": {
+                    "col": 12,
+                    "len": 24,
+                    "line": 4
+                  }
+                }
+              ]
+            },
+            "id": "q1",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Text: ok, cost bound to `px` (bars, total), outputs (documentable), the IR, limits, the static `W_CONSECUTIVE_EVENTS` warning.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q1",
+          "query": {
+            "inputs": [
+              "px"
+            ],
+            "kind": "check_program",
+            "source": "param len int = 5 in 2..50\nm = sma(close, len)\nseries avg = m\nevent up = close > m and defined(m)\n"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "errors": [
+                {
+                  "at": "/nodes/3/period",
+                  "code": "limit",
+                  "expected": [
+                    "2000"
+                  ],
+                  "message": "`period` = 5000 is above the window limit 2000",
+                  "reason": "E_WINDOW_LIMIT",
+                  "span": {
+                    "col": 23,
+                    "len": 4,
+                    "line": 2
+                  }
+                },
+                {
+                  "at": "/nodes/4/period",
+                  "code": "invalid",
+                  "expected": [
+                    "1..=2000"
+                  ],
+                  "message": "`period` = 0 is outside 1..=2000",
+                  "reason": "E_BAD_PARAM",
+                  "span": {
+                    "col": 19,
+                    "len": 1,
+                    "line": 3
+                  }
+                },
+                {
+                  "at": "/nodes/6/n",
+                  "code": "unsupported",
+                  "hint": "a program reads only closed bars; refuse with `reject E_LOOKAHEAD` if the request needs the future",
+                  "message": "lag -1 reads a future bar",
+                  "reason": "E_LOOKAHEAD",
+                  "span": {
+                    "col": 18,
+                    "len": 2,
+                    "line": 4
+                  }
+                }
+              ],
+              "ir": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "x",
+                    "op": "sma",
+                    "period": 3,
+                    "x": "_1"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_2",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_3",
+                    "op": "sma",
+                    "period": 5000,
+                    "x": "_2"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "rsi",
+                    "period": 0,
+                    "x": "x"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_5",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_6",
+                    "n": -1,
+                    "op": "lag",
+                    "x": "_5"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "y",
+                    "node": "_3"
+                  },
+                  {
+                    "kind": "series",
+                    "name": "z",
+                    "node": "_4"
+                  },
+                  {
+                    "kind": "series",
+                    "name": "w",
+                    "node": "_6"
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": false,
+              "outputs": [
+                {
+                  "documentable": true,
+                  "kind": "series",
+                  "name": "y"
+                },
+                {
+                  "documentable": true,
+                  "kind": "series",
+                  "name": "z"
+                },
+                {
+                  "documentable": true,
+                  "kind": "series",
+                  "name": "w"
+                }
+              ],
+              "program_id": "sha256:5fb635399a87312f0a987d73cf7d319c55ade6ee2865c8d3f06f0f389ce86e6d"
+            },
+            "id": "q2",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Every checker error at once, each with its `span`: window limit, parameter range, look-ahead.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q2",
+          "query": {
+            "kind": "check_program",
+            "source": "x = sma(close, 3)\nseries y = sma(close, 5000)\nseries z = rsi(x, 0)\nseries w = close[-1]\n"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "errors": [
+                {
+                  "code": "schema",
+                  "did_you_mean": [
+                    "sma",
+                    "ema",
+                    "max"
+                  ],
+                  "expected": [
+                    "sma",
+                    "ema",
+                    "rsi",
+                    "highest",
+                    "lowest",
+                    "stdev",
+                    "percentrank",
+                    "macd",
+                    "bollinger",
+                    "atr",
+                    "min",
+                    "max",
+                    "abs",
+                    "cross_above",
+                    "cross_below",
+                    "streak",
+                    "bars_since",
+                    "once",
+                    "rearm",
+                    "cooldown",
+                    "defined",
+                    "align",
+                    "line",
+                    "bucket"
+                  ],
+                  "message": "bilinmeyen işlev `smaa`",
+                  "reason": "E_UNKNOWN_OP",
+                  "span": {
+                    "col": 5,
+                    "len": 4,
+                    "line": 1
+                  }
+                }
+              ],
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": false
+            },
+            "id": "q3",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "An unknown function (a text error, in Turkish): `did_you_mean`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q3",
+          "query": {
+            "kind": "check_program",
+            "lang": "tr",
+            "source": "x = smaa(close, 3)\nseries z = x\n"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "errors": [
+                {
+                  "code": "invalid",
+                  "expected": [
+                    "2..=50"
+                  ],
+                  "message": "value 99 of parameter `len` is outside 2..=50",
+                  "reason": "E_PARAM_RANGE"
+                },
+                {
+                  "at": "/nodes/1/op",
+                  "code": "schema",
+                  "did_you_mean": [
+                    "sma",
+                    "ema",
+                    "max",
+                    "lag",
+                    "macd"
+                  ],
+                  "expected": [
+                    "input",
+                    "const",
+                    "bar_index",
+                    "time",
+                    "sma",
+                    "ema",
+                    "rsi",
+                    "macd",
+                    "bollinger",
+                    "highest",
+                    "lowest",
+                    "atr",
+                    "stdev",
+                    "percentrank",
+                    "add",
+                    "sub",
+                    "mul",
+                    "div",
+                    "min",
+                    "max",
+                    "neg",
+                    "abs",
+                    "lag",
+                    "gt",
+                    "ge",
+                    "lt",
+                    "le",
+                    "eq",
+                    "ne",
+                    "and",
+                    "or",
+                    "not",
+                    "cross_above",
+                    "cross_below",
+                    "streak",
+                    "bars_since",
+                    "once",
+                    "rearm",
+                    "cooldown",
+                    "defined",
+                    "align",
+                    "line",
+                    "bucket"
+                  ],
+                  "message": "unknown function `smaa`",
+                  "reason": "E_UNKNOWN_OP"
+                }
+              ],
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": false,
+              "outputs": [
+                {
+                  "documentable": true,
+                  "kind": "series",
+                  "name": "avg"
+                },
+                {
+                  "documentable": true,
+                  "kind": "event",
+                  "name": "up"
+                }
+              ],
+              "params": [
+                {
+                  "default": 5,
+                  "key": "len",
+                  "kind": "int",
+                  "max": 50,
+                  "min": 2
+                }
+              ]
+            },
+            "id": "q4",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "IR: errors carry `at` (the IR path); a value out of range.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q4",
+          "query": {
+            "kind": "check_program",
+            "params": {
+              "len": 99
+            },
+            "program": {
+              "nodes": [
+                {
+                  "field": "close",
+                  "id": "_1",
+                  "op": "input"
+                },
+                {
+                  "id": "m",
+                  "op": "smaa",
+                  "period": {
+                    "param": "len"
+                  },
+                  "x": "_1"
+                },
+                {
+                  "field": "close",
+                  "id": "_2",
+                  "op": "input"
+                },
+                {
+                  "a": "_2",
+                  "b": "m",
+                  "id": "_3",
+                  "op": "gt"
+                },
+                {
+                  "id": "_4",
+                  "op": "defined",
+                  "x": "m"
+                },
+                {
+                  "a": "_3",
+                  "b": "_4",
+                  "id": "_5",
+                  "op": "and"
+                }
+              ],
+              "outputs": [
+                {
+                  "kind": "series",
+                  "name": "avg",
+                  "node": "m"
+                },
+                {
+                  "kind": "event",
+                  "name": "up",
+                  "node": "_5"
+                }
+              ],
+              "params": [
+                {
+                  "default": 5,
+                  "key": "len",
+                  "kind": "int",
+                  "max": 50,
+                  "min": 2
+                }
+              ],
+              "version": "qp-ir/0"
+            }
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": true,
+              "reject": {
+                "code": "E_LOOKAHEAD",
+                "reason": "the next bar's close is not known at this bar's close"
+              }
+            },
+            "id": "q5",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "A coded refusal: `ok: true` with `reject`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q5",
+          "query": {
+            "kind": "check_program",
+            "source": "reject E_LOOKAHEAD \"the next bar's close is not known at this bar's close\"\n"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "cost": {
+                "limit": 666,
+                "live_per_bar": 2576,
+                "per_bar": 647
+              },
+              "ir": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "const",
+                    "value": 0.0
+                  },
+                  {
+                    "a": "_1",
+                    "b": "_2",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_4",
+                    "op": "input"
+                  },
+                  {
+                    "id": "_5",
+                    "op": "stdev",
+                    "period": 640,
+                    "x": "_4"
+                  },
+                  {
+                    "id": "_6",
+                    "op": "const",
+                    "value": 0.0
+                  },
+                  {
+                    "a": "_5",
+                    "b": "_6",
+                    "id": "_7",
+                    "op": "gt"
+                  },
+                  {
+                    "a": "_3",
+                    "b": "_7",
+                    "id": "e",
+                    "op": "or"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "signal",
+                    "name": "a",
+                    "node": "e",
+                    "rule": {
+                      "max_bars": 500,
+                      "stop_pct": 90.0,
+                      "target_pct": 900.0
+                    },
+                    "side": "al",
+                    "source": {
+                      "strategy": "a",
+                      "version": "1"
+                    }
+                  },
+                  {
+                    "kind": "signal",
+                    "name": "b",
+                    "node": "e",
+                    "rule": {
+                      "max_bars": 500,
+                      "stop_pct": 90.0,
+                      "target_pct": 900.0
+                    },
+                    "side": "al",
+                    "source": {
+                      "strategy": "b",
+                      "version": "1"
+                    }
+                  },
+                  {
+                    "kind": "signal",
+                    "name": "c",
+                    "node": "e",
+                    "rule": {
+                      "max_bars": 500,
+                      "stop_pct": 90.0,
+                      "target_pct": 900.0
+                    },
+                    "side": "al",
+                    "source": {
+                      "strategy": "c",
+                      "version": "1"
+                    }
+                  },
+                  {
+                    "kind": "signal",
+                    "name": "d",
+                    "node": "e",
+                    "rule": {
+                      "max_bars": 500,
+                      "stop_pct": 90.0,
+                      "target_pct": 900.0
+                    },
+                    "side": "al",
+                    "source": {
+                      "strategy": "d",
+                      "version": "1"
+                    }
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": true,
+              "outputs": [
+                {
+                  "documentable": false,
+                  "kind": "signal",
+                  "name": "a"
+                },
+                {
+                  "documentable": false,
+                  "kind": "signal",
+                  "name": "b"
+                },
+                {
+                  "documentable": false,
+                  "kind": "signal",
+                  "name": "c"
+                },
+                {
+                  "documentable": false,
+                  "kind": "signal",
+                  "name": "d"
+                }
+              ],
+              "program_id": "sha256:010952bc49bffd4a28abdeb97cd816045cd775d7f7bbad08dfb1bbb5dc07323c",
+              "warnings": [
+                {
+                  "expected": [
+                    "2000"
+                  ],
+                  "hint": "Lower windows or outputs; try_program still runs it.",
+                  "message": "live cost 2576 per bar is over the per-owner live limit 2000: add_program refuses it",
+                  "reason": "W_LIVE_BUDGET"
+                }
+              ]
+            },
+            "id": "q6",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "It checks, but its live cost alone is over the per-owner limit: `W_LIVE_BUDGET` (`add_program` would refuse it).",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q6",
+          "query": {
+            "kind": "check_program",
+            "source": "e = close > 0 or stdev(close, 640) > 0\nsignal a = e side al target 900% stop 90% max_bars 500 source \"a\" \"1\"\nsignal b = e side al target 900% stop 90% max_bars 500 source \"b\" \"1\"\nsignal c = e side al target 900% stop 90% max_bars 500 source \"c\" \"1\"\nsignal d = e side al target 900% stop 90% max_bars 500 source \"d\" \"1\"\n"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "data": {
+              "cost": {
+                "limit": 666,
+                "live_per_bar": 9,
+                "per_bar": 7
+              },
+              "ir": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "r",
+                    "op": "rsi",
+                    "period": 14,
+                    "x": "_1"
+                  },
+                  {
+                    "id": "_2",
+                    "op": "const",
+                    "value": 30.0
+                  },
+                  {
+                    "a": "r",
+                    "b": "_2",
+                    "id": "_3",
+                    "op": "cross_below"
+                  },
+                  {
+                    "bars": 12,
+                    "id": "entry",
+                    "op": "cooldown",
+                    "trigger": "_3"
+                  },
+                  {
+                    "edges": [
+                      30.0,
+                      50.0,
+                      70.0
+                    ],
+                    "id": "_4",
+                    "op": "bucket",
+                    "x": "r"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "signal",
+                    "name": "rsi_dip",
+                    "node": "entry",
+                    "rule": {
+                      "max_bars": 24,
+                      "stop_pct": 1.5,
+                      "target_pct": 3.0
+                    },
+                    "side": "al",
+                    "source": {
+                      "strategy": "rsi_dip",
+                      "version": "1"
+                    }
+                  },
+                  {
+                    "dims": [
+                      {
+                        "name": "lvl",
+                        "node": "_4"
+                      }
+                    ],
+                    "kind": "state",
+                    "name": "zone"
+                  }
+                ],
+                "version": "qp-ir/0"
+              },
+              "kind": "program_check",
+              "limits": {
+                "program.check.max_errors": 50,
+                "program.live.doc.max_cost_per_bar": 2000,
+                "program.live.doc.max_instances": 32,
+                "program.live.doc.max_log_bytes": 4194304,
+                "program.max_cost_per_bar": 666,
+                "program.max_ir_bytes": 8192,
+                "program.max_nodes": 200,
+                "program.max_ops_per_command": 8,
+                "program.max_outputs": 4,
+                "program.max_params": 16,
+                "program.max_window": 2000,
+                "program.signal.max_horizon_bars": 500,
+                "program.text.max_depth": 64,
+                "program.text.max_source_chars": 65536,
+                "program.text.max_token_chars": 1024,
+                "program.try.max_bars": 20000,
+                "program.try.max_items": 10,
+                "program.try.max_work": 50000000,
+                "program.work.open_record": 1,
+                "program.work.read": 1,
+                "program.work.record": 16
+              },
+              "ok": true,
+              "outputs": [
+                {
+                  "documentable": false,
+                  "kind": "signal",
+                  "name": "rsi_dip"
+                },
+                {
+                  "documentable": false,
+                  "kind": "state",
+                  "name": "zone"
+                }
+              ],
+              "program_id": "sha256:b5ce0c64df65361b3d52f34d4a7eeadf03287f6b1447999b4bbeab00e834ac18"
+            },
+            "id": "q7",
+            "now": 1760000000000,
+            "seq": 0,
+            "type": "result"
+          }
+        }
+      ],
+      "note": "Signal and state outputs check; not documentable.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q7",
+          "query": {
+            "kind": "check_program",
+            "source": "r = rsi(close, 14)\nentry = cooldown(cross_below(r, 30), 12)\nsignal rsi_dip = entry side al target 3% stop 1.5% max_bars 24 source \"rsi_dip\" \"1\"\nstate zone { lvl = bucket(r, [30, 50, 70]) }\n"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "invalid",
+              "expected": [
+                "program",
+                "source",
+                "instance"
+              ],
+              "message": "give exactly one of `program`, `source`, `instance`",
+              "path": "/query"
+            },
+            "id": "q8",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "Neither program nor source: `invalid`.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "q8",
+          "query": {
+            "kind": "check_program"
+          },
+          "type": "query"
+        }
+      }
+    },
+    {
+      "expect": [
+        {
+          "conn": "a",
+          "msg": {
+            "error": {
+              "code": "invalid",
+              "errors": [
+                {
+                  "code": "invalid",
+                  "message": "`rsi14` is not a bar series",
+                  "reason": "E_NOT_BAR_SERIES"
+                },
+                {
+                  "code": "invalid",
+                  "expected": [
+                    "2..=50"
+                  ],
+                  "message": "value 99 of parameter `len` is outside 2..=50",
+                  "reason": "E_PARAM_RANGE"
+                },
+                {
+                  "at": "/nodes/1/op",
+                  "code": "schema",
+                  "did_you_mean": [
+                    "sma",
+                    "ema",
+                    "max",
+                    "lag",
+                    "macd"
+                  ],
+                  "expected": [
+                    "input",
+                    "const",
+                    "bar_index",
+                    "time",
+                    "sma",
+                    "ema",
+                    "rsi",
+                    "macd",
+                    "bollinger",
+                    "highest",
+                    "lowest",
+                    "atr",
+                    "stdev",
+                    "percentrank",
+                    "add",
+                    "sub",
+                    "mul",
+                    "div",
+                    "min",
+                    "max",
+                    "neg",
+                    "abs",
+                    "lag",
+                    "gt",
+                    "ge",
+                    "lt",
+                    "le",
+                    "eq",
+                    "ne",
+                    "and",
+                    "or",
+                    "not",
+                    "cross_above",
+                    "cross_below",
+                    "streak",
+                    "bars_since",
+                    "once",
+                    "rearm",
+                    "cooldown",
+                    "defined",
+                    "align",
+                    "line",
+                    "bucket"
+                  ],
+                  "message": "unknown function `smaa`",
+                  "reason": "E_UNKNOWN_OP"
+                }
+              ],
+              "message": "`rsi14` is not a bar series",
+              "path": "/ops/0/inputs/0",
+              "reason": "E_NOT_BAR_SERIES"
+            },
+            "id": "c1",
+            "type": "error"
+          }
+        }
+      ],
+      "note": "add_program: the first error at the top (`E_NOT_BAR_SERIES`), every error in `errors[]`; nothing applied.",
+      "send": {
+        "conn": "a",
+        "msg": {
+          "id": "c1",
+          "ops": [
+            {
+              "inputs": [
+                "rsi14"
+              ],
+              "op": "add_program",
+              "params": {
+                "len": 99
+              },
+              "program": {
+                "nodes": [
+                  {
+                    "field": "close",
+                    "id": "_1",
+                    "op": "input"
+                  },
+                  {
+                    "id": "m",
+                    "op": "smaa",
+                    "period": {
+                      "param": "len"
+                    },
+                    "x": "_1"
+                  },
+                  {
+                    "field": "close",
+                    "id": "_2",
+                    "op": "input"
+                  },
+                  {
+                    "a": "_2",
+                    "b": "m",
+                    "id": "_3",
+                    "op": "gt"
+                  },
+                  {
+                    "id": "_4",
+                    "op": "defined",
+                    "x": "m"
+                  },
+                  {
+                    "a": "_3",
+                    "b": "_4",
+                    "id": "_5",
+                    "op": "and"
+                  }
+                ],
+                "outputs": [
+                  {
+                    "kind": "series",
+                    "name": "avg",
+                    "node": "m"
+                  },
+                  {
+                    "kind": "event",
+                    "name": "up",
+                    "node": "_5"
+                  }
+                ],
+                "params": [
+                  {
+                    "default": 5,
+                    "key": "len",
+                    "kind": "int",
+                    "max": 50,
+                    "min": 2
+                  }
+                ],
+                "version": "qp-ir/0"
+              }
+            }
+          ],
+          "type": "command"
+        }
+      }
+    }
+  ]
+}

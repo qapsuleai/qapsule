@@ -44,22 +44,74 @@ pub(crate) fn owners(new: &[ChangeOp]) -> BTreeSet<String> {
         .collect()
 }
 
-/// Program bytes per owner in `log` (the world's own log: the authority's or the public
-/// world's). One walk over the entries' changes; only program series are measured, and
-/// each owner's are at most `program.live.doc.max_log_bytes` (this check keeps them
-/// there), so the work is bounded by the budget, not by the log's other entries' size.
-/// (No incremental count: the expansion, where this must hold on every path, gets no
-/// subsystem state; see the crate README.)
-pub(crate) fn logged(log: &[LogEntry]) -> BTreeMap<String, u64> {
-    let mut out: BTreeMap<String, u64> = BTreeMap::new();
-    for (o, n) in log
+/// What identifies a log entry for the memo: seq, time, author, change count.
+type Tail = (u64, i64, String, usize);
+
+/// The last log counted: where it lives, how long it was, its last entry, the count.
+struct Memo {
+    at: usize,
+    len: usize,
+    tail: Tail,
+    per_owner: BTreeMap<String, u64>,
+}
+
+thread_local! {
+    /// [`logged`]'s memo. A pure cache of a function of the log (same log, same answer):
+    /// every program op of a command, and the next command on the same log, reuse the
+    /// count instead of walking the log again. The expansion gets no subsystem state
+    /// (missing hook: a slot read in `qp_ops::Ctx`), so the cache lives here.
+    static MEMO: std::cell::RefCell<Option<Memo>> = const { std::cell::RefCell::new(None) };
+}
+
+/// The memo's identity of entry `e`.
+fn tail(e: &LogEntry) -> Tail {
+    (e.seq, e.at, e.author.clone(), e.changes.len())
+}
+
+/// Adds the program bytes of `entries` to `per_owner`.
+fn count(entries: &[LogEntry], per_owner: &mut BTreeMap<String, u64>) {
+    for (o, n) in entries
         .iter()
         .flat_map(|e| e.changes.iter())
         .filter_map(program_bytes)
     {
-        *out.entry(o.to_owned()).or_default() += n;
+        *per_owner.entry(o.to_owned()).or_default() += n;
     }
-    out
+}
+
+/// Program bytes per owner in `log` (the world's own log: the authority's or the public
+/// world's). Counted once per log and then only for the entries appended since
+/// ([`MEMO`]): the same log (the next op of a command) costs nothing more, a grown log
+/// only its new entries; another log (another world, a moved vector) is counted afresh.
+/// Only program series are measured.
+pub(crate) fn logged(log: &[LogEntry]) -> BTreeMap<String, u64> {
+    let at = log.as_ptr() as usize;
+    MEMO.with(|m| {
+        let mut m = m.borrow_mut();
+        let reuse = m.as_ref().is_some_and(|x| {
+            x.at == at
+                && x.len > 0
+                && x.len <= log.len()
+                && log.get(x.len - 1).map(tail).as_ref() == Some(&x.tail)
+        });
+        let mut memo = match m.take() {
+            Some(x) if reuse => x,
+            _ => Memo {
+                at,
+                len: 0,
+                tail: (0, 0, String::new(), 0),
+                per_owner: BTreeMap::new(),
+            },
+        };
+        count(&log[memo.len..], &mut memo.per_owner);
+        memo.len = log.len();
+        if let Some(e) = log.last() {
+            memo.tail = tail(e);
+        }
+        let out = memo.per_owner.clone();
+        *m = Some(memo);
+        out
+    })
 }
 
 /// `owner`'s use in `after` (the document with `new` applied): `prior` program bytes
@@ -200,5 +252,24 @@ mod tests {
         let c = logged(&log);
         assert_eq!(c.get("arkin"), Some(&(2 * one)));
         assert_eq!(c.len(), 2);
+        // Again, and grown: the same as a fresh count.
+        assert_eq!(logged(&log), c);
+        let mut grown = Vec::with_capacity(16);
+        grown.extend(log.iter().cloned());
+        let first = logged(&grown);
+        assert_eq!(first, c);
+        grown.push(entry(4, series("c", "arkin")));
+        let mut fresh = BTreeMap::new();
+        count(&grown, &mut fresh);
+        assert_eq!(logged(&grown), fresh);
+        assert_eq!(fresh.get("arkin"), Some(&(3 * one)));
+        // Another log with the same length elsewhere: counted afresh.
+        let other = vec![
+            entry(1, series("a", "deniz")),
+            entry(2, series("b", "deniz")),
+            entry(3, series("c", "deniz")),
+            entry(4, series("d", "deniz")),
+        ];
+        assert_eq!(logged(&other).get("arkin"), None);
     }
 }

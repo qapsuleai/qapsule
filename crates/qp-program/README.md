@@ -30,8 +30,8 @@ izleyici program serilerini veri düzlemiyle hesaplar).
   edilen önerinin işlemleri (karar veren sahip) ya da program serisi geri getirebilen `undo`
   bir kopyada barındırıcının sınırlarıyla (`SessionView::param`) açılır: program sınırları ve
   yazılan/geri gelen her sahibin canlı bütçesi (`program.live.doc.*`). Günlük baytı her
-  açılım yolunda o dünyanın kendi günlüğünden sayılır (tek geçiş; yalnız program serileri
-  ölçülür, sahip başına bütçeyle sınırlı). Kabulde açılımın yazacağı sahip (karar verenin
+  açılım yolunda o dünyanın kendi günlüğünden sayılır: günlük başına bir kez, sonra yalnız
+  eklenen girdiler (`budget::logged`, saf önbellek; aynı günlük aynı cevap). Kabulde açılımın yazacağı sahip (karar verenin
   yazar adı ilke kimliği sayılır) karar veren bağlantının kişisi değilse `owner_unresolved`.
 - Sorgular (`QueryHandler`): `check_program` (ara gösterim ya da metin; metin hataları `span`
   taşır; `program.text.*` sınırları), `try_program` (okuyucunun kapanmış barları, veri yetkisi
@@ -46,7 +46,8 @@ hataları → protokol hatası, hepsi birden).
 defterinden (`qp_lang::Limits`). Açılım `qp_ops::Ctx`'te `param` olmadığından kayıt defteri
 varsayılanlarıyla denetler; barındırıcı değeri `Check` fazında. Eksik kancalar: açılımda
 `param_for` (PS §7/3); açılım bağlamında karar verenin ilke kimliği (`Ctx::approved_by` yalnız
-`Author`); açılımın alt sistem durumuna erişimi (artımlı günlük baytı sayacı için).
+`Author`); açılımın alt sistem durumuna erişimi (günlük baytı önbelleği bu yüzden `thread_local`); komut
+başına program işlemi tavanı için kayıt defterinde anahtar yok.
 
 **Ne değildir:** program serilerinin değerlerini hesaplamaz (`qp-plane`); otorite değildir;
 yeni `ChangeOp`, koşul türü ya da koleksiyon eklemez.

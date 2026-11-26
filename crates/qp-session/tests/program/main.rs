@@ -7,6 +7,7 @@
 mod accept;
 mod agent;
 mod legend;
+mod long;
 mod ops;
 mod queries;
 mod rig;

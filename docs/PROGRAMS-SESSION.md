@@ -209,7 +209,10 @@ varsayılan, `tr`).
 Süreç içi, `qp serve` ve MCP aynı mesajları taşır. MCP araçları (ince yüzey, K86/6) sorgu ve
 işlem adlarıyla: `check_program`, `try_program`, `explain_program` (metin ya da ara gösterim),
 `add_program` (metni önce ara gösterime indirir, komutu gönderir; MCP bağlantısı ajan kökenli,
-öneri olur). Karar aracı yok. Şemadan üretilen `op_*` araçları varsa yeni işlemler de oraya düşer;
+öneri olur). *(RL1/M uygulama notu: araç adları `program_check`, `program_try`,
+`program_explain`, `program_add`; `thin` yüzeyinin ajan ucunda üretilmiş araçlardan sonra
+listelenir. Üretilmiş `query_*_program` ve `op_add_program` araçlarıyla çakışmasın diye
+`program_` önekiyle; argüman `program` dizgiyse metin, nesneyse ara gösterimdir.)* Karar aracı yok. Şemadan üretilen `op_*` araçları varsa yeni işlemler de oraya düşer;
 politika onları yine sınırlar. Komut satırı: `qp program check | run | explain <dosya>` (metin ya
 da JSON; `run` = `try_program` çekirdeği, kapalı pencere).
 
@@ -222,6 +225,16 @@ da JSON; `run` = `try_program` çekirdeği, kapalı pencere).
   `t`, sinyal `records` (PR §6 kayıt biçimi + `bar`, `exit_bar` indeksleri), durum `keys` (bar
   başına dizi ya da `null`) ve `counts`.
 - `qp program explain [--json] [--lang tr|en] <dosya>`: `program_explain` cevabı.
+- *(RL1/M uygulama notu)* Dosya `{` ya da `[` ile başlıyorsa JSON (ara gösterim) okunur;
+  ayrıştırılamazsa (ör. 128'den derin iç içelik) kodlu `E_PARSE` + ipucu, metin sayılmaz;
+  değilse metindir. Boyut okumadan önce sınanır ve okuma sınırlıdır: en çok
+  `max(program.text.max_source_chars × 4, program.max_ir_bytes)` bayt, aşan `E_TOO_LARGE`
+  (`expected` = sınır). Sınırlar kayıt defteri varsayılanlarıdır. `run --full` cevabı
+  `{"kind":"program_run", program_id, bars, from_t, to_t, outputs, work, stopped?}`; durum
+  `counts` = `[{key, count}]` (anahtar sırasıyla); pencere ve iş bütçesi `try_program`'ınkiyle
+  aynı (`program.try.*`). Çıkış: 0 cevap basıldı; 1 programda hata (`program_check` cevabı
+  basılır; `run`/`explain`'de ret de 1, çalışacak program yok); 2 kullanım, dosya ya da veri
+  hatası.
 
 ## 4. Uygunluk dökümleri (eklenecek: 71–77)
 

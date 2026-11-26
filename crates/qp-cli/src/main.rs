@@ -118,6 +118,13 @@ enum Command {
         #[command(subcommand)]
         command: live::LiveCommand,
     },
+    /// (RL1) Programs of the computation language (`qp-ir/0`, docs/PROGRAMS.md): check,
+    /// run over a bar series file (closed window) or explain a program file (text or IR
+    /// JSON) without a session (docs/PROGRAMS-SESSION.md §3.3).
+    Program {
+        #[command(subcommand)]
+        command: ProgramCommand,
+    },
     /// Run protocol conformance transcripts (docs/PROTOCOL.md §15).
     Conform {
         /// Transcript files or directories of `*.json` transcripts.
@@ -448,6 +455,7 @@ fn run(command: Command) -> Result<Outcome, String> {
         Command::Explain(args) => scene_cmd(&args, true),
         Command::Scene(args) => scene_cmd(&args, false),
         Command::Look { command } => look_cmd(&command),
+        Command::Program { command } => program_cmd(&command),
     }
 }
 

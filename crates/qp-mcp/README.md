@@ -9,6 +9,7 @@ JSON-RPC 2.0 cevaplar (`initialize`, `tools/list`, `tools/call`, `resources/*`,
 **Katman:** uyarlayıcılar (`docs/ENGINEERING.md` §2).
 
 **Bağımlılıklar:** `qp-schema`, `qp-render` (`render` aracı için), `qp-session`,
+`qp-lang-text` (RL1 `program_add`: metin → ara gösterim),
 `schemars`, `serde`, `serde_json`. Geliştirme: `qp-schema` (`validate`).
 
 **Dışa açık yüzey (`lib.rs`):**

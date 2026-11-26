@@ -75,3 +75,16 @@ yeniden kayıt.** Kanıt `rounds/RL1/experiments/i1/describe-diff.md`: 570 durum
 hepsi listelerin sonuna yeni adların eklenmesi (eski liste değişmemiş önek); bayt toplamları
 yalnız bu eklemelerle açıklanıyor. `fixtures/` değişmedi. PROGRAMS §17'deki "describe değişmez"
 varsayımı bu kadarıyla düzeltilir (ekleme).
+
+## D6 — Çalıştırıcı kabuk paketinde; İ8 yeniden (Arkin, 2026-11-26)
+
+**Soru (D1 şart 1, PA'nın WASM kapısı):** D4 tavanı (ham 6.763.122 / gzip 1.988.319) aşıldı. (a) main,
+`qp-lang` bağlanmadan: ham 6.935.682 / gzip 2.005.537 (I1'in protokol tipleri: kabuk yeni işlem ve
+sorguları çözmek için serde kodunu taşır). (b) `qp-lang` `qp-plane`'e bağlanınca: ham 7.154.035 /
+gzip 2.076.328 (çalıştırıcının payı +%3,1 / +%3,5). Değerler telde taşınmaz; yansı her seriyi kendi
+hesaplar: çalıştırıcı pakette olmazsa web kabuğu program serisini çizemez.
+
+**Karar: çalıştırıcı pakette; İ8 yeniden.** Yansı program serisini kendi hesaplar (belirlenimcilik
+wasm32'de kanıtlı: program özeti `4e77c249…` üç mimaride eşit). **Yeni İ8** = ölçülen (b) + %2,5:
+**ham 7.332.886 B, gzip 2.128.236 B.** Ö1 öncesi paket (9.004.332 / 2.485.078) bundan hâlâ %20,5 /
+%16,5 büyüktü. VERIFY 6 bu satıra göre ölçülür; round sonunda ölçüm yinelenir.

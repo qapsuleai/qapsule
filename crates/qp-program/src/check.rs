@@ -3,7 +3,7 @@
 //! the proposal it accepts (the decider as owner) or an `undo` that may restore program
 //! series — expanded on a copy under the host's limits (`SessionView::param`, PR §8.4):
 //! the program's limits and every restored or written owner's live budget, with the
-//! log's program bytes. On an acceptance the owner the expansion will write (the decider's
+//! log's program bytes from the slot ([`LogBytes`], kept in `AfterCommit`). On an acceptance the owner the expansion will write (the decider's
 //! author name read as a principal, `crate::expand::owner_of`) must be the deciding
 //! connection's person, else it is refused (missing hook: the decider's principal in
 //! `qp_ops::Ctx`). Nothing is written here (ARCHITECTURE "Yazarken dikkat").
@@ -17,7 +17,7 @@ use qp_schema::protocol::{Op, ProtocolError, Role};
 use qp_schema::Author;
 use qp_subsystem::{SessionCtx, SessionView};
 
-use crate::budget::{logged, over_budget};
+use crate::budget::{over_budget, LogBytes};
 use crate::expand::author_name;
 use crate::expand::Rules;
 use crate::guard::guards;
@@ -205,7 +205,11 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
         Err(_) => return Ok(()),
     };
     // The whole command against every owner it writes or restores, with the log's bytes.
-    let prior = logged(view.log());
+    let log = view.log();
+    let prior = match ctx.slots.get_mut::<LogBytes>() {
+        Some(lb) if !view.in_public() => lb.current(log).clone(),
+        _ => LogBytes::scan(log).current(log).clone(),
+    };
     let errs = over_budget(&ex.doc, &prior, &ex.changes, &rules.limits, rules.lang);
     if errs.is_empty() {
         Ok(())

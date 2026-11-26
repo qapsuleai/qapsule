@@ -44,30 +44,6 @@ pub(crate) fn owners(new: &[ChangeOp]) -> BTreeSet<String> {
         .collect()
 }
 
-/// What identifies a log entry for the memo: seq, time, author, change count.
-type Tail = (u64, i64, String, usize);
-
-/// The last log counted: where it lives, how long it was, its last entry, the count.
-struct Memo {
-    at: usize,
-    len: usize,
-    tail: Tail,
-    per_owner: BTreeMap<String, u64>,
-}
-
-thread_local! {
-    /// [`logged`]'s memo. A pure cache of a function of the log (same log, same answer):
-    /// every program op of a command, and the next command on the same log, reuse the
-    /// count instead of walking the log again. The expansion gets no subsystem state
-    /// (missing hook: a slot read in `qp_ops::Ctx`), so the cache lives here.
-    static MEMO: std::cell::RefCell<Option<Memo>> = const { std::cell::RefCell::new(None) };
-}
-
-/// The memo's identity of entry `e`.
-fn tail(e: &LogEntry) -> Tail {
-    (e.seq, e.at, e.author.clone(), e.changes.len())
-}
-
 /// Adds the program bytes of `entries` to `per_owner`.
 fn count(entries: &[LogEntry], per_owner: &mut BTreeMap<String, u64>) {
     for (o, n) in entries
@@ -79,39 +55,59 @@ fn count(entries: &[LogEntry], per_owner: &mut BTreeMap<String, u64>) {
     }
 }
 
-/// Program bytes per owner in `log` (the world's own log: the authority's or the public
-/// world's). Counted once per log and then only for the entries appended since
-/// ([`MEMO`]): the same log (the next op of a command) costs nothing more, a grown log
-/// only its new entries; another log (another world, a moved vector) is counted afresh.
-/// Only program series are measured.
-pub(crate) fn logged(log: &[LogEntry]) -> BTreeMap<String, u64> {
-    let at = log.as_ptr() as usize;
-    MEMO.with(|m| {
-        let mut m = m.borrow_mut();
-        let reuse = m.as_ref().is_some_and(|x| {
-            x.at == at
-                && x.len > 0
-                && x.len <= log.len()
-                && log.get(x.len - 1).map(tail).as_ref() == Some(&x.tail)
-        });
-        let mut memo = match m.take() {
-            Some(x) if reuse => x,
-            _ => Memo {
-                at,
-                len: 0,
-                tail: (0, 0, String::new(), 0),
-                per_owner: BTreeMap::new(),
-            },
-        };
-        count(&log[memo.len..], &mut memo.per_owner);
-        memo.len = log.len();
-        if let Some(e) = log.last() {
-            memo.tail = tail(e);
+/// Program bytes per owner in the authority's log (its slot, PS §2.3): one scan at
+/// registration, then each committed entry's changes in [`Phase::AfterCommit`]
+/// (`crate::subsystem`), read by the `Check` phase. Every entry is committed in the
+/// authority's world (the public world mirrors it), so this one count is the strictest
+/// for both worlds. A log it does not continue (cleared, replaced: a different length or
+/// last seq than it counted) is scanned again before it is read — never read stale.
+///
+/// [`Phase::AfterCommit`]: qp_subsystem::Phase::AfterCommit
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub(crate) struct LogBytes {
+    len: usize,
+    last_seq: Option<u64>,
+    per_owner: BTreeMap<String, u64>,
+}
+
+impl LogBytes {
+    /// The count of `log`, from the start.
+    pub(crate) fn scan(log: &[LogEntry]) -> LogBytes {
+        let mut per_owner = BTreeMap::new();
+        count(log, &mut per_owner);
+        LogBytes {
+            len: log.len(),
+            last_seq: log.last().map(|e| e.seq),
+            per_owner,
         }
-        let out = memo.per_owner.clone();
-        *m = Some(memo);
-        out
-    })
+    }
+
+    /// Whether it counted exactly `log`'s entries so far (a prefix of `n` entries).
+    fn counted(&self, log: &[LogEntry], n: usize) -> bool {
+        self.len == n
+            && n <= log.len()
+            && (n == 0 || log.get(n - 1).map(|e| e.seq) == self.last_seq)
+    }
+
+    /// After an entry was committed to `log`: counts the entries after the ones it
+    /// counted, or `log` again when it does not continue it.
+    pub(crate) fn on_commit(&mut self, log: &[LogEntry]) {
+        if !self.counted(log, self.len) {
+            *self = LogBytes::scan(log);
+            return;
+        }
+        count(&log[self.len..], &mut self.per_owner);
+        self.len = log.len();
+        self.last_seq = log.last().map(|e| e.seq);
+    }
+
+    /// The bytes per owner of `log` (counted again first unless it counted all of it).
+    pub(crate) fn current(&mut self, log: &[LogEntry]) -> &BTreeMap<String, u64> {
+        if !self.counted(log, log.len()) {
+            *self = LogBytes::scan(log);
+        }
+        &self.per_owner
+    }
 }
 
 /// `owner`'s use in `after` (the document with `new` applied): `prior` program bytes
@@ -242,34 +238,32 @@ mod tests {
     }
 
     #[test]
-    fn logged_counts_each_owners_program_bytes() {
+    fn the_slot_follows_commits_and_rebuilds_on_another_log() {
         let one = serde_json::to_vec(&series("a", "arkin")).unwrap().len() as u64;
-        let log = vec![
-            entry(1, series("a", "arkin")),
-            entry(2, series("a", "arkin")),
-            entry(3, series("b", "deniz")),
-        ];
-        let c = logged(&log);
-        assert_eq!(c.get("arkin"), Some(&(2 * one)));
-        assert_eq!(c.len(), 2);
-        // Again, and grown: the same as a fresh count.
-        assert_eq!(logged(&log), c);
-        let mut grown = Vec::with_capacity(16);
-        grown.extend(log.iter().cloned());
-        let first = logged(&grown);
-        assert_eq!(first, c);
-        grown.push(entry(4, series("c", "arkin")));
-        let mut fresh = BTreeMap::new();
-        count(&grown, &mut fresh);
-        assert_eq!(logged(&grown), fresh);
-        assert_eq!(fresh.get("arkin"), Some(&(3 * one)));
-        // Another log with the same length elsewhere: counted afresh.
-        let other = vec![
-            entry(1, series("a", "deniz")),
-            entry(2, series("b", "deniz")),
-            entry(3, series("c", "deniz")),
-            entry(4, series("d", "deniz")),
-        ];
-        assert_eq!(logged(&other).get("arkin"), None);
+        let mut log = Vec::new();
+        let mut lb = LogBytes::scan(&log);
+        for k in 1..=50 {
+            log.push(entry(k, series("a", "arkin")));
+            lb.on_commit(&log);
+        }
+        assert_eq!(lb, LogBytes::scan(&log), "incremental = a full scan");
+        assert_eq!(lb.current(&log).get("arkin"), Some(&(50 * one)));
+        // An undo writes the series again: its bytes count too.
+        log.push(entry(51, series("b", "arkin")));
+        lb.on_commit(&log);
+        assert_eq!(lb.current(&log).get("arkin"), Some(&(51 * one)));
+        // Cleared (a follower restart): rebuilt, not stale.
+        log.clear();
+        assert!(lb.current(&log).is_empty());
+        // Replaced by another log of the same length: rebuilt by its last seq.
+        let a: Vec<LogEntry> = (1..=3).map(|k| entry(k, series("a", "arkin"))).collect();
+        let b: Vec<LogEntry> = (7..=9).map(|k| entry(k, series("a", "deniz"))).collect();
+        let mut lb = LogBytes::scan(&a);
+        assert!(lb.current(&b).get("arkin").is_none());
+        assert!(lb.current(&b).get("deniz").is_some());
+        // A commit after a missed one: scanned again.
+        let mut lb = LogBytes::scan(&a[..1]);
+        lb.on_commit(&a);
+        assert_eq!(lb, LogBytes::scan(&a));
     }
 }

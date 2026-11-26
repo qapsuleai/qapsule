@@ -18,11 +18,11 @@ use qp_plane::error::{ptr, PResult, E};
 use qp_plane::plane::{bars_for, is_bar_series};
 use qp_plane::values::find_series;
 use qp_schema::program::{ProgramParamValue, ProgramRef, ProgramScope, PROGRAM_STUDY};
-use qp_schema::protocol::{ChangeOp, ErrorCode, LogEntry, Op, Show};
+use qp_schema::protocol::{ChangeOp, ErrorCode, Op, Show};
 use qp_schema::{Author, Document, Series, SeriesSource};
 use serde_json::Value;
 
-use crate::budget::{logged, over_budget};
+use crate::budget::over_budget;
 use crate::inst::{instance_names, output_name, outputs_of, program_of};
 use crate::refuse::{refuse, session, under, Located};
 
@@ -180,7 +180,7 @@ pub(crate) fn add_program(
     };
     let names: Vec<&str> = checked.outputs.iter().map(|o| o.name.as_str()).collect();
     let mut out = put_outputs(doc, &names, input, &pref, p)?;
-    budget_check(doc, &out, ctx.log, rules, p)?;
+    budget_check(doc, &out, rules, p)?;
     for c in &out {
         if let ChangeOp::PutSeries { series, .. } = c {
             ctx.n += 1;
@@ -283,19 +283,15 @@ fn instance_id(doc: &Document, id: Option<&String>, p: &str, ctx: &mut Ctx<'_>) 
     Ok(name)
 }
 
-/// The live budget after `new` (applied to a copy of `doc`), with `log`'s program bytes.
+/// The live budget after `new` (applied to a copy of `doc`).
 #[allow(clippy::result_large_err)]
-fn budget_check(
-    doc: &Document,
-    new: &[ChangeOp],
-    log: &[LogEntry],
-    rules: Rules,
-    p: &str,
-) -> PResult<()> {
+fn budget_check(doc: &Document, new: &[ChangeOp], rules: Rules, p: &str) -> PResult<()> {
     let mut after = doc.clone();
     qp_ops::apply_all(&mut after, new).map_err(|m| qp_plane::error::invalid(m, "/ops"))?;
-    // Every expansion path (each world, its own log) counts the log's program bytes.
-    let errs = over_budget(&after, &logged(log), new, &rules.limits, rules.lang);
+    // The log's program bytes are the `Check` phase's (its slot, once per command); every
+    // expansion path (the public world's mirror too) counts instances, cost and its own
+    // bytes, without walking the log.
+    let errs = over_budget(&after, &BTreeMap::new(), new, &rules.limits, rules.lang);
     if errs.is_empty() {
         return Ok(());
     }
@@ -370,7 +366,7 @@ pub(crate) fn set_program_params(
         })
         .collect();
     debug_assert!(outs.iter().all(|s| output_name(s).is_some()));
-    budget_check(doc, &out, ctx.log, rules, p)?;
+    budget_check(doc, &out, rules, p)?;
     Ok(out)
 }
 

@@ -274,7 +274,13 @@ altında, `-- --write` ile.
 
 Toplu eklemede 0,1,0 kaybı ve art arda olayda tek bildirim (§1.2); seans sonu gecikmesi;
 `condition` aboneliğinde olay serisinin `compare` işleneni olması engellenemez; kişi başına
-plan değeri çözülemez (PR Açık sorular 1); `since_t` öncesi olaylar dokümanda görünmez.
+plan değeri çözülemez (PR Açık sorular 1); `since_t` öncesi olaylar dokümanda görünmez. Günlük baytı bütçesi (`max_log_bytes`) komut başına
+bir kez `Check` fazında, otoritenin günlüğünü izleyen yuvadan (`AfterCommit`) karar verilir; açılım
+(kamu dünyasının yansı yolu dahil) `Check`'e ulaşmaz, yalnız örnek sayısını, maliyeti ve kendi
+baytını sayar — her girdi otoritenin dünyasında işlendiğinden bu sayım iki dünya için de en
+sıkısıdır. Komut başına program işlemi tavanı için kayıt defterinde anahtar yok. Kabulde açılım
+karar verenin ilke kimliğini bilmez (`Ctx::approved_by` yalnız `Author`); yazar adı ilke kimliği
+değilse kabul `owner_unresolved` ile reddedilir.
 
 ## 7. Eksik kancalar (D1 şart 3; ayrıntı `REPORT.md`)
 

@@ -39,3 +39,49 @@ fn many_program_ops_over_a_long_log_stay_fast() {
     // 600 set-ups ~25 s instead of ~1 s). The bound sits between, with room.
     assert!(took < Duration::from_secs(1), "{took:?}");
 }
+
+/// The bytes of program series `id` as the log stores them.
+fn bytes(h: &H, id: &str) -> u64 {
+    serde_json::to_vec(&h.series(id)).unwrap().len() as u64
+}
+
+/// Repeated value changes fill the owner's log bytes (`program.live.doc.max_log_bytes`,
+/// 4 MiB): refused at exactly the predicted change, counted by the slot over every
+/// commit; an undo's restored series count as written.
+#[test]
+fn repeated_set_params_reach_the_log_byte_budget_exactly() {
+    let mut h = H::new();
+    h.add("p1", SMA_TEXT);
+    let set = |h: &mut H, len: u32| {
+        h.cmd(
+            "a",
+            json!([{"op":"set_program_params","program":"p1","params":{"len": len}}]),
+        )
+    };
+    // Same-width values: every entry writes the same bytes.
+    assert_eq!(set(&mut h, 10)["status"], "applied");
+    let per = bytes(&h, "p1.avg") + bytes(&h, "p1.up");
+    let limit = 4_194_304_u64;
+    // add_program wrote `per` bytes (as wide as these), and one set so far.
+    let fits = limit / per; // entries that fit
+    let mut applied = 2;
+    loop {
+        let r = set(&mut h, 10 + (applied % 2) as u32);
+        if r["type"] == "error" {
+            assert_eq!(r["error"]["reason"], "E_BUDGET", "{r}");
+            assert_eq!(r["error"]["expected"], json!([limit.to_string()]), "{r}");
+            break;
+        }
+        applied += 1;
+        assert!(applied <= fits + 1, "not refused in time");
+    }
+    assert_eq!(
+        applied, fits,
+        "refused at exactly the first entry over the limit"
+    );
+    // Removing the instance frees no log bytes; its undo would write them again.
+    let r = h.cmd("a", json!([{"op":"remove_program","program":"p1"}]));
+    let seq = r["seq"].as_u64().unwrap();
+    let r = h.cmd("a", json!([{"op":"undo","seq":seq}]));
+    assert_eq!(r["error"]["reason"], "E_BUDGET", "{r}");
+}

@@ -483,6 +483,9 @@ Veri hataları (`dene` için) var olan `no_entitlement` ve `no_data` kodlarıdı
   `cross_below`, `once`, `rearm`, `bars ≥ 1` olan `cooldown` ya da bir işleneni bunlardan olan
   `and` değil); olay art arda barlarda doğabilir ve bildirim birleşir (PS §1.2, D1 şart 2).
 - `W_UNUSED_NODE`: hiçbir çıktıya ulaşmayan düğüm (maliyete yine sayılır).
+- `W_LIVE_BUDGET` (oturumda, `check_program`): programın canlı bar maliyeti tek başına kişi başı
+  canlı sınırını (`program.live.doc.max_cost_per_bar`) aşıyor; `add_program` `E_BUDGET` ile reddeder
+  (`expected` = sınır; RL1/U3 bulgusu).
 
 ## 12. Metin dil
 

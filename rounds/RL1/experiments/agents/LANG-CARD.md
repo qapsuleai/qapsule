@@ -75,7 +75,7 @@ state  ad { boyut1 = bucket(...), boyut2 = bucket(...) }
   zorunlu (`max_bars` 1…500; `target`, `stop` > 0 isteğe bağlı). Giriş = sinyal barının
   kapanışı; sonuç sonraki barlardan: önce durdurma, sonra hedef, aynı barda ikisi → `stop`;
   `max_bars` dolarsa `expired`; veri biterse `open`. Sinyal ve durum tanımı **dokümana
-  eklenmez** (yalnız `check`/`try`; `add_program` → `E_TRY_ONLY`).
+  eklenmez** (yalnız `check`/`try`; `program_add` → `E_TRY_ONLY`).
 - **Durum tanımı:** 1…4 boyut, her boyut bir `bucket`; bar başına anahtar boyut sırasıyla;
   bir boyut boşsa anahtar boş.
 
@@ -99,7 +99,7 @@ state  ad { boyut1 = bucket(...), boyut2 = bucket(...) }
 | `E_WINDOW_LIMIT`, `E_TOO_MANY_NODES`, `E_TOO_LARGE`, `E_COST_LIMIT`, `E_BUDGET` | Pencere > 2000; düğüm > 200; boyut; bar başı maliyet > 666; kişi bütçesi |
 | `E_LOOKAHEAD` | Geleceğe bakma: negatif gecikme, kapanmamış bar, gelecek değer |
 | `E_UNSUPPORTED` | Bilerek olmayan yapı: döngü, koşullu ifade, kullanıcı işlevi, çoklu sembol, emir, `tut` |
-| `E_TRY_ONLY` | `add_program`'da sinyal ya da durum tanımı çıktısı |
+| `E_TRY_ONLY` | `program_add`'de sinyal ya da durum tanımı çıktısı |
 
 ## 6. Ara gösterim (JSON) kısaca (PR §2, §4)
 
@@ -127,14 +127,14 @@ Düğümler topolojik sırada (yalnız öncekilere başvuru). İşlem adları: `
 
 ## 7. Araçlar (PS §3.2–3.3)
 
-Programı `source` (metin) **ya da** `program` (IR) ile verirsin; `inputs` bağlı seri.
+Program `program` alanındadır: metin bir dizgi, ara gösterim (IR) bir JSON nesnesi; `inputs` bağlı seri.
 
 | Araç | Ne verir |
 |---|---|
-| `check_program` | `ok`, `errors[]` (hepsi birden), `warnings[]`, `cost`, `outputs`, `ir` (metinden indiyse), `reject?`. Çalıştırmaz |
-| `try_program` | Kapanmış barlarda koşar, **özet** döner: seri (tanımlı sayısı, son değerler), olay (sayı, ilk/son olaylar), sinyal (sayı, sonuç dağılımı, ilk kayıtlar), durum (anahtar sayısı). Tam çıktı vermez |
-| `explain_program` | Kanonik metin, düğüm başına maliyet, çıktılar |
-| `add_program` | Programı dokümana **öneri** olarak ekler (kararı insan verir); yalnız seri/olay çıktılı programlar |
+| `program_check` | `ok`, `errors[]` (hepsi birden), `warnings[]`, `cost`, `outputs`, `ir` (metinden indiyse), `reject?`. Çalıştırmaz |
+| `program_try` | Kapanmış barlarda koşar, **özet** döner: seri (tanımlı sayısı, son değerler), olay (sayı, ilk/son olaylar), sinyal (sayı, sonuç dağılımı, ilk kayıtlar), durum (anahtar sayısı). Tam çıktı vermez |
+| `program_explain` | Kanonik metin, düğüm başına maliyet, çıktılar |
+| `program_add` | Programı dokümana **öneri** olarak ekler (kararı insan verir); yalnız seri/olay çıktılı programlar |
 
 ## 8. Örnekler (PR §12.5)
 

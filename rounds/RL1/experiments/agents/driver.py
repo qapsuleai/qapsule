@@ -90,11 +90,20 @@ def free_port():
 
 def write_session(wd):
     """SessionInit + Document: tek bar serisi `rx4` (RX4 seen, 3000 × 1h, takvimsiz → UTC
-    hizası). Saat son barın kapanışından sonra: bütün barlar kapanmış (kapalı pencere, PR §1).
+    hizası) + bir nöbetçi canlı bar; saat nöbetçinin kapanışında (= RX4 son bar + 2h). RX4'ün
+    3000 barının hepsi kapanmış (PR §1: son bar canlıdır, saat ne derse desin).
     Ajan ilkesi `claude` (ajan, öneren, Arkın adına; `--init` ile sunucu ajan eklemez)."""
     series = load_json(DATA_DIR / "seen.bars.json")
-    series = dict(series, id=SERIES_ID)
-    last_t = series["data"]["bars"][-1]["t"]
+    # The last bar of an inline bar series is the live one (PR §1), and `program_try` leaves
+    # it out (qp-program `asked::closed_bars`) whatever the clock says. One sentinel bar
+    # after the RX4 data makes all 3000 RX4 bars closed in the session; it is flat (o=h=l=c=
+    # the last close, v=0) and, being live, enters no closed-bar output (U2 probe finding).
+    bars = list(series["data"]["bars"])
+    last = bars[-1]
+    bars.append({"t": last["t"] + HOUR_MS, "o": last["c"], "h": last["c"], "l": last["c"],
+                 "c": last["c"], "v": 0.0})
+    series = dict(series, id=SERIES_ID, data=dict(series["data"], bars=bars))
+    last_t = bars[-1]["t"]
     doc = {
         "schema_version": "0", "id": "doc-rl1-agents", "title": "RL1 ajan teyidi (RX4 seen)",
         "display_tz": "UTC", "series": [series],
@@ -104,7 +113,7 @@ def write_session(wd):
         "facts": [], "findings": [], "capsules": [], "intents": [], "ledger": {"entries": []},
     }
     init = {
-        "document": "document.json", "clock": last_t + 2 * HOUR_MS, "epoch": 0,
+        "document": "document.json", "clock": last_t + HOUR_MS, "epoch": 0,
         "proposal_ttl_ms": None,
         "principals": [
             {"id": "arkin", "author": {"kind": "human", "name": "arkin"}, "role": "owner"},
@@ -357,7 +366,8 @@ def cmd_stop(a):
     run = a[1]
     wd = run_dir(run)
     meta = load_json(wd / "meta.json")
-    kill(meta["pid"])
+    if not meta.get("stopped"):  # a second `stop` (e.g. with --transcript) must not signal a
+        kill(meta["pid"])        # PID the system may have reused (K92)
     kv = {a[i]: a[i + 1] for i in range(2, len(a) - 1) if a[i].startswith("--")}
     meta.update({"tokens_notification": int(kv.get("--tokens", 0)) or None,
                  "tool_uses": int(kv.get("--tool-uses", 0)) or None,

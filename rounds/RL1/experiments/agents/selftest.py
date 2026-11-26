@@ -49,8 +49,9 @@ def check(cond, what):
 # ------------------------------------------------------------------ sahte MCP sunucusu
 
 def program_check_reply(args):
-    src = args.get("source")
+    # the thin tools: `program` is the text (a string) or the IR (an object)
     prog = args.get("program")
+    src = prog if isinstance(prog, str) else None
     if not args.get("inputs"):
         return {"type": "error", "error": {"code": "invalid", "reason": "E_NOT_BAR_SERIES",
                                            "message": "inputs: one bar series"}}
@@ -77,16 +78,17 @@ def program_check_reply(args):
 
 
 def tool_reply(name, args):
-    if name in ("check_program", "try_program", "explain_program"):
+    if name in ("program_check", "program_try", "program_explain"):
         return program_check_reply(args)
-    if name == "add_program":
-        src = args.get("source") or ""
+    if name == "program_add":
+        src = args.get("program") if isinstance(args.get("program"), str) else ""
         if re.search(r"^\s*(signal|state)\b", src, re.M):
             return {"type": "error", "error": {
                 "code": "unsupported", "reason": "E_TRY_ONLY", "message": "signal output: try only",
                 "errors": [{"code": "unsupported", "reason": "E_TRY_ONLY",
                             "message": "signal output: try only"}]}}
-        return {"type": "ack", "created": ["prog-1-1.out"]}
+        return {"type": "ack", "created": ["prog-1-0.out"], "proposal": "prop-1",
+                "status": "proposed", "seq": 1}
     return {"type": "error", "error": {"code": "not_found", "message": f"no tool {name}"}}
 
 
@@ -109,11 +111,18 @@ class Mock(http.server.BaseHTTPRequestHandler):
                              for t in score.PROGRAM_TOOLS]}
         elif method == "tools/call":
             p = body["params"]
+            if "source" in (p.get("arguments") or {}):  # as qp-mcp: deny_unknown_fields
+                self.reply({"jsonrpc": "2.0", "id": mid, "error": {
+                    "code": -32602, "message": f"tool `{p['name']}`: unknown field `source`"}})
+                return
             rep = tool_reply(p["name"], p.get("arguments") or {})
             res = {"structuredContent": rep, "content": [{"type": "text", "text": json.dumps(rep)}]}
         else:
             res = {}
-        out = json.dumps({"jsonrpc": "2.0", "id": mid, "result": res}).encode()
+        self.reply({"jsonrpc": "2.0", "id": mid, "result": res})
+
+    def reply(self, obj):
+        out = json.dumps(obj).encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.send_header("Mcp-Session-Id", "mock-session")
@@ -157,7 +166,7 @@ class Agent:
         return str(p)
 
     def check(self, text):
-        return self.run("call", "check_program", "--source-file", self.write(text),
+        return self.run("call", "program_check", "--program-file", self.write(text),
                         '{"inputs":["rx4"]}')
 
     def submit(self, text, ext="qp"):
@@ -228,11 +237,13 @@ def main():
         rc, out = a.submit(src)
         check(rc == 0 and json.loads(out)["submission"] == 1, "G1-01 submit")
         a.canned(1, ok("G1-01"))
-        a.run("call", "add_program", '{"source": "r = rsi(close, 14)\\nevent r4m_ust = cross_above(r, 70)\\n", "inputs": ["rx4"]}')
+        a.run("call", "program_add", '{"program": "r = rsi(close, 14)\\nevent r4m_ust = cross_above(r, 70)\\n", "inputs": ["rx4"]}')
         a.run("call", "approve_proposal", '{"id": "p1"}')
 
         # 2. G2-01: uydurma işlev (E_UNKNOWN_OP), sonra yanlış teslim, sonra doğru
         a = Agent(qx, url, root, "haiku", "G2-01")
+        rc, _ = a.run("call", "program_check", '{"source": "x = 1", "inputs": ["rx4"]}')
+        check(rc == 1, "qmcpx: unknown argument `source` is a transport error (exit 1)")
         rc, out = a.check("z = zscore(close, 20)\nseries zq3_skor = z\n")
         check('"E_UNKNOWN_OP"' in out, "G2-01 mock E_UNKNOWN_OP")
         good = ("m = sma(close, 20)\nz = (close - m) / stdev(close, 20)\nseries zq3_skor = z\n"
@@ -256,11 +267,11 @@ def main():
         a.check(rej)
         a.submit(rej)
 
-        # 5. G7-01: yanlış ret; sinyalli programı add_program'a verme (E_TRY_ONLY)
+        # 5. G7-01: yanlış ret; sinyalli programı program_add'e verme (E_TRY_ONLY)
         a = Agent(qx, url, root, "haiku", "G7-01")
         sig = ("r = rsi(close, 14)\nsignal f6g_dip = cross_above(r, 30) side al target 4% "
                "stop 2% max_bars 24 source \"rsi-dip\" \"1\"\n")
-        a.run("call", "add_program", json.dumps({"source": sig, "inputs": ["rx4"]}))
+        a.run("call", "program_add", json.dumps({"program": sig, "inputs": ["rx4"]}))
         a.submit('reject E_UNSUPPORTED "signals are not supported"\n')
 
         # 6. G3-02: teslimsiz
@@ -333,9 +344,13 @@ def main():
         wd.mkdir(parents=True)
         sd = driver.write_session(wd)
         init, doc = load_json(sd / "init.json"), load_json(sd / "document.json")
-        check(len(doc["series"][0]["data"]["bars"]) == 3000 and doc["series"][0]["id"] == "rx4",
-              "session document")
-        check(init["clock"] > doc["series"][0]["data"]["bars"][-1]["t"] + 3_600_000, "closed window")
+        sb = doc["series"][0]["data"]["bars"]
+        seen = load_json(driver.DATA_DIR / "seen.bars.json")["data"]["bars"]
+        check(len(sb) == 3001 and sb[:3000] == seen and doc["series"][0]["id"] == "rx4",
+              "session document: RX4 seen + one sentinel bar")
+        # the last bar is live (PR §1): the sentinel, so every RX4 bar is closed
+        check(sb[-1]["t"] == seen[-1]["t"] + 3_600_000 and sb[-1]["v"] == 0.0
+              and init["clock"] == sb[-1]["t"] + 3_600_000, "closed RX4 bars (sentinel live bar)")
         check(any(p["id"] == "claude" and p["author"]["kind"] == "agent" for p in init["principals"]),
               "agent principal")
         task = {t["id"]: t for t in conform.load_tasks(DEFAULT_RX4)}["G8-03"]
@@ -359,7 +374,7 @@ def main():
                 {"type": "assistant", "message": {"id": "m2", "model": "claude-haiku-5-5",
                  "usage": dict(u1, cache_read_input_tokens=100, cache_creation_input_tokens=0),
                  "content": [{"type": "tool_use", "name": "Bash",
-                              "input": {"command": f"python3 {driver.QMCPX} call check_program '{{}}'"}}]}}]
+                              "input": {"command": f"python3 {driver.QMCPX} call program_check '{{}}'"}}]}}]
         tp.write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
         u = driver.usage_of(tp)
         check(u["tokens"] == 224 and u["requests"] == 2 and u["tool_uses"] == 3,

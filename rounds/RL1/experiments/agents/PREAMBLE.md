@@ -20,7 +20,8 @@ dilinde bir **program** (ya da gerekiyorsa bir **ret**) yazarak çöz. Bu not he
 
 ## Veri
 
-- Bağlı seri `{SERIES}`: tek sembol, taban periyot **1 saat**, 3000 **kapanmış** bar. Bar
+- Bağlı seri `{SERIES}`: tek sembol, taban periyot **1 saat**, 3000 **kapanmış** bar (arkasında
+  bir de canlı bar durur: `try` maliyetinde `bars` 3001 görünür; canlı bar hiçbir çıktıya girmez). Bar
   `{t, o, h, l, c, v}`; `t` barın açılış zamanı (epoch ms, UTC). Bar indeksi 0'dan başlar.
   Puanlama aynı programı başka bir (görmediğin) veri kümesinde de koşar; programın yalnız bu
   veriye uyması yetmez.
@@ -38,19 +39,20 @@ Qapsule'e **yalnız** şu komutla erişirsin (Bash ile):
 
 - `<komut> list` araçları listeler; `<komut> schema <araç>` bir aracın girdi şemasını verir.
 - `<komut> call <araç> '<json>'` bir aracı çağırır. Programın metnini JSON'a gömmek yerine
-  dosyadan verebilirsin: `<komut> call check_program --source-file {WORKDIR}/prog.qp '{"inputs":["{SERIES}"]}'`.
-- Kullanacağın araçlar yalnız program araçlarıdır: `check_program`, `try_program`,
-  `explain_program`, `add_program`. Her çağrıda `"inputs": ["{SERIES}"]` ver. Başka araç
+  dosyadan verebilirsin: `<komut> call program_check --program-file {WORKDIR}/prog.qp '{"inputs":["{SERIES}"]}'`
+  (`.qp` metin, `.json` ara gösterim olarak `program` alanına konur).
+- Kullanacağın araçlar yalnız program araçlarıdır: `program_check`, `program_try`,
+  `program_explain`, `program_add`. Her çağrıda `"inputs": ["{SERIES}"]` ver. Başka araç
   çağırma. Onay/ret gibi **karar aracı yoktur**: önerini insan değerlendirir.
-- Programı **metin dilde** (`source`) ya da **ara gösterimde** (JSON, `program`) yazabilirsin;
-  ikisi aynı motora iner. Seçim senin.
-- `check_program` (derleme, tip, maliyet, bütün hatalar birden) ve `try_program` (yalnız bu
+- Programı **metin dilde** ya da **ara gösterimde** (JSON) yazabilirsin; ikisi de `program`
+  alanına gider (metin bir dizgi, ara gösterim bir nesne) ve aynı motora iner. Seçim senin.
+- `program_check` (derleme, tip, maliyet, bütün hatalar birden) ve `program_try` (yalnız bu
   veride kısaltılmış özet) istediğin kadar kullanılabilir. Beklenen çıktı gösterilmez.
 
 ## Teslim
 
 - Programını (ya da retini) bir dosyaya yaz (`{WORKDIR}/prog.qp` metin ya da
-  `{WORKDIR}/prog.json` ara gösterim) ve **önce `check_program` ile denetle**; hatasızsa
+  `{WORKDIR}/prog.json` ara gösterim) ve **önce `program_check` ile denetle**; hatasızsa
   `<komut> submit <dosya>` ile teslim et.
 - `submit` görev başına **en çok 3** kez; **son teslim** nihai sayılır. `submit` teslimi
   kaydeder ve motorun denetim cevabını gösterir.
@@ -65,7 +67,7 @@ Qapsule'e **yalnız** şu komutla erişirsin (Bash ile):
   kodlarından uygun olanı ve kısa bir gerekçe (`reject <E_KOD> "gerekçe"`). Gereksiz ret de
   yanlış sayılır.
 - **Öneri:** görev yalnız seri ve/veya olay çıktısı istiyorsa, son tesliminden sonra aynı
-  programı `add_program` ile **bir kez** dokümana öneri olarak ekle (`"inputs": ["{SERIES}"]`).
+  programı `program_add` ile **bir kez** dokümana öneri olarak ekle (`"inputs": ["{SERIES}"]`).
   Sinyal ya da durum tanımı çıktılı programlar ve retler eklenmez. Öneriyi kabul etmek ya da
   reddetmek insanın işidir.
 - Bitince son mesajın yalnız `DONE` olsun.

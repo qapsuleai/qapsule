@@ -13,17 +13,19 @@ Düzenek: `SELECTION.md` (20 görev), `PREAMBLE.md` (ölçülen ajana ön not), 
 `env QMCP_URL=… QMCP_PRINCIPAL=claude QMCP_RUN=<koşu> QMCP_STATE=<koşu>/mcp.sid QMCPX_DIR=<koşu> python3 …/qmcpx`.
 `qmcpx`, R5B `rounds/R5B/experiments/harness/driver/qmcp` istemcisini yükler (aynı Streamable
 HTTP, `X-Qp-Principal`/`X-Qp-Run`, oturum kimliği dosyası) ve üç şey ekler: her çağrının
-**tam** argümanı ve cevabı `transcript.jsonl`'a; `--source-file` (program metnini JSON'a gömme
-derdi olmasın: yerli MCP istemcisinde zaten yoktur); `submit` (yerel sayaç, en çok 3; teslimi
-`check_program` ile denetleyip kaydeder). Neden yerel `submit`: PS §3.3'te sunucu aracı olarak
-teslim yok ve `add_program` sinyal/durum programını `E_TRY_ONLY` ile reddeder (G7, G8). Seri/olay
-görevlerinde ajan son tesliminden sonra `add_program` ile öneri de verir (PREAMBLE); karar aracı
+**tam** argümanı ve cevabı `transcript.jsonl`'a; `--program-file` (eski adı `--source-file`;
+program metnini JSON'a gömme derdi olmasın: yerli MCP istemcisinde zaten yoktur); `submit`
+(yerel sayaç, en çok 3; teslimi `program_check` ile denetleyip kaydeder). `list` yalnız dört
+program aracını gösterir. Neden yerel `submit`: PS §3.3'te sunucu aracı olarak
+teslim yok ve `program_add` sinyal/durum programını `E_TRY_ONLY` ile reddeder (G7, G8). Seri/olay
+görevlerinde ajan son tesliminden sonra `program_add` ile öneri de verir (PREAMBLE); karar aracı
 yok, kararı insan verir.
 
 ## 2. Ön koşullar (koşudan önce, sırayla; biri tutmazsa dur ve REPORT'a yaz)
 
-1. MCP araçları ve komut satırı var: `qp mcp serve` `thin` yüzeyinde `check_program`,
-   `try_program`, `explain_program`, `add_program`; `qp program check|run` (PS §3.3).
+1. MCP araçları ve komut satırı var: `qp mcp serve` `thin` yüzeyinde `program_check`,
+   `program_try`, `program_explain`, `program_add` (PS §3.3 RL1/M notu; argüman `program`:
+   metin dizgi ya da IR nesnesi); `qp program check|run`.
 2. RX4 uygunluğu yeşil: `python3 -I rounds/RL1/experiments/rx4/conform.py --run "<şablon>"`
    26/26 + 4 ret eşit (motor çıktısı biçimi `conform.adapt_outputs`'a uyuyor demektir; puanlayıcı
    aynı adaptörü kullanır).
@@ -32,13 +34,13 @@ yok, kararı insan verir.
    python3 -I rounds/RL1/experiments/agents/driver.py start probe G1-01 --tag probe
    # istem dosyasındaki komutla:
    <komut> list                     # dört program aracı görünmeli
-   <komut> schema check_program     # alan adları: source | program, inputs, params?, lang?
+   <komut> schema program_check     # alan adları: program (dizgi|nesne), inputs, params?, lang?
    ```
    `inputs` biçimi `["rx4"]` değilse (ör. dizgi ya da `{series}`) yalnız `QMCPX_INPUTS`
    (driver `qmcpx_line`), `PREAMBLE.md` ve `LANG-CARD.md` §7 düzeltilir; düzeltme REPORT'a.
-4. **Kart doğrulaması:** `LANG-CARD.md` §6 ve §8'deki her örnek `check_program`'dan `ok: true`
+4. **Kart doğrulaması:** `LANG-CARD.md` §6 ve §8'deki her örnek `program_check`'ten `ok: true`
    (ret `reject` ile) dönmeli; dönmüyorsa kart ya da uygulama yanlıştır → önce o düzeltilir
-   (şartname geçerli). `add_program` ret metniyle ne döndürüyor ve sinyalde `E_TRY_ONLY` mi,
+   (şartname geçerli). `program_add` ret metniyle ne döndürüyor ve sinyalde `E_TRY_ONLY` mi,
    bakılır (puanlama ikisini de cevaptan okur).
 5. Oturum yükleniyor: `driver.py start` `server exited` vermemeli (init: belge + ilkeler,
    `--init` ile sunucu ajan ilkesi eklemez; init kendisi ekler). Deneme koşusu:
@@ -49,7 +51,7 @@ yok, kararı insan verir.
 
 ```sh
 cd /Users/arkns/Works/Mchart/qapsule
-export CARGO_TARGET_DIR=/Users/arkns/Works/Mchart/qapsule/target
+export CARGO_TARGET_DIR=/Users/arkns/Works/Mchart/qapsule/target/wt/u2   # yoklamada derlendi (main 64e30256)
 cargo build -p qp-cli --release                 # QP_BIN = $CARGO_TARGET_DIR/release/qp
 export QP_RL1_AGENTS=<oturum scratchpad'i>/rl1-agents    # ham koşular: depoya girmez
 A=rounds/RL1/experiments/agents
@@ -128,8 +130,8 @@ bin; burada da Claude Code alt ajanı, aynı düzen.
 
 **Karşılaştırmayı bozan bilinen farklar** (sonuç okunurken akılda; REPORT'a yazılır):
 araçlar CLI değil MCP (Bash köprüsüyle); belge RX4 `SPEC.md` + `DOC.md` yerine tek `LANG-CARD.md`;
-ajan veri dosyasını okumaz (`try_program` özeti var); seri/olay görevlerinde fazladan bir
-`add_program` çağrısı; çıktı `fingerprint` → `state`, Qapsule hata kodları ve sınırları.
+ajan veri dosyasını okumaz (`program_try` özeti var); seri/olay görevlerinde fazladan bir
+`program_add` çağrısı; çıktı `fingerprint` → `state`, Qapsule hata kodları ve sınırları.
 RX4'te ölçüm tavandaydı (180/180 ilk teslim doğru): burada 20/20'nin altı tek görevde bile
 nedeniyle açıklanır.
 
@@ -169,3 +171,56 @@ olarak REPORT "Öneriler"e; ölçüm yeniden koşulmaz (bir kez).
 Her `stop` sunucuyu kapatır; koşu bitince `ps` ile `qp mcp serve` kalmadığına sürücünün
 yazdığı `pid`'lerle bakılır (adla toplu kapatma yok, K92). `$QP_RL1_AGENTS` (ham koşular,
 `heldout.bars.json` kopyaları) silinir; kalan yalnız `RESULT.md/json`.
+
+## 9. Yoklama sonucu (U2-probe, 2026-11-26; ölçüme sayılmaz)
+
+Main `64e30256`, `qp` = `/Users/arkns/Works/Mchart/qapsule/target/wt/u2/release/qp` (bu klasör
+ölçüm bitene kadar silinmez). Deneme koşusu `probe G1-01 --tag probe`, model çağrılmadan
+`qmcpx` elle sürüldü. Sonuç: init yüklendi (`server exited` yok); `list` dört araç;
+`program_check` + `inputs:["rx4"]` çalışıyor; kart §6 (IR) ve §8'in beş örneği `ok:true`, ret
+örneği `ok:true, reject{E_LOOKAHEAD}`; `program_try`, `program_explain` cevap veriyor; uydurma
+`zscore` → `E_UNKNOWN_OP` + `expected`; `program_add` olayda `ack {status:"proposed",
+proposal}`, sinyalde qp/0 `error` `E_TRY_ONLY`; iki `submit` (ret, program) kaydedildi;
+`transcript.jsonl` her çağrının tam argümanı ve cevabıyla; `stop` sunucuyu PID ile kapattı
+(`ps -p` boş), `engine/` (check + seen/heldout `run --full`) yazıldı, `score.py` satırı
+`false_reject → correct (seen eşit, heldout eşit)`, öneri 1 ack + 1 `E_TRY_ONLY`. `selftest: OK`.
+
+**Düzeltilen düzenek hataları:** (1) araç adları `check_program…` → `program_check`,
+`program_try`, `program_explain`, `program_add` (qmcpx, score, selftest, PREAMBLE, KART §7);
+(2) araç argümanı `source` değil `program` (dizgi = metin, nesne = IR; `source` →
+`-32602 unknown field`): `--program-file` (`.json` → nesne), `submit` `program` gönderir;
+puanlayıcı uydurma adı `program` dizgisinden de okur, aktarım hatasını (`-32602`) hata cevabı
+sayar; (3) `qmcpx list` bütün 76 ince aracı basıyordu → yalnız dört program aracı, `schema`
+başka araç için 2 döner; (4) **kapanmış bar:** belge içi serinin son barı canlıdır (PR §1) ve
+`program_try` saat ne olursa olsun onu atar (`asked::closed_bars`) → RX4'ün 3000. barı
+görünmüyordu; sürücü bir nöbetçi canlı bar ekler (düz, v=0; saat onun kapanışında), şimdi
+`program_try` `to_t` = RX4 son bar ve 3000 kapanmış bar (maliyette `bars` 3001; PREAMBLE'da
+söylendi). Puanlama komut satırında kapalı pencereyle koştuğu için etkilenmezdi.
+**Motor notları (düzeltilmedi, REPORT'a):** `E_TRY_ONLY` `hint` "run it with try_program"
+diyor (MCP adı `program_try`); `program_try` kapalı pencereli bağda (`window.to_t`) da son barı
+atıyor, `claims::closed` ise kapanmış sayıyor.
+
+**Koşu başına kesin yordam** (depo kökünden; aynı anda en çok 5):
+
+```sh
+export CARGO_TARGET_DIR=/Users/arkns/Works/Mchart/qapsule/target/wt/u2
+export QP_RL1_AGENTS=<orkestratör scratchpad'i>/rl1-agents
+A=rounds/RL1/experiments/agents
+python3 -I $A/driver.py start <haiku|opus> <görev>
+#  -> {"run":"<model>-<görev>","workdir":…,"prompt_file":…/prompt.md,"url":…,"pid":N}
+```
+
+Alt ajan: `Agent(subagent_type="general-purpose", model=<haiku|opus>, description="RL1 ajan
+teyidi <görev>", prompt=<prompt_file dosyasının içeriği, aynen>)` — yol değil içerik verilir
+(RX4 ile aynı; istem dosyası ajanın okuyabileceği tek dosya dışı yol değildir, ama okuma bir araç
+çağrısı ve belirteç ekler). Bildirim gelince (DONE ya da hata):
+
+```sh
+python3 -I $A/driver.py stop <model>-<görev> --tokens <total_tokens> --tool-uses <tool_uses> --ms <duration_ms>
+#  -> {"run","engine_checked":K,"tokens":…,"transcript":<alt ajan dökümü|null>,"violations":V,"dump":true}
+```
+
+`transcript` `null` ise döküm (`~/.claude/projects/*/*/subagents/agent-*.jsonl`, istem yolunu
+anan) bulunup aynı `stop` bayraklarla ve `--transcript <yol>` ile yeniden koşulur (ikinci `stop`
+sinyal göndermez; motor yeniden koşar, zararsız). `violations > 0` ise `meta.json` elle okunur.
+Hepsi bitince §5 `score.py`; sonra `ps -p <pid>` ile sunucu kalmadığına bakılır (§8).

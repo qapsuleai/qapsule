@@ -9,18 +9,20 @@ Mcp-Session-Id file). It adds what this measurement needs and nothing else:
   qmcpx schema <tool>                 a tool's full input schema
   qmcpx call <tool> '<json>'          calls a tool, prints the reply (structuredContent)
   qmcpx call <tool> @args.json        ... arguments from a JSON file
-  qmcpx call <tool> --source-file F ['<json>']
-                                      ... `source` = the text of F (no JSON escaping of the
-                                      program text; the rest of the arguments from <json>)
+  qmcpx call <tool> --program-file F ['<json>']
+                                      ... `program` = the content of F: the text of a `.qp`
+                                      file, the parsed object of a `.json` file (no JSON
+                                      escaping of the program text; the rest of the
+                                      arguments from <json>). `--source-file` is an alias.
   qmcpx submit <file>                 a submission (at most QMCPX_MAX_SUBMIT per task): the
                                       file (text `.qp` or IR `.json`, a program or a reject)
                                       is copied to submissions/N.<ext> and checked with
-                                      `check_program` over MCP; the reply is N.reply.json
+                                      `program_check` over MCP; the reply is N.reply.json
 
 Every call (and every submission) is one JSON line in $QMCPX_DIR/transcript.jsonl with the
 full arguments and the full reply: the scorer reads replies from there (error codes, invented
 names, rejects). `submit` is local bookkeeping, not a server tool: the engine has no submit
-(RX4 had one; PS §3.3 has `add_program`, which refuses signal/state programs, E_TRY_ONLY).
+(RX4 had one; PS §3.3 has `program_add`, which refuses signal/state programs, E_TRY_ONLY).
 
 Environment: QMCP_URL, QMCP_PRINCIPAL, QMCP_RUN, QMCP_STATE (as qmcp); QMCPX_DIR (run
 folder, required); QMCPX_INPUTS (JSON list, default ["rx4"]: the bound bar series for
@@ -40,7 +42,9 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
 QMCP = os.path.join(ROOT, "rounds", "R5B", "experiments", "harness", "driver", "qmcp")
-PROGRAM_TOOLS = ("check_program", "try_program", "explain_program", "add_program")
+# The thin surface's program tools (crates/qp-mcp/src/surfaces/thin/program.rs). `list`
+# shows only these: the agent is told to call nothing else.
+PROGRAM_TOOLS = ("program_check", "program_try", "program_explain", "program_add")
 
 
 def load_qmcp(path=QMCP):
@@ -102,7 +106,7 @@ def parse_call_args(rest):
     src_file, json_text = None, None
     i = 0
     while i < len(rest):
-        if rest[i] == "--source-file" and i + 1 < len(rest):
+        if rest[i] in ("--program-file", "--source-file") and i + 1 < len(rest):
             src_file = rest[i + 1]
             i += 2
             continue
@@ -116,24 +120,28 @@ def parse_call_args(rest):
         raise ValueError("arguments must be a JSON object")
     if src_file:
         with open(src_file, encoding="utf-8") as f:
-            args["source"] = f.read()
+            text = f.read()
+        args["program"] = json.loads(text) if program_is_ir(src_file, text) else text
     return args
 
 
+def program_is_ir(path, text):
+    return path.endswith(".json") or text.lstrip().startswith("{")
+
+
 def submission_args(path):
-    """(kind, ext, check_program arguments) of a submission file."""
+    """(kind, ext, program_check arguments) of a submission file."""
     with open(path, encoding="utf-8") as f:
         text = f.read()
     inputs = json.loads(os.environ.get("QMCPX_INPUTS", '["rx4"]'))
-    stripped = text.lstrip()
-    if path.endswith(".json") or stripped.startswith("{"):
+    if program_is_ir(path, text):
         obj = json.loads(text)
         kind = "reject" if isinstance(obj, dict) and "reject" in obj else "program"
         return kind, "json", {"program": obj, "inputs": inputs}
     first = next((ln.strip() for ln in text.splitlines()
                   if ln.strip() and not ln.strip().startswith("#")), "")
     kind = "reject" if first.startswith("reject ") or first == "reject" else "program"
-    return kind, "qp", {"source": text, "inputs": inputs}
+    return kind, "qp", {"program": text, "inputs": inputs}
 
 
 def cmd_submit(Q, path):
@@ -157,7 +165,7 @@ def cmd_submit(Q, path):
     shutil.copyfile(path, dst)
     t0 = time.monotonic()
     try:
-        res = Q.rpc("tools/call", {"name": "check_program", "arguments": args})
+        res = Q.rpc("tools/call", {"name": "program_check", "arguments": args})
         rep = reply_of(res)
     except Q.Fail as e:
         rep = None
@@ -171,6 +179,22 @@ def cmd_submit(Q, path):
     return 0 if rep is not None else 1
 
 
+def cmd_list(Q, mode):
+    """The program tools only, in PROGRAM_TOOLS order (the server lists every thin tool)."""
+    tools = {t["name"]: t for t in Q.all_tools()}
+    for name in PROGRAM_TOOLS:
+        t = tools.get(name)
+        if t is None:
+            print(f"qmcpx: the server has no tool `{name}`", file=sys.stderr)
+            return 1
+        if mode == "names":
+            print(name)
+        else:
+            desc = " ".join((t.get("description") or "").split())
+            print(f"{name}: {desc} | params: {Q.params_of(t.get('inputSchema'))}")
+    return 0
+
+
 def main(argv, qmcp_path=QMCP):
     if not argv or argv[0] not in ("list", "schema", "call", "submit"):
         print(__doc__)
@@ -180,11 +204,15 @@ def main(argv, qmcp_path=QMCP):
     try:
         if cmd == "list":
             transcript({"tool": "_list"})
-            return Q.cmd_list("names" if "--names" in argv else "text")
+            return cmd_list(Q, "names" if "--names" in argv else "text")
         if cmd == "schema":
             if len(argv) < 2:
                 return 2
             transcript({"tool": "_schema", "args": {"tool": argv[1]}})
+            if argv[1] not in PROGRAM_TOOLS:
+                print(f"qmcpx: `{argv[1]}` is not a program tool: {', '.join(PROGRAM_TOOLS)}",
+                      file=sys.stderr)
+                return 2
             return Q.cmd_schema(argv[1])
         if cmd == "submit":
             if len(argv) < 2:

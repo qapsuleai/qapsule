@@ -21,7 +21,7 @@ Dört ölçüt (GOAL §7) ve ek kayıtlar:
                  yanlış ret (0 olmalı)
   invented       `E_UNKNOWN_OP` cevapları: uydurma işlev adları (ad, görev, model)
   ek             sessiz yanlış (M4), seen doğru / heldout yanlış (M5), teslimsiz, metin/IR,
-                 check'siz teslim, öneri (`add_program`) sonucu, program aracı dışı çağrı,
+                 check'siz teslim, öneri (`program_add`) sonucu, program aracı dışı çağrı,
                  belirteç ve araç çağrısı (meta.json; driver `stop` bayraklarından)
 """
 import argparse
@@ -41,7 +41,8 @@ from rx4common import DEFAULT_RX4, load_json  # noqa: E402
 SELECTION = ["G1-01", "G1-03", "G2-01", "G2-03", "G3-01", "G3-02", "G3-03", "G4-01", "G4-02",
              "G4-04", "G5-01", "G5-02", "G5-03", "G7-01", "G7-03", "G7-05", "G8-01", "G8-03",
              "G9-02", "G9-03"]
-PROGRAM_TOOLS = ("check_program", "try_program", "explain_program", "add_program")
+# MCP thin surface names (crates/qp-mcp/src/surfaces/thin/program.rs)
+PROGRAM_TOOLS = ("program_check", "program_try", "program_explain", "program_add")
 LOCAL_TOOLS = ("_list", "_schema", "submit")
 DECISION_RE = re.compile(r"approve|decide|accept|reject_proposal|decision", re.I)
 
@@ -102,7 +103,9 @@ def invented_name(err, args):
     m = re.search(r"`([^`]+)`", str(err.get("message", "")))
     if m:
         return m.group(1)
-    span, src = err.get("span"), (args or {}).get("source")
+    # the thin tools carry text in `program` (a string); `source` is the query form
+    src = (args or {}).get("source") or (args or {}).get("program")
+    span = err.get("span")
     if isinstance(span, dict) and isinstance(src, str):
         lines = src.splitlines()
         ln, col, n = span.get("line", 0), span.get("col", 0), span.get("len", 0)
@@ -270,7 +273,7 @@ def score_run(rd, truth):
     final_seq = max((r["seq"] for r in tr if r.get("tool") == "submit" and "n" in r), default=None)
     first_submit_seq = min((r["seq"] for r in tr if r.get("tool") == "submit" and "n" in r),
                            default=None)
-    checked_before_submit = any(r.get("tool") == "check_program" and
+    checked_before_submit = any(r.get("tool") == "program_check" and
                                 (first_submit_seq is None or r["seq"] < first_submit_seq)
                                 for r in tr)
     proposals = {"calls": 0, "acked": 0, "try_only": 0, "errors": 0}
@@ -284,13 +287,15 @@ def score_run(rd, truth):
         if tool not in PROGRAM_TOOLS and tool != "submit":
             continue
         errs = reply_errors(r.get("reply")) if r.get("reply") is not None else []
+        if r.get("transport_error"):  # e.g. -32602 unknown argument: the agent read it too
+            errs = [{"reason": "transport", "message": r["transport_error"]}]
         if errs and (final_seq is None or r["seq"] < final_seq):
             errors_before_final += 1
         for e in errs:
             if err_reason(e) == "E_UNKNOWN_OP":
                 invented.append({"name": invented_name(e, r.get("args")), "tool": tool,
                                  "seq": r.get("seq")})
-        if tool == "add_program":
+        if tool == "program_add":
             proposals["calls"] += 1
             rep = r.get("reply") or {}
             if rep.get("type") == "ack":

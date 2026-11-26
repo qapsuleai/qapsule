@@ -216,9 +216,18 @@ pub const PROGRAM_TEXT_MAX_DEPTH: ParamDef = row(
     false,
     "Expression nesting of a program text at most, parentheses included (`E_TOO_LARGE`).",
 );
+/// `program.max_ops_per_command`.
+pub const PROGRAM_MAX_OPS_PER_COMMAND: ParamDef = row(
+    "program.max_ops_per_command",
+    "count",
+    (1.0, Some(64.0)),
+    8,
+    false,
+    "Program operations (`add_program`, `set_program_params`, `remove_program`) in one command at most (`E_TOO_LARGE`).",
+);
 
 /// The RL1 rows, in `docs/PARAMETERS.md` order.
-pub const PROGRAM_ROWS: [&ParamDef; 20] = [
+pub const PROGRAM_ROWS: [&ParamDef; 21] = [
     &PROGRAM_MAX_NODES,
     &PROGRAM_MAX_WINDOW,
     &PROGRAM_MAX_OUTPUTS,
@@ -239,4 +248,5 @@ pub const PROGRAM_ROWS: [&ParamDef; 20] = [
     &PROGRAM_TEXT_MAX_SOURCE_CHARS,
     &PROGRAM_TEXT_MAX_TOKEN_CHARS,
     &PROGRAM_TEXT_MAX_DEPTH,
+    &PROGRAM_MAX_OPS_PER_COMMAND,
 ];

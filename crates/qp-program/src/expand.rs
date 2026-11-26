@@ -19,7 +19,7 @@ use qp_plane::plane::{bars_for, is_bar_series};
 use qp_plane::values::find_series;
 use qp_schema::program::{ProgramParamValue, ProgramRef, ProgramScope, PROGRAM_STUDY};
 use qp_schema::protocol::{ChangeOp, ErrorCode, Op, Show};
-use qp_schema::{Author, Document, Series, SeriesSource};
+use qp_schema::{Document, Series, SeriesSource};
 use serde_json::Value;
 
 use crate::budget::over_budget;
@@ -35,24 +35,13 @@ pub(crate) struct Rules {
     pub(crate) lang: Lang,
 }
 
-/// The owner of what a command writes (PS §2.3): the person the decider of an accepted
-/// proposal acts for, else the person the speaker acts for (`person_of`: an agent's
-/// person; a person is their own). One identity everywhere: a principal's person id.
-///
-/// `qp_ops::Ctx` carries the decider only as an `Author`, not as a principal id (missing
-/// hook: the decider's principal in the expansion context). The decider's principal is
-/// taken as its author name; the `Check` phase, which knows the deciding connection's
-/// principal, refuses an acceptance where the two differ (`crate::check`).
+/// The owner of what a command writes (PS §2.3): the person the speaker acts for
+/// (`person_of`: an agent's person, a person their own). On an accepted proposal the
+/// speaker is the proposer's principal (the authority expands it as the proposer, the
+/// decider recorded as `approved_by`): an agent working for a person charges that
+/// person. One identity everywhere: a principal's person id.
 pub(crate) fn owner_of(ctx: &Ctx<'_>) -> String {
-    let who = ctx.approved_by.as_ref().map_or(ctx.speaker, author_name);
-    qp_ops::watch::person_of(ctx.plane, who).to_owned()
-}
-
-/// The name of author `a`.
-pub(crate) fn author_name(a: &Author) -> &str {
-    match a {
-        Author::Human { name } | Author::Agent { name, .. } | Author::Engine { name, .. } => name,
-    }
+    qp_ops::watch::person_of(ctx.plane, ctx.speaker).to_owned()
 }
 
 /// The bound bar series of `inputs` (exactly one bar series), or its errors.

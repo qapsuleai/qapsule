@@ -1,11 +1,12 @@
-//! A long log and a command of many program ops: the log's program bytes are counted
-//! once, not once per op (the memo in `qp-program`'s budget).
+//! A long log and many program ops: the log's program bytes come from the subsystem's
+//! slot (kept at each commit), so a command does not walk the log; a command carries at
+//! most `program.max_ops_per_command` program ops.
 
 use std::time::{Duration, Instant};
 
 use serde_json::json;
 
-use crate::rig::{H, SMA_TEXT};
+use crate::rig::{reason, H, SMA_TEXT};
 
 #[test]
 fn many_program_ops_over_a_long_log_stay_fast() {
@@ -19,25 +20,42 @@ fn many_program_ops_over_a_long_log_stay_fast() {
         assert_eq!(r["status"], "applied", "{r}");
     }
     let ir = h.ir(SMA_TEXT);
-    let ops: Vec<_> = (0..30)
-        .map(|k| json!({"op":"add_program","id":format!("m{k}"),"program":ir,"inputs":["px"]}))
-        .collect();
     let t = Instant::now();
-    let r = h.cmd("a", json!(ops));
+    for c in 0..3 {
+        let ops: Vec<_> = (0..8)
+            .map(|k| {
+                json!({"op":"add_program","id":format!("m{c}x{k}"),"program":ir,"inputs":["px"]})
+            })
+            .collect();
+        let r = h.cmd("a", json!(ops));
+        assert_eq!(r["status"], "applied", "{r}");
+    }
     let took = t.elapsed();
-    assert_eq!(r["status"], "applied", "{r}");
-    assert_eq!(
+    let n =
         h.s.document()
             .series
             .iter()
-            .filter(|s| s.id.starts_with('m') && s.id.contains('.'))
-            .count(),
-        60
-    );
-    eprintln!("30 program ops over a 600-entry log: {took:?}");
-    // Measured in a debug build: ~0.17 s with the memo, ~1.7 s rescanning per op (and the
-    // 600 set-ups ~25 s instead of ~1 s). The bound sits between, with room.
+            .filter(|s| s.id.starts_with('m') && s.id.contains('.'));
+    assert_eq!(n.count(), 48);
+    eprintln!("3 commands of 8 program ops over a 600-entry log: {took:?}");
     assert!(took < Duration::from_secs(1), "{took:?}");
+}
+
+#[test]
+fn a_command_carries_a_bounded_number_of_program_ops() {
+    let mut h = H::new();
+    let ir = h.ir(SMA_TEXT);
+    let ops: Vec<_> = (0..9)
+        .map(|k| json!({"op":"add_program","id":format!("c{k}"),"program":ir,"inputs":["px"]}))
+        .collect();
+    let r = h.cmd("a", json!(ops));
+    assert_eq!(reason(&r), "E_TOO_LARGE", "{r}");
+    assert_eq!(r["error"]["path"], "/ops/8", "{r}");
+    assert_eq!(r["error"]["expected"], json!(["8"]), "{r}");
+    assert!(h.s.log().is_empty());
+    // The same as an agent's proposal: refused when proposed.
+    let r = h.cmd_mode("s", "auto", json!(ops));
+    assert_eq!(reason(&r), "E_TOO_LARGE", "{r}");
 }
 
 /// The bytes of program series `id` as the log stores them.

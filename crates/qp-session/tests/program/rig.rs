@@ -21,13 +21,20 @@ pub struct H {
 }
 
 impl H {
-    /// `thyao` with `arkin` (owner, human) on `a`, `scout` (agent, proposer) on `s`,
+    /// `thyao` with `arkin` (owner, human) on `a`, `scout` (agent, proposer, working for
+    /// arkin) on `s`,
     /// `viewer` on `v`, the host on `h`; the R5B agent policy on.
     pub fn new() -> Self {
         let mut init: SessionInit =
             qp_session::read_json(&root().join("fixtures/protocol/init/thyao.json")).unwrap();
         // (R5B, §25.3) The agent write rule holds for agent-origin commands.
         init.agent_policy = Some("r5b".to_owned());
+        // `scout` works for `arkin`: its accepted programs are charged to arkin.
+        for p in &mut init.principals {
+            if p.id == "scout" {
+                p.on_behalf = Some("arkin".to_owned());
+            }
+        }
         Self::with(
             init,
             &[

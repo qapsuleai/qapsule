@@ -1,16 +1,15 @@
 //! The `Check` phase (PS §2.1, §2.3): the program-series guards over every op (and over
 //! the ops of a proposal being accepted), then the command — its program ops, the ops of
-//! the proposal it accepts (the decider as owner) or an `undo` that may restore program
+//! the proposal it accepts (owned by the person its proposer acts for) or an `undo` that may restore program
 //! series — expanded on a copy under the host's limits (`SessionView::param`, PR §8.4):
 //! the program's limits and every restored or written owner's live budget, with the
-//! log's program bytes from the slot ([`LogBytes`], kept in `AfterCommit`). On an acceptance the owner the expansion will write (the decider's
-//! author name read as a principal, `crate::expand::owner_of`) must be the deciding
-//! connection's person, else it is refused (missing hook: the decider's principal in
-//! `qp_ops::Ctx`). Nothing is written here (ARCHITECTURE "Yazarken dikkat").
+//! log's program bytes from the slot ([`LogBytes`], kept in `AfterCommit`). On an
+//! acceptance the speaker is the proposer's principal (the author of the entry that made
+//! the proposal), as the authority expands it.
 
 use std::cell::Cell;
 
-use qp_lang::{Lang, Limits};
+use qp_lang::{Lang, Limit, Limits, Reason};
 use qp_ops::expand::{expand_ops_with, Ctx};
 use qp_plane::plane::Reader;
 use qp_schema::protocol::{Op, ProtocolError, Role};
@@ -18,11 +17,10 @@ use qp_schema::Author;
 use qp_subsystem::{SessionCtx, SessionView};
 
 use crate::budget::{over_budget, LogBytes};
-use crate::expand::author_name;
 use crate::expand::Rules;
 use crate::guard::guards;
 use crate::ops::expand_with;
-use crate::refuse::{refuse, under};
+use crate::refuse::{refuse, under, Located};
 
 /// Whether `op` is a program op.
 fn is_program_op(op: &Op) -> bool {
@@ -53,6 +51,20 @@ fn principal_of(view: &dyn SessionView, a: &Author) -> String {
     }
 }
 
+/// The principal that made proposal `pid`: the author of the log entry that put it
+/// pending (the log records principals; the proposal only its `Author`).
+fn proposer_of(view: &dyn SessionView, pid: &str) -> Option<String> {
+    view.log().iter().find_map(|e| {
+        e.changes
+            .iter()
+            .any(|c| {
+                matches!(c, qp_schema::protocol::ChangeOp::PutProposal { proposal, .. }
+                    if proposal.id == pid && proposal.decided_by.is_none())
+            })
+            .then(|| e.author.clone())
+    })
+}
+
 /// The program ops to check and who writes them; `None`: nothing of ours.
 fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op>, Writer)> {
     let c = view.conn(conn)?;
@@ -70,7 +82,8 @@ fn program_ops(view: &dyn SessionView, conn: &str, ops: &[Op]) -> Option<(Vec<Op
         {
             return None;
         }
-        let proposer = principal_of(view, &pr.provenance.author);
+        let proposer = proposer_of(view, proposal)
+            .unwrap_or_else(|| principal_of(view, &pr.provenance.author));
         let is_owner = view
             .principal(&proposer)
             .is_some_and(|p| p.role == Role::Owner);
@@ -119,31 +132,31 @@ fn lang_of(view: &dyn SessionView, conn: &str) -> Lang {
     }
 }
 
-/// On an acceptance: the person the expansion will charge (the decider's author name
-/// read as a principal) is the deciding connection's person.
+/// At most `program.max_ops_per_command` program ops in one command (PR §8.4).
 ///
 /// # Errors
-/// `unsupported` when they differ (the expansion cannot know the decider's principal).
+/// `E_TOO_LARGE` at the first op over the limit.
 #[allow(clippy::result_large_err)]
-fn decider_identity(view: &dyn SessionView, conn: &str, w: &Writer) -> Result<(), ProtocolError> {
-    let (Some(a), Some(c)) = (&w.approved_by, view.conn(conn)) else {
+fn op_cap(ops: &[Op], rules: &Rules) -> Result<(), ProtocolError> {
+    let max = usize::try_from(rules.limits.get(Limit::MaxOpsPerCommand)).unwrap_or(usize::MAX);
+    let Some((i, _)) = ops
+        .iter()
+        .enumerate()
+        .filter(|(_, o)| is_program_op(o))
+        .nth(max)
+    else {
         return Ok(());
     };
-    let person = |p: &str| qp_ops::watch::person_of(view.plane(), p).to_owned();
-    let (exact, read) = (person(c.principal), person(author_name(a)));
-    if exact == read {
-        return Ok(());
-    }
-    Err(qp_plane::error::E::new(
-        qp_schema::protocol::ErrorCode::Unsupported,
-        format!(
-            "this proposal writes programs owned by its decider, and the decider's principal `{exact}` cannot be named from its author `{read}` on the command path"
-        ),
-    )
-    .at("/ops/0")
-    .reason("owner_unresolved")
-    .hint("Missing hook: the decider's principal id in the expansion context. Until then, a person whose principal id is their author name decides program proposals.")
-    .build())
+    let mut e = Reason::TooLarge.error(
+        None,
+        format!("a command carries at most {max} program operations"),
+    );
+    e.expected = vec![max.to_string()];
+    e.hint = Some("Split the program operations over several commands.".to_owned());
+    Err(refuse(vec![Located {
+        err: e,
+        path: format!("/ops/{i}"),
+    }]))
 }
 
 /// The `Check` phase of connection `conn`'s command `ops`.
@@ -163,11 +176,11 @@ pub(crate) fn check(conn: &str, ops: &[Op], ctx: &mut SessionCtx<'_>) -> Result<
     let Some((ops, w)) = program_ops(view, conn, ops) else {
         return Ok(());
     };
-    decider_identity(view, conn, &w)?;
     let rules = Rules {
         limits: Limits::from_params(|k| view.param(k)),
         lang: lang_of(view, conn),
     };
+    op_cap(&ops, &rules)?;
     let can_decide = view.conn(conn).is_some_and(|c| c.permissions.decide);
     let mut qctx = Ctx {
         author: w.author,

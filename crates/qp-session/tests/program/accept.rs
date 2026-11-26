@@ -168,10 +168,10 @@ fn two_worlds() -> H {
     )
     .unwrap();
     let mut v = t["init"].clone();
-    v["principals"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"id":"bot","author":{"kind":"agent","name":"bot"},"role":"proposer"}));
+    v["principals"].as_array_mut().unwrap().push(
+        json!({"id":"bot","author":{"kind":"agent","name":"bot"},"role":"proposer",
+            "on_behalf":"arkin"}),
+    );
     v["data"]["entitlements"]["bot"] = json!(["*"]);
     v["agent_policy"] = json!("r5b");
     H::with(
@@ -210,7 +210,8 @@ fn both_worlds_keep_the_same_budget() {
 }
 
 #[test]
-fn a_decider_whose_principal_the_expansion_cannot_name_is_refused() {
+fn an_accepted_program_is_owned_by_the_proposers_person_whatever_the_names() {
+    // The decider's author name ("Arkın") is not its principal id (`arkin`).
     let mut h = two_worlds();
     let ir = h.ir(SMA_TEXT);
     let r = h.cmd_mode(
@@ -221,6 +222,13 @@ fn a_decider_whose_principal_the_expansion_cannot_name_is_refused() {
     assert_eq!(r["status"], "proposed", "{r}");
     let pid = r["proposal"].as_str().unwrap().to_owned();
     let r = h.cmd("a", json!([{"op":"accept_proposal","proposal":pid}]));
-    assert_eq!(reason(&r), "owner_unresolved", "{r}");
-    assert!(h.series("x.avg").is_null());
+    assert_eq!(r["status"], "applied", "{r}");
+    assert_eq!(h.series("x.avg")["source"]["program"]["owner"], "arkin");
+    let d = h.cmd(
+        "a",
+        json!([{"op":"add_program","id":"y","program":ir,"inputs":["px"]}]),
+    );
+    assert_eq!(d["status"], "applied", "{d}");
+    assert_eq!(h.series("y.avg")["source"]["program"]["owner"], "arkin");
+    h.assert_replay();
 }

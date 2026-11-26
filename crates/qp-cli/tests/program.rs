@@ -221,7 +221,6 @@ fn explain_prints_the_canonical_text() {
 /// VERIFY 16: the MCP `program_check` answer (`structuredContent.data`) of a session with
 /// default parameters equals `qp program check --json` on the same input.
 #[test]
-#[ignore = "needs qp-program (rl1/program)"]
 fn cli_check_equals_mcp_program_check() {
     use qp_mcp::{surfaces, Config, Hub, McpServer, NotifyMode, Options};
     let r = root();

@@ -278,9 +278,11 @@ plan değeri çözülemez (PR Açık sorular 1); `since_t` öncesi olaylar dokü
 bir kez `Check` fazında, otoritenin günlüğünü izleyen yuvadan (`AfterCommit`) karar verilir; açılım
 (kamu dünyasının yansı yolu dahil) `Check`'e ulaşmaz, yalnız örnek sayısını, maliyeti ve kendi
 baytını sayar — her girdi otoritenin dünyasında işlendiğinden bu sayım iki dünya için de en
-sıkısıdır. Komut başına program işlemi tavanı için kayıt defterinde anahtar yok. Kabulde açılım
-karar verenin ilke kimliğini bilmez (`Ctx::approved_by` yalnız `Author`); yazar adı ilke kimliği
-değilse kabul `owner_unresolved` ile reddedilir.
+sıkısıdır. Komut başına en çok `program.max_ops_per_command` program işlemi (`E_TOO_LARGE`).
+Uygulama notu (§2.3): kabul edilen öneride sahip, öneriyi verenin adına çalıştığı kişidir
+(`person_of`; ajanın `on_behalf`'ı, insanın kendisi); karar veren `approved_by` olarak kalır.
+Açılım bağlamı karar verenin ilke kimliğini taşımadığından (`Ctx::approved_by` yalnız `Author`)
+sahip ondan türetilmez.
 
 ## 7. Eksik kancalar (D1 şart 3; ayrıntı `REPORT.md`)
 

@@ -1,0 +1,500 @@
+{
+ "run": "/Users/arkns/Works/Mchart/qapsule/target/wt/u1/debug/qp program run --json --full --data {data} {program}",
+ "check": "/Users/arkns/Works/Mchart/qapsule/target/wt/u1/debug/qp program check --json {program}",
+ "sets": [
+  "seen",
+  "heldout"
+ ],
+ "rows": [
+  {
+   "task": "G1-01",
+   "cluster": "G1",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G1-01",
+   "cluster": "G1",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G1-02",
+   "cluster": "G1",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G1-02",
+   "cluster": "G1",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G1-03",
+   "cluster": "G1",
+   "set": "seen",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G1-03",
+   "cluster": "G1",
+   "set": "heldout",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-01",
+   "cluster": "G2",
+   "set": "seen",
+   "bits": [
+    129,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-01",
+   "cluster": "G2",
+   "set": "heldout",
+   "bits": [
+    211,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-02",
+   "cluster": "G2",
+   "set": "seen",
+   "bits": [
+    130,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-02",
+   "cluster": "G2",
+   "set": "heldout",
+   "bits": [
+    214,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-03",
+   "cluster": "G2",
+   "set": "seen",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-03",
+   "cluster": "G2",
+   "set": "heldout",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-04",
+   "cluster": "G2",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G2-04",
+   "cluster": "G2",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-01",
+   "cluster": "G3",
+   "set": "seen",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-01",
+   "cluster": "G3",
+   "set": "heldout",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-02",
+   "cluster": "G3",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-02",
+   "cluster": "G3",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-03",
+   "cluster": "G3",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-03",
+   "cluster": "G3",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-04",
+   "cluster": "G3",
+   "set": "seen",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G3-04",
+   "cluster": "G3",
+   "set": "heldout",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-01",
+   "cluster": "G4",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-01",
+   "cluster": "G4",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-02",
+   "cluster": "G4",
+   "set": "seen",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-02",
+   "cluster": "G4",
+   "set": "heldout",
+   "bits": [
+    3000,
+    3000
+   ],
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-03",
+   "cluster": "G4",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-03",
+   "cluster": "G4",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G4-04",
+   "cluster": "G4",
+   "set": "—",
+   "bits": null,
+   "verdict": "ret görevi: eşit",
+   "detail": "kabul ['E_LOOKAHEAD']; ret tanındı: E_LOOKAHEAD; yasak program reddedildi: E_LOOKAHEAD"
+  },
+  {
+   "task": "G5-01",
+   "cluster": "G5",
+   "set": "—",
+   "bits": null,
+   "verdict": "ret görevi: eşit",
+   "detail": "kabul ['E_LOOKAHEAD']; ret tanındı: E_LOOKAHEAD; yasak program reddedildi: E_LOOKAHEAD"
+  },
+  {
+   "task": "G5-02",
+   "cluster": "G5",
+   "set": "—",
+   "bits": null,
+   "verdict": "ret görevi: eşit",
+   "detail": "kabul ['E_UNSUPPORTED', 'E_COST_LIMIT', 'E_WINDOW_LIMIT']; ret tanındı: E_UNSUPPORTED; yasak program reddedildi: E_WINDOW_LIMIT"
+  },
+  {
+   "task": "G5-03",
+   "cluster": "G5",
+   "set": "—",
+   "bits": null,
+   "verdict": "ret görevi: eşit",
+   "detail": "kabul ['E_UNKNOWN_OP', 'E_UNSUPPORTED']; ret tanındı: E_UNSUPPORTED; yasak program reddedildi: E_UNKNOWN_OP"
+  },
+  {
+   "task": "G7-01",
+   "cluster": "G7",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-01",
+   "cluster": "G7",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-02",
+   "cluster": "G7",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-02",
+   "cluster": "G7",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-03",
+   "cluster": "G7",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-03",
+   "cluster": "G7",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-04",
+   "cluster": "G7",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-04",
+   "cluster": "G7",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-05",
+   "cluster": "G7",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G7-05",
+   "cluster": "G7",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G8-01",
+   "cluster": "G8",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G8-01",
+   "cluster": "G8",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G8-02",
+   "cluster": "G8",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G8-02",
+   "cluster": "G8",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G8-03",
+   "cluster": "G8",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G8-03",
+   "cluster": "G8",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-01",
+   "cluster": "G9",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-01",
+   "cluster": "G9",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-02",
+   "cluster": "G9",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-02",
+   "cluster": "G9",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-03",
+   "cluster": "G9",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-03",
+   "cluster": "G9",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-04",
+   "cluster": "G9",
+   "set": "seen",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  },
+  {
+   "task": "G9-04",
+   "cluster": "G9",
+   "set": "heldout",
+   "bits": null,
+   "verdict": "eşit",
+   "detail": ""
+  }
+ ]
+}

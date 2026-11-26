@@ -676,6 +676,7 @@ ayrıştırır, `qp-lang` programa çevirir).
 | 17 | `run` veri kümesi | `seen` | Bağlı serinin kapanmış barları (okuyucunun yetkisiyle), `range` ile | Gerçek oturum verisi |
 | 18 | Sinyal kaydı `mode` | Hep `"replay"` (alan gereksiz bulundu) | Kalır, hep `"replay"` + "simüle" etiketi; alanlar RX5 `LedgerEntry` adlarıyla, kimlik `t` ile, `born_t`/`known_t`; canlı kayıt RS1'de aynı biçimle `live` | X26, K77; RS1 aynı biçimi bekliyor |
 | 19 | Metin dil | Parametre yok, `fingerprint` | `param` satırı, `.çıktı` seçici, `defined`, `state`; kanonik yazıcı ve gidiş-dönüş özelliği; Türkçe ad önerisi | §12 |
+| 20 | `sma` toplama sırası | Her barda son `p` değer sırayla baştan toplanır | Qapsule `qp-compute` `sma`: kayan toplam `(sum + x) − evicted`; sonuç son bitlerde farklı olabilir (tolerans içinde) | §14: beş `add_study` hesabı bit eşit kalmalı; RX4 uygunluğunda G2-01/G2-02 bit eşitliği kısmi (`rounds/RL1/experiments/rx4/RESULT.md`) |
 
 ### 15.1 RX4 uygunluk yöntemi
 
